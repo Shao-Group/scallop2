@@ -87,7 +87,7 @@ int simulation_num_edges = 0;
 int simulation_max_edge_weight = 0;
 
 // input and output
-string algo = "scallop";
+string algo = "scallop-umi";
 string input_file;
 string ref_file;
 string ref_file1;
@@ -100,7 +100,7 @@ bool output_tex_files = false;
 string fixed_gene_name = "";
 int batch_bundle_size = 100;
 int verbose = 1;
-string version = "v0.11.1";
+string version = "v1.0.0";
 
 int parse_arguments(int argc, const char ** argv)
 {
@@ -525,7 +525,7 @@ int print_command_line(int argc, const char ** argv)
 int print_help()
 {
 	printf("\n");
-	printf("Usage: scallop -i <bam-file> -o <gtf-file> [options]\n");
+	printf("Usage: scallop-umi -i <bam-file> -o <gtf-file> [options]\n");
 	printf("\n");
 	printf("Options:\n");
 	printf(" %-42s  %s\n", "--help",  "print usage of Scallop and exit");
@@ -533,46 +533,23 @@ int print_help()
 	printf(" %-42s  %s\n", "--preview",  "determine fragment-length-range and library-type and exit");
 	printf(" %-42s  %s\n", "--verbose <0, 1, 2>",  "0: quiet; 1: one line for each graph; 2: with details, default: 1");
 	printf(" %-42s  %s\n", "--library_type <first, second, unstranded>",  "library type of the sample, default: unstranded");
-	printf(" %-42s  %s\n", "--min_transcript_coverage <float>",  "minimum coverage required for a multi-exon transcript, default: 1.01");
+	printf(" %-42s  %s\n", "--min_transcript_coverage <float>",  "minimum coverage required for a multi-exon transcript, default: 0.5");
 	printf(" %-42s  %s\n", "--min_single_exon_coverage <float>",  "minimum coverage required for a single-exon transcript, default: 20");
 	printf(" %-42s  %s\n", "--min_transcript_length_increase <integer>",  "default: 50");
 	printf(" %-42s  %s\n", "--min_transcript_length_base <integer>",  "default: 150, minimum length of a transcript would be");
 	printf(" %-42s  %s\n", "",  "--min_transcript_length_base + --min_transcript_length_increase * num-of-exons");
 	printf(" %-42s  %s\n", "--min_mapping_quality <integer>",  "ignore reads with mapping quality less than this value, default: 1");
 	printf(" %-42s  %s\n", "--max_num_cigar <integer>",  "ignore reads with CIGAR size larger than this value, default: 1000");
-	printf(" %-42s  %s\n", "--min_bundle_gap <integer>",  "minimum distances required to start a new bundle, default: 50");
-	printf(" %-42s  %s\n", "--min_num_hits_in_bundle <integer>",  "minimum number of reads required in a bundle, default: 20");
+	printf(" %-42s  %s\n", "--min_bundle_gap <integer>",  "minimum distances required to start a new bundle, default: 100");
+	printf(" %-42s  %s\n", "--min_num_hits_in_bundle <integer>",  "minimum number of reads required in a bundle, default: 10");
 	printf(" %-42s  %s\n", "--min_flank_length <integer>",  "minimum match length in each side for a spliced read, default: 3");
-	printf(" %-42s  %s\n", "--min_splice_bundary_hits <integer>",  "minimum number of spliced reads required for a junction, default: 1");
-	printf(" %-42s  %s\n", "--min_bridging_score <double>", "the minimized bottleneck weight in bridging path, default: 0.5");
-	printf(" %-42s  %s\n", "--dp_solution_size <integer>",  "candidate number of bridgign paths, default: 10");
-	printf(" %-42s  %s\n", "--dp_stack_size <integer>",  "number of weights maintained for each bridging path, default: 5");
-	printf(" %-42s  %s\n", "--max_clustring_flank <integer>",  "maximized basepair difference for being in an equivalent class, default: 30");
-	printf(" %-42s  %s\n", "--min_splice_bundary_hits <integer>",  "minimum number of spliced reads required for a junction, default: 1");
 
 	return 0;
 }
 
 int print_copyright()
 {
-	printf("Scallop %s (c) 2017 Mingfu Shao, Carl Kingsford, and Carnegie Mellon University\n", version.c_str());
+	printf("Scallop-UMI %s (c) 2021 Qimin Zhang and Mingfu Shao, The Pennsylvania State University\n", version.c_str());
 	return 0;
 }
 
-int print_logo()
-{
-	printf("      ___           ___           ___                                       ___           ___    \n");
-	printf("     /  /\\         /  /\\         /  /\\                                     /  /\\         /  /\\   \n");
-	printf("    /  /:/_       /  /:/        /  /::\\                                   /  /::\\       /  /::\\  \n");
-	printf("   /  /:/ /\\     /  /:/        /  /:/\\:\\    ___     ___   ___     ___    /  /:/\\:\\     /  /:/\\:\\ \n");
-	printf("  /  /:/ /::\\   /  /:/  ___   /  /:/~/::\\  /__/\\   /  /\\ /__/\\   /  /\\  /  /:/  \\:\\   /  /:/~/:/ \n");
-	printf(" /__/:/ /:/\\:\\ /__/:/  /  /\\ /__/:/ /:/\\:\\ \\  \\:\\ /  /:/ \\  \\:\\ /  /:/ /__/:/ \\__\\:\\ /__/:/ /:/  \n");
-	printf(" \\  \\:\\/:/~/:/ \\  \\:\\ /  /:/ \\  \\:\\/:/__\\/  \\  \\:\\  /:/   \\  \\:\\  /:/  \\  \\:\\ /  /:/ \\  \\:\\/:/   \n");
-	printf("  \\  \\::/ /:/   \\  \\:\\  /:/   \\  \\::/        \\  \\:\\/:/     \\  \\:\\/:/    \\  \\:\\  /:/   \\  \\::/    \n");
-	printf("   \\__\\/ /:/     \\  \\:\\/:/     \\  \\:\\         \\  \\::/       \\  \\::/      \\  \\:\\/:/     \\  \\:\\    \n");
-	printf("     /__/:/       \\  \\::/       \\  \\:\\         \\__\\/         \\__\\/        \\  \\::/       \\  \\:\\   \n");
-	printf("     \\__\\/         \\__\\/         \\__\\/                                     \\__\\/         \\__\\/   \n");
-	printf("\n");
-
-	return 0;
-}

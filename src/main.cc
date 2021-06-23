@@ -39,7 +39,6 @@ int main(int argc, const char **argv)
 		print_copyright();
 		print_help();
 		printf("\n");
-		//print_logo();
 		return 0;
 	}
 
