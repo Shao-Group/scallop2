@@ -1,4 +1,4 @@
-bin_PROGRAMS = scallop
+bin_PROGRAMS = scallop-umi
 
 
 GTF_INCLUDE = $(top_srcdir)/lib/gtf
@@ -9,11 +9,11 @@ GTF_LIB = $(top_builddir)/lib/gtf
 UTIL_LIB = $(top_builddir)/lib/util
 GRAPH_LIB = $(top_builddir)/lib/graph
 
-scallop_CPPFLAGS = -std=c++11 -I$(GTF_INCLUDE) -I$(GRAPH_INCLUDE) -I$(UTIL_INCLUDE)
-scallop_LDFLAGS = -pthread -L$(GTF_LIB) -L$(GRAPH_LIB) -L$(UTIL_LIB)
-scallop_LDADD = -lgtf -lgraph -lutil
+scallop_umi_CPPFLAGS = -std=c++11 -I$(GTF_INCLUDE) -I$(GRAPH_INCLUDE) -I$(UTIL_INCLUDE)
+scallop_umi_LDFLAGS = -pthread -L$(GTF_LIB) -L$(GRAPH_LIB) -L$(UTIL_LIB)
+scallop_umi_LDADD = -lgtf -lgraph -lutil
 
-scallop_SOURCES = splice_graph.h splice_graph.cc \
+scallop_umi_SOURCES = splice_graph.h splice_graph.cc \
 				  super_graph.h super_graph.cc \
 				  sgraph_compare.h sgraph_compare.cc \
 				  vertex_info.h vertex_info.cc \
