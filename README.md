@@ -5,7 +5,7 @@ The development of Scallop-UMI has been based on the [Scallop](https://github.co
 
 # Installation
 
-Scallop-UMI can be easily installed with conda: [![Anaconda-Server Badge](https://anaconda.org/bioconda/scallop-umi/badges/installer/conda.svg)](https://conda.anaconda.org/bioconda/scallop-umi)
+Scallop-UMI can be easily installed with conda: [![Anaconda-Server Badge](https://anaconda.org/bioconda/scallop-umi/badges/installer/conda.svg)](https://anaconda.org/bioconda/scallop-umi)
 
 Download the source code of Scallop-UMI from
 [here](https://github.com/Shao-Group/scallop-umi/releases/download/v1.0.0/scallop-umi-1.0.0.tar.gz).
