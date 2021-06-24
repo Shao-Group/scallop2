@@ -1,6 +1,8 @@
 /*
 Part of Scallop Transcript Assembler
 (c) 2017 by  Mingfu Shao, Carl Kingsford, and Carnegie Mellon University.
+Part of Scallop-UMI
+(c) 2021 by  Qimin Zhang, Mingfu Shao, and The Pennsylvania State University.
 See LICENSE for licensing.
 */
 
@@ -101,12 +103,10 @@ int assembler::assemble()
 
 	assign_RPKM();
 
-	printf("trsts size = %d\n", trsts.size());
 	filter ft(trsts);
 	ft.merge_single_exon_transcripts();
 	trsts = ft.trs;
 
-	printf("non full trsts size = %d\n", non_full_trsts.size());
 	filter ft1(non_full_trsts);
 	ft1.merge_single_exon_transcripts();
 	non_full_trsts = ft1.trs;

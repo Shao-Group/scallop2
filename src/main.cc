@@ -19,20 +19,9 @@ See LICENSE for licensing.
 
 using namespace std;
 
-int nt;		//total fragments #
-int nnp;	//total paired end fr
-int nnu;	//total umi-lined only fr
-int nnb;	//total both fr
-int np;		//bridged paired-end fr
-int nu;		//bridged UMI-linked only fr
-int nb;		//bridged both fr
-
 int main(int argc, const char **argv)
 {
 	srand(time(0));
-
-	// TODO: bridged fragment type count
-	nt = nnp = nnu = nnb = np = nu = nb = 0;
 
 	if(argc == 1)
 	{
@@ -59,8 +48,6 @@ int main(int argc, const char **argv)
 
 	assembler asmb;
 	asmb.assemble();
-
-	printf("Total fragments = %d, paired-end = %d, UMI-linked only = %d, both = %d\nBridged fragments: total = %d, paired-end = %d, UMI-linked only = %d, both = %d\n", nt, nnp, nnu, nnb, np+nu, np, nu, nb);
 
 	return 0;
 }

@@ -1,10 +1,8 @@
 /*
 Part of Scallop Transcript Assembler
 (c) 2017 by Mingfu Shao, Carl Kingsford, and Carnegie Mellon University.
-
-Part of Coral, an efficient tool to bridge mate pairs
-(c) 2018 by Mingfu Shao and The Pennsylvania State University.
-
+Part of Coral
+(c) 2019 by Mingfu Shao, The Pennsylvania State University.
 See LICENSE for licensing.
 */
 

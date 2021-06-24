@@ -3,6 +3,8 @@ Part of Scallop Transcript Assembler
 (c) 2017 by Mingfu Shao, Carl Kingsford, and Carnegie Mellon University.
 Part of Coral
 (c) 2019 by Mingfu Shao, The Pennsylvania State University.
+Part of Scallop-UMI
+(c) 2021 by  Qimin Zhang, Mingfu Shao, and The Pennsylvania State University.
 See LICENSE for licensing.
 */
 
@@ -21,8 +23,8 @@ using namespace std;
 int min_flank_length = 3;
 int max_num_cigar = 1000;
 int max_edit_distance = 10;
-int32_t min_bundle_gap = 100;		// 50->100, single cell
-int min_num_hits_in_bundle = 10;	// 20->10, single cell may have less hits
+int32_t min_bundle_gap = 100;		
+int min_num_hits_in_bundle = 10;	
 int min_num_splices_in_bundle = 15;	// not used; accept bundle if #hits with splices is at least this number
 uint32_t min_mapping_quality = 1;
 int32_t min_splice_boundary_hits = 1;

@@ -1,6 +1,8 @@
 /*
-Part of Coral, an efficient tool to bridge mate pairs
-(c) 2018 by Mingfu Shao and The Pennsylvania State University.
+Part of Coral
+(c) 2019 by Mingfu Shao, The Pennsylvania State University.
+Part of Scallop-UMI
+(c) 2021 by  Qimin Zhang, Mingfu Shao, and The Pennsylvania State University.
 See LICENSE for licensing.
 */
 
@@ -35,7 +37,7 @@ public:
 	vector<path> paths;	// possible connecting paths
 
 	int type;		// 0: paird-end, 1: UMI-paird 2: both
-	int next;		// index for next fragments in UMI-linked, init as -1 means no next
+	int next;		// index for next fragments in UMI-linked
 
 public:
 	bool equal(const fragment &f) const;

@@ -1,6 +1,8 @@
 /*
 Part of Scallop Transcript Assembler
 (c) 2017 by  Mingfu Shao, Carl Kingsford, and Carnegie Mellon University.
+Part of Scallop-UMI
+(c) 2021 by  Qimin Zhang, Mingfu Shao, and The Pennsylvania State University.
 See LICENSE for licensing.
 */
 
@@ -107,7 +109,7 @@ int scallop::assemble()
 	
 	non_full_trsts.clear();
 	gr.output_transcripts1(trsts, non_full_trsts, paths);
-	printf("in scallop.cc: trsts.size = %d, non full length trsts.size = %d\n", trsts.size(), non_full_trsts.size());
+	//printf("in scallop.cc: trsts.size = %d, non full length trsts.size = %d\n", trsts.size(), non_full_trsts.size());
 
 	if(verbose >= 2) 
 	{

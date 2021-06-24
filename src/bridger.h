@@ -1,6 +1,8 @@
 /*
 Part of Coral
-(c) 2019 by Mingfu Shao, The Pennsylvania State University
+(c) 2019 by Mingfu Shao, The Pennsylvania State University.
+Part of Scallop-UMI
+(c) 2021 by  Qimin Zhang, Mingfu Shao, and The Pennsylvania State University.
 See LICENSE for licensing.
 */
 

@@ -1,6 +1,8 @@
 /*
 Part of Scallop Transcript Assembler
 (c) 2017 by  Mingfu Shao, Carl Kingsford, and Carnegie Mellon University.
+Part of Scallop-UMI
+(c) 2021 by  Qimin Zhang, Mingfu Shao, and The Pennsylvania State University.
 See LICENSE for licensing.
 */
 
@@ -1163,7 +1165,6 @@ int splice_graph::output_transcripts(vector<transcript> &v, const vector<path> &
 	return 0;
 }
 
-// TODO : non full length transcript
 int splice_graph::output_transcripts1(vector<transcript> &v, vector<transcript> &v1, const vector<path> &p) const
 {
         for(int i = 0; i < p.size(); i++)

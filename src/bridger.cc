@@ -1,6 +1,8 @@
 /*
 Part of Coral
-(c) 2019 by Mingfu Shao, The Pennsylvania State University
+(c) 2019 by Mingfu Shao, The Pennsylvania State University.
+Part of Scallop-UMI
+(c) 2021 by  Qimin Zhang, Mingfu Shao, and The Pennsylvania State University.
 See LICENSE for licensing.
 */
 
@@ -68,22 +70,6 @@ int bridger::bridge()
 	if(r3 < 65) printf("low bridged rate here!");
 	printf("#fragments = %d, #fixed = %d -> %d -> %d, ratio = %.2lf -> %.2lf -> %.2lf, #remain = %d, length = (%d, %d, %d), total paired-end = %d, UMI-linked only = %d, intersection: %d, bridged paired-end = %d, UMI-linked only = %d, intersection: %d\n", 
 			n, n1, n2, n3, r1, r2, r3, n - n3, length_low, length_median, length_high, ct[3], ct[4], ct[5], ct[0], ct[1], ct[2]);
-
-	// TODO: count bridged fragments type
-	extern int nt;
-	extern int nnp;
-	extern int nnu;
-	extern int nnb;
-	extern int np;
-	extern int nu;
-	extern int nb;
-	nt = nt + bd->fragments.size();
-	np = np + ct[0];
-	nu = nu + ct[1];
-	nb = nb + ct[2];
-	nnp = nnp + ct[3];
-	nnu = nnu + ct[4];
-	nnb = nnb + ct[5];
 
 	/*
 	printf("after bridging ... \n");
