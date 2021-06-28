@@ -516,6 +516,8 @@ int bundle::revise_splice_graph()
 	remove_intron_contamination();
 
 	remove_small_junctions();
+	extend_start_boundaries();
+	extend_end_boundaries();
 	extend_boundaries();
 	refine_splice_graph();
 
@@ -540,6 +542,62 @@ int bundle::refine_splice_graph()
 		if(b == false) break;
 	}
 	return 0;
+}
+
+bool bundle::extend_start_boundaries()
+{
+	bool flag = false;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		PEB p = gr.edge(0, i);
+		if(p.second == true) continue;
+
+		double wv = gr.get_vertex_weight(i);
+		double we = 0;
+		PEEI pei = gr.in_edges(i);
+		for(edge_iterator it = pei.first; it != pei.second; it++)
+		{
+			we += gr.get_edge_weight(*it);
+		}
+
+		if(wv < we || wv < 10.0 * we * we + 10.0) continue;
+
+		edge_descriptor ee = gr.add_edge(0, i);
+		gr.set_edge_weight(ee, wv - we);
+		gr.set_edge_info(ee, edge_info());
+
+		if(verbose >= 2) printf("extend start boundary: vertex = %d, wv = %.2lf, we = %.2lf\n", i, wv, we);
+		flag = true;
+	}
+	return flag;
+}
+
+bool bundle::extend_end_boundaries()
+{
+	bool flag = false;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		PEB p = gr.edge(i, gr.num_vertices() - 1);
+		if(p.second == true) continue;
+
+		double wv = gr.get_vertex_weight(i);
+		double we = 0;
+		PEEI pei = gr.out_edges(i);
+		for(edge_iterator it = pei.first; it != pei.second; it++)
+		{
+			we += gr.get_edge_weight(*it);
+		}
+
+		if(wv < we || wv < 10.0 * we * we + 10.0) continue;
+
+		edge_descriptor ee = gr.add_edge(i, gr.num_vertices() - 1);
+		gr.set_edge_weight(ee, wv - we);
+		gr.set_edge_info(ee, edge_info());
+
+		if(verbose >= 2) printf("extend end boundary: vertex = %d, wv = %.2lf, we = %.2lf\n", i, wv, we);
+		flag = true;
+	}
+	return flag;
 }
 
 bool bundle::extend_boundaries()
@@ -578,8 +636,9 @@ bool bundle::extend_boundaries()
 			gr.set_edge_weight(ee, wt);
 			gr.set_edge_info(ee, edge_info());
 		}
-
 		gr.remove_edge(e);
+
+		if(verbose >= 2) printf("extend boundary: s = %d, t = %d, ws = %.1lf, we = %.1lf\n", s, t, ws, we);
 		return true;
 	}
 
