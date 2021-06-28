@@ -943,10 +943,12 @@ bool bundle::remove_false_boundaries()
 		vertex_info v2 = gr.get_vertex_info(u2);
 
 		int types = 0;
+		int32_t lengths = 0;
 		for(int k = 0; k < fr.paths.size(); k++) types += fr.paths[k].type;
+		for(int k = 0; k < fr.paths.size(); k++) lengths += fr.paths[k].length;
 
-		printf("%s: u1 = %d, %d-%d, u2 = %d, %d-%d, h1.rpos = %d, h2.lpos = %d, #bridging = %lu, types = %d\n", 
-				fr.h1->qname.c_str(), u1, v1.lpos, v1.rpos, u2, v2.lpos, v2.rpos, fr.h1->rpos, fr.h2->pos, fr.paths.size(), types);
+		printf("%s: u1 = %d, %d-%d, u2 = %d, %d-%d, h1.rpos = %d, h2.lpos = %d, #bridging = %lu, types = %d, lengths = %d\n", 
+				fr.h1->qname.c_str(), u1, v1.lpos, v1.rpos, u2, v2.lpos, v2.rpos, fr.h1->rpos, fr.h2->pos, fr.paths.size(), types, lengths);
 
 		//if(gr.get_vertex_info(u1).rpos == fr.h1->rpos)
 		{
