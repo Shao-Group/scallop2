@@ -560,7 +560,7 @@ bool bundle::extend_start_boundaries()
 			we += gr.get_edge_weight(*it);
 		}
 
-		if(wv < we || wv < 5 * we * we + 5) continue;
+		if(wv < we || wv < 10 * we * we + 10) continue;
 
 		edge_descriptor ee = gr.add_edge(0, i);
 		gr.set_edge_weight(ee, wv - we);
@@ -590,7 +590,7 @@ bool bundle::extend_end_boundaries()
 			we += gr.get_edge_weight(*it);
 		}
 
-		if(wv < we || wv < 5 * we * we + 5) continue;
+		if(wv < we || wv < 10 * we * we + 10) continue;
 
 		edge_descriptor ee = gr.add_edge(i, gr.num_vertices() - 1);
 		gr.set_edge_weight(ee, wv - we);
