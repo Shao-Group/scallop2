@@ -515,8 +515,8 @@ int bundle::revise_splice_graph()
 	remove_small_exons();
 	remove_intron_contamination();
 
-	//extend_boundaries();
-	//remove_small_junctions();
+	remove_small_junctions();
+	extend_boundaries();
 
 	while(keep_surviving_edges());
 	refine_splice_graph();
