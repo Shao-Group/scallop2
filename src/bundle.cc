@@ -934,6 +934,9 @@ bool bundle::remove_false_boundaries()
 		if(fr.paths.size() == 1 && fr.paths[0].type == 1) continue;
 		//if(fr.h1->bridged == true || fr.h2->bridged == true) continue;
 
+		// only use uniquely aligned reads
+		if(fr.h1->nh >= 2 || fr.h2->nh >= 2) continue;
+
 		// calculate actual length
 		vector<int> v = align_fragment(fr);
 		if(v.size() <= 1) continue;
