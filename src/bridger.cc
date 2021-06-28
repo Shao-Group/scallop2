@@ -496,9 +496,11 @@ int bridger::bridge_hard_fragments()
 		open[k].print(k);
 	}
 
+	/*
 	printf("print pnode bridge...\n");
 	for(int k = 0; k < bd->regions.size(); k++) bd->regions[k].print(k);
 	for(int k = 0; k < pnodes.size(); k++) pnodes[k].print_bridge(k);
+	*/
 
 	vector< set<int> > affected(bd->regions.size());
 	vector<int> max_needed(bd->regions.size(), -1);
@@ -648,6 +650,7 @@ int bridger::bridge_hard_fragments()
 			//if(voting_ratio <= 0.49) continue;
 			//if(best_ratio < 0.8 && be != best_path) continue;
 
+			/*
 			printf("fcluster with %lu fragments, total %lu paths, best = %d, from %d to %d, v1 = (", fc.fset.size(), pb.size(), be, k, j);
 			printv(fc.v1);
 			printf("), v2 = ( ");
@@ -663,6 +666,7 @@ int bridger::bridge_hard_fragments()
 				printv(pn[e]);
 				printf(")\n");
 			}
+			*/
 
 			for(int i = 0; i < fc.fset.size(); i++)
 			{
@@ -677,7 +681,7 @@ int bridger::bridge_hard_fragments()
 				else p.type = 2;
 
 				fr->paths.push_back(p);
-				printf(" fragment %d length = %d using path %d, p.type = %d\n", i, p.length, be, p.type);
+				//printf(" fragment %d length = %d using path %d, p.type = %d\n", i, p.length, be, p.type);
 			}
 		}
 	}

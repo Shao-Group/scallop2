@@ -933,8 +933,6 @@ bool bundle::remove_false_boundaries()
 		if(fr.paths.size() == 1 && fr.paths[0].type == 1) continue;
 		//if(fr.h1->bridged == true || fr.h2->bridged == true) continue;
 
-		fr.print(i);
-
 		int u1 = gr.locate_vertex(fr.h1->rpos - 1);
 		int u2 = gr.locate_vertex(fr.h2->pos);
 
@@ -943,15 +941,16 @@ bool bundle::remove_false_boundaries()
 
 		vertex_info v1 = gr.get_vertex_info(u1);
 		vertex_info v2 = gr.get_vertex_info(u2);
-		//printf("%s: u1 = %d, %d-%d, u2 = %d, %d-%d, h1.rpos = %d, h2.lpos = %d\n", h1.qname.c_str(), u1, v1.lpos, v1.rpos, u2, v2.lpos, v2.rpos, h1.rpos, h2.pos);
 
-		//if(gr.get_vertex_info(u1).rpos == fr.h1->rpos)
+		printf("%s: u1 = %d, %d-%d, u2 = %d, %d-%d, h1.rpos = %d, h2.lpos = %d\n", fr.h1->qname.c_str(), u1, v1.lpos, v1.rpos, u2, v2.lpos, v2.rpos, fr.h1->rpos, fr.h2->pos);
+
+		if(gr.get_vertex_info(u1).rpos == fr.h1->rpos)
 		{
 			if(fb1.find(u1) != fb1.end()) fb1[u1]++;
 			else fb1.insert(make_pair(u1, 1));
 		}
 
-		//if(gr.get_vertex_info(u2).lpos == fr.h2->pos)
+		if(gr.get_vertex_info(u2).lpos == fr.h2->pos)
 		{
 			if(fb2.find(u2) != fb2.end()) fb2[u2]++;
 			else fb2.insert(make_pair(u2, 1));
@@ -1020,8 +1019,9 @@ bool bundle::tackle_false_boundaries()
 		tlen -= offset2;
 
 		// print
-		fr.print(99);
+		//fr.print(99);
 		printf("break fragment: total-length = %d, bridge-length = %d\n", tlen, fr.paths[0].length);
+		/*
 		for(int i = 0; i < v.size(); i++)
 		{
 			int32_t l = pexons[v[i]].rpos - pexons[v[i]].lpos;
@@ -1029,6 +1029,7 @@ bool bundle::tackle_false_boundaries()
 			if(i == v.size() - 1) l -= offset2;
 			printf(" vertex %d: length = %d, region = %d-%d -> %d\n", v[i], l, pexons[v[i]].lpos, pexons[v[i]].rpos, pexons[v[i]].rpos - pexons[v[i]].lpos);
 		}
+		*/
 
 		if(tlen < insertsize_low) continue;
 		if(tlen > insertsize_high) continue;
@@ -1112,7 +1113,7 @@ int bundle::print(int index)
 	if(verbose <= 1) return 0;
 
 	// print bb.hits
-	for(int i = 0; i < bb.hits.size(); i++) bb.hits[i].print();
+	//for(int i = 0; i < bb.hits.size(); i++) bb.hits[i].print();
 
 	// print regions
 	for(int i = 0; i < regions.size(); i++)
