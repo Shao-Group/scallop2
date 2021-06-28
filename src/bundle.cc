@@ -517,6 +517,7 @@ int bundle::revise_splice_graph()
 
 	remove_small_junctions();
 	extend_boundaries();
+	refine_splice_graph();
 
 	while(keep_surviving_edges());
 	refine_splice_graph();
