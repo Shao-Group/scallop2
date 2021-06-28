@@ -944,13 +944,13 @@ bool bundle::remove_false_boundaries()
 
 		printf("%s: u1 = %d, %d-%d, u2 = %d, %d-%d, h1.rpos = %d, h2.lpos = %d\n", fr.h1->qname.c_str(), u1, v1.lpos, v1.rpos, u2, v2.lpos, v2.rpos, fr.h1->rpos, fr.h2->pos);
 
-		if(gr.get_vertex_info(u1).rpos == fr.h1->rpos)
+		//if(gr.get_vertex_info(u1).rpos == fr.h1->rpos)
 		{
 			if(fb1.find(u1) != fb1.end()) fb1[u1]++;
 			else fb1.insert(make_pair(u1, 1));
 		}
 
-		if(gr.get_vertex_info(u2).lpos == fr.h2->pos)
+		//if(gr.get_vertex_info(u2).lpos == fr.h2->pos)
 		{
 			if(fb2.find(u2) != fb2.end()) fb2[u2]++;
 			else fb2.insert(make_pair(u2, 1));
