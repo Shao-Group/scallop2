@@ -933,6 +933,21 @@ bool bundle::remove_false_boundaries()
 		if(fr.paths.size() == 1 && fr.paths[0].type == 1) continue;
 		//if(fr.h1->bridged == true || fr.h2->bridged == true) continue;
 
+		// calculate actual length
+		vector<int> v = align_fragment(fr);
+		if(v.size() <= 1) continue;
+
+		int32_t tlen = 0;
+		int32_t offset1 = (fr.lpos - pexons[v.front()].lpos);
+		int32_t offset2 = (pexons[v.back()].rpos - fr.rpos);
+		for(int i = 0; i < v.size(); i++)
+		{
+			int32_t l = pexons[v[i]].rpos - pexons[v[i]].lpos;
+			tlen += l;
+		}
+		tlen -= offset1;
+		tlen -= offset2;
+
 		int u1 = gr.locate_vertex(fr.h1->rpos - 1);
 		int u2 = gr.locate_vertex(fr.h2->pos);
 
@@ -947,8 +962,13 @@ bool bundle::remove_false_boundaries()
 		for(int k = 0; k < fr.paths.size(); k++) types += fr.paths[k].type;
 		for(int k = 0; k < fr.paths.size(); k++) lengths += fr.paths[k].length;
 
-		printf("%s: u1 = %d, %d-%d, u2 = %d, %d-%d, h1.rpos = %d, h2.lpos = %d, #bridging = %lu, types = %d, lengths = %d\n", 
-				fr.h1->qname.c_str(), u1, v1.lpos, v1.rpos, u2, v2.lpos, v2.rpos, fr.h1->rpos, fr.h2->pos, fr.paths.size(), types, lengths);
+		bool use = true;
+		if(fr.paths.size() == 1 && types == 2 && lengths <= 2 * tlen) use = false;
+
+		printf("%s: u1 = %d, %d-%d, u2 = %d, %d-%d, h1.rpos = %d, h2.lpos = %d, #bridging = %lu, types = %d, lengths = %d, tlen = %d, use = %c\n", 
+				fr.h1->qname.c_str(), u1, v1.lpos, v1.rpos, u2, v2.lpos, v2.rpos, fr.h1->rpos, fr.h2->pos, fr.paths.size(), types, lengths, tlen, use ? 'T' : 'F');
+
+		if(use == false) continue;
 
 		//if(gr.get_vertex_info(u1).rpos == fr.h1->rpos)
 		{
