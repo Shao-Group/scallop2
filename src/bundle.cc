@@ -566,7 +566,9 @@ bool bundle::extend_start_boundaries()
 		gr.set_edge_weight(ee, wv - we);
 		gr.set_edge_info(ee, edge_info());
 
-		if(verbose >= 2) printf("extend start boundary: vertex = %d, wv = %.2lf, we = %.2lf\n", i, wv, we);
+		vertex_info vi = gr.get_vertex_info(i);
+		if(verbose >= 2) printf("extend start boundary: vertex = %d, wv = %.2lf, we = %.2lf, pos = %d\n", i, wv, we, vi.lpos);
+
 		flag = true;
 	}
 	return flag;
@@ -594,7 +596,9 @@ bool bundle::extend_end_boundaries()
 		gr.set_edge_weight(ee, wv - we);
 		gr.set_edge_info(ee, edge_info());
 
-		if(verbose >= 2) printf("extend end boundary: vertex = %d, wv = %.2lf, we = %.2lf\n", i, wv, we);
+		vertex_info vi = gr.get_vertex_info(i);
+		if(verbose >= 2) printf("extend end boundary: vertex = %d, wv = %.2lf, we = %.2lf, pos = %d\n", i, wv, we, vi.rpos);
+
 		flag = true;
 	}
 	return flag;
