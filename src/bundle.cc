@@ -902,6 +902,9 @@ bool bundle::remove_small_junctions()
 	for(SE::iterator it = se.begin(); it != se.end(); it++)
 	{
 		edge_descriptor e = (*it);
+		vertex_info v1 = gr.get_vertex_info(e->source());
+		vertex_info v2 = gr.get_vertex_info(e->target());
+		if(verbose >= 2) printf("remove small junction: length = %d, pos = %d-%d\n", v2.lpos - v1.rpos, v2.lpos, v1.rpos);
 		gr.remove_edge(e);
 	}
 
