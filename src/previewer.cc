@@ -247,8 +247,8 @@ int previewer::solve_insertsize()
 	}
 
 	// further relax bounds of insertsize
-	insertsize_low = insertsize_low / 1.25;
-	insertsize_high = insertsize_high * 1.25;
+	insertsize_low = insertsize_low / 1.50;
+	insertsize_high = insertsize_high * 1.50;
 
 	return 0;
 }
