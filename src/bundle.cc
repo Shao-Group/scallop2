@@ -1070,7 +1070,7 @@ bool bundle::remove_false_boundaries()
 		for(int k = 0; k < fr.paths.size(); k++) lengths += fr.paths[k].length;
 
 		bool use = true;
-		//if(fr.paths.size() == 1 && types == 2 && lengths <= 2 * tlen) use = false;
+		if(fr.paths.size() == 1 && types == 2 && lengths <= 2 * tlen) use = false;
 
 		printf("%s: u1 = %d, %d-%d, u2 = %d, %d-%d, h1.rpos = %d, h2.lpos = %d, #bridging = %lu, types = %d, lengths = %d, tlen = %d, use = %c\n", 
 				fr.h1->qname.c_str(), u1, v1.lpos, v1.rpos, u2, v2.lpos, v2.rpos, fr.h1->rpos, fr.h2->pos, fr.paths.size(), types, lengths, tlen, use ? 'T' : 'F');
@@ -1174,12 +1174,16 @@ bool bundle::tackle_false_boundaries()
 		{
 			partial_exon &px = pexons[v[i + 0]];
 			partial_exon &py = pexons[v[i + 1]];
-			if(px.rtype != END_BOUNDARY) continue;
-			if(py.ltype != START_BOUNDARY) continue;
-
-			printf("break vertex %d-%d\n", v[i], v[i + 1]);
-			points[v[i + 0]] += 1;
-			points[v[i + 1]] += 1;
+			if(px.rtype == END_BOUNDARY) 
+			{
+				printf("break ending vertex %d, pos = %d\n", v[i], px.rpos);
+				points[v[i + 0]] += 1;
+			}
+			if(py.ltype == START_BOUNDARY) 
+			{
+				printf("break starting vertex %d, pos = %d\n", v[i + 1], py.lpos);
+				points[v[i + 1]] += 1;
+			}
 		}
 	}
 
