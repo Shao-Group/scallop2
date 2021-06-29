@@ -246,6 +246,10 @@ int previewer::solve_insertsize()
 		//printf("insertsize_profile %d %.8lf\n", i, insertsize_profile[i]);
 	}
 
+	// further relax bounds of insertsize
+	insertsize_low = insertsize_low / 1.25;
+	insertsize_high = insertsize_high * 1.25;
+
 	return 0;
 }
 
