@@ -1071,6 +1071,7 @@ bool bundle::remove_false_boundaries()
 
 		bool use = true;
 		if(fr.paths.size() == 1 && types == 2 && tlen > 10000) use = false;
+		if(fr.paths.size() == 1 && types == 2 && lengths <= 1.5 * insertsize_high) use = false;
 		//if(fr.paths.size() == 1 && types == 2 && tlen <= 1.5 * insertsize_high) use = false;
 		//if(fr.paths.size() == 1 && types == 2 && lengths <= 2 * tlen) use = false;
 
