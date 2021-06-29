@@ -280,6 +280,16 @@ int previewer::process_bundle(bundle_base &bb, map<int32_t, int>& m)
 		fragment& fr = br.fragments[k];
 		if(fr.paths.size() != 1) continue;
 
+		// make sure all vertices are well covered
+		bool b = true;
+		vector<int> v = decode_vlist(fr.paths[0].v);
+		for(int j = 0; j < v.size(); j++)
+		{
+			if(br.regions[v[j]].ave < 5.0) b = false;
+			if(b == false) break;
+		}
+		if(b == false) continue;
+
 		int32_t len = fr.paths[0].length;
 
 		/*
@@ -294,7 +304,7 @@ int previewer::process_bundle(bundle_base &bb, map<int32_t, int>& m)
 		if(m.find(len) != m.end()) m[len]++;
 		else m.insert(pair<int, int>(len, 1));
 
-		if(cnt >= 1000) return cnt;
+		if(cnt >= 10000) return cnt;
 	}
 	return cnt;
 }
