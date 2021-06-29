@@ -513,20 +513,41 @@ int bundle::build_splice_graph()
 
 int bundle::revise_splice_graph()
 {
-	tackle_false_boundaries();
-	remove_false_boundaries();
+	bool b = false;
+	while(true)
+	{
+		b = tackle_false_boundaries();
+		if(b == true) continue;
 
-	remove_inner_boundaries();
-	remove_small_exons();
-	remove_intron_contamination();
+		b = remove_false_boundaries();
+		if(b == true) continue;
 
-	remove_small_junctions();
-	extend_start_boundaries();
-	extend_end_boundaries();
-	extend_boundaries();
-	refine_splice_graph();
+		b = remove_inner_boundaries();
+		if(b == true) continue;
 
-	while(keep_surviving_edges());
+		b = remove_small_exons();
+		if(b == true) continue;
+
+		b = remove_intron_contamination();
+		if(b == true) continue;
+
+		b = remove_small_junctions();
+		if(b == true) continue;
+
+		b = extend_start_boundaries();
+		if(b == true) continue;
+
+		b = extend_end_boundaries();
+		if(b == true) continue;
+
+		b = extend_boundaries();
+		if(b == true) refine_splice_graph();
+		if(b == true) continue;
+
+		b = keep_surviving_edges();
+		if(b == true) refine_splice_graph();
+		if(b == true) continue;
+	}
 	refine_splice_graph();
 
 	return 0;
@@ -917,6 +938,9 @@ bool bundle::remove_inner_boundaries()
 	int n = gr.num_vertices() - 1;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
+		vertex_info vi = gr.get_vertex_info(i);
+		if(vi.type == EMPTY_VERTEX) continue;
+
 		if(gr.in_degree(i) != 1) continue;
 		if(gr.out_degree(i) != 1) continue;
 
@@ -928,7 +952,7 @@ bool bundle::remove_inner_boundaries()
 		it1 = pei.first;
 		it2 = pei.second;
 		edge_descriptor e2 = (*it1);
-		vertex_info vi = gr.get_vertex_info(i);
+
 		int s = e1->source();
 		int t = e2->target();
 
@@ -954,6 +978,9 @@ bool bundle::remove_intron_contamination()
 	bool flag = false;
 	for(int i = 1; i < gr.num_vertices(); i++)
 	{
+		vertex_info vi = gr.get_vertex_info(i);
+		if(vi.type == EMPTY_VERTEX) continue;
+
 		if(gr.in_degree(i) != 1) continue;
 		if(gr.out_degree(i) != 1) continue;
 
@@ -967,7 +994,6 @@ bool bundle::remove_intron_contamination()
 		int s = e1->source();
 		int t = e2->target();
 		double wv = gr.get_vertex_weight(i);
-		vertex_info vi = gr.get_vertex_info(i);
 
 		if(s == 0) continue;
 		if(t == gr.num_vertices() - 1) continue;
@@ -1064,6 +1090,7 @@ bool bundle::remove_false_boundaries()
 	{
 		PEB p = gr.edge(x.first, gr.num_vertices() - 1);
 		vertex_info vi = gr.get_vertex_info(x.first);
+		if(vi.type == EMPTY_VERTEX) continue;
 		if(p.second == false) continue;
 		double w = gr.get_vertex_weight(x.first);
 		double z = log(1 + w) / log(1 + x.second);
@@ -1080,6 +1107,7 @@ bool bundle::remove_false_boundaries()
 	{
 		PEB p = gr.edge(0, x.first);
 		vertex_info vi = gr.get_vertex_info(x.first);
+		if(vi.type == EMPTY_VERTEX) continue;
 		if(p.second == false) continue;
 		double w = gr.get_vertex_weight(x.first);
 		double z = log(1 + w) / log(1 + x.second);
