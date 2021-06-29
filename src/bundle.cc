@@ -532,6 +532,7 @@ int bundle::revise_splice_graph()
 		if(b == true) continue;
 
 		b = remove_small_junctions();
+		if(b == true) refine_splice_graph();
 		if(b == true) continue;
 
 		b = extend_start_boundaries();
@@ -809,6 +810,9 @@ bool bundle::remove_small_exons()
 	bool flag = false;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
+		vertex_info vi = gr.get_vertex_info(i);
+		if(vi.type == EMPTY_VERTEX) continue;
+
 		bool b = true;
 		edge_iterator it1, it2;
 		PEEI pei;
@@ -841,7 +845,6 @@ bool bundle::remove_small_exons()
 		if(gr.edge(0, i).second == false && gr.edge(i, gr.num_vertices() - 1).second == false) continue;
 
 		//gr.clear_vertex(i);
-		vertex_info vi = gr.get_vertex_info(i);
 		vi.type = EMPTY_VERTEX;
 		gr.set_vertex_info(i, vi);
 
@@ -1097,8 +1100,8 @@ bool bundle::remove_false_boundaries()
 		double w = gr.get_vertex_weight(x.first);
 		double z = log(1 + w) / log(1 + x.second);
 		double s = log(1 + w) - log(1 + x.second);
-		if(verbose >= 2) printf("detect false end boundary %d with %d reads, vertex = %d, w = %.2lf, type = %d, z = %.2lf, s = %.2lf\n", vi.rpos, x.second, x.first, w, vi.type, z, s); 
 		if(s > 1) continue;
+		if(verbose >= 2) printf("detect false end boundary %d with %d reads, vertex = %d, w = %.2lf, type = %d, z = %.2lf, s = %.2lf\n", vi.rpos, x.second, x.first, w, vi.type, z, s); 
 		//gr.remove_edge(p.first);
 		vi.type = EMPTY_VERTEX;
 		gr.set_vertex_info(x.first, vi);
@@ -1114,8 +1117,8 @@ bool bundle::remove_false_boundaries()
 		double w = gr.get_vertex_weight(x.first);
 		double z = log(1 + w) / log(1 + x.second);
 		double s = log(1 + w) - log(1 + x.second);
-		if(verbose >= 2) printf("detect false start boundary %d with %d reads, vertex = %d, w = %.2lf, type = %d, z = %.2lf, s = %.2lf\n", vi.lpos, x.second, x.first, w, vi.type, z, s); 
 		if(s > 1) continue;
+		if(verbose >= 2) printf("detect false start boundary %d with %d reads, vertex = %d, w = %.2lf, type = %d, z = %.2lf, s = %.2lf\n", vi.lpos, x.second, x.first, w, vi.type, z, s); 
 		//gr.remove_edge(p.first);
 		vi.type = EMPTY_VERTEX;
 		gr.set_vertex_info(x.first, vi);
