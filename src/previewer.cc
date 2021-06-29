@@ -176,8 +176,8 @@ int previewer::solve_insertsize()
 			bb2.strand = '-';
 		}
 
-		//if(cnt >= 1000000) break;
-		if(cnt >= 500000) break;
+		//if(cnt >= 500000) break;
+		if(cnt >= 1000000) break;
 
 		// add hit
 		if(uniquely_mapped_only == true && ht.nh != 1) continue;
@@ -198,7 +198,7 @@ int previewer::solve_insertsize()
 		total += it->second;
 	}
 
-	if(total < 100) // single-cell data may have low number of paired-end reads
+	if(total < 1000) // single-cell data may have low number of paired-end reads
 	//if(total < 10000)
 	{
 		printf("not enough paired-end reads to create the profile (%d collected)\n", total);
@@ -217,8 +217,8 @@ int previewer::solve_insertsize()
 		if(n >= 0.5 * total && insertsize_median < 0) insertsize_median = it->first;
 		insertsize_ave += it->second * it->first;
 		sx2 += it->second * it->first * it->first;
-		if(insertsize_low == -1 && n >= 0.005 * total) insertsize_low = it->first;
-		if(insertsize_high == -1 && n >= 0.995 * total) insertsize_high = it->first;
+		if(insertsize_low == -1 && n >= 0.001 * total) insertsize_low = it->first;
+		if(insertsize_high == -1 && n >= 0.998 * total) insertsize_high = it->first;
 		if(n >= 0.999 * total) break;
 	}
 	
@@ -304,7 +304,7 @@ int previewer::process_bundle(bundle_base &bb, map<int32_t, int>& m)
 		if(m.find(len) != m.end()) m[len]++;
 		else m.insert(pair<int, int>(len, 1));
 
-		if(cnt >= 10000) return cnt;
+		if(cnt >= 1000) return cnt;
 	}
 	return cnt;
 }
