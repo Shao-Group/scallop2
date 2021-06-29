@@ -547,6 +547,8 @@ int bundle::revise_splice_graph()
 		b = keep_surviving_edges();
 		if(b == true) refine_splice_graph();
 		if(b == true) continue;
+
+		break;
 	}
 	refine_splice_graph();
 
