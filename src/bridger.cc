@@ -128,6 +128,7 @@ int bridger::bridge_overlapped_fragment(fragment &fr, int ex1, int ex2)
 	if(p.length >= length_low && p.length <= length_high)
 	{
 		p.type = 1;
+		printf("add read %s to breads\n", fr.h1->qname.c_str());
 		bd->breads.insert(fr.h1->qname);
 	}
 	else p.type = 2;
@@ -683,6 +684,7 @@ int bridger::bridge_hard_fragments()
 
 				if(p.length >= length_low && p.length <= length_high)
 				{
+					printf("add read %s to breads\n", fr->h1->qname.c_str());
 					bd->breads.insert(fr->h1->qname);
 					p.type = 1;
 				}
