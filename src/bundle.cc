@@ -1070,7 +1070,8 @@ bool bundle::remove_false_boundaries()
 		for(int k = 0; k < fr.paths.size(); k++) lengths += fr.paths[k].length;
 
 		bool use = true;
-		if(fr.paths.size() == 1 && types == 2 && tlen <= 1.5 * insertsize_high) use = false;
+		if(fr.paths.size() == 1 && types == 2 && tlen > 10000) use = false;
+		//if(fr.paths.size() == 1 && types == 2 && tlen <= 1.5 * insertsize_high) use = false;
 		//if(fr.paths.size() == 1 && types == 2 && lengths <= 2 * tlen) use = false;
 
 		printf("%s: u1 = %d, %d-%d, u2 = %d, %d-%d, h1.rpos = %d, h2.lpos = %d, #bridging = %lu, types = %d, lengths = %d, tlen = %d, use = %c\n", 
