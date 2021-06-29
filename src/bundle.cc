@@ -90,6 +90,7 @@ int bundle::build_intervals()
 		hit &ht = bb.hits[i];
 		if(ht.bridged == true) continue;
 		if(br.breads.find(ht.qname) != br.breads.end()) continue;
+		if((ht.flag & 0x100) >= 1) continue;
 		for(int k = 0; k < ht.itvm.size(); k++)
 		{
 			int32_t s = high32(ht.itvm[k]);
@@ -134,6 +135,7 @@ int bundle::build_junctions()
 	{
 		if(bb.hits[i].bridged == true) continue;
 		if(br.breads.find(bb.hits[i].qname) != br.breads.end()) continue;
+		if((ht.flag & 0x100) >= 1) continue;
 
 		vector<int64_t> v = bb.hits[i].spos;
 		if(v.size() == 0) continue;
