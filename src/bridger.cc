@@ -125,7 +125,11 @@ int bridger::bridge_overlapped_fragment(fragment &fr, int ex1, int ex2)
 	p.v.insert(p.v.end(), it + 1, v2.end());
 	p.length = bd->compute_aligned_length(fr.k1l, fr.k2r, p.v);
 	p.v = encode_vlist(p.v);
-	if(p.length >= length_low && p.length <= length_high) p.type = 1;
+	if(p.length >= length_low && p.length <= length_high)
+	{
+		p.type = 1;
+		bd->breads.insert(fr.h1->qname);
+	}
 	else p.type = 2;
 
 	fr.paths.push_back(p);
@@ -677,7 +681,11 @@ int bridger::bridge_hard_fragments()
 				p.length = bd->compute_aligned_length(fr->k1l, fr->k2r, p.v);
 				p.v = encode_vlist(p.v);
 
-				if(p.length >= length_low && p.length <= length_high) p.type = 1;
+				if(p.length >= length_low && p.length <= length_high)
+				{
+					bd->breads.insert(fr->h1->qname);
+					p.type = 1;
+				}
 				else p.type = 2;
 
 				fr->paths.push_back(p);

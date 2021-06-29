@@ -25,6 +25,7 @@ public:
 
 public:
 	bundle_base &bb;					// input bundle base
+	set<string> breads;					// bridged reads
 	vector<fragment> fragments;			// to-be-filled fragments
 	vector<junction> junctions;			// splice junctions
 	vector<region> regions;				// pexons

@@ -87,8 +87,9 @@ int bundle::build_intervals()
 
 	for(int i = 0; i < bb.hits.size(); i++)
 	{
-		if(bb.hits[i].bridged == true) continue;
 		hit &ht = bb.hits[i];
+		if(ht.bridged == true) continue;
+		if(br.breads.find(ht.qname) != br.breads.end()) continue;
 		for(int k = 0; k < ht.itvm.size(); k++)
 		{
 			int32_t s = high32(ht.itvm[k]);
@@ -132,6 +133,8 @@ int bundle::build_junctions()
 	for(int i = 0; i < bb.hits.size(); i++)
 	{
 		if(bb.hits[i].bridged == true) continue;
+		if(br.breads.find(bb.hits[i].qname) != br.breads.end()) continue;
+
 		vector<int64_t> v = bb.hits[i].spos;
 		if(v.size() == 0) continue;
 
@@ -998,7 +1001,8 @@ bool bundle::remove_false_boundaries()
 		//if(fr.h1->bridged == true || fr.h2->bridged == true) continue;
 
 		// only use uniquely aligned reads
-		if(fr.h1->nh >= 2 || fr.h2->nh >= 2) continue;
+		//if(fr.h1->nh >= 2 || fr.h2->nh >= 2) continue;
+		if(br.breads.find(fr.h1->qname) != br.breads.end()) continue;
 
 		// calculate actual length
 		vector<int> v = align_fragment(fr);
@@ -1095,6 +1099,7 @@ bool bundle::tackle_false_boundaries()
 
 		if(fr.paths.size() != 1) continue;
 		if(fr.paths[0].type != 2) continue;
+		if(br.breads.find(fr.h1->qname) != br.breads.end()) continue;
 
 		vector<int> v = align_fragment(fr);
 		if(v.size() <= 1) continue;
@@ -1113,7 +1118,7 @@ bool bundle::tackle_false_boundaries()
 
 		// print
 		//fr.print(99);
-		printf("break fragment: total-length = %d, bridge-length = %d\n", tlen, fr.paths[0].length);
+		printf("break fragment %s: total-length = %d, bridge-length = %d\n", fr.h1->qname.c_str(), tlen, fr.paths[0].length);
 		/*
 		for(int i = 0; i < v.size(); i++)
 		{
