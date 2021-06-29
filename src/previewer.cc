@@ -285,7 +285,7 @@ int previewer::process_bundle(bundle_base &bb, map<int32_t, int>& m)
 		vector<int> v = decode_vlist(fr.paths[0].v);
 		for(int j = 0; j < v.size(); j++)
 		{
-			if(br.regions[v[j]].ave < 5.0) b = false;
+			if(br.regions[v[j]].ave < 20.0) b = false;
 			if(b == false) break;
 		}
 		if(b == false) continue;
