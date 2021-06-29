@@ -28,7 +28,7 @@ int min_num_hits_in_bundle = 10;
 int min_num_splices_in_bundle = 15;	// not used; accept bundle if #hits with splices is at least this number
 uint32_t min_mapping_quality = 1;
 int32_t min_splice_boundary_hits = 1;
-bool use_second_alignment = false;
+bool use_second_alignment = true;
 bool uniquely_mapped_only = false;
 int library_type = EMPTY;
 
