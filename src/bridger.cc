@@ -167,7 +167,8 @@ int bridger::cluster_open_fragments(vector<fcluster> &fclusters)
 	for(int i = 0; i < bd->fragments.size(); i++)
 	{
 		fragment &fr = bd->fragments[i];
-		if(fr.paths.size() == 1 && fr.paths[0].type == 1) continue;
+		if(fr.paths.size() >= 1) continue;
+		//if(fr.paths.size() == 1 && fr.paths[0].type == 1) continue;
 		int last1 = fr.h1->vlist[fr.h1->vlist.size() - 2] + fr.h1->vlist.back() - 1;
 		int last2 = fr.h2->vlist[fr.h2->vlist.size() - 2] + fr.h2->vlist.back() - 1;
 		if(last1 >= last2) continue;
@@ -816,7 +817,7 @@ int bridger::bridge_tough_fragments()
 				p.length = bd->compute_aligned_length(fr->k1l, fr->k2r, p.v);
 				p.v = encode_vlist(p.v);
 				fr->paths.push_back(p);
-				printf(" fragment %d length = %d\n", j, p.length);
+				//printf(" fragment %d length = %d\n", j, p.length);
 			}
 		}
 	}
@@ -1548,7 +1549,7 @@ int bridger::filter_paths()
 		// TODO: fliter based on fragments type
 
 		if(fr.paths.size() <= 0) continue;
-
+		
 		int minp = -1;
 		double mind = 9999999999999;
 		if(fr.type == 1)
@@ -1599,14 +1600,16 @@ int bridger::filter_paths()
 
 int bridger::get_paired_fragments()
 {
-	int n = 0;
+	int n1 = 0;
+	int n2 = 0;
 	for(int k = 0; k < bd->fragments.size(); k++)
 	{
+		if(bd->fragments[k].paths.size() >= 1) n1++;
 		if(bd->fragments[k].paths.size() != 1) continue;
 		if(bd->fragments[k].paths[0].type != 1) continue;
-		n++;
+		n2++;
 	}
-	return n;
+	return n1;
 }
 
 vector<int> bridger::get_bridged_fragments_type()
