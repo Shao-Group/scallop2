@@ -63,12 +63,12 @@ int32_t min_subregion_length = 15;
 
 // for revising/decomposing splice graph
 double max_intron_contamination_coverage = 2.0;
-double min_surviving_edge_weight = 2.1;
+double min_surviving_edge_weight = 1.5;
 double max_decompose_error_ratio[7] = {0.33, 0.05, 0.0, 0.25, 0.30, 0.0, 1.1};
 double min_guaranteed_edge_weight = 0.01;
 
 // for selecting paths
-double min_transcript_coverage = 1.0; //1.01->0.5 single cell;
+double min_transcript_coverage = 1.5; //1.01->0.5 single cell;
 double min_transcript_coverage_low = 1.41; // single cell, not used
 double min_transcript_coverage_up = 2; // single cell, not used
 double min_transcript_coverage_ratio = 0.005;
