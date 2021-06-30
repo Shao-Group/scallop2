@@ -58,7 +58,7 @@ int32_t flank_tiny_length = 10;
 double flank_tiny_ratio = 0.4;
 
 // for identifying subgraphs
-int32_t min_subregion_gap = 3;
+int32_t min_subregion_gap = 10;
 int32_t min_subregion_len = 15;
 int32_t min_subregion_max = 3;
 double min_subregion_ave = 1.5;

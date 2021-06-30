@@ -847,6 +847,7 @@ bool bundle::remove_small_exons()
 		if(gr.edge(0, i).second == false && gr.edge(i, gr.num_vertices() - 1).second == false) continue;
 
 		//gr.clear_vertex(i);
+		if(verbose >= 2) printf("remove small exon: length = %d, pos = %d-%d\n", p2 - p1, p1, p2);
 		vi.type = EMPTY_VERTEX;
 		gr.set_vertex_info(i, vi);
 
