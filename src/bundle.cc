@@ -199,8 +199,8 @@ int bundle::build_regions()
 	{
 		junction &jc = junctions[i];
 
-		double ave, dev;
-		evaluate_rectangle(fmap, jc.lpos, jc.rpos, ave, dev);
+		double ave, dev, max;
+		evaluate_rectangle(fmap, jc.lpos, jc.rpos, ave, dev, max);
 
 		int32_t l = jc.lpos;
 		int32_t r = jc.rpos;

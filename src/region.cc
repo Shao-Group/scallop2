@@ -89,10 +89,10 @@ int region::split_join_interval_map()
 		if(p - lpos < min_split_boundary_length) b = false;
 		if(rpos - q < min_split_boundary_length) b = false;
 
-		double ave1 = -1, ave2 = -1;
-		double dev1 = -1, dev2 = -1;
-		evaluate_rectangle(*mmap, lpos, p, ave1, dev1);
-		evaluate_rectangle(*mmap, q, rpos, ave2, dev2);
+		double ave1 = -1, ave2 = -1, max1 = -1;
+		double dev1 = -1, dev2 = -1, max2 = -1;
+		evaluate_rectangle(*mmap, lpos, p, ave1, dev1, max1);
+		evaluate_rectangle(*mmap, q, rpos, ave2, dev2, max2);
 
 		if(ave1 < min_split_boundary_coverage) b = false;
 		if(ave2 < min_split_boundary_coverage) b = false;
@@ -173,7 +173,7 @@ int region::build_partial_exons()
 	if(lower(jmap.begin()->first) == lpos && upper(jmap.begin()->first) == rpos)
 	{
 		partial_exon pe(lpos, rpos, ltype, rtype);
-		evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev);
+		evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev, pe.ave);
 		pexons.push_back(pe);
 		return 0;
 	}
@@ -205,7 +205,7 @@ int region::build_partial_exons()
 		if(b == true) pe.type = EMPTY_VERTEX;
 		else pe.type = 0;
 
-		evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev);
+		evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev, pe.ave);
 		pexons.push_back(pe);
 	}
 
