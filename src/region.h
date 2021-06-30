@@ -30,6 +30,7 @@ public:
 	int rtype;						// type of the right boundary
 	double ave;						// coverage mean
 	double dev;						// coverage deviation
+	double max;						// coverage max
 	const split_interval_map *mmap;	// pointer to match interval map
 	const split_interval_map *imap;	// pointer to indel interval map
 	join_interval_map jmap;			// subregion intervals

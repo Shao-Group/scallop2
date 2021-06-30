@@ -195,7 +195,7 @@ int bundle_bridge::build_regions()
 		if(rtype == LEFT_RIGHT_SPLICE) rtype = LEFT_SPLICE;
 
 		region rr(l, r, ltype, rtype);
-		evaluate_rectangle(bb.mmap, l, r, rr.ave, rr.dev, rr.ave);
+		evaluate_rectangle(bb.mmap, l, r, rr.ave, rr.dev, rr.max);
 		regions.push_back(rr);
 	}
 

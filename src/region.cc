@@ -15,6 +15,7 @@ region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype)
 	:lpos(_lpos), rpos(_rpos), ltype(_ltype), rtype(_rtype)
 {
 	ave = 0;
+	max = 0;
 	dev = 1;
 }
 
@@ -22,6 +23,7 @@ region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split
 	:lpos(_lpos), rpos(_rpos), mmap(_mmap), imap(_imap), ltype(_ltype), rtype(_rtype)
 {
 	ave = 0;
+	max = 0;
 	dev = 1;
 	build_join_interval_map();
 	smooth_join_interval_map();
