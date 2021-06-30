@@ -1180,8 +1180,9 @@ bool bundle::tackle_false_boundaries()
 		}
 		*/
 
-		if(tlen < insertsize_low) continue;
-		if(tlen > insertsize_high) continue;
+		if(tlen < insertsize_low / 1.5) continue;
+		if(tlen > insertsize_high * 1.5) continue;
+		if(tlen >= fr.paths[0].length) continue;
 
 		for(int i = 0; i < v.size() - 1; i++)
 		{
