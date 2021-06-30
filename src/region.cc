@@ -149,17 +149,19 @@ bool region::empty_subregion(int32_t p1, int32_t p2)
 	assert(p1 >= lpos && p2 <= rpos);
 
 	//printf(" region = [%d, %d), subregion [%d, %d), length = %d\n", lpos, rpos, p1, p2, p2 - p1);
-	if(p2 - p1 < min_subregion_length) return true;
+	if(p2 - p1 < min_subregion_len) return true;
 
 	PSIMI pei = locate_boundary_iterators(*mmap, p1, p2);
 	SIMI it1 = pei.first, it2 = pei.second;
 	if(it1 == mmap->end() || it2 == mmap->end()) return true;
 
 	int32_t sum = compute_sum_overlap(*mmap, it1, it2);
+	int32_t max = compute_sum_overlap(*mmap, it1, it2);
 	double ratio = sum * 1.0 / (p2 - p1);
 	//printf(" region = [%d, %d), subregion [%d, %d), overlap = %.2lf\n", lpos, rpos, p1, p2, ratio);
 	//if(ratio < min_subregion_overlap + max_intron_contamination_coverage) return true;
-	if(ratio < min_subregion_overlap) return true;
+	if(ratio < min_subregion_ave) return true;
+	if(max < min_subregion_max) return true;
 
 	return false;
 }

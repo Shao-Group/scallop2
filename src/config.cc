@@ -58,8 +58,9 @@ double flank_tiny_ratio = 0.4;
 
 // for identifying subgraphs
 int32_t min_subregion_gap = 3;
-double min_subregion_overlap = 1.5;
-int32_t min_subregion_length = 15;
+int32_t min_subregion_len = 15;
+int32_t min_subregion_max = 3;
+double min_subregion_ave = 1.5;
 
 // for revising/decomposing splice graph
 double max_intron_contamination_coverage = 2.0;
@@ -238,14 +239,19 @@ int parse_arguments(int argc, const char ** argv)
 			min_subregion_gap = atoi(argv[i + 1]);
 			i++;
 		}
-		else if(string(argv[i]) == "--min_subregion_length")
+		else if(string(argv[i]) == "--min_subregion_len")
 		{
-			min_subregion_length = atoi(argv[i + 1]);
+			min_subregion_len = atoi(argv[i + 1]);
 			i++;
 		}
-		else if(string(argv[i]) == "--min_subregion_overlap")
+		else if(string(argv[i]) == "--min_subregion_ave")
 		{
-			min_subregion_overlap = atof(argv[i + 1]);
+			min_subregion_ave = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_subregion_max")
+		{
+			min_subregion_max = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_surviving_edge_weight")
@@ -467,8 +473,9 @@ int print_parameters()
 
 	// for identifying subgraphs
 	printf("min_subregion_gap = %d\n", min_subregion_gap);
-	printf("min_subregion_length = %d\n", min_subregion_length);
-	printf("min_subregion_overlap = %.2lf\n", min_subregion_overlap);
+	printf("min_subregion_len = %d\n", min_subregion_len);
+	printf("min_subregion_max = %d\n", min_subregion_max);
+	printf("min_subregion_ave = %.2lf\n", min_subregion_ave);
 
 	// for splice graph
 	printf("max_intron_contamination_coverage = %.2lf\n", max_intron_contamination_coverage);

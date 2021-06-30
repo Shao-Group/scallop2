@@ -83,9 +83,9 @@ extern double flank_tiny_ratio;
 
 // for identifying subgraphs
 extern int32_t min_subregion_gap;
-extern double min_subregion_overlap;
-extern int32_t min_subregion_length;
-extern int min_subregion_ladders;
+extern int32_t min_subregion_len;
+extern int32_t min_subregion_max;
+extern double min_subregion_ave;
 
 // for subsetsum and router
 extern int max_dp_table_size;
