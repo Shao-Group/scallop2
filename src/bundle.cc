@@ -552,7 +552,7 @@ int bundle::revise_splice_graph()
 		break;
 	}
 
-	find_contamination_chain();
+	//find_contamination_chain();
 	refine_splice_graph();
 
 	return 0;
