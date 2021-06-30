@@ -1045,6 +1045,13 @@ bool bundle::remove_false_boundaries()
 
 		// calculate actual length
 		vector<int> v = align_fragment(fr);
+		
+		if(v.size() == 0)
+		{
+			printf("fail to align fragment: ");
+			fr.print(99);
+		}
+
 		if(v.size() <= 1) continue;
 
 		int32_t tlen = 0;
