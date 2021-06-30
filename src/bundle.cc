@@ -40,8 +40,6 @@ int bundle::build()
 	link_partial_exons();
 	build_splice_graph();
 
-	find_contamination_chain();
-
 	revise_splice_graph();
 
 	build_hyper_set();
@@ -553,6 +551,8 @@ int bundle::revise_splice_graph()
 
 		break;
 	}
+
+	find_contamination_chain();
 	refine_splice_graph();
 
 	return 0;
@@ -1231,12 +1231,18 @@ bool bundle::tackle_false_boundaries()
 
 int bundle::find_contamination_chain()
 {
+	int min_vertices = 3;
+	double max_coverage = 5.0;
+	int32_t max_distance = 2000;
+
 	vector<int> chain;
 	vector<string> types;
 	for(int i = 1; i < pexons.size() - 1; i++)
 	{
 		string type = "";
 		partial_exon &pe = pexons[i];
+		if(pe.ave > max_coverage) continue;
+
 		if(pe.ltype == START_BOUNDARY && pe.rtype == END_BOUNDARY) type = "island";
 		if(pe.ltype == START_BOUNDARY && pe.rtype == RIGHT_SPLICE) type = "start";
 		if(pe.ltype == LEFT_SPLICE && pe.rtype == RIGHT_SPLICE) type = "intron";
@@ -1248,12 +1254,43 @@ int bundle::find_contamination_chain()
 		types.push_back(type);
 	}
 
+	if(chain.size() == 0) return 0;
+
 	int32_t pre = 0;
 	for(int k = 0; k < chain.size(); k++)
 	{
 		partial_exon &pe = pexons[chain[k]];
 		printf("chain %d, pexon = %d, type = %s, pos = %d-%d, len = %d, cov = %.2lf, dist = %d\n", k, chain[k], types[k].c_str(), pe.lpos, pe.rpos, pe.rpos - pe.lpos, pe.ave, pe.lpos - pre);
 		pre = pe.rpos;
+	}
+
+	int k1 = -1;
+	pre = 0 - max_distance - 1;
+	for(int k = 0; k < chain.size(); k++)
+	{
+		partial_exon &pe = pexons[chain[k]];
+		int32_t dist = pe.lpos - pre;
+		if(dist > max_distance)
+		{
+			if(k - k1 > min_vertices)
+			{
+				printf("delete chain: %d-%d\n", k1 + 1, k - 1);
+				for(int i = k1 + 1; i < k; i++)
+				{
+					gr.clear_vertex(chain[k] + 1);
+				}
+			}
+			k1 = k - 1;
+		}
+		pre = pe.rpos;
+	}
+
+	if(chain.size() > k1 + min_vertices)
+	{
+		for(int i = k1 + 1; i < chain.size(); i++)
+		{
+			gr.clear_vertex(chain[i] + 1);
+		}
 	}
 	return 0;
 }
