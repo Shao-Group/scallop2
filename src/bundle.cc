@@ -1046,12 +1046,6 @@ bool bundle::remove_false_boundaries()
 		// calculate actual length
 		vector<int> v = align_fragment(fr);
 		
-		if(v.size() == 0)
-		{
-			printf("fail to align fragment: ");
-			fr.print(99);
-		}
-
 		if(v.size() <= 1) continue;
 
 		int32_t tlen = 0;
@@ -1085,7 +1079,7 @@ bool bundle::remove_false_boundaries()
 		//if(fr.paths.size() == 1 && types == 2 && tlen <= 1.5 * insertsize_high) use = false;
 		//if(fr.paths.size() == 1 && types == 2 && lengths <= 2 * tlen) use = false;
 
-		printf("%s: u1 = %d, %d-%d, u2 = %d, %d-%d, h1.rpos = %d, h2.lpos = %d, #bridging = %lu, types = %d, lengths = %d, tlen = %d, use = %c\n", 
+		if(verbose >= 2) printf("%s: u1 = %d, %d-%d, u2 = %d, %d-%d, h1.rpos = %d, h2.lpos = %d, #bridging = %lu, types = %d, lengths = %d, tlen = %d, use = %c\n", 
 				fr.h1->qname.c_str(), u1, v1.lpos, v1.rpos, u2, v2.lpos, v2.rpos, fr.h1->rpos, fr.h2->pos, fr.paths.size(), types, lengths, tlen, use ? 'T' : 'F');
 
 		if(use == false) continue;
@@ -1113,7 +1107,7 @@ bool bundle::remove_false_boundaries()
 		double w = gr.get_vertex_weight(x.first);
 		double z = log(1 + w) / log(1 + x.second);
 		double s = log(1 + w) - log(1 + x.second);
-		if(s > 1) continue;
+		if(s > 1.5) continue;
 		if(verbose >= 2) printf("detect false end boundary %d with %d reads, vertex = %d, w = %.2lf, type = %d, z = %.2lf, s = %.2lf\n", vi.rpos, x.second, x.first, w, vi.type, z, s); 
 		//gr.remove_edge(p.first);
 		vi.type = EMPTY_VERTEX;
@@ -1130,7 +1124,7 @@ bool bundle::remove_false_boundaries()
 		double w = gr.get_vertex_weight(x.first);
 		double z = log(1 + w) / log(1 + x.second);
 		double s = log(1 + w) - log(1 + x.second);
-		if(s > 1) continue;
+		if(s > 1.5) continue;
 		if(verbose >= 2) printf("detect false start boundary %d with %d reads, vertex = %d, w = %.2lf, type = %d, z = %.2lf, s = %.2lf\n", vi.lpos, x.second, x.first, w, vi.type, z, s); 
 		//gr.remove_edge(p.first);
 		vi.type = EMPTY_VERTEX;
@@ -1169,7 +1163,7 @@ bool bundle::tackle_false_boundaries()
 
 		// print
 		//fr.print(99);
-		printf("break fragment %s: total-length = %d, bridge-length = %d\n", fr.h1->qname.c_str(), tlen, fr.paths[0].length);
+		if(verbose >= 2) printf("break fragment %s: total-length = %d, bridge-length = %d\n", fr.h1->qname.c_str(), tlen, fr.paths[0].length);
 		/*
 		for(int i = 0; i < v.size(); i++)
 		{
@@ -1190,12 +1184,12 @@ bool bundle::tackle_false_boundaries()
 			partial_exon &py = pexons[v[i + 1]];
 			if(px.rtype == END_BOUNDARY) 
 			{
-				printf("break ending vertex %d, pos = %d\n", v[i], px.rpos);
+				if(verbose >= 2) printf("break ending vertex %d, pos = %d\n", v[i], px.rpos);
 				points[v[i + 0]] += 1;
 			}
 			if(py.ltype == START_BOUNDARY) 
 			{
-				printf("break starting vertex %d, pos = %d\n", v[i + 1], py.lpos);
+				if(verbose >= 2) printf("break starting vertex %d, pos = %d\n", v[i + 1], py.lpos);
 				points[v[i + 1]] += 1;
 			}
 		}
@@ -1212,7 +1206,7 @@ bool bundle::tackle_false_boundaries()
 		double z = log(1 + w) / log(1 + points[k]);
 		double s = log(1 + w) - log(1 + points[k]);
 		if(verbose >= 2) printf("tackle false end boundary %d with %d reads, vertex = %d, w = %.2lf, z = %.2lf, s = %.2lf\n", pexons[k].rpos, points[k], k + 1, w, z, s);
-		if(s > 1) continue;
+		if(s > 1.5) continue;
 		vi.type = EMPTY_VERTEX;
 		gr.set_vertex_info(k + 1, vi);
 		b = true;
@@ -1229,7 +1223,7 @@ bool bundle::tackle_false_boundaries()
 		double z = log(1 + w) / log(1 + points[k]);
 		double s = log(1 + w) - log(1 + points[k]);
 		if(verbose >= 2) printf("tackle false start boundary %d with %d reads, vertex = %d, w = %.2lf, z = %.2lf, s = %.2lf\n", pexons[k].lpos, points[k], k + 1, w, z, s);
-		if(s > 1) continue;
+		if(s > 1.5) continue;
 		vi.type = EMPTY_VERTEX;
 		gr.set_vertex_info(k + 1, vi);
 		b = true;
