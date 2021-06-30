@@ -43,6 +43,8 @@ double insertsize_std = 50;
 int insertsize_median = -1;
 int insertsize_low = -1;
 int insertsize_high = -1;
+double insertsize_low_percentile = 0.005;
+double insertsize_high_percentile = 0.998;
 vector<double> insertsize_profile;
 
 // for bridging
@@ -64,7 +66,7 @@ double min_subregion_ave = 1.5;
 // for revising/decomposing splice graph
 double min_guaranteed_edge_weight = 0.01;
 double min_surviving_edge_weight = 1.5;
-double max_intron_contamination_coverage = 3.5;
+double max_intron_contamination_coverage = 2.0;
 double max_decompose_error_ratio[7] = {0.33, 0.05, 0.0, 0.25, 0.30, 0.0, 1.1};
 
 // for selecting paths

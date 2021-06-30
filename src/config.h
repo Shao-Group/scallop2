@@ -69,6 +69,8 @@ extern double insertsize_std;
 extern int insertsize_median;
 extern int insertsize_low;
 extern int insertsize_high;
+extern double insertsize_low_percentile;
+extern double insertsize_high_percentile;
 extern vector<double> insertsize_profile;
 
 // for bridging

@@ -217,8 +217,8 @@ int previewer::solve_insertsize()
 		if(n >= 0.5 * total && insertsize_median < 0) insertsize_median = it->first;
 		insertsize_ave += it->second * it->first;
 		sx2 += it->second * it->first * it->first;
-		if(insertsize_low == -1 && n >= 0.001 * total) insertsize_low = it->first;
-		if(insertsize_high == -1 && n >= 0.998 * total) insertsize_high = it->first;
+		if(insertsize_low == -1 && n >= 1.0 * insertsize_low_percentile * total) insertsize_low = it->first;
+		if(insertsize_high == -1 && n >= 1.0 * insertsize_high_percentile * total) insertsize_high = it->first;
 		if(n >= 0.999 * total) break;
 	}
 	
