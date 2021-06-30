@@ -87,6 +87,8 @@ public:
 	bool remove_false_boundaries();
 	bool tackle_false_boundaries();
 
+	int find_contamination_chain();
+
 	// hyper set
 	int build_hyper_set();
 

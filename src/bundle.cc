@@ -40,6 +40,8 @@ int bundle::build()
 	link_partial_exons();
 	build_splice_graph();
 
+	find_contamination_chain();
+
 	revise_splice_graph();
 
 	build_hyper_set();
@@ -1225,6 +1227,35 @@ bool bundle::tackle_false_boundaries()
 	}
 
 	return b;
+}
+
+int bundle::find_contamination_chain()
+{
+	vector<int> chain;
+	vector<string> types;
+	for(int i = 1; i < pexons.size() - 1; i++)
+	{
+		string type = "";
+		partial_exon &pe = pexons[i];
+		if(pe.ltype == START_BOUNDARY && pe.rtype == END_BOUNDARY) type = "island";
+		if(pe.ltype == START_BOUNDARY && pe.rtype == RIGHT_SPLICE) type = "start";
+		if(pe.ltype == LEFT_SPLICE && pe.rtype == RIGHT_SPLICE) type = "intron";
+		if(pe.ltype == LEFT_SPLICE && pe.rtype == END_BOUNDARY) type = "end";
+
+		if(type == "") continue;
+
+		chain.push_back(i);
+		types.push_back(type);
+	}
+
+	int32_t pre = 0;
+	for(int k = 0; k < chain.size(); k++)
+	{
+		partial_exon &pe = pexons[chain[k]];
+		printf("chain %d, pexon = %d, type = %s, pos = %d-%d, len = %d, dist = %d\n", k, chain[k], types[k].c_str(), pe.lpos, pe.rpos, pe.rpos - pe.lpos, pe.lpos - pre);
+		pre = pe.rpos;
+	}
+	return 0;
 }
 
 int bundle::count_junctions() const
