@@ -173,7 +173,7 @@ int region::build_partial_exons()
 	if(lower(jmap.begin()->first) == lpos && upper(jmap.begin()->first) == rpos)
 	{
 		partial_exon pe(lpos, rpos, ltype, rtype);
-		evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev, pe.ave);
+		evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev, pe.max);
 		pexons.push_back(pe);
 		return 0;
 	}
@@ -182,6 +182,7 @@ int region::build_partial_exons()
 	{
 		partial_exon pe(lpos, lpos + 1, ltype, END_BOUNDARY);
 		pe.ave = min_guaranteed_edge_weight;
+		pe.max = min_guaranteed_edge_weight;
 		pe.dev = 1.0;
 		pexons.push_back(pe);
 	}
@@ -205,7 +206,7 @@ int region::build_partial_exons()
 		if(b == true) pe.type = EMPTY_VERTEX;
 		else pe.type = 0;
 
-		evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev, pe.ave);
+		evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev, pe.max);
 		pexons.push_back(pe);
 	}
 
@@ -213,6 +214,7 @@ int region::build_partial_exons()
 	{
 		partial_exon pe(rpos - 1, rpos, START_BOUNDARY, rtype);
 		pe.ave = min_guaranteed_edge_weight;
+		pe.max = min_guaranteed_edge_weight;
 		pe.dev = 1.0;
 		pexons.push_back(pe);
 	}

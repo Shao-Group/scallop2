@@ -28,6 +28,7 @@ public:
 	int pid;						// index in the parental pexons
 	int type;						// label
 	double ave;						// average abundance
+	double max;						// maximum abundance
 	double dev;						// standard-deviation of abundance
 
 public:

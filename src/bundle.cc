@@ -412,7 +412,7 @@ int bundle::build_splice_graph()
 		int length = r.rpos - r.lpos;
 		assert(length >= 1);
 		gr.add_vertex();
-		gr.set_vertex_weight(i + 1, r.ave < min_guaranteed_edge_weight ? min_guaranteed_edge_weight : r.ave);
+		gr.set_vertex_weight(i + 1, r.max < min_guaranteed_edge_weight ? min_guaranteed_edge_weight : r.max);
 		vertex_info vi;
 		vi.lpos = r.lpos;
 		vi.rpos = r.rpos;
@@ -459,8 +459,8 @@ int bundle::build_splice_graph()
 		if(r.ltype == START_BOUNDARY)
 		{
 			edge_descriptor p = gr.add_edge(ss, i + 1);
-			double w = r.ave;
-			if(i >= 1 && pexons[i - 1].rpos == r.lpos) w -= pexons[i - 1].ave;
+			double w = r.max;
+			if(i >= 1 && pexons[i - 1].rpos == r.lpos) w -= pexons[i - 1].max;
 			if(w < min_guaranteed_edge_weight) w = min_guaranteed_edge_weight;
 			gr.set_edge_weight(p, w);
 			edge_info ei;
@@ -471,8 +471,8 @@ int bundle::build_splice_graph()
 		if(r.rtype == END_BOUNDARY) 
 		{
 			edge_descriptor p = gr.add_edge(i + 1, tt);
-			double w = r.ave;
-			if(i < pexons.size() - 1 && pexons[i + 1].lpos == r.rpos) w -= pexons[i + 1].ave;
+			double w = r.max;
+			if(i < pexons.size() - 1 && pexons[i + 1].lpos == r.rpos) w -= pexons[i + 1].max;
 			if(w < min_guaranteed_edge_weight) w = min_guaranteed_edge_weight;
 			gr.set_edge_weight(p, w);
 			edge_info ei;
@@ -493,7 +493,7 @@ int bundle::build_splice_graph()
 		
 		int xd = gr.out_degree(i + 1);
 		int yd = gr.in_degree(i + 2);
-		double wt = (xd < yd) ? x.ave : y.ave;
+		double wt = (xd < yd) ? x.max: y.max;
 		//int32_t xr = compute_overlap(mmap, x.rpos - 1);
 		//int32_t yl = compute_overlap(mmap, y.lpos);
 		//double wt = xr < yl ? xr : yl;
@@ -1241,7 +1241,7 @@ int bundle::find_contamination_chain()
 	{
 		string type = "";
 		partial_exon &pe = pexons[i];
-		if(pe.ave > max_coverage) continue;
+		if(pe.max > max_coverage) continue;
 
 		if(pe.ltype == START_BOUNDARY && pe.rtype == END_BOUNDARY) type = "island";
 		if(pe.ltype == START_BOUNDARY && pe.rtype == RIGHT_SPLICE) type = "start";
@@ -1260,7 +1260,7 @@ int bundle::find_contamination_chain()
 	for(int k = 0; k < chain.size(); k++)
 	{
 		partial_exon &pe = pexons[chain[k]];
-		printf("chain %d, pexon = %d, type = %s, pos = %d-%d, len = %d, cov = %.2lf, dist = %d\n", k, chain[k], types[k].c_str(), pe.lpos, pe.rpos, pe.rpos - pe.lpos, pe.ave, pe.lpos - pre);
+		printf("chain %d, pexon = %d, type = %s, pos = %d-%d, len = %d, cov = %.2lf, dist = %d\n", k, chain[k], types[k].c_str(), pe.lpos, pe.rpos, pe.rpos - pe.lpos, pe.max, pe.lpos - pre);
 		pre = pe.rpos;
 	}
 
