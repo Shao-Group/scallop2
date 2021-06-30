@@ -1231,8 +1231,8 @@ bool bundle::tackle_false_boundaries()
 
 int bundle::find_contamination_chain()
 {
-	int min_vertices = 3;
-	double max_coverage = 5.0;
+	int min_vertices = 5;
+	double max_coverage = 4.0;
 	int32_t max_distance = 2000;
 
 	vector<int> chain;
