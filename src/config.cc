@@ -33,7 +33,6 @@ bool uniquely_mapped_only = false;
 int library_type = EMPTY;
 
 // for preview
-//
 int max_preview_reads = 2000000;
 int max_preview_spliced_reads = 50000;
 int min_preview_spliced_reads = 10000;
@@ -63,15 +62,13 @@ int32_t min_subregion_max = 3;
 double min_subregion_ave = 1.5;
 
 // for revising/decomposing splice graph
-double max_intron_contamination_coverage = 2.0;
-double min_surviving_edge_weight = 1.5;
-double max_decompose_error_ratio[7] = {0.33, 0.05, 0.0, 0.25, 0.30, 0.0, 1.1};
 double min_guaranteed_edge_weight = 0.01;
+double min_surviving_edge_weight = 1.5;
+double max_intron_contamination_coverage = 3.5;
+double max_decompose_error_ratio[7] = {0.33, 0.05, 0.0, 0.25, 0.30, 0.0, 1.1};
 
 // for selecting paths
 double min_transcript_coverage = 1.5; //1.01->0.5 single cell;
-double min_transcript_coverage_low = 1.41; // single cell, not used
-double min_transcript_coverage_up = 2; // single cell, not used
 double min_transcript_coverage_ratio = 0.005;
 double min_single_exon_coverage = 20;
 double min_transcript_numreads = 10; // 20 -> 10 single cell

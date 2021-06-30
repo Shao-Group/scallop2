@@ -99,10 +99,7 @@ extern double min_transcript_numreads;
 extern double min_transcript_coverage;
 extern double min_guaranteed_edge_weight;
 
-// single cell
-extern double min_transcript_coverage_low;
-extern double min_transcript_coverage_up;
-
+// for filtering transcripts
 extern double min_single_exon_coverage;
 extern double min_transcript_coverage_ratio; 
 extern int min_transcript_length_base;
