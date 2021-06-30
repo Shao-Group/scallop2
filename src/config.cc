@@ -43,7 +43,7 @@ double insertsize_std = 50;
 int insertsize_median = -1;
 int insertsize_low = -1;
 int insertsize_high = -1;
-double insertsize_low_percentile = 0.005;
+double insertsize_low_percentile = 0.01;
 double insertsize_high_percentile = 0.999;
 vector<double> insertsize_profile;
 
