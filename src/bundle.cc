@@ -1252,7 +1252,7 @@ int bundle::find_contamination_chain()
 	for(int k = 0; k < chain.size(); k++)
 	{
 		partial_exon &pe = pexons[chain[k]];
-		printf("chain %d, pexon = %d, type = %s, pos = %d-%d, len = %d, dist = %d\n", k, chain[k], types[k].c_str(), pe.lpos, pe.rpos, pe.rpos - pe.lpos, pe.lpos - pre);
+		printf("chain %d, pexon = %d, type = %s, pos = %d-%d, len = %d, cov = %.2lf, dist = %d\n", k, chain[k], types[k].c_str(), pe.lpos, pe.rpos, pe.rpos - pe.lpos, pe.ave, pe.lpos - pre);
 		pre = pe.rpos;
 	}
 	return 0;
