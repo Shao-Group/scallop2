@@ -1245,7 +1245,7 @@ int bundle::find_contamination_chain()
 
 		if(pe.ltype == START_BOUNDARY && pe.rtype == END_BOUNDARY) type = "island";
 		if(pe.ltype == START_BOUNDARY && pe.rtype == RIGHT_SPLICE) type = "start";
-		if(pe.ltype == LEFT_SPLICE && pe.rtype == RIGHT_SPLICE) type = "intron";
+		if(pe.ltype == LEFT_SPLICE && pe.rtype == RIGHT_SPLICE && gr.edge(i - 1, i + 1).second == true) type = "intron";
 		if(pe.ltype == LEFT_SPLICE && pe.rtype == END_BOUNDARY) type = "end";
 
 		if(type == "") continue;
@@ -1285,8 +1285,9 @@ int bundle::find_contamination_chain()
 		pre = pe.rpos;
 	}
 
-	if(chain.size() > k1 + min_vertices)
+	if((int)(chain.size()) > min_vertices + k1)
 	{
+		printf("delete chain: %d-%d\n", k1 + 1, (int)(chain.size()) - 1);
 		for(int i = k1 + 1; i < chain.size(); i++)
 		{
 			gr.clear_vertex(chain[i] + 1);
