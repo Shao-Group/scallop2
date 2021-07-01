@@ -155,6 +155,7 @@ int assembler::process(int n)
 		bd.print(index++);
 		assemble(bd.gr, bd.hs, ts1, ts2);
 
+		/*
 		bd.build(1, false);
 		bd.print(index++);
 		assemble(bd.gr, bd.hs, ts1, ts2);
@@ -162,6 +163,7 @@ int assembler::process(int n)
 		bd.build(2, false);
 		bd.print(index++);
 		assemble(bd.gr, bd.hs, ts1, ts2);
+		*/
 
 		vector<transcript> gv1 = ts1.get_transcripts(2, 1);
 		vector<transcript> gv2 = ts2.get_transcripts(2, 1);
@@ -215,11 +217,11 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0, transcrip
 
 		for(int i = 0; i < sc.trsts.size(); i++)
 		{
-			ts1.add(sc.trsts[i], 1, 0, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD);
+			ts1.add(sc.trsts[i], 1, 0, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD, TRANSCRIPT_COUNT_ADD_COVERAGE_MIN);
 		}
 		for(int i = 0; i < sc.non_full_trsts.size(); i++)
 		{
-			ts2.add(sc.non_full_trsts[i], 1, 0, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD);
+			ts2.add(sc.non_full_trsts[i], 1, 0, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD, TRANSCRIPT_COUNT_ADD_COVERAGE_MIN);
 		}
 
 		/*

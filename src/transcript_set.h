@@ -30,7 +30,7 @@ public:
 	int merge(const trans_item &ti, int mode);
 };
 
-int merge_sorted_trans_items(vector<trans_item> &vx, const vector<trans_item> &vy, int mode, double single_exon_overlap);
+int merge_sorted_trans_items(vector<trans_item> &vx, const vector<trans_item> &vy, int mode1, int mode2, double single_exon_overlap);
 
 class transcript_set
 {
@@ -44,8 +44,8 @@ public:
 	double single_exon_overlap;
 
 public:
-	int add(const transcript &t, int count, int sid, int mode);
-	int add(const transcript_set &ts, int mode);
+	int add(const transcript &t, int count, int sid, int mode1, int mode2);
+	int add(const transcript_set &ts, int mode1, int mode2);
 	int increase_count(int count);
 	int filter(int min_count);
 	int print() const;

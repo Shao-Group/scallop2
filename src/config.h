@@ -47,7 +47,8 @@ using namespace std;
 
 #define TRANSCRIPT_COUNT_ADD_COVERAGE_ADD 1
 #define TRANSCRIPT_COUNT_ADD_COVERAGE_NUL 2
-#define TRANSCRIPT_COUNT_MAX_COVERAGE_MAX 3
+#define TRANSCRIPT_COUNT_ADD_COVERAGE_MAX 3
+#define TRANSCRIPT_COUNT_ADD_COVERAGE_MIN 4
 
 //// parameters
 // for bam file and reads

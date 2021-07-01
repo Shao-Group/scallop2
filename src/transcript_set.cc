@@ -23,8 +23,35 @@ int trans_item::merge(const trans_item &ti, int mode)
 {
 	if(mode == TRANSCRIPT_COUNT_ADD_COVERAGE_ADD) 
 	{
-		if(trst.exons.size() >= 2) trst.coverage += ti.trst.coverage;
-		else if(trst.coverage < ti.trst.coverage) trst.coverage = ti.trst.coverage;
+		trst.coverage += ti.trst.coverage;
+
+		trst.extend_bounds(ti.trst);
+		count += ti.count;
+
+		for(auto &x : ti.samples)
+		{
+			if(samples.find(x.first) == samples.end()) samples.insert(x);
+			else if(samples[x.first] < x.second) samples[x.first] = x.second;
+		}
+		//samples.insert(ti.samples.begin(), ti.samples.end());
+	}
+	else if(mode == TRANSCRIPT_COUNT_ADD_COVERAGE_MAX) 
+	{
+		if(trst.coverage < ti.trst.coverage) trst.coverage = ti.trst.coverage;
+
+		trst.extend_bounds(ti.trst);
+		count += ti.count;
+
+		for(auto &x : ti.samples)
+		{
+			if(samples.find(x.first) == samples.end()) samples.insert(x);
+			else if(samples[x.first] < x.second) samples[x.first] = x.second;
+		}
+		//samples.insert(ti.samples.begin(), ti.samples.end());
+	}
+	else if(mode == TRANSCRIPT_COUNT_ADD_COVERAGE_MIN) 
+	{
+		if(trst.coverage > ti.trst.coverage) trst.coverage = ti.trst.coverage;
 
 		trst.extend_bounds(ti.trst);
 		count += ti.count;
@@ -41,10 +68,11 @@ int trans_item::merge(const trans_item &ti, int mode)
 		count += ti.count;
 	}
 	else assert(false);
+
 	return 0;
 }
 
-int merge_sorted_trans_items(vector<trans_item> &vx, const vector<trans_item> &vy, int mode, double single_exon_ratio)
+int merge_sorted_trans_items(vector<trans_item> &vx, const vector<trans_item> &vy, int mode1, int mode2, double single_exon_ratio)
 {
 	vector<trans_item> vz;
 	int kx = 0, ky = 0;
@@ -53,7 +81,8 @@ int merge_sorted_trans_items(vector<trans_item> &vx, const vector<trans_item> &v
 		int b = vx[kx].trst.compare1(vy[ky].trst, single_exon_ratio);
 		if(b == 0)
 		{
-			vx[kx].merge(vy[ky], mode);
+			if(vx[kx].trst.exons.size() <= 1) vx[kx].merge(vy[ky], mode1);
+			if(vx[kx].trst.exons.size() >= 2) vx[kx].merge(vy[ky], mode2);
 			vz.push_back(vx[kx]);
 			kx++;
 			ky++;
@@ -100,14 +129,14 @@ transcript_set::transcript_set(const transcript &t, int count, int sid, double o
 	mt.insert(make_pair(h, v));
 }
 
-int transcript_set::add(const transcript &t, int count, int sid, int mode)
+int transcript_set::add(const transcript &t, int count, int sid, int mode1, int mode2)
 {
 	transcript_set ts(t, count, sid, this->single_exon_overlap);
-	add(ts, mode);
+	add(ts, mode1, mode2);
 	return 0;
 }
 
-int transcript_set::add(const transcript_set &ts, int mode)
+int transcript_set::add(const transcript_set &ts, int mode1, int mode2)
 {
 	//boost::asio::thread_pool pool(threads);
 	for(auto &x : ts.mt)
@@ -119,7 +148,7 @@ int transcript_set::add(const transcript_set &ts, int mode)
 		}
 		else
 		{
-			merge_sorted_trans_items(z->second, x.second, mode, single_exon_overlap);
+			merge_sorted_trans_items(z->second, x.second, mode1, mode2, single_exon_overlap);
 			/*
 			vector<trans_item> &zz = z->second;
 			const vector<trans_item> &xx = x.second;
