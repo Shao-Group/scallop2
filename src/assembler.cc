@@ -155,8 +155,8 @@ int assembler::process(int n)
 		bd.print(index);
 		assemble(bd.gr, bd.hs, ts1, ts2);
 
-		vector<transcript> gv1 = ts1.get_transcripts(1);
-		vector<transcript> gv2 = ts2.get_transcripts(1);
+		vector<transcript> gv1 = ts1.get_transcripts(2);
+		vector<transcript> gv2 = ts2.get_transcripts(2);
 
 		filter ft1(gv1);
 		ft1.filter_length_coverage();
