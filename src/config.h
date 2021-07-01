@@ -45,6 +45,10 @@ using namespace std;
 
 #define EMPTY_VERTEX -9
 
+#define TRANSCRIPT_COUNT_ADD_COVERAGE_ADD 1
+#define TRANSCRIPT_COUNT_ADD_COVERAGE_NUL 2
+#define TRANSCRIPT_COUNT_MAX_COVERAGE_MAX 3
+
 //// parameters
 // for bam file and reads
 extern int min_flank_length;

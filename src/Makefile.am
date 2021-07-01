@@ -39,5 +39,6 @@ scallop_umi_SOURCES = splice_graph.h splice_graph.cc \
 				  scallop.h scallop.cc \
 				  previewer.h previewer.cc \
 				  assembler.h assembler.cc \
+				  transcript_set.h transcript_set.cc \
 				  filter.h filter.cc \
 				  main.cc

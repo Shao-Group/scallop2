@@ -41,9 +41,8 @@ public:
 	splice_graph gr;				// splice graph
 	hyper_set hs;					// hyper set
 
-
 public:
-	virtual int build();
+	virtual int build(int mode);
 	int output_transcripts(ofstream &fout, const vector<path> &p, const string &gid) const;	
 	int output_transcripts(gene &gn, const vector<path> &p, const string &gid) const;	
 	int output_transcripts(vector<transcript> &trsts, const vector<path> &p, const string &gid) const;	
@@ -53,6 +52,8 @@ public:
 	int print(int index);
 
 public:
+	int prepare();
+
 	// check and init
 	int check_left_ascending();
 	int check_right_ascending();
@@ -65,7 +66,7 @@ public:
 	int build_regions();
 	int build_partial_exons();
 	int link_partial_exons();
-	int build_splice_graph();
+	int build_splice_graph(int mode);
 	int build_partial_exon_map();
 	int locate_left_partial_exon(int32_t x);
 	int locate_right_partial_exon(int32_t x);
@@ -86,12 +87,10 @@ public:
 	bool remove_intron_contamination();
 	bool remove_false_boundaries();
 	bool tackle_false_boundaries();
-
 	int find_contamination_chain();
 
 	// hyper set
 	int build_hyper_set();
-
 };
 
 #endif

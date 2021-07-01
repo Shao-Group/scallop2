@@ -15,6 +15,7 @@ See LICENSE for licensing.
 #include "transcript.h"
 #include "splice_graph.h"
 #include "hyper_set.h"
+#include "transcript_set.h"
 
 using namespace std;
 
@@ -45,7 +46,7 @@ public:
 
 private:
 	int process(int n);
-	int assemble(const splice_graph &gr, const hyper_set &hs);
+	int assemble(const splice_graph &gr, const hyper_set &hs, transcript_set &ts1, transcript_set &ts2);
 	int assign_RPKM();
 	int write();
 	int compare(splice_graph &gr, const string &ref, const string &tex = "");

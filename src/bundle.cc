@@ -23,12 +23,13 @@ bundle::bundle(bundle_base &b)
 	: bb(b), br(b)
 {
 	br.build();
+	prepare();
 }
 
 bundle::~bundle()
 {}
 
-int bundle::build()
+int bundle::prepare()
 {
 	compute_strand();
 	build_intervals();
@@ -38,10 +39,13 @@ int bundle::build()
 
 	build_partial_exon_map();
 	link_partial_exons();
-	build_splice_graph();
+	return 0;
+}
 
+int bundle::build(int mode)
+{
+	build_splice_graph(mode);
 	revise_splice_graph();
-
 	build_hyper_set();
 	return 0;
 }
@@ -395,7 +399,7 @@ int bundle::link_partial_exons()
 	return 0;
 }
 
-int bundle::build_splice_graph()
+int bundle::build_splice_graph(int mode)
 {
 	gr.clear();
 
@@ -412,7 +416,8 @@ int bundle::build_splice_graph()
 		int length = r.rpos - r.lpos;
 		assert(length >= 1);
 		gr.add_vertex();
-		gr.set_vertex_weight(i + 1, r.max < min_guaranteed_edge_weight ? min_guaranteed_edge_weight : r.max);
+		if(mode == 1) gr.set_vertex_weight(i + 1, r.max < min_guaranteed_edge_weight ? min_guaranteed_edge_weight : r.max);
+		if(mode == 2) gr.set_vertex_weight(i + 1, r.ave < min_guaranteed_edge_weight ? min_guaranteed_edge_weight : r.ave);
 		vertex_info vi;
 		vi.lpos = r.lpos;
 		vi.rpos = r.rpos;
@@ -459,8 +464,11 @@ int bundle::build_splice_graph()
 		if(r.ltype == START_BOUNDARY)
 		{
 			edge_descriptor p = gr.add_edge(ss, i + 1);
-			double w = r.max;
-			if(i >= 1 && pexons[i - 1].rpos == r.lpos) w -= pexons[i - 1].max;
+			double w = min_guaranteed_edge_weight;
+			if(mode == 1) w = r.max;
+			if(mode == 2) w = r.ave;
+			if(mode == 1 && i >= 1 && pexons[i - 1].rpos == r.lpos) w -= pexons[i - 1].max;
+			if(mode == 2 && i >= 1 && pexons[i - 1].rpos == r.lpos) w -= pexons[i - 1].ave;
 			if(w < min_guaranteed_edge_weight) w = min_guaranteed_edge_weight;
 			gr.set_edge_weight(p, w);
 			edge_info ei;
@@ -471,8 +479,11 @@ int bundle::build_splice_graph()
 		if(r.rtype == END_BOUNDARY) 
 		{
 			edge_descriptor p = gr.add_edge(i + 1, tt);
-			double w = r.max;
-			if(i < pexons.size() - 1 && pexons[i + 1].lpos == r.rpos) w -= pexons[i + 1].max;
+			double w = min_guaranteed_edge_weight;
+			if(mode == 1) w = r.max;
+			if(mode == 2) w = r.ave;
+			if(mode == 1 && i < pexons.size() - 1 && pexons[i + 1].lpos == r.rpos) w -= pexons[i + 1].max;
+			if(mode == 2 && i < pexons.size() - 1 && pexons[i + 1].lpos == r.rpos) w -= pexons[i + 1].ave;
 			if(w < min_guaranteed_edge_weight) w = min_guaranteed_edge_weight;
 			gr.set_edge_weight(p, w);
 			edge_info ei;
@@ -493,7 +504,9 @@ int bundle::build_splice_graph()
 		
 		int xd = gr.out_degree(i + 1);
 		int yd = gr.in_degree(i + 2);
-		double wt = (xd < yd) ? x.max: y.max;
+		double wt = min_guaranteed_edge_weight;
+		if(mode == 1) wt = (xd < yd) ? x.max: y.max;
+		if(mode == 2) wt = (xd < yd) ? x.ave: y.ave;
 		//int32_t xr = compute_overlap(mmap, x.rpos - 1);
 		//int32_t yl = compute_overlap(mmap, y.lpos);
 		//double wt = xr < yl ? xr : yl;
