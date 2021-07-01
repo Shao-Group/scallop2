@@ -161,6 +161,12 @@ PI32 gene::get_bounds() const
 	return pp;
 }
 
+char gene::get_strand() const
+{
+	if(transcripts.size() == 0) return '.';
+	else return transcripts[0].strand;
+}
+
 string gene::get_seqname() const
 {
 	if(transcripts.size() == 0) return "";

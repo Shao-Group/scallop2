@@ -45,6 +45,7 @@ public:
 	PI32 get_bounds() const;
 	string get_seqname() const;
 	string get_gene_id() const;
+	char get_strand() const;
 
 	// write
 	int write(ofstream &fout) const;	

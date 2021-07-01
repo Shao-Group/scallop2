@@ -30,3 +30,13 @@ size_t string_hash(const std::string& str)
 
 	return (hash & 0x7FFFFFFF);
 }
+
+size_t vector_hash(const vector<int32_t> & vec)
+{
+	size_t seed = vec.size();
+	for(int i = 0; i < vec.size(); i++)
+	{
+		seed ^= (size_t)(vec[i]) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+	}
+	return (seed & 0x7FFFFFFF);
+}

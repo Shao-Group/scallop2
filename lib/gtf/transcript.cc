@@ -1,4 +1,6 @@
 /*
+Part of aletsch
+(c) 2020 by  Mingfu Shao, The Pennsylvania State University.
 Part of Scallop Transcript Assembler
 (c) 2017 by  Mingfu Shao, Carl Kingsford, and Carnegie Mellon University.
 See LICENSE for licensing.
@@ -11,6 +13,7 @@ See LICENSE for licensing.
 #include <map>
 
 #include "transcript.h"
+#include "util.h"
 
 transcript::transcript()
 {
@@ -40,6 +43,7 @@ int transcript::assign(const item &e)
 	end = e.end;
 	strand = e.strand;
 	frame = e.frame;
+	score = e.score;
 	coverage = e.coverage;
 	RPKM = e.RPKM;
 	FPKM = e.FPKM;
@@ -73,6 +77,7 @@ int transcript::clear()
 	strand = '.';
 	frame = -1;
 	coverage = 0;
+	score = 0;
 	RPKM = 0;
 	TPM = 0;
 	return 0;
@@ -169,6 +174,26 @@ vector<PI32> transcript::get_intron_chain() const
 	return v;
 }
 
+size_t transcript::get_intron_chain_hashing() const
+{
+	if(exons.size() == 0) return 0;
+
+	if(exons.size() == 1)
+	{
+		size_t p = (exons[0].first + exons[0].second) / 10000;
+		return p + 1;
+	}
+
+	vector<int32_t> vv;
+	vector<PI32> v = get_intron_chain();
+	for(int i = 0; i < v.size(); i++) 
+	{
+		vv.push_back(v[i].first);
+		vv.push_back(v[i].second);
+	}
+	return vector_hash(vv) + 1;
+}
+
 bool transcript::intron_chain_match(const transcript &t) const
 {
 	if(exons.size() != t.exons.size()) return false;
@@ -184,6 +209,98 @@ bool transcript::intron_chain_match(const transcript &t) const
 	return true;
 }
 
+int transcript::intron_chain_compare(const transcript &t) const
+{
+	if(exons.size() < t.exons.size()) return +1;
+	if(exons.size() > t.exons.size()) return -1;
+	if(exons.size() <= 1) return 0;
+
+	int n = exons.size() - 1;
+	if(exons[0].second < t.exons[0].second) return +1;
+	if(exons[0].second > t.exons[0].second) return -1;
+	for(int k = 1; k < n - 1; k++)
+	{
+		if(exons[k].first < t.exons[k].first) return +1;
+		if(exons[k].first > t.exons[k].first) return -1;
+		if(exons[k].second < t.exons[k].second) return +1;
+		if(exons[k].second > t.exons[k].second) return -1;
+	}
+	if(exons[n].first < t.exons[n].first) return +1;
+	if(exons[n].first > t.exons[n].first) return -1;
+	return 0;
+}
+
+bool transcript::equal1(const transcript &t, double single_exon_overlap) const
+{
+	if(exons.size() != t.exons.size()) return false;
+
+	if(seqname != t.seqname) return false;
+	if(strand == '+' && t.strand == '-') return false;
+	if(strand == '-' && t.strand == '+') return false;
+
+	if(exons.size() == 1)
+	{
+		int32_t p1 = exons[0].first < t.exons[0].first ? exons[0].first : t.exons[0].first;
+		int32_t p2 = exons[0].first < t.exons[0].first ? t.exons[0].first : exons[0].first;
+		int32_t q1 = exons[0].second > t.exons[0].second ? exons[0].second : t.exons[0].second;
+		int32_t q2 = exons[0].second > t.exons[0].second ? t.exons[0].second : exons[0].second;
+
+		int32_t overlap = q2 - p2;
+		if(overlap >= single_exon_overlap * length()) return true;
+		if(overlap >= single_exon_overlap * t.length()) return true;
+		return false;
+
+		/*
+		double overlap = (q2 - p2) * 1.0 / (q1 - p1);
+		if(overlap < 0.8) return false;
+		else return true;
+		*/
+	}
+
+	return intron_chain_match(t);
+}
+
+int transcript::compare1(const transcript &t, double single_exon_overlap) const
+{
+	if(exons.size() < t.exons.size()) return +1;
+	if(exons.size() > t.exons.size()) return -1;
+
+	if(seqname < t.seqname) return +1;
+	if(seqname > t.seqname) return -1;
+	if(strand < t.strand) return +1;
+	if(strand > t.strand) return -1;
+
+	if(exons.size() == 1)
+	{
+		int32_t p1 = exons[0].first < t.exons[0].first ? exons[0].first : t.exons[0].first;
+		int32_t p2 = exons[0].first < t.exons[0].first ? t.exons[0].first : exons[0].first;
+		int32_t q1 = exons[0].second > t.exons[0].second ? exons[0].second : t.exons[0].second;
+		int32_t q2 = exons[0].second > t.exons[0].second ? t.exons[0].second : exons[0].second;
+
+		int32_t overlap = q2 - p2;
+		if(overlap >= single_exon_overlap * length()) return 0;
+		if(overlap >= single_exon_overlap * t.length()) return 0;
+
+		//double overlap = (q2 - p2) * 1.0 / (q1 - p1);
+		//if(overlap >= 0.8) return 0;
+
+		if(exons[0].first < t.exons[0].first) return +1;
+		if(exons[0].first > t.exons[0].first) return -1;
+		if(exons[0].second < t.exons[0].second) return +1;
+		if(exons[0].second > t.exons[0].second) return -1;
+	}
+
+	return intron_chain_compare(t);
+}
+
+int transcript::extend_bounds(const transcript &t)
+{
+	if(exons.size() == 0) return 0;
+	if(t.exons.front().first < exons.front().first) exons.front().first = t.exons.front().first;
+	if(t.exons.back().second > exons.back().second) exons.back().second = t.exons.back().second;
+	return 0;
+}
+
 string transcript::label() const
 {
 	char buf[10240];
@@ -192,7 +309,7 @@ string transcript::label() const
 	return string(buf);
 }
 
-int transcript::write(ostream &fout) const
+int transcript::write(ostream &fout, double cov2, int count) const
 {
 	fout.precision(4);
 	fout<<fixed;
@@ -213,8 +330,11 @@ int transcript::write(ostream &fout) const
 	fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
 	if(gene_type != "") fout<<"gene_type \""<<gene_type.c_str()<<"\"; ";
 	if(transcript_type != "") fout<<"transcript_type \""<<transcript_type.c_str()<<"\"; ";
-	fout<<"RPKM \""<<RPKM<<"\"; ";
-	fout<<"cov \""<<coverage<<"\";"<<endl;
+	//fout<<"RPKM \""<<RPKM<<"\"; ";
+	fout<<"cov \""<<coverage<<"\"; ";
+	if(cov2 >= -0.5) fout<<"cov2 \""<<cov2<<"\"; ";
+	if(count >= -0.5) fout<<"count \""<<count<<"\"; ";
+	fout << endl;
 
 	for(int k = 0; k < exons.size(); k++)
 	{
@@ -232,4 +352,3 @@ int transcript::write(ostream &fout) const
 	}
 	return 0;
 }
-

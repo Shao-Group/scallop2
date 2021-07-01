@@ -29,9 +29,9 @@ int item::parse(const string &s)
 	sstr>>buf;
 	feature.assign(buf);
 	sstr>>start>>end;
-	start--;			// TODO gtf: (from 1, both inclusive)
+	start--;			// gtf: (from 1, both inclusive)
 	sstr>>buf;
-	if(buf[0] == '.') score = -1;
+	if(buf[0] == '.') score = 0;
 	else score = atof(buf);
 	sstr>>buf;
 	strand = buf[0];
