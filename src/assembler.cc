@@ -217,11 +217,11 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0, transcrip
 
 		for(int i = 0; i < sc.trsts.size(); i++)
 		{
-			ts1.add(sc.trsts[i], 1, 0, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD, TRANSCRIPT_COUNT_ADD_COVERAGE_MIN);
+			ts1.add(sc.trsts[i], 1, 0, TRANSCRIPT_COUNT_ADD_COVERAGE_MIN, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD);
 		}
 		for(int i = 0; i < sc.non_full_trsts.size(); i++)
 		{
-			ts2.add(sc.non_full_trsts[i], 1, 0, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD, TRANSCRIPT_COUNT_ADD_COVERAGE_MIN);
+			ts2.add(sc.non_full_trsts[i], 1, 0, TRANSCRIPT_COUNT_ADD_COVERAGE_MIN, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD);
 		}
 
 		/*
