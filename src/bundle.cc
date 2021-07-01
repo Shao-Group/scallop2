@@ -42,10 +42,10 @@ int bundle::prepare()
 	return 0;
 }
 
-int bundle::build(int mode)
+int bundle::build(int mode, bool revise)
 {
 	build_splice_graph(mode);
-	revise_splice_graph();
+	if(revise == true) revise_splice_graph();
 	build_hyper_set();
 	return 0;
 }

@@ -147,11 +147,19 @@ int assembler::process(int n)
 
 		bundle bd(bb);
 
-		bd.build(1);
+		bd.build(1, true);
 		bd.print(index++);
 		assemble(bd.gr, bd.hs, ts1, ts2);
 
-		bd.build(2);
+		bd.build(2, true);
+		bd.print(index++);
+		assemble(bd.gr, bd.hs, ts1, ts2);
+
+		bd.build(1, false);
+		bd.print(index++);
+		assemble(bd.gr, bd.hs, ts1, ts2);
+
+		bd.build(2, false);
 		bd.print(index++);
 		assemble(bd.gr, bd.hs, ts1, ts2);
 

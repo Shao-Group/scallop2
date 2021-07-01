@@ -42,7 +42,7 @@ public:
 	hyper_set hs;					// hyper set
 
 public:
-	virtual int build(int mode);
+	virtual int build(int mode, bool revise);
 	int output_transcripts(ofstream &fout, const vector<path> &p, const string &gid) const;	
 	int output_transcripts(gene &gn, const vector<path> &p, const string &gid) const;	
 	int output_transcripts(vector<transcript> &trsts, const vector<path> &p, const string &gid) const;	
