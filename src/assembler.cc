@@ -148,11 +148,11 @@ int assembler::process(int n)
 		bundle bd(bb);
 
 		bd.build(1);
-		bd.print(index);
+		bd.print(index++);
 		assemble(bd.gr, bd.hs, ts1, ts2);
 
 		bd.build(2);
-		bd.print(index);
+		bd.print(index++);
 		assemble(bd.gr, bd.hs, ts1, ts2);
 
 		vector<transcript> gv1 = ts1.get_transcripts(2);
@@ -167,8 +167,6 @@ int assembler::process(int n)
 		ft2.filter_length_coverage();
 		ft2.remove_nested_transcripts();
 		if(ft2.trs.size() >= 1) non_full_trsts.insert(non_full_trsts.end(), ft2.trs.begin(), ft2.trs.end());
-
-		index++;
 	}
 	pool.clear();
 	return 0;
