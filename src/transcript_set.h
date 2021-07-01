@@ -51,6 +51,7 @@ public:
 	int print() const;
 	pair<bool, trans_item> query(const transcript &t) const;
 	vector<transcript> get_transcripts(int min_count) const;
+	vector<transcript> get_transcripts(int min1, int min2) const;
 };
 
 #endif

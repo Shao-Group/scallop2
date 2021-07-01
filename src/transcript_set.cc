@@ -179,6 +179,21 @@ vector<transcript> transcript_set::get_transcripts(int min_count) const
 	return v;
 }
 
+vector<transcript> transcript_set::get_transcripts(int min_count_single, int min_count_multi) const
+{
+	vector<transcript> v;
+	for(auto &x : mt)
+	{
+		for(auto &z : x.second)
+		{
+			if(z.trst.exons.size() <= 1 && z.count < min_count_single) continue;
+			if(z.trst.exons.size() >= 2 && z.count < min_count_multi) continue;
+			v.push_back(z.trst);
+		}
+	}
+	return v;
+}
+
 pair<bool, trans_item> transcript_set::query(const transcript &t) const
 {
 	pair<bool, trans_item> p;
