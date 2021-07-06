@@ -8,7 +8,7 @@ The development of Scallop-UMI has been based on the [Scallop](https://github.co
 Scallop-UMI can be easily installed with conda: [![Anaconda-Server Badge](https://anaconda.org/bioconda/scallop-umi/badges/installer/conda.svg)](https://anaconda.org/bioconda/scallop-umi)
 
 Install from source code: download the source code of Scallop-UMI from
-[here](https://github.com/Shao-Group/scallop-umi/releases/download/v1.0.0/scallop-umi-1.0.0.tar.gz).
+[here](https://github.com/Shao-Group/scallop-umi/releases/download/v1.1.0/scallop-umi-1.1.0.tar.gz).
 Scallop-UMI uses additional libraries of Boost and htslib. 
 If they have not been installed in your system, you first
 need to download and install them. You might also need to
