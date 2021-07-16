@@ -89,7 +89,7 @@ int simulation_num_edges = 0;
 int simulation_max_edge_weight = 0;
 
 // input and output
-string algo = "scallop-umi";
+string algo = "scallop2";
 string input_file;
 string ref_file;
 string ref_file1;
@@ -102,7 +102,7 @@ bool output_tex_files = false;
 string fixed_gene_name = "";
 int batch_bundle_size = 100;
 int verbose = 1;
-string version = "v1.0.0";
+string version = "v1.1.1";
 
 int parse_arguments(int argc, const char ** argv)
 {
@@ -533,7 +533,7 @@ int print_command_line(int argc, const char ** argv)
 int print_help()
 {
 	printf("\n");
-	printf("Usage: scallop-umi -i <bam-file> -o <gtf-file> [options]\n");
+	printf("Usage: scallop2 -i <bam-file> -o <gtf-file> [options]\n");
 	printf("\n");
 	printf("Options:\n");
 	printf(" %-42s  %s\n", "--help",  "print usage of Scallop and exit");
@@ -557,7 +557,7 @@ int print_help()
 
 int print_copyright()
 {
-	printf("Scallop-UMI %s (c) 2021 Qimin Zhang and Mingfu Shao, The Pennsylvania State University\n", version.c_str());
+	printf("Scallop2 %s (c) 2021 Qimin Zhang and Mingfu Shao, The Pennsylvania State University\n", version.c_str());
 	return 0;
 }
 
