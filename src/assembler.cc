@@ -168,8 +168,14 @@ int assembler::process(int n)
 		vector<transcript> gv1 = ts1.get_transcripts(3, 2);
 		vector<transcript> gv2 = ts2.get_transcripts(3, 2);
 
-		for(int k = 0; k < gv1.size(); k++) gv1[k].coverage /= (1.0 * assemble_duplicates);
-		for(int k = 0; k < gv2.size(); k++) gv2[k].coverage /= (1.0 * assemble_duplicates);
+		for(int k = 0; k < gv1.size(); k++)
+		{
+			if(gv1[k].exons.size() >= 2) gv1[k].coverage /= (1.0 * assemble_duplicates);
+		}
+		for(int k = 0; k < gv2.size(); k++) 
+		{
+			if(gv2[k].exons.size() >= 2) gv2[k].coverage /= (1.0 * assemble_duplicates);
+		}
 
 		filter ft1(gv1);
 		ft1.filter_length_coverage();
@@ -218,11 +224,11 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0, transcrip
 
 			for(int i = 0; i < sc.trsts.size(); i++)
 			{
-				ts1.add(sc.trsts[i], 1, 0, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD);
+				ts1.add(sc.trsts[i], 1, 0, TRANSCRIPT_COUNT_ADD_COVERAGE_MIN, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD);
 			}
 			for(int i = 0; i < sc.non_full_trsts.size(); i++)
 			{
-				ts2.add(sc.non_full_trsts[i], 1, 0, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD);
+				ts2.add(sc.non_full_trsts[i], 1, 0, TRANSCRIPT_COUNT_ADD_COVERAGE_MIN, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD);
 			}
 
 			/*
