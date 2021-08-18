@@ -169,7 +169,7 @@ int assembler::process(int n)
 		vector<transcript> gv2 = ts2.get_transcripts(3, 2);
 
 		for(int k = 0; k < gv1.size(); k++) gv1[k].coverage /= (1.0 * assemble_duplicates);
-		//for(int k = 0; k < gv2.size(); k++) gv2[k].coverage /= (1.0 * assemble_duplicates);
+		for(int k = 0; k < gv2.size(); k++) gv2[k].coverage /= (1.0 * assemble_duplicates);
 
 		filter ft1(gv1);
 		ft1.filter_length_coverage();
