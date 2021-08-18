@@ -62,7 +62,7 @@ int assembler::assemble()
 		//if(ht.nh >= 2 && p.qual < min_mapping_quality) continue;
 		//if(ht.nm > max_edit_distance) continue;
 
-		if(p.tid > 1) break;
+		//if(p.tid > 1) break;
 
 		qlen += ht.qlen;
 		qcnt += 1;
@@ -168,8 +168,8 @@ int assembler::process(int n)
 		vector<transcript> gv1 = ts1.get_transcripts(3, 2);
 		vector<transcript> gv2 = ts2.get_transcripts(3, 2);
 
-		for(int k = 0; k < gv1.size(); k++) gv1[k].coverage /= (1.0 * assemble_duplicates);
-		for(int k = 0; k < gv2.size(); k++) gv2[k].coverage /= (1.0 * assemble_duplicates);
+		for(int k = 0; k < gv1.size(); k++) gv1[k].coverage /= (2.0 * assemble_duplicates);
+		for(int k = 0; k < gv2.size(); k++) gv2[k].coverage /= (2.0 * assemble_duplicates);
 
 		filter ft1(gv1);
 		ft1.filter_length_coverage();
