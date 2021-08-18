@@ -18,8 +18,8 @@ See LICENSE for licensing.
 scallop::scallop()
 {}
 
-scallop::scallop(const splice_graph &g, const hyper_set &h)
-	: gr(g), hs(h)
+scallop::scallop(const splice_graph &g, const hyper_set &h, bool r)
+	: gr(g), hs(h), random_ordering(r)
 {
 	round = 0;
 	if(output_tex_files == true) gr.draw(gr.gid + "." + tostring(round++) + ".tex");
@@ -129,6 +129,8 @@ bool scallop::resolve_smallest_edges(double max_ratio)
 	//for(set<int>::iterator it = nonzeroset.begin(); it != nonzeroset.end(); it++)
 	//for(int i = 1; i < gr.num_vertices() - 1; i++)
 	vector<int> vv(nonzeroset.begin(), nonzeroset.end());
+	if(random_ordering) random_shuffle(vv.begin(), vv.end());
+
 	for(int k = 0; k < vv.size(); k++)
 	{
 		int i = vv[k];
@@ -170,6 +172,8 @@ bool scallop::resolve_smallest_edges(double max_ratio)
 		ratio = r;
 		se = e;
 		root = i;
+
+		if(random_ordering == true) break;
 	}
 
 	if(flag == true) return true;
@@ -250,6 +254,8 @@ bool scallop::resolve_splittable_vertex(int type, int degree, double max_ratio)
 	//for(set<int>::iterator it = nonzeroset.begin(); it != nonzeroset.end(); it++)
 	//for(int i = 1; i < gr.num_vertices() - 1; i++)
 	vector<int> vv(nonzeroset.begin(), nonzeroset.end());
+	if(random_ordering) random_shuffle(vv.begin(), vv.end());
+
 	for(int k = 0; k < vv.size(); k++)
 	{
 		int i = vv[k];
@@ -277,6 +283,8 @@ bool scallop::resolve_splittable_vertex(int type, int degree, double max_ratio)
 		ratio = rt.ratio;
 		eqns = rt.eqns;
 		//degree = rt.degree;
+
+		if(random_ordering == true) break;
 	}
 
 	if(root == -1) return false;
@@ -298,6 +306,8 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree, double max_ratio
 	//for(int i = 1; i < gr.num_vertices() - 1; i++)
 	//for(set<int>::iterator it = nonzeroset.begin(); it != nonzeroset.end(); it++)
 	vector<int> vv(nonzeroset.begin(), nonzeroset.end());
+	if(random_ordering) random_shuffle(vv.begin(), vv.end());
+
 	for(int k = 0; k < vv.size(); k++)
 	{
 		int i = vv[k];
@@ -332,6 +342,8 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree, double max_ratio
 		root = i;
 		ratio = rt.ratio;
 		pe2w = rt.pe2w;
+
+		if(random_ordering == true) break;
 	}
 
 	if(flag == true) return true;
@@ -443,6 +455,7 @@ bool scallop::resolve_trivial_vertex(int type, double jump_ratio)
 	//for(int i = 1; i < gr.num_vertices() - 1; i++)
 	//for(set<int>::iterator it = nonzeroset.begin(); it != nonzeroset.end(); it++)
 	vector<int> vv(nonzeroset.begin(), nonzeroset.end());
+	if(random_ordering) random_shuffle(vv.begin(), vv.end());
 	for(int k = 0; k < vv.size(); k++)
 	{
 		int i = vv[k];
@@ -475,6 +488,7 @@ bool scallop::resolve_trivial_vertex(int type, double jump_ratio)
 		se = e;
 
 		if(ratio < jump_ratio) break;
+		if(random_ordering == true) break;
 	}
 
 	if(flag == true) return true;
@@ -493,6 +507,7 @@ bool scallop::resolve_trivial_vertex_fast(double jump_ratio)
 	bool flag = false;
 	//for(set<int>::iterator it = nonzeroset.begin(); it != nonzeroset.end(); it++)
 	vector<int> vv(nonzeroset.begin(), nonzeroset.end());
+	if(random_ordering) random_shuffle(vv.begin(), vv.end());
 	for(int k = 0; k < vv.size(); k++)
 	{
 		int i = vv[k];

@@ -165,8 +165,8 @@ int assembler::process(int n)
 		assemble(bd.gr, bd.hs, ts1, ts2);
 		*/
 
-		vector<transcript> gv1 = ts1.get_transcripts(2, 1);
-		vector<transcript> gv2 = ts2.get_transcripts(2, 1);
+		vector<transcript> gv1 = ts1.get_transcripts(2, 2);
+		vector<transcript> gv2 = ts2.get_transcripts(2, 2);
 
 		filter ft1(gv1);
 		ft1.filter_length_coverage();
@@ -194,65 +194,61 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0, transcrip
 
 	for(int k = 0; k < sg.subs.size(); k++)
 	{
-		string gid = "gene." + tostring(index) + "." + tostring(k);
-		if(fixed_gene_name != "" && gid != fixed_gene_name) continue;
-
-		if(verbose >= 2 && (k == 0 || fixed_gene_name != "")) sg.print();
-
 		splice_graph &gr = sg.subs[k];
 		hyper_set &hs = sg.hss[k];
 
 		if(determine_regional_graph(gr) == true) continue;
 		if(gr.num_edges() <= 0) continue;
 
-		gr.gid = gid;
-		scallop sc(gr, hs);
-		sc.assemble();
-
-		if(verbose >= 2)
+		for(int r = 0; r < 2; r++)
 		{
-			printf("transcripts:\n");
-			for(int i = 0; i < sc.trsts.size(); i++) sc.trsts[i].write(cout);
-		}
+			string gid = "gene." + tostring(index) + "." + tostring(k) + "." + tostring(r);
+			gr.gid = gid;
+			scallop sc(gr, hs, r == 0 ? false : true);
+			sc.assemble();
 
-		for(int i = 0; i < sc.trsts.size(); i++)
-		{
-			ts1.add(sc.trsts[i], 1, 0, TRANSCRIPT_COUNT_ADD_COVERAGE_MIN, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD);
-		}
-		for(int i = 0; i < sc.non_full_trsts.size(); i++)
-		{
-			ts2.add(sc.non_full_trsts[i], 1, 0, TRANSCRIPT_COUNT_ADD_COVERAGE_MIN, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD);
-		}
+			if(verbose >= 2)
+			{
+				printf("transcripts with r = %d:\n", r);
+				for(int i = 0; i < sc.trsts.size(); i++) sc.trsts[i].write(cout);
+			}
 
-		/*
-		filter ft(sc.trsts);
-		//ft.join_single_exon_transcripts();
-		ft.filter_length_coverage();
-		if(ft.trs.size() >= 1) gv.insert(gv.end(), ft.trs.begin(), ft.trs.end());
+			for(int i = 0; i < sc.trsts.size(); i++)
+			{
+				ts1.add(sc.trsts[i], 1, 0, TRANSCRIPT_COUNT_ADD_COVERAGE_MIN, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD);
+			}
+			for(int i = 0; i < sc.non_full_trsts.size(); i++)
+			{
+				ts2.add(sc.non_full_trsts[i], 1, 0, TRANSCRIPT_COUNT_ADD_COVERAGE_MIN, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD);
+			}
 
-		if(verbose >= 2)
-		{
+			/*
+			filter ft(sc.trsts);
+			//ft.join_single_exon_transcripts();
+			ft.filter_length_coverage();
+			if(ft.trs.size() >= 1) gv.insert(gv.end(), ft.trs.begin(), ft.trs.end());
+
+			if(verbose >= 2)
+			{
 			printf("transcripts after filtering:\n");
 			for(int i = 0; i < ft.trs.size(); i++) ft.trs[i].write(cout);
 
 			printf("non full length transcripts:\n");
 			for(int i = 0; i < sc.non_full_trsts.size(); i++) sc.non_full_trsts[i].write(cout);
-		}
+			}
 
-		filter ft1(sc.non_full_trsts);
-		//ft.join_single_exon_transcripts();
-		ft1.filter_length_coverage();
-		if(ft1.trs.size() >= 1) gv1.insert(gv1.end(), ft1.trs.begin(), ft1.trs.end());
+			filter ft1(sc.non_full_trsts);
+			//ft.join_single_exon_transcripts();
+			ft1.filter_length_coverage();
+			if(ft1.trs.size() >= 1) gv1.insert(gv1.end(), ft1.trs.begin(), ft1.trs.end());
 
-		if(verbose >= 2)
-		{
+			if(verbose >= 2)
+			{
 			printf("non full transcripts after filtering:\n");
 			for(int i = 0; i < ft1.trs.size(); i++) ft1.trs[i].write(cout);
+			}
+			*/
 		}
-		*/
-
-		if(fixed_gene_name != "" && gid == fixed_gene_name) terminate = true;
-		if(terminate == true) return 0;
 	}
 
 	return 0;
