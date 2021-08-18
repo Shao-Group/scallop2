@@ -62,7 +62,7 @@ int assembler::assemble()
 		//if(ht.nh >= 2 && p.qual < min_mapping_quality) continue;
 		//if(ht.nm > max_edit_distance) continue;
 
-		//if(p.tid > 1) break;
+		if(p.tid > 1) break;
 
 		qlen += ht.qlen;
 		qcnt += 1;
