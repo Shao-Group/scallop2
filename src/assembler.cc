@@ -165,8 +165,8 @@ int assembler::process(int n)
 		assemble(bd.gr, bd.hs, ts1, ts2);
 		*/
 
-		vector<transcript> gv1 = ts1.get_transcripts(2, 3);
-		vector<transcript> gv2 = ts2.get_transcripts(2, 3);
+		vector<transcript> gv1 = ts1.get_transcripts(2, 2);
+		vector<transcript> gv2 = ts2.get_transcripts(2, 2);
 
 		filter ft1(gv1);
 		ft1.filter_length_coverage();
@@ -200,7 +200,7 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0, transcrip
 		if(determine_regional_graph(gr) == true) continue;
 		if(gr.num_edges() <= 0) continue;
 
-		for(int r = 0; r < 3; r++)
+		for(int r = 0; r < assemble_duplicates; r++)
 		{
 			string gid = "gene." + tostring(index) + "." + tostring(k) + "." + tostring(r);
 			gr.gid = gid;
@@ -209,7 +209,7 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0, transcrip
 
 			if(verbose >= 2)
 			{
-				printf("transcripts with r = %d:\n", r);
+				printf("assembly with r = %d, total %d transcripts:\n", r, sc.trsts.size());
 				for(int i = 0; i < sc.trsts.size(); i++) sc.trsts[i].write(cout);
 			}
 
