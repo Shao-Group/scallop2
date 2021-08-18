@@ -136,6 +136,7 @@ extern int library_type;
 extern int min_gtf_transcripts_num;
 extern int batch_bundle_size;
 extern int verbose;
+extern int assemble_duplicates;
 extern string version;
 
 // parse arguments

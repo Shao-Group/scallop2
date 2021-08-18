@@ -209,7 +209,7 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0, transcrip
 
 			if(verbose >= 2)
 			{
-				printf("assembly with r = %d, total %d transcripts:\n", r, sc.trsts.size());
+				printf("assembly with r = %d, total %lu transcripts:\n", r, sc.trsts.size());
 				for(int i = 0; i < sc.trsts.size(); i++) sc.trsts[i].write(cout);
 			}
 
