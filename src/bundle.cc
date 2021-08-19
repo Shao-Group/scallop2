@@ -1521,6 +1521,7 @@ int bundle::build_hyper_set()
 
 			if(fr.paths.size() != 1) continue;
 
+			// TODO: "bridged" may not be correct
 			if(fr.h1->bridged == false) continue;
 			if(fr.h2->bridged == false) continue;
 
@@ -1581,12 +1582,14 @@ int bundle::build_hyper_set()
 
 		if(v.size() > 0)
 		{
+			/*
 			printf("v = ");
 			for(int ii = 0; ii < v.size(); ii++)
 			{
 				printf("%d ", v[ii]);
 			}
 			printf("\n");
+			*/
 
 			if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, cnt));
 			else m[v] += cnt;
@@ -1596,6 +1599,8 @@ int bundle::build_hyper_set()
 	for(int k = 0; k < bb.hits.size(); k++)
 	{
 		hit &h = bb.hits[k];
+
+		// bridged used here, but maybe okay
 		if(h.bridged == true) continue;
 
 		vector<int> v = align_hit(h);
