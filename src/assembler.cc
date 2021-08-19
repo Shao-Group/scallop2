@@ -165,8 +165,8 @@ int assembler::process(int n)
 		assemble(bd.gr, bd.hs, ts1, ts2);
 		*/
 
-		vector<transcript> gv1 = ts1.get_transcripts(5, 2);
-		vector<transcript> gv2 = ts2.get_transcripts(5, 2);
+		vector<transcript> gv1 = ts1.get_transcripts(assemble_duplicates, assemble_duplicates > 1 ? 2 : 1);
+		vector<transcript> gv2 = ts2.get_transcripts(assemble_duplicates, assemble_duplicates > 1 ? 2 : 1);
 
 		for(int k = 0; k < gv1.size(); k++)
 		{
