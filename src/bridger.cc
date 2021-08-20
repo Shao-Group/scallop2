@@ -45,7 +45,6 @@ int bridger::bridge()
 	printf("===\n");
 	*/
 
-	remove_tiny_boundary();
 
 	update_length();
 	int n = bd->fragments.size();
@@ -59,6 +58,7 @@ int bridger::bridge()
 	int n2 = get_paired_fragments();
 
 	// first round of briding hard fragments
+	remove_tiny_boundary();
 	bridge_hard_fragments();
 	filter_paths();
 	int n3 = get_paired_fragments();
@@ -434,6 +434,8 @@ int bridger::remove_tiny_boundary()
 	for(int i = 0; i < bd->fragments.size(); i++)
 	{
 		fragment &fr = bd->fragments[i];
+
+		if(fr.paths.size() == 1 && fr.paths[0].type == 1) continue;
 
 		//if(fr.h1->bridged == true) continue;
 		//if(fr.h2->bridged == true) continue;
