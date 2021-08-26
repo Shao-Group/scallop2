@@ -166,7 +166,7 @@ int assembler::process(int n)
 		*/
 
 		int sdup = assemble_duplicates / 1 + 1;
-		int mdup = assemble_duplicates / 3 + 1;
+		int mdup = assemble_duplicates / 2 + 0;
 
 		vector<transcript> gv1 = ts1.get_transcripts(sdup, mdup);
 		vector<transcript> gv2 = ts2.get_transcripts(sdup, mdup);
