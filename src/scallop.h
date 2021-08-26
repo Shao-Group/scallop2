@@ -72,6 +72,11 @@ private:
 	int balance_vertex(int x);
 	double compute_balance_ratio(int x);
 
+	// max_matching
+	int max_matching();
+	int max_matching_core(vector<vector<int>> ge, int nx, int ny);
+	int dfs(int u, int nx, int ny, vector<int>& mx, vector<int>& my, vector<int>& mark, vector<vector<int>>& map);
+
 	// decomposing subroutines
 	int compute_smallest_edge(int x, double &ratio);
 	int decompose_trivial_vertex(int v);

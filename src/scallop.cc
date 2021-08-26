@@ -41,7 +41,10 @@ int scallop::assemble()
 {
 	int c = classify();
 
+	// TODO: print graph and hyper set info
+	printf("\nprint graph info...\n");
 	gr.print_weights();
+	printf("\nprint hs info...\n");
 	hs.print();
 
 	if(verbose >= 1) printf("process splice graph %s type = %d, vertices = %lu, edges = %lu, phasing paths = %lu\n", gr.gid.c_str(), c, gr.num_vertices(), gr.num_edges(), hs.edges.size());
@@ -53,6 +56,9 @@ int scallop::assemble()
 		if(gr.num_vertices() > max_num_exons) break;
 
 		bool b = false;
+
+		// TODO: max-matching algorithm
+		int mm = max_matching();
 
 		b = resolve_trivial_vertex_fast(max_decompose_error_ratio[TRIVIAL_VERTEX]);
 		if(b == true) continue;
@@ -1164,6 +1170,157 @@ int scallop::split_edge(int ei, double w)
 	e2i.insert(PEI(p2, n));
 
 	return n;
+}
+
+int scallop::max_matching()
+{
+	printf("running max matching...\n");
+
+	// get edge info
+	vector<edge_descriptor> el; // edge list
+	el.clear();
+	edge_iterator it1, it2;
+	PEEI pei;
+	for(pei =gr. edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
+	{
+		edge_descriptor e = (*it1);
+		el.push_back(e);
+	}
+	/*
+	printf("edge list size = %lu\n", el.size());
+	for(int i = 0; i < el.size(); i++)
+	{
+		int e = e2i[(el[i])];
+                int vs = (el[i])->source();
+                int vt = (el[i])->target();
+		printf("edge # %d, (%d, %d)\n", e, vs, vt);
+	}
+	*/
+
+	// get hs info
+	vector<vector<int>> hl; // hyper edges list
+	hl.clear();
+	//printf("hs size = %lu\n", hs.edges.size());
+	if(hs.edges.size() == 0) return 0;
+	for(int i = 0; i < hs.edges.size(); i++)
+	{
+		vector<int> e = hs.edges[i];
+		/*
+                printf("hs edge # %d: ( ", i);
+                printv(e);
+                printf(")\n");
+		*/
+
+		vector<int> cur_e;
+		cur_e.clear();
+		for(int j = 0; j < e.size(); j++)
+		{
+			if(e[j] != -1) cur_e.push_back(e[j]);
+			else
+			{
+				if(cur_e.size() > 0)
+				{
+					printf("split\n");
+					hl.push_back(cur_e);
+					cur_e.clear();
+					continue;
+				}
+				else if(cur_e.size() == 0) continue;
+			}
+		}
+		if(cur_e.size() > 0) hl.push_back(cur_e);
+	}
+	
+	printf("hl size = %lu\n", hl.size());
+	/*
+        for(int i = 0; i < hl.size(); i++)
+        {
+                vector<int> e = hl[i];
+                printf("hl edge # %d: ( ", i);
+                printv(e);
+                printf(")\n");
+	}
+	*/
+
+	// create bipartite graph
+	int en = el.size();
+	int hn = hl.size();
+	int tn = (en + hn);
+	printf("edge number = %d, hyper edge number = %d, total vertexes number in bi-graph = %d\n", en, hn, tn);
+	int vl1[tn];
+	int vl2[tn];
+	// index 0 ~ (en-1): edge vertex; index en ~ (tn-1): hyper vertex
+	for(int i = 0; i < tn; i++)
+	{
+		vl1[i] = i;
+		vl2[i] = i;
+	}
+	
+	// TODO
+        // ge : list of bipartite edges, e.g. {{0,1},{0,2},{1,1},{2,0},{2,2},{2,3}}
+        // nx : number of vertex in x; ny : number of vertex in y; index from 0
+	vector<vector<int>> ge;
+
+	/*
+	int nx = ;
+	int ny = ;
+	
+	int mm = max_matching_core(ge, nx, ny);
+	printf("max matching = %d\n", mm);
+	
+	return mm;
+	*/
+}
+
+int scallop::max_matching_core(vector<vector<int>> ge, int nx, int ny)
+{
+	int maxn = max(nx, ny);
+	vector<int> mx(maxn, -1);
+	vector<int> my(maxn, -1);
+	vector<int> mark(maxn, 0);
+	vector<vector<int>> map;
+	for(int i = 0; i<maxn;i++)
+        {
+                vector<int> init(maxn, 0);
+                map.push_back(init);
+        }
+
+	for(int i = 0; i < ge.size(); i++)
+	{
+		int t1 = ge[i][0];
+		int t2 = ge[i][1];
+		map[t1][t2] = 1;
+	}
+
+	int sum = 0;
+	for(int i = 0; i < nx; i++)
+	{
+		if(mx[i]==-1)
+		{
+			vector<int> renew(maxn, 0);
+			mark = renew;
+			sum+=dfs(i, nx, ny, mx, my, mark, map);
+		}
+	}
+	return sum;
+}
+
+int scallop::dfs(int u, int nx, int ny, vector<int>& mx, vector<int>& my, vector<int>& mark, vector<vector<int>>& map)
+{
+    for (int v = 0; v < ny; v++)
+    {
+        if (mark[v] == 0 && map[u][v] == 1)
+        {
+            mark[v] = 1;
+            if (my[v] == -1 || dfs(my[v], nx, ny, mx, my, mark, map) == 1)
+            {
+                mx[u] = v;
+                my[v] = u;
+                return 1;
+            }
+        }
+    }
+    return 0;
 }
 
 int scallop::balance_vertex(int v)
