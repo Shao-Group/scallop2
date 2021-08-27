@@ -1068,7 +1068,7 @@ int splice_graph::print_weights()
 		vertex_info vi = get_vertex_info(i);
 		edge_iterator it1, it2;
 		PEEI pei;
-		printf("vertex %d, range = [%d, %d), length = %d\n", i, vi.lpos, vi.rpos, vi.rpos - vi.lpos);
+		printf("vertex %d, range = [%d, %d), length = %d, type = %d\n", i, vi.lpos, vi.rpos, vi.rpos - vi.lpos, vi.type);
 	}
 
 	edge_iterator it1, it2;

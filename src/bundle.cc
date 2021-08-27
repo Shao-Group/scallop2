@@ -535,8 +535,8 @@ int bundle::revise_splice_graph()
 		b = remove_false_boundaries();
 		if(b == true) continue;
 
-		b = remove_inner_boundaries();
-		if(b == true) continue;
+		//b = remove_inner_boundaries();
+		//if(b == true) continue;
 
 		b = remove_small_exons();
 		if(b == true) continue;
