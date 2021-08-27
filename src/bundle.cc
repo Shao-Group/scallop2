@@ -992,7 +992,7 @@ bool bundle::remove_inner_boundaries()
 				int ss = ee->source();
 				double ww = gr.get_vertex_weight(ss);
 				if(ww > w + 1.0) flag = true;
-				if(ss < i) flag = true;
+				//if(ss < i) flag = true;
 			}
 			if(flag == false) continue;
 		}
@@ -1007,7 +1007,7 @@ bool bundle::remove_inner_boundaries()
 				int tt = ee->target();
 				double ww = gr.get_vertex_weight(tt);
 				if(ww > w + 1.0) flag = true;
-				if(tt > i) flag = true;
+				//if(tt > i) flag = true;
 			}
 			if(flag == false) continue;
 		}
