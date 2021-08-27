@@ -991,8 +991,8 @@ bool bundle::remove_inner_boundaries()
 				edge_descriptor ee = *ei;
 				int ss = ee->source();
 				double ww = gr.get_vertex_weight(ss);
-				if(ww > w) flag = true;
-				//if(ss < i) flag = true;
+				if(ww > w + 1.0) flag = true;
+				if(ss < i) flag = true;
 			}
 			if(flag == false) continue;
 		}
@@ -1006,8 +1006,8 @@ bool bundle::remove_inner_boundaries()
 				edge_descriptor ee = *ei;
 				int tt = ee->target();
 				double ww = gr.get_vertex_weight(tt);
-				if(ww > w) flag = true;
-				//if(tt > i) flag = true;
+				if(ww > w + 1.0) flag = true;
+				if(tt > i) flag = true;
 			}
 			if(flag == false) continue;
 		}
