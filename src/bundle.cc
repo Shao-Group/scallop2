@@ -535,8 +535,8 @@ int bundle::revise_splice_graph()
 		b = remove_false_boundaries();
 		if(b == true) continue;
 
-		//b = remove_inner_boundaries();
-		//if(b == true) continue;
+		b = remove_inner_boundaries();
+		if(b == true) continue;
 
 		b = remove_small_exons();
 		if(b == true) continue;
@@ -990,8 +990,10 @@ bool bundle::remove_inner_boundaries()
 			{
 				edge_descriptor ee = *ei;
 				int ss = ee->source();
-				double ww = gr.get_vertex_weight(ss);
-				if(ww > w + 1.0) flag = true;
+				if(ss == i) continue;
+				if(gr.get_vertex_info(ss).type != EMPTY_VERTEX) flag = true;
+				//double ww = gr.get_vertex_weight(ss);
+				//if(ww > w + 1.0) flag = true;
 				//if(ss < i) flag = true;
 			}
 			if(flag == false) continue;
@@ -1005,8 +1007,10 @@ bool bundle::remove_inner_boundaries()
 			{
 				edge_descriptor ee = *ei;
 				int tt = ee->target();
-				double ww = gr.get_vertex_weight(tt);
-				if(ww > w + 1.0) flag = true;
+				if(tt == i) continue;
+				if(gr.get_vertex_info(tt).type != EMPTY_VERTEX) flag = true;
+				//double ww = gr.get_vertex_weight(tt);
+				//if(ww > w + 1.0) flag = true;
 				//if(tt > i) flag = true;
 			}
 			if(flag == false) continue;
