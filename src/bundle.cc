@@ -535,8 +535,8 @@ int bundle::revise_splice_graph()
 		b = remove_false_boundaries();
 		if(b == true) continue;
 
-		//b = remove_inner_boundaries();
-		//if(b == true) continue;
+		b = remove_inner_boundaries();
+		if(b == true) continue;
 
 		b = remove_small_exons();
 		if(b == true) continue;
@@ -978,8 +978,32 @@ bool bundle::remove_inner_boundaries()
 		int t = e2->target();
 
 		if(s != 0 && t != n) continue;
-		if(s != 0 && gr.out_degree(s) == 1) continue;
-		if(t != n && gr.in_degree(t) == 1) continue;
+
+		if(s == 0)
+		{
+			bool flag = false;
+			PEEI pt = gr.in_edges(t);
+			for(edge_iterator ei = pt.first; ei != pt.second; ei++)
+			{
+				edge_descriptor ee = *ei;
+				int ss = ee->source();
+				if(ss < i) flag = true;
+			}
+			if(flag == false) continue;
+		}
+
+		if(t == n)
+		{
+			bool flag = false;
+			PEEI pt = gr.out_edges(s);
+			for(edge_iterator ei = pt.first; ei != pt.second; ei++)
+			{
+				edge_descriptor ee = *ei;
+				int tt = ee->target();
+				if(tt > i) flag = true;
+			}
+			if(flag == false) continue;
+		}
 
 		if(vi.stddev >= 0.01) continue;
 
