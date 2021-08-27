@@ -76,7 +76,7 @@ double min_single_exon_coverage = 20;
 double min_transcript_numreads = 10; // 20 -> 10 single cell
 int min_transcript_length_base = 100;
 int min_transcript_length_increase = 30;
-int min_exon_length = 20;
+int min_exon_length = 10;
 int max_num_exons = 1000;
 
 // for subsetsum and router
