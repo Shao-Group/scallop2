@@ -976,12 +976,12 @@ bool bundle::remove_inner_boundaries()
 
 		int s = e1->source();
 		int t = e2->target();
+		double w = gr.get_vertex_weight(i);
 
 		if(s != 0 && t != n) continue;
-		if(s != 0 && gr.out_degree(s) == 1) continue;
-		if(t != n && gr.in_degree(t) == 1) continue;
+		//if(s != 0 && gr.out_degree(s) == 1) continue;
+		//if(t != n && gr.in_degree(t) == 1) continue;
 
-		/*
 		if(s == 0)
 		{
 			bool flag = false;
@@ -990,7 +990,9 @@ bool bundle::remove_inner_boundaries()
 			{
 				edge_descriptor ee = *ei;
 				int ss = ee->source();
-				if(ss < i) flag = true;
+				double ww = gr.get_vertex_weight(ss);
+				if(ww > w) flag = true;
+				//if(ss < i) flag = true;
 			}
 			if(flag == false) continue;
 		}
@@ -1003,11 +1005,12 @@ bool bundle::remove_inner_boundaries()
 			{
 				edge_descriptor ee = *ei;
 				int tt = ee->target();
-				if(tt > i) flag = true;
+				double ww = gr.get_vertex_weight(tt);
+				if(ww > w) flag = true;
+				//if(tt > i) flag = true;
 			}
 			if(flag == false) continue;
 		}
-		*/
 
 		if(vi.stddev >= 0.01) continue;
 
