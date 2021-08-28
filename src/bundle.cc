@@ -1583,6 +1583,7 @@ int bundle::build_hyper_set()
 			{
 				if(v.size() > 0)
 				{
+					printf("umi-link kk = %d, v = ", kk); printv(v); printf("\n");
 					if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, cnt));
 					else m[v] += cnt;
 				}
