@@ -46,7 +46,7 @@ int scallop::assemble()
 	gr.print_weights();
 	printf("print phasing path info...\n");
 	hs.print();
-	int mm = max_matching();
+	//int mm = max_matching();
 
 	if(verbose >= 1) printf("process splice graph %s type = %d, vertices = %lu, edges = %lu, phasing paths = %lu\n", gr.gid.c_str(), c, gr.num_vertices(), gr.num_edges(), hs.edges.size());
 
@@ -56,7 +56,7 @@ int scallop::assemble()
 	{	
 		if(gr.num_vertices() > max_num_exons) break;
 
-		//int mm = max_matching();
+		int mm = max_matching();
 
 		bool b = false;
 
@@ -1178,38 +1178,43 @@ int scallop::max_matching()
 
 	// get edge info
 	vector<edge_descriptor> el; // edge list
+	vector<int> eli; // graph index of edge
 	el.clear();
+	eli.clear();
 	edge_iterator it1, it2;
 	PEEI pei;
 	for(pei =gr.edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
 		el.push_back(e);
+		int idx= e2i[e];
+		eli.push_back(idx);
 	}
 	
-	printf("edge list size = %lu\n", el.size());
+	printf("gr.edge list size = %lu\n", el.size());
 	for(int i = 0; i < el.size(); i++)
 	{
+		int idx = eli[i];
 		int e = e2i[(el[i])];
                 int vs = (el[i])->source();
                 int vt = (el[i])->target();
-		printf("edge # %d, (%d, %d)\n", e, vs, vt);
+		printf("el[%d]   gr.edge # %d = %d, (%d, %d)\n", i, idx, e, vs, vt);
 	}
 	
 
 	// get hs info
 	vector<vector<int>> hl; // hyper edges list
 	hl.clear();
-	//printf("hs size = %lu\n", hs.edges.size());
+	//printf("phasing path size = %lu\n", hs.edges.size());
 	if(hs.edges.size() == 0) return 0;
 	for(int i = 0; i < hs.edges.size(); i++)
 	{
 		vector<int> e = hs.edges[i];
-		/*
-                printf("hs edge # %d: ( ", i);
+		
+                printf("phasing path edge # %d: ( ", i);
                 printv(e);
                 printf(")\n");
-		*/
+		
 
 		vector<int> cur_e;
 		cur_e.clear();
@@ -1231,12 +1236,12 @@ int scallop::max_matching()
 		if(cur_e.size() > 0) hl.push_back(cur_e);
 	}
 	
-	printf("hl size = %lu\n", hl.size());
+	printf("after split using -1: phasing path size = %lu\n", hl.size());
 	
         for(int i = 0; i < hl.size(); i++)
         {
                 vector<int> e = hl[i];
-                printf("hl edge # %d: ( ", i);
+                printf("phasing path edge # %d: ( ", i);
                 printv(e);
                 printf(")\n");
 	}
@@ -1276,27 +1281,32 @@ int scallop::max_matching()
 		for(int j = 0; j < hn; j++)
 		{
 			int sey = hl[j][0];
-			if(i == sey)
+			if(eli[i] == sey)
 			{
 				ge.push_back({i,j+en});
 				continue;
 			}
-			//printf("i = %d, j = %d, sey = %d\n", i, j, sey);
-			int sy = (el[sey])->source();
+			//printf("i = %d, eli = %d, j = %d, sey = %d\n", i, eli[i], j, sey);
+			int sy = (i2e[sey])->source();
 			int ex = (el[i])->target();
 			if(ex <= sy && gr.check_path(ex,sy)) ge.push_back({i,j+en});
 		}
 	}
+	printf("finish 2\n");
 	
 	for(int i = 0; i < hn; i++)
 	{
 		for(int j = 0; j < en; j++)
 		{
 			int sy = (el[j])->source();
+			printf("(hl[i].size()-1) = %d , hl[i][(hl[i].size()-1)] = %d\n",(hl[i].size()-1), hl[i][(hl[i].size()-1)]);
 			int eex = hl[i][(hl[i].size()-1)];
-			int ex = (el[eex])->target();
+			printf("i = %d, j = %d, eex = %d \n", i,j,eex);
+			int ex = (i2e[eex])->target();
+			printf("1111111111\n");
 			int sex = hl[i][0];
-			int sx = (el[sex])->source();
+			int sx = (i2e[sex])->source();
+			printf("i = %d, sx = %d, ex = %d, j = %d, eli = %d, sy = %d\n", i, sx, ex, j, eli[j], sy);
 			if(ex <= sy)
 			{
 				if(gr.check_path(ex,sy)) ge.push_back({i+en,j});
@@ -1306,7 +1316,7 @@ int scallop::max_matching()
 			{
 				for(int k = 0; k < hl[i].size(); k++)
 				{
-					if(j == hl[i][k])
+					if(eli[j] == hl[i][k])
 					{
 						ge.push_back({i+en,j});
 						break;
@@ -1321,13 +1331,13 @@ int scallop::max_matching()
 		for(int j = 0; j < hn; j++)
 		{
                         int eex = hl[i][(hl[i].size()-1)];
-                        int ex = (el[eex])->target();
+                        int ex = (i2e[eex])->target();
                         int sex = hl[i][0];
-                        int sx = (el[sex])->source();
+                        int sx = (i2e[sex])->source();
 			int eey = hl[j][(hl[j].size()-1)];
-			int ey = (el[eey])->target();
+			int ey = (i2e[eey])->target();
 			int sey = hl[j][0];
-			int sy = (el[sey])->source();
+			int sy = (i2e[sey])->source();
                         if(ex <= sy)
                         {
 				if(gr.check_path(ex, sy)) ge.push_back({i+en,j});
