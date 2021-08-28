@@ -1169,6 +1169,7 @@ int splice_graph::output_transcripts1(vector<transcript> &v, vector<transcript> 
 {
         for(int i = 0; i < p.size(); i++)
         {
+		printf("p size = %lu\n", p.size());
                 string tid = gid + "." + tostring(i);
 		transcript trst;
                 output_transcript(trst, p[i], tid);

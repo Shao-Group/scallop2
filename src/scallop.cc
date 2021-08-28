@@ -41,11 +41,12 @@ int scallop::assemble()
 {
 	int c = classify();
 
-	// TODO: print graph and hyper set info
-	printf("\nprint graph info...\n");
+	// TODO
+	printf("\nprint splice graph info...\n");
 	gr.print_weights();
-	printf("\nprint hs info...\n");
+	printf("print phasing path info...\n");
 	hs.print();
+	int mm = max_matching();
 
 	if(verbose >= 1) printf("process splice graph %s type = %d, vertices = %lu, edges = %lu, phasing paths = %lu\n", gr.gid.c_str(), c, gr.num_vertices(), gr.num_edges(), hs.edges.size());
 
@@ -55,10 +56,9 @@ int scallop::assemble()
 	{	
 		if(gr.num_vertices() > max_num_exons) break;
 
-		bool b = false;
+		//int mm = max_matching();
 
-		// TODO: max-matching algorithm
-		int mm = max_matching();
+		bool b = false;
 
 		b = resolve_trivial_vertex_fast(max_decompose_error_ratio[TRIVIAL_VERTEX]);
 		if(b == true) continue;
@@ -115,7 +115,7 @@ int scallop::assemble()
 	
 	non_full_trsts.clear();
 	gr.output_transcripts1(trsts, non_full_trsts, paths);
-	//printf("in scallop.cc: trsts.size = %d, non full length trsts.size = %d\n", trsts.size(), non_full_trsts.size());
+	//printf("in scallop.cc: trsts.size = %lu, non full length trsts.size = %lu\n", trsts.size(), non_full_trsts.size());
 
 	if(verbose >= 2) 
 	{
@@ -1174,19 +1174,19 @@ int scallop::split_edge(int ei, double w)
 
 int scallop::max_matching()
 {
-	printf("running max matching...\n");
+	printf("====================\nrunning max matching...\n");
 
 	// get edge info
 	vector<edge_descriptor> el; // edge list
 	el.clear();
 	edge_iterator it1, it2;
 	PEEI pei;
-	for(pei =gr. edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
+	for(pei =gr.edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
 		el.push_back(e);
 	}
-	/*
+	
 	printf("edge list size = %lu\n", el.size());
 	for(int i = 0; i < el.size(); i++)
 	{
@@ -1195,7 +1195,7 @@ int scallop::max_matching()
                 int vt = (el[i])->target();
 		printf("edge # %d, (%d, %d)\n", e, vs, vt);
 	}
-	*/
+	
 
 	// get hs info
 	vector<vector<int>> hl; // hyper edges list
@@ -1220,7 +1220,7 @@ int scallop::max_matching()
 			{
 				if(cur_e.size() > 0)
 				{
-					printf("split\n");
+					//printf("split\n");
 					hl.push_back(cur_e);
 					cur_e.clear();
 					continue;
@@ -1232,7 +1232,7 @@ int scallop::max_matching()
 	}
 	
 	printf("hl size = %lu\n", hl.size());
-	/*
+	
         for(int i = 0; i < hl.size(); i++)
         {
                 vector<int> e = hl[i];
@@ -1240,13 +1240,13 @@ int scallop::max_matching()
                 printv(e);
                 printf(")\n");
 	}
-	*/
+	
 
 	// create bipartite graph
 	int en = el.size();
 	int hn = hl.size();
 	int tn = (en + hn);
-	printf("edge number = %d, hyper edge number = %d, total vertexes number in bi-graph = %d\n", en, hn, tn);
+	printf("edge number = %d, phasing path number = %d, total vertexes number in bi-graph = %d\n", en, hn, tn);
 	int vl1[tn];
 	int vl2[tn];
 	// index 0 ~ (en-1): edge vertex; index en ~ (tn-1): hyper vertex
@@ -1258,18 +1258,140 @@ int scallop::max_matching()
 	
 	// TODO
         // ge : list of bipartite edges, e.g. {{0,1},{0,2},{1,1},{2,0},{2,2},{2,3}}
-        // nx : number of vertex in x; ny : number of vertex in y; index from 0
+        // nx : number of vertex in x; ny : number of vertex in y; index from 0; nx = ny = tn here
 	vector<vector<int>> ge;
-
-	/*
-	int nx = ;
-	int ny = ;
+	for(int i = 0; i < en; i++)
+	{
+		for(int j = 0; j < en; j++)
+		{
+			if(i == j) continue;
+			int sy = (el[j])->source();
+                	int ex = (el[i])->target();
+			if(ex <= sy && gr.check_path(ex,sy)) ge.push_back({i,j});
+		}
+	}
 	
-	int mm = max_matching_core(ge, nx, ny);
+	for(int i = 0; i < en; i++)
+	{
+		for(int j = 0; j < hn; j++)
+		{
+			int sey = hl[j][0];
+			if(i == sey)
+			{
+				ge.push_back({i,j+en});
+				continue;
+			}
+			//printf("i = %d, j = %d, sey = %d\n", i, j, sey);
+			int sy = (el[sey])->source();
+			int ex = (el[i])->target();
+			if(ex <= sy && gr.check_path(ex,sy)) ge.push_back({i,j+en});
+		}
+	}
+	
+	for(int i = 0; i < hn; i++)
+	{
+		for(int j = 0; j < en; j++)
+		{
+			int sy = (el[j])->source();
+			int eex = hl[i][(hl[i].size()-1)];
+			int ex = (el[eex])->target();
+			int sex = hl[i][0];
+			int sx = (el[sex])->source();
+			if(ex <= sy)
+			{
+				if(gr.check_path(ex,sy)) ge.push_back({i+en,j});
+				continue;
+			}
+			if(sx <= sy)
+			{
+				for(int k = 0; k < hl[i].size(); k++)
+				{
+					if(j == hl[i][k])
+					{
+						ge.push_back({i+en,j});
+						break;
+					}
+				}
+			}
+		}
+	}
+	
+	for(int i = 0; i < hn; i++)
+	{
+		for(int j = 0; j < hn; j++)
+		{
+                        int eex = hl[i][(hl[i].size()-1)];
+                        int ex = (el[eex])->target();
+                        int sex = hl[i][0];
+                        int sx = (el[sex])->source();
+			int eey = hl[j][(hl[j].size()-1)];
+			int ey = (el[eey])->target();
+			int sey = hl[j][0];
+			int sy = (el[sey])->source();
+                        if(ex <= sy)
+                        {
+				if(gr.check_path(ex, sy)) ge.push_back({i+en,j});
+                                continue;
+                        }
+			if(sx <= sy)
+			{
+				if(ex >= ey)
+				{
+					for(int m = 0; m < hl[i].size(); m++){
+						if(sey == hl[i][m]){
+							if(hl[j].size() == 1){
+								ge.push_back({i+en,j+en});
+								break;
+							}
+							for(int n = 1; n < hl[j].size();n++){
+								if(m+n >= hl[i].size()) break;
+								if(hl[j][n] != hl[i][m+n]) break;
+								if((n == hl[j].size()-1) && hl[j][n] == hl[i][m+n]){
+									ge.push_back({i+en,j+en});
+									break;
+								}
+							}
+							break;
+						}
+					}
+				}
+				else{
+					for(int m = 0; m < hl[i].size(); m++){
+						if(sey == hl[i][m]){
+                                                        if(hl[j].size() == 1){
+                                                                ge.push_back({i+en,j+en});
+                                                                break;
+                                                        }
+							if(m == hl[i].size()-1) break;
+							for(int k = 1; m+k < hl[i].size(); k++){
+								if(k >= hl[j].size()) break;
+								if(hl[j][k] != hl[i][m+k]) break;
+								if(eex == hl[i][m+k] && eex == hl[j][k]){
+									ge.push_back({i+en,j+en});
+									break;
+								}
+							}
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	printf("\nprint bi-graph...\n");
+        for(int i = 0; i < ge.size(); i++)
+        {
+                vector<int> e = ge[i];
+                printf("bigraph edge # %d: ( ", i);
+                printv(e);
+                printf(")\n");
+        }
+	
+	int mm = max_matching_core(ge, tn, tn);
 	printf("max matching = %d\n", mm);
 	
 	return mm;
-	*/
 }
 
 int scallop::max_matching_core(vector<vector<int>> ge, int nx, int ny)

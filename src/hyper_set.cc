@@ -610,13 +610,13 @@ int hyper_set::print()
 		printf(")\n");
 	}
 
-	/*
+	
 	for(int i = 0; i < edges.size(); i++)
 	{
 		printf("hyper-edge (edges) %d: ( ", i);
 		printv(edges[i]);
 		printf(")\n");
 	}
-	*/
+	
 	return 0;
 }
