@@ -1621,14 +1621,7 @@ int bundle::build_hyper_set()
 
 		if(v.size() > 0)
 		{
-			/*
-			printf("v = ");
-			for(int ii = 0; ii < v.size(); ii++)
-			{
-				printf("%d ", v[ii]);
-			}
-			printf("\n");
-			*/
+			printf("umi-link #frag = %lu, v = ", br.umiLink[k].size()); printv(v); printf("\n");
 
 			if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, cnt));
 			else m[v] += cnt;
