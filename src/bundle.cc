@@ -860,8 +860,8 @@ bool bundle::remove_small_exons()
 		// only consider boundary small exons
 		if(gr.edge(0, i).second == false && gr.edge(i, n).second == false) continue;
 
-		if(gr.edge(0, i).second == true && if(gr.edge(0, i).first == gr.max_out_edge(0)) continue;
-		if(gr.edge(i, n).second == true && if(gr.edge(i, n).first == gr.max_in_edge(n)) continue;
+		if(gr.edge(0, i).second == true && gr.edge(0, i).first == gr.max_out_edge(0)) continue;
+		if(gr.edge(i, n).second == true && gr.edge(i, n).first == gr.max_in_edge(n)) continue;
 
 		//gr.clear_vertex(i);
 		if(verbose >= 2) printf("remove small exon: length = %d, pos = %d-%d\n", p2 - p1, p1, p2);
