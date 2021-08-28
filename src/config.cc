@@ -24,7 +24,7 @@ int min_flank_length = 3;
 int max_num_cigar = 1000;
 int max_edit_distance = 10;
 int32_t min_bundle_gap = 100;		
-int min_num_hits_in_bundle = 10;	
+int min_num_hits_in_bundle = 5;	
 int min_num_splices_in_bundle = 15;	// not used; accept bundle if #hits with splices is at least this number
 uint32_t min_mapping_quality = 1;
 int32_t min_splice_boundary_hits = 1;
@@ -76,7 +76,7 @@ double min_single_exon_coverage = 30;
 double min_transcript_numreads = 10; // 20 -> 10 single cell
 int min_transcript_length_base = 100;
 int min_transcript_length_increase = 30;
-int min_exon_length = 25;
+int min_exon_length = 30;
 int max_num_exons = 1000;
 
 // for subsetsum and router
