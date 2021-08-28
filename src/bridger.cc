@@ -58,7 +58,7 @@ int bridger::bridge()
 	int n2 = get_paired_fragments();
 
 	// first round of briding hard fragments
-	remove_tiny_boundary();
+	//remove_tiny_boundary();
 	bridge_hard_fragments();
 	filter_paths();
 	int n3 = get_paired_fragments();
@@ -77,14 +77,12 @@ int bridger::bridge()
 	printf("#fragments = %d, #fixed = %d -> %d -> %d -> %d, ratio = %.2lf -> %.2lf -> %.2lf -> %.2lf, #remain = %d, length = (%d, %d, %d), total paired-end = %d, UMI-linked only = %d, intersection: %d, bridged paired-end = %d, UMI-linked only = %d, intersection: %d\n", 
 			n, n1, n2, n3, n4, r1, r2, r3, r4, n - n4, length_low, length_median, length_high, ct[3], ct[4], ct[5], ct[0], ct[1], ct[2]);
 
-	/*
 	printf("after bridging ... \n");
 	for(int i = 0; i < bd->fragments.size(); i++)
 	{
 		bd->fragments[i].print(i);
 	}
 	printf("===\n");
-	*/
 
 	return 0;
 }
@@ -686,7 +684,6 @@ int bridger::bridge_hard_fragments()
 			for(int i = 0; i < fc.fset.size(); i++)
 			{
 				fragment *fr = fc.fset[i];
-				fr->print(i); // test
 				path p;
 				p.ex1 = p.ex2 = 0;
 				p.v = pn[be];

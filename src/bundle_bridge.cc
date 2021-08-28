@@ -37,6 +37,7 @@ int bundle_bridge::build()
 	align_hits_transcripts();
 	index_references();
 
+	remove_tiny_boundary();
 	build_fragments();
 	//group_fragments();
 
@@ -359,6 +360,47 @@ int bundle_bridge::locate_region(int32_t x)
 		else k1 = m;
 	}
 	return -1;
+}
+
+int bundle_bridge::remove_tiny_boundary()
+{
+	for(int i = 0; i < bb.hits.size(); i++)
+	{
+		hit &h = bb.hits[i];
+
+		vector<int> vv = decode_vlist(h.vlist);
+		int n = vv.size();
+		if(n >= 2 && vv[n - 2] + 1 == vv[n - 1])
+		{
+			int k = vv[n - 1];
+			int32_t total = regions[k].rpos - regions[k].lpos;
+			int32_t flank = h.rpos - regions[k].lpos;
+
+			if(flank <= flank_tiny_length && 1.0 * flank / total < flank_tiny_ratio)
+			{
+				vector<int> v(vv.begin(), vv.begin() + n - 1);
+				assert(v.size() + 1 == vv.size());
+				h.vlist = encode_vlist(v);
+				h.rpos = regions[k].lpos;
+			}
+		}
+
+		if(n >= 2 && vv[0] + 1 == vv[1])
+		{
+			int k = vv[0];
+			int32_t total = regions[k].rpos - regions[k].lpos;
+			int32_t flank = regions[k].rpos - h.pos;
+
+			if(flank <= flank_tiny_length && 1.0 * flank / total < flank_tiny_ratio)
+			{
+				vector<int> v(vv.begin() + 1, vv.end());
+				assert(v.size() + 1 == vv.size());
+				h.vlist = encode_vlist(v);
+				h.pos = regions[k].rpos;
+			}
+		}
+	}
+	return 0;
 }
 
 int bundle_bridge::build_fragments()
