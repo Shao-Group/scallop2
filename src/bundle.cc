@@ -1599,6 +1599,9 @@ int bundle::build_hyper_set()
 
 			// otherwise, add and merge cur_v to v
 			vector<int> cur_v = align_fragment(fr);
+
+			printf("umi-link kk = %d, cur-v = ", kk); printv(cur_v); printf("\n");
+
 			if(fr.paths.size() != 1 || fr.paths[0].type != 1) cur_v.clear();
 
 			if(cur_v.size()==0)
