@@ -1567,6 +1567,9 @@ int bundle::build_hyper_set()
 			v = align_fragment(fr);
 			if(fr.paths.size() != 1 || fr.paths[0].type != 1) v.clear();
 
+
+			printf("paired-end k = %d, v = ", k); printv(v); printf("\n");
+
 			if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, fr.cnt));
 			else m[v] += fr.cnt;
 
