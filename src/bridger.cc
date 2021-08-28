@@ -665,6 +665,7 @@ int bridger::bridge_hard_fragments()
 			//if(voting_ratio <= 0.49) continue;
 			//if(best_ratio < 0.8 && be != best_path) continue;
 
+			/*
 			printf("fcluster with %lu fragments, total %lu paths, best = %d, from %d to %d, v1 = (", fc.fset.size(), pb.size(), be, k, j);
 			printv(fc.v1);
 			printf("), v2 = ( ");
@@ -680,10 +681,12 @@ int bridger::bridge_hard_fragments()
 				printv(pn[e]);
 				printf(")\n");
 			}
+			*/
 
 			for(int i = 0; i < fc.fset.size(); i++)
 			{
 				fragment *fr = fc.fset[i];
+				fr->print(i); // test
 				path p;
 				p.ex1 = p.ex2 = 0;
 				p.v = pn[be];

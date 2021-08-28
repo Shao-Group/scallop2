@@ -1580,6 +1580,7 @@ int bundle::build_hyper_set()
 		for(int kk = 0; kk < br.umiLink[k].size(); kk++)
 		{
 			fragment &fr = br.fragments[(br.umiLink[k][kk])];
+			fr.print(br.umiLink[k][kk]);
 
 			// if unbridge, then trucate and add to m
 			//if(fr.paths.size() != 1 || fr.h1->bridged == false || fr.h2->bridged == false)
