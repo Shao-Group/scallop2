@@ -95,6 +95,7 @@ public:
 
 vector<int> encode_vlist(const vector<int> &v);
 vector<int> decode_vlist(const vector<int> &v);
+bool compare_hit_pos(const hit &x, const hit &y);
 
 //inline bool hit_compare_by_name(const hit &x, const hit &y);
 

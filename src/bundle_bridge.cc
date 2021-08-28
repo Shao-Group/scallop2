@@ -385,6 +385,8 @@ int bundle_bridge::remove_tiny_boundary()
 			}
 		}
 
+		vv = decode_vlist(h.vlist);
+		n = vv.size();
 		if(n >= 2 && vv[0] + 1 == vv[1])
 		{
 			int k = vv[0];
@@ -400,6 +402,7 @@ int bundle_bridge::remove_tiny_boundary()
 			}
 		}
 	}
+	sort(bb.hits.begin(), bb.hits.end(), compare_hit_pos);
 	return 0;
 }
 

@@ -386,3 +386,7 @@ vector<int> decode_vlist(const vector<int> &v)
 	}
 	return vv;
 }
+
+
+bool compare_hit_pos(const hit &x, const hit &y) 
+{ return x.pos < y.pos; }
