@@ -24,7 +24,7 @@ int min_flank_length = 3;
 int max_num_cigar = 1000;
 int max_edit_distance = 10;
 int32_t min_bundle_gap = 100;		
-int min_num_hits_in_bundle = 5;	
+int min_num_hits_in_bundle = 10;	
 int min_num_splices_in_bundle = 15;	// not used; accept bundle if #hits with splices is at least this number
 uint32_t min_mapping_quality = 1;
 int32_t min_splice_boundary_hits = 1;
@@ -65,12 +65,12 @@ double min_subregion_ave = 1.5;
 
 // for revising/decomposing splice graph
 double min_guaranteed_edge_weight = 0.01;
-double min_surviving_edge_weight = 1.5;
+double min_surviving_edge_weight = 1.2;
 double max_intron_contamination_coverage = 2.0;
 double max_decompose_error_ratio[7] = {0.33, 0.05, 0.0, 0.25, 0.30, 0.0, 1.1};
 
 // for selecting paths
-double min_transcript_coverage = 1.5; //1.01->0.5 single cell;
+double min_transcript_coverage = 1.2; //1.01->0.5 single cell;
 double min_transcript_coverage_ratio = 0.005;
 double min_single_exon_coverage = 30;
 double min_transcript_numreads = 10; // 20 -> 10 single cell
