@@ -306,16 +306,19 @@ int hyper_set::replace(const vector<int> &v, int e)
 		int b = bv[0];
 		vv[b] = e;
 
+		/* get rid of testing useful
 		bool b1 = useful(vv, 0, b);
 		bool b2 = useful(vv, b + v.size() - 1, vv.size() - 1);
-
 		if(b1 == false && b2 == false)
 		{
 			fb.push_back(k);
 			continue;
 		}
+		*/
 
 		vv.erase(vv.begin() + b + 1, vv.begin() + b + v.size());
+
+		fb.push_back(k);
 
 		if(e2s.find(e) == e2s.end())
 		{
@@ -328,6 +331,8 @@ int hyper_set::replace(const vector<int> &v, int e)
 			e2s[e].insert(k);
 		}
 	}
+
+	//if(v.size() != 1) return 0; //????
 
 	for(int i = 0; i < v.size(); i++)
 	{
@@ -366,12 +371,15 @@ int hyper_set::remove(int e)
 			if(vv[i] != e) continue;
 
 			vv[i] = -1;
+			fb.push_back(k);
 
+			/*
 			bool b1 = useful(vv, 0, i - 1);
 			bool b2 = useful(vv, i + 1, vv.size() - 1);
 			if(b1 == false && b2 == false) fb.push_back(k);
 			 
 			break;
+			*/
 		}
 	}
 
@@ -382,6 +390,9 @@ int hyper_set::remove(int e)
 
 int hyper_set::remove_pair(int x, int y)
 {
+	insert_between(x, y, -1);
+	return 0;
+
 	if(e2s.find(x) == e2s.end()) return 0;
 	set<int> &s = e2s[x];
 	vector<int> fb;
@@ -439,6 +450,8 @@ int hyper_set::insert_between(int x, int y, int e)
 			if(vv[i + 1] != y) continue;
 			vv.insert(vv.begin() + i + 1, e);
 
+			if(e == -1) continue;
+
 			if(e2s.find(e) == e2s.end())
 			{
 				set<int> ss;
@@ -451,8 +464,7 @@ int hyper_set::insert_between(int x, int y, int e)
 			}
 
 			//printf("line %d: insert %d between (%d, %d) = (%d, %d, %d)\n", k, e, x, y, vv[i], vv[i + 1], vv[i + 2]);
-
-			break;
+			//break;
 		}
 	}
 	return 0;
