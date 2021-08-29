@@ -1192,6 +1192,7 @@ int scallop::max_matching()
 	}
 	
 	printf("gr.edge list size = %lu\n", el.size());
+	/*
 	for(int i = 0; i < el.size(); i++)
 	{
 		int idx = eli[i];
@@ -1200,21 +1201,21 @@ int scallop::max_matching()
                 int vt = (el[i])->target();
 		printf("el[%d]   gr.edge # %d = %d, (%d, %d)\n", i, idx, e, vs, vt);
 	}
-	
+	*/	
 
 	// get hs info
 	vector<vector<int>> hl; // hyper edges list
 	hl.clear();
-	//printf("phasing path size = %lu\n", hs.edges.size());
+	printf("phasing path size = %lu\n", hs.edges.size());
 	if(hs.edges.size() == 0) return 0;
 	for(int i = 0; i < hs.edges.size(); i++)
 	{
 		vector<int> e = hs.edges[i];
-		
+		/*
                 printf("phasing path edge # %d: ( ", i);
                 printv(e);
                 printf(")\n");
-		
+		*/
 
 		vector<int> cur_e;
 		cur_e.clear();
@@ -1237,7 +1238,7 @@ int scallop::max_matching()
 	}
 	
 	printf("after split using -1: phasing path size = %lu\n", hl.size());
-	
+	/*
         for(int i = 0; i < hl.size(); i++)
         {
                 vector<int> e = hl[i];
@@ -1245,7 +1246,7 @@ int scallop::max_matching()
                 printv(e);
                 printf(")\n");
 	}
-	
+	*/	
 
 	// create bipartite graph
 	int en = el.size();
@@ -1292,21 +1293,16 @@ int scallop::max_matching()
 			if(ex <= sy && gr.check_path(ex,sy)) ge.push_back({i,j+en});
 		}
 	}
-	printf("finish 2\n");
 	
 	for(int i = 0; i < hn; i++)
 	{
 		for(int j = 0; j < en; j++)
 		{
 			int sy = (el[j])->source();
-			printf("(hl[i].size()-1) = %d , hl[i][(hl[i].size()-1)] = %d\n",(hl[i].size()-1), hl[i][(hl[i].size()-1)]);
 			int eex = hl[i][(hl[i].size()-1)];
-			printf("i = %d, j = %d, eex = %d \n", i,j,eex);
 			int ex = (i2e[eex])->target();
-			printf("1111111111\n");
 			int sex = hl[i][0];
 			int sx = (i2e[sex])->source();
-			printf("i = %d, sx = %d, ex = %d, j = %d, eli = %d, sy = %d\n", i, sx, ex, j, eli[j], sy);
 			if(ex <= sy)
 			{
 				if(gr.check_path(ex,sy)) ge.push_back({i+en,j});
@@ -1388,7 +1384,7 @@ int scallop::max_matching()
 			}
 		}
 	}
-	
+	/*
 	printf("\nprint bi-graph...\n");
         for(int i = 0; i < ge.size(); i++)
         {
@@ -1397,7 +1393,7 @@ int scallop::max_matching()
                 printv(e);
                 printf(")\n");
         }
-	
+	*/
 	int mm = max_matching_core(ge, tn, tn);
 	printf("max matching = %d\n", mm);
 	
