@@ -437,41 +437,26 @@ int bridger::remove_tiny_boundary()
 
 		if(fr.paths.size() == 1 && fr.paths[0].type == 1) continue;
 
-		//if(fr.h1->bridged == true) continue;
-		//if(fr.h2->bridged == true) continue;
-
-		vector<int> v1 = decode_vlist(fr.h1->vlist);
-		int n1 = v1.size();
-		if(n1 >= 2 && v1[n1 - 2] + 1 == v1[n1 - 1])
+		if(bd->right_indent(*(fr.h1)) == true)
 		{
+			vector<int> v1 = decode_vlist(fr.h1->vlist);
+			int n1 = v1.size();
 			int k = v1[n1 - 1];
-			int32_t total = bd->regions[k].rpos - bd->regions[k].lpos;
-			int32_t flank = fr.h1->rpos - bd->regions[k].lpos;
-
-			if(flank <= flank_tiny_length && 1.0 * flank / total < flank_tiny_ratio)
-			{
-				vector<int> v(v1.begin(), v1.begin() + n1 - 1);
-				assert(v.size() + 1 == v1.size());
-				fr.h1->vlist = encode_vlist(v);
-				fr.h1->rpos = bd->regions[k].lpos;
-			}
+			vector<int> v(v1.begin(), v1.begin() + n1 - 1);
+			assert(v.size() + 1 == v1.size());
+			fr.h1->vlist = encode_vlist(v);
+			fr.h1->rpos = bd->regions[k].lpos;
 		}
 
-		vector<int> v2 = decode_vlist(fr.h2->vlist);
-		int n2 = v2.size();
-		if(n2 >= 2 && v2[0] + 1 == v2[1])
+		if(bd->left_indent(*(fr.h2)) == true)
 		{
+			vector<int> v2 = decode_vlist(fr.h2->vlist);
+			int n2 = v2.size();
 			int k = v2[0];
-			int32_t total = bd->regions[k].rpos - bd->regions[k].lpos;
-			int32_t flank = bd->regions[k].rpos - fr.h2->pos;
-
-			if(flank <= flank_tiny_length && 1.0 * flank / total < flank_tiny_ratio)
-			{
-				vector<int> v(v2.begin() + 1, v2.end());
-				assert(v.size() + 1 == v2.size());
-				fr.h2->vlist = encode_vlist(v);
-				fr.h2->pos = bd->regions[k].rpos;
-			}
+			vector<int> v(v2.begin() + 1, v2.end());
+			assert(v.size() + 1 == v2.size());
+			fr.h2->vlist = encode_vlist(v);
+			fr.h2->pos = bd->regions[k].rpos;
 		}
 	}
 	return 0;
