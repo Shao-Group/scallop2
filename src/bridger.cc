@@ -50,24 +50,28 @@ int bridger::bridge()
 	int n = bd->fragments.size();
 
 	bridge_overlapped_fragments();
-	filter_paths();
 	int n1 = get_paired_fragments();
 
 	//bridge_phased_fragments();
 	//filter_paths();
-	int n2 = get_paired_fragments();
 
 	// first round of briding hard fragments
 	bridge_hard_fragments();
-	filter_paths();
-	int n3 = get_paired_fragments();
+	int n2 = get_paired_fragments();
 
 	remove_tiny_boundary();
 
 	// 2nd round of briding hard fragments
 	bridge_hard_fragments();
-	filter_paths();
+	int n3 = get_paired_fragments();
+
+	remove_tiny_boundary();
+
+	// 3rd round of briding hard fragments
+	bridge_hard_fragments();
 	int n4 = get_paired_fragments();
+
+	filter_paths();
 
 	double r1 = n1 * 100.0 / n;
 	double r2 = n2 * 100.0 / n;
