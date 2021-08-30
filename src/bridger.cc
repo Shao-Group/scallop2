@@ -133,7 +133,7 @@ int bridger::bridge_overlapped_fragment(fragment &fr, int ex1, int ex2)
 	p.v = encode_vlist(p.v);
 
 	if(p.length >= length_low && p.length <= length_good) p.type = GOOD_PATH;
-	if(p.length >= length_low && p.length <= length_high) p.type = VALID_PATH;
+	else if(p.length >= length_low && p.length <= length_high) p.type = VALID_PATH;
 	else p.type = INVALID_PATH;
 
 	fr.paths.push_back(p);
@@ -429,7 +429,7 @@ int bridger::bridge_phased_cluster(fcluster &fc)
 			p.length = bd->compute_aligned_length(fr->k1l, fr->k2r, p.v);
 			p.v = encode_vlist(p.v);
 			if(p.length >= length_low && p.length <= length_good) p.type = GOOD_PATH;
-			if(p.length >= length_low && p.length <= length_high) p.type = VALID_PATH;
+			else if(p.length >= length_low && p.length <= length_high) p.type = VALID_PATH;
 			else p.type = INVALID_PATH;
 			fr->paths.push_back(p);
 		}
