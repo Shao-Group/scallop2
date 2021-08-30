@@ -76,7 +76,7 @@ int bundle::build_intervals()
 	for(int i = 0; i < br.fragments.size(); i++)
 	{
 		fragment &fr = br.fragments[i];
-		if(fr.paths.size() != 1 || fr.paths[0].type != 1) continue;
+		if(fr.paths.size() != 1 || fr.paths[0].type == INVALID_PATH) continue;
 		vector<int32_t> vv = br.get_aligned_intervals(fr);
 		if(vv.size() <= 0) continue;
 		assert(vv.size() % 2 == 0);
@@ -111,7 +111,7 @@ int bundle::build_junctions()
 	for(int i = 0; i < br.fragments.size(); i++)
 	{
 		fragment &fr = br.fragments[i];
-		if(fr.paths.size() != 1 || fr.paths[0].type != 1) continue;
+		if(fr.paths.size() != 1 || fr.paths[0].type == INVALID_PATH) continue;
 		vector<int32_t> vv = br.get_splices(fr);
 		if(vv.size() <= 0) continue;
 		assert(vv.size() % 2 == 0);
@@ -1049,7 +1049,7 @@ bool bundle::remove_false_boundaries()
 	for(int i = 0; i < br.fragments.size(); i++)
 	{
 		fragment &fr = br.fragments[i];
-		if(fr.paths.size() == 1 && fr.paths[0].type == 1) continue;
+		if(fr.paths.size() == 1 && fr.paths[0].type != INVALID_PATH) continue;
 		//if(fr.h1->bridged == true || fr.h2->bridged == true) continue;
 
 		// only use uniquely aligned reads
@@ -1087,7 +1087,7 @@ bool bundle::remove_false_boundaries()
 		for(int k = 0; k < fr.paths.size(); k++) lengths += fr.paths[k].length;
 
 		bool use = true;
-		if(fr.paths.size() == 1 && types == 2 && tlen > 10000) use = false;
+		if(fr.paths.size() == 1 && types == INVALID_PATH && tlen > 10000) use = false;
 		//if(fr.paths.size() == 1 && types == 2 && lengths <= 1.5 * insertsize_high) use = false;
 		//if(fr.paths.size() == 1 && types == 2 && tlen <= 1.5 * insertsize_high) use = false;
 		//if(fr.paths.size() == 1 && types == 2 && lengths <= 2 * tlen) use = false;
@@ -1156,7 +1156,7 @@ bool bundle::tackle_false_boundaries()
 		fragment &fr = br.fragments[k];
 
 		if(fr.paths.size() != 1) continue;
-		if(fr.paths[0].type != 2) continue;
+		if(fr.paths[0].type != INVALID_PATH) continue;
 		if(br.breads.find(fr.h1->qname) != br.breads.end()) continue;
 
 		vector<int> v = align_fragment(fr);
@@ -1494,7 +1494,7 @@ int bundle::build_hyper_set()
 		assert(fr.h2->paired == true);
 
 		if(fr.paths.size() != 1) continue;
-		if(fr.paths[0].type != 1) continue;
+		if(fr.paths[0].type == INVALID_PATH) continue;
 
 		//if(fr.h1->bridged == false) continue;
 		//if(fr.h2->bridged == false) continue;
@@ -1526,7 +1526,7 @@ int bundle::build_hyper_set()
 			if(fr.h2->bridged == false) continue;
 
 			v = align_fragment(fr);
-			if(fr.paths.size() != 1 || fr.paths[0].type != 1) v.clear();
+			if(fr.paths.size() != 1 || fr.paths[0].type == INVALID_PATH) v.clear();
 
 			if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, fr.cnt));
 			else m[v] += fr.cnt;
@@ -1556,7 +1556,7 @@ int bundle::build_hyper_set()
 
 			// otherwise, add and merge cur_v to v
 			vector<int> cur_v = align_fragment(fr);
-			if(fr.paths.size() != 1 || fr.paths[0].type != 1) cur_v.clear();
+			if(fr.paths.size() != 1 || fr.paths[0].type == INVALID_PATH) cur_v.clear();
 
 			if(cur_v.size()==0)
 			{

@@ -861,7 +861,7 @@ vector<int32_t> bundle_bridge::get_aligned_intervals(fragment &fr)
 	//if(fr.h1->bridged == false) return vv;
 	//if(fr.h2->bridged == false) return vv;
 	if(fr.paths.size() != 1) return vv;
-	assert(fr.paths[0].type == 1 || fr.paths[0].type == 2);
+	//assert(fr.paths[0].type == 1 || fr.paths[0].type == 2);
 	//if(fr.paths[0].type != 1) return vv;
 
 	vector<int32_t> v = get_splices(fr);
@@ -879,7 +879,7 @@ vector<int32_t> bundle_bridge::get_splices(fragment &fr)
 	//if(fr.h1->bridged == false) return vv;
 	//if(fr.h2->bridged == false) return vv;
 	if(fr.paths.size() != 1) return vv;
-	assert(fr.paths[0].type == 1 || fr.paths[0].type == 2);
+	//assert(fr.paths[0].type == 1 || fr.paths[0].type == 2);
 	//if(fr.paths[0].type != 1) return vv;
 
 	vector<int> v = decode_vlist(fr.paths[0].v);

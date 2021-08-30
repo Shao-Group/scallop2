@@ -131,12 +131,10 @@ int bridger::bridge_overlapped_fragment(fragment &fr, int ex1, int ex2)
 	p.v.insert(p.v.end(), it + 1, v2.end());
 	p.length = bd->compute_aligned_length(fr.k1l, fr.k2r, p.v);
 	p.v = encode_vlist(p.v);
-	if(p.length >= length_low && p.length <= length_high)
-	{
-		p.type = 1;
-		//bd->breads.insert(fr.h1->qname);
-	}
-	else p.type = 2;
+
+	if(p.length >= length_low && p.length <= length_good) p.type = GOOD_PATH;
+	if(p.length >= length_low && p.length <= length_high) p.type = VALID_PATH;
+	else p.type = INVALID_PATH;
 
 	fr.paths.push_back(p);
 	return 0;
@@ -298,7 +296,7 @@ int bridger::build_path_nodes(int max_len)
 	{
 		// TODO, also check length
 		fragment &fr = bd->fragments[i];
-		if(fr.paths.size() == 1 && fr.paths[0].type == 1)
+		if(fr.paths.size() == 1 && fr.paths[0].type == GOOD_PATH)
 		{
 			vector<int> v = decode_vlist(fr.paths[0].v);
 			if(v.size() <= 1) continue;
@@ -430,8 +428,9 @@ int bridger::bridge_phased_cluster(fcluster &fc)
 			p.v = fc.phase[k];
 			p.length = bd->compute_aligned_length(fr->k1l, fr->k2r, p.v);
 			p.v = encode_vlist(p.v);
-			if(p.length >= length_low && p.length <= length_high) p.type = 1;
-			else p.type = 2;
+			if(p.length >= length_low && p.length <= length_good) p.type = GOOD_PATH;
+			if(p.length >= length_low && p.length <= length_high) p.type = VALID_PATH;
+			else p.type = INVALID_PATH;
 			fr->paths.push_back(p);
 		}
 	}
@@ -444,7 +443,7 @@ int bridger::remove_tiny_boundary()
 	{
 		fragment &fr = bd->fragments[i];
 
-		if(fr.paths.size() == 1 && fr.paths[0].type == 1) continue;
+		if(fr.paths.size() == 1 && fr.paths[0].type == GOOD_PATH) continue;
 
 		if(bd->right_indent(*(fr.h1)) == true)
 		{
@@ -686,12 +685,9 @@ int bridger::bridge_hard_fragments()
 				p.length = bd->compute_aligned_length(fr->k1l, fr->k2r, p.v);
 				p.v = encode_vlist(p.v);
 
-				if(p.length >= length_low && p.length <= length_high)
-				{
-					//bd->breads.insert(fr->h1->qname);
-					p.type = 1;
-				}
-				else p.type = 2;
+				if(p.length >= length_low && p.length <= length_good) p.type = GOOD_PATH;
+				else if(p.length >= length_low && p.length <= length_high) p.type = VALID_PATH;
+				else p.type = INVALID_PATH;
 
 				fr->paths.push_back(p);
 				//printf(" fragment %d length = %d using path %d, p.type = %d\n", i, p.length, be, p.type);
@@ -1590,7 +1586,7 @@ int bridger::filter_paths()
 			fr.paths[0] = fr.paths[minp];
 			fr.paths.resize(1);
 			assert(fr.paths.size() == 1);
-			if(fr.paths[0].type == 1) fr.set_bridged(true);
+			if(fr.paths[0].type != INVALID_PATH) fr.set_bridged(true);
 			//fr.h1->bridged = true;
 			//fr.h2->bridged = true;
 		}
@@ -1606,7 +1602,7 @@ int bridger::get_paired_fragments()
 	{
 		if(bd->fragments[k].paths.size() >= 1) n1++;
 		if(bd->fragments[k].paths.size() != 1) continue;
-		if(bd->fragments[k].paths[0].type != 1) continue;
+		if(bd->fragments[k].paths[0].type == INVALID_PATH) continue;
 		n2++;
 	}
 	return n1;

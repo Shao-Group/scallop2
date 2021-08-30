@@ -43,8 +43,8 @@ public:
 	int max_pnode_length;			// kmer size
 	int32_t length_median;
 	int32_t length_low;
+	int32_t length_good;
 	int32_t length_high;
-
 
 public:
 	int bridge();

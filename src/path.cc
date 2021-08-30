@@ -8,6 +8,7 @@ See LICENSE for licensing.
 
 #include "path.h"
 #include "util.h"
+#include "config.h"
 
 #include <cassert>
 #include <cstdio>
@@ -15,7 +16,7 @@ See LICENSE for licensing.
 path::path()
 {
 	v.clear();
-	type = 0;
+	type = INVALID_PATH;
 	abd = 0;
 	reads = 0;
 	score = 0;
@@ -36,7 +37,7 @@ bool path::operator<(const path& p) const
 
 int path::clear()
 {
-	type = 0;
+	type = INVALID_PATH;
 	ex1 = 0;
 	ex2 = 0;
 	v.clear();

@@ -50,6 +50,10 @@ using namespace std;
 #define TRANSCRIPT_COUNT_ADD_COVERAGE_MAX 3
 #define TRANSCRIPT_COUNT_ADD_COVERAGE_MIN 4
 
+#define INVALID_PATH -1
+#define VALID_PATH 0
+#define GOOD_PATH 1
+
 //// parameters
 // for bam file and reads
 extern int min_flank_length;
