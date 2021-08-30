@@ -361,6 +361,36 @@ int bundle_bridge::locate_region(int32_t x)
 	return -1;
 }
 
+bool bundle_bridge::left_indent(const hit &ht)
+{
+	vector<int> v2 = decode_vlist(ht.vlist);
+	int n2 = v2.size();
+	if(n2 >= 2 && v2[0] + 1 == v2[1])
+	{
+		int k = v2[0];
+		int32_t total = regions[k].rpos - regions[k].lpos;
+		int32_t flank = regions[k].rpos - ht.pos;
+
+		if(flank <= flank_tiny_length && 1.0 * flank / total < flank_tiny_ratio) return true;
+	}
+	return false;
+}
+
+bool bundle_bridge::right_indent(const hit &ht)
+{
+	vector<int> v1 = decode_vlist(ht.vlist);
+	int n1 = v1.size();
+	if(n1 >= 2 && v1[n1 - 2] + 1 == v1[n1 - 1])
+	{
+		int k = v1[n1 - 1];
+		int32_t total = regions[k].rpos - regions[k].lpos;
+		int32_t flank = ht.rpos - regions[k].lpos;
+
+		if(flank <= flank_tiny_length && 1.0 * flank / total < flank_tiny_ratio) return true;
+	}
+	return false;
+}
+
 int bundle_bridge::build_fragments()
 {
 

@@ -50,6 +50,8 @@ public:
 
 	int build_fragments();
 	int group_fragments();
+	bool left_indent(const hit &ht);
+	bool right_indent(const hit &ht);
 
 	int align_hits_transcripts();
 	int align_hit(const map<int32_t, int> &m, const hit &h, vector<int> &v);
