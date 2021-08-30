@@ -58,10 +58,11 @@ int bridger::bridge()
 	int n2 = get_paired_fragments();
 
 	// first round of briding hard fragments
-	remove_tiny_boundary();
 	bridge_hard_fragments();
 	filter_paths();
 	int n3 = get_paired_fragments();
+
+	remove_tiny_boundary();
 
 	// 2nd round of briding hard fragments
 	bridge_hard_fragments();
