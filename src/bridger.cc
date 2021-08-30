@@ -296,7 +296,7 @@ int bridger::build_path_nodes(int max_len)
 	{
 		// TODO, also check length
 		fragment &fr = bd->fragments[i];
-		if(fr.paths.size() == 1 && fr.paths[0].type != INVALID_PATH)
+		if(fr.paths.size() == 1 && fr.paths[0].type == GOOD_PATH)
 		{
 			vector<int> v = decode_vlist(fr.paths[0].v);
 			if(v.size() <= 1) continue;
