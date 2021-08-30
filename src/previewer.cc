@@ -219,6 +219,7 @@ int previewer::solve_insertsize()
 		sx2 += it->second * it->first * it->first;
 		if(insertsize_low == -1 && n >= 1.0 * insertsize_low_percentile * total) insertsize_low = it->first;
 		if(insertsize_high == -1 && n >= 1.0 * insertsize_high_percentile * total) insertsize_high = it->first;
+		if(insertsize_good == -1 && n >= 1.0 * insertsize_good_percentile * total) insertsize_good = it->first;
 		if(n >= 0.999 * total) break;
 	}
 	
@@ -236,8 +237,8 @@ int previewer::solve_insertsize()
 
 	if(verbose >= 1)
 	{
-		printf("preview insertsize: sampled reads = %d, isize = %.2lf +/- %.2lf, median = %d, low = %d, high = %d\n", 
-				total, insertsize_ave, insertsize_std, insertsize_median, insertsize_low, insertsize_high);
+		printf("preview insertsize: sampled reads = %d, isize = %.2lf +/- %.2lf, median = %d, low = %d, good = %d, high = %d\n", 
+				total, insertsize_ave, insertsize_std, insertsize_median, insertsize_low, insertsize_good, insertsize_high);
 	}
 
 	for(int i = 0; i < insertsize_profile.size(); i++)
