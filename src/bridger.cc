@@ -443,7 +443,7 @@ int bridger::remove_tiny_boundary()
 	{
 		fragment &fr = bd->fragments[i];
 
-		if(fr.paths.size() == 1 && fr.paths[0].type != INVALID_PATH) continue;
+		if(fr.paths.size() == 1 && fr.paths[0].type == GOOD_PATH) continue;
 
 		if(bd->right_indent(*(fr.h1)) == true)
 		{
