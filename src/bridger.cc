@@ -168,7 +168,7 @@ int bridger::cluster_open_fragments(vector<fcluster> &fclusters)
 	{
 		fragment &fr = bd->fragments[i];
 		//if(fr.paths.size() >= 1) continue;
-		//if(fr.paths.size() == 1 && fr.paths[0].type == 1) continue;
+		if(fr.paths.size() == 1 && fr.paths[0].type == GOOD_PATH) continue;
 		int last1 = fr.h1->vlist[fr.h1->vlist.size() - 2] + fr.h1->vlist.back() - 1;
 		int last2 = fr.h2->vlist[fr.h2->vlist.size() - 2] + fr.h2->vlist.back() - 1;
 		if(last1 >= last2) continue;
