@@ -1395,7 +1395,7 @@ int scallop::max_matching()
         }
 	*/
 	int mm = max_matching_core(ge, tn, tn);
-	printf("max matching = %d\n", mm);
+	printf("summary: #edges = %d, #phases = %d, #vertices = %d | max-matching = %d, lower bound = %d\n", en, hn, tn, mm, tn - mm);
 	
 	return mm;
 }
