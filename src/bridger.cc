@@ -440,6 +440,7 @@ int bridger::bridge_phased_cluster(fcluster &fc)
 
 int bridger::remove_tiny_boundary()
 {
+	set<int> fb;
 	for(int i = 0; i < bd->fragments.size(); i++)
 	{
 		fragment &fr = bd->fragments[i];
@@ -455,6 +456,7 @@ int bridger::remove_tiny_boundary()
 			assert(v.size() + 1 == v1.size());
 			fr.h1->vlist = encode_vlist(v);
 			fr.h1->rpos = bd->regions[k].lpos;
+			fb.insert(fr.h1->hid);
 		}
 
 		if(bd->left_indent(*(fr.h2)) == true)
@@ -466,8 +468,23 @@ int bridger::remove_tiny_boundary()
 			assert(v.size() + 1 == v2.size());
 			fr.h2->vlist = encode_vlist(v);
 			fr.h2->pos = bd->regions[k].rpos;
+			fb.insert(fr.h2->hid);
 		}
 	}
+
+	for(int i = 0; i < bd->fragments.size(); i++)
+	{
+		fragment &fr = bd->fragments[i];
+		if(fb.find(fr.h1->hid) == fb.end() && fb.find(fr.h2->hid) == fb.end()) continue;
+
+		vector<int> v1 = decode_vlist(fr.h1->vlist);
+		vector<int> v2 = decode_vlist(fr.h2->vlist);
+		fr.k1l = fr.h1->pos - bd->regions[v1.front()].lpos;
+		fr.k1r = bd->regions[v1.back()].rpos - fr.h1->rpos;
+		fr.k2l = fr.h2->pos - bd->regions[v2.front()].lpos;
+		fr.k2r = bd->regions[v2.back()].rpos - fr.h2->rpos;
+	}
+
 	return 0;
 }
 
