@@ -308,8 +308,17 @@ int bridger::build_path_nodes(int max_len)
 		{
 			vector<int> v1 = decode_vlist(fr.h1->vlist);
 			vector<int> v2 = decode_vlist(fr.h2->vlist);
-			build_path_nodes(m, v1, fr.cnt);
-			build_path_nodes(m, v2, fr.cnt);
+
+			if(v1.size() >= 2)
+			{
+				if(bd->right_indent(*(fr.h1)) == true) v1.pop_back();
+				build_path_nodes(m, v1, fr.cnt);
+			}
+			if(v2.size() >= 2)
+			{
+				if(bd->left_indent(*(fr.h2)) == true) v2.erase(v2.begin());
+				build_path_nodes(m, v2, fr.cnt);
+			}
 		}
 	}
 
