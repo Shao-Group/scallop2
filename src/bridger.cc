@@ -1519,15 +1519,10 @@ int bridger::set_thresholds()
 
 int bridger::update_length()
 {
-	//length_high = insertsize_high;
-	//length_low = insertsize_low;
+	length_high = insertsize_high;
+	length_low = insertsize_low;
 	length_median = insertsize_median;
 	length_good = insertsize_good;
-	//length_high = insertsize_good;
-	length_high = length_median * 2.0;
-	length_low = length_median * 0.3;
-	if(length_low < insertsize_low) length_low = insertsize_low;
-	if(length_high > insertsize_high) length_high = insertsize_high;
 	return 0;
 
 	// TODO
