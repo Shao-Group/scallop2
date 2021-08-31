@@ -73,6 +73,7 @@ int bundle::compute_strand()
 int bundle::build_intervals()
 {
 	fmap.clear();
+	set<int> fb;
 	for(int i = 0; i < br.fragments.size(); i++)
 	{
 		fragment &fr = br.fragments[i];
@@ -81,6 +82,8 @@ int bundle::build_intervals()
 		if(vv.size() <= 0) continue;
 		assert(vv.size() % 2 == 0);
 
+		fb.insert(fr.h1->hid);
+		fb.insert(fr.h2->hid);
 		for(int k = 0; k < vv.size() / 2; k++)
 		{
 			int32_t p = vv[2 * k + 0];
@@ -92,7 +95,7 @@ int bundle::build_intervals()
 	for(int i = 0; i < bb.hits.size(); i++)
 	{
 		hit &ht = bb.hits[i];
-		if(ht.bridged == true) continue;
+		if(fb.find(ht.hid) != fb.end()) continue;
 		if((ht.flag & 0x100) >= 1) continue;
 		if(br.breads.find(ht.qname) != br.breads.end()) continue;
 		for(int k = 0; k < ht.itvm.size(); k++)
