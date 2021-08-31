@@ -77,7 +77,7 @@ int bundle::build_intervals()
 	for(int i = 0; i < br.fragments.size(); i++)
 	{
 		fragment &fr = br.fragments[i];
-		if(fr.paths.size() != 1 || fr.paths[0].type != GOOD_PATH) continue;
+		if(fr.paths.size() != 1 || fr.paths[0].type == INVALID_PATH) continue;
 		vector<int32_t> vv = br.get_aligned_intervals(fr);
 		if(vv.size() <= 0) continue;
 		assert(vv.size() % 2 == 0);
@@ -1056,7 +1056,8 @@ bool bundle::remove_false_boundaries()
 	for(int i = 0; i < br.fragments.size(); i++)
 	{
 		fragment &fr = br.fragments[i];
-		if(fr.paths.size() == 1 && fr.paths[0].type != INVALID_PATH) continue;
+		//if(fr.paths.size() == 1 && fr.paths[0].type != INVALID_PATH) continue;
+		if(fr.paths.size() == 1 && fr.paths[0].length < 1000) continue;
 
 		// only use uniquely aligned reads
 		//if(fr.h1->nh >= 2 || fr.h2->nh >= 2) continue;
@@ -1162,7 +1163,8 @@ bool bundle::tackle_false_boundaries()
 		fragment &fr = br.fragments[k];
 
 		if(fr.paths.size() != 1) continue;
-		if(fr.paths[0].type != INVALID_PATH) continue;
+		//if(fr.paths[0].type != INVALID_PATH) continue;
+		if(fr.paths[0].length < 1000) continue;
 		if(br.breads.find(fr.h1->qname) != br.breads.end()) continue;
 
 		vector<int> v = align_fragment(fr);
