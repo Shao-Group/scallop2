@@ -111,6 +111,7 @@ int bundle::build_intervals()
 int bundle::build_junctions()
 {
 	map<int64_t, vector<hit*>> m;		// bridged fragments
+	set<int> fb;
 	for(int i = 0; i < br.fragments.size(); i++)
 	{
 		fragment &fr = br.fragments[i];
@@ -118,6 +119,9 @@ int bundle::build_junctions()
 		vector<int32_t> vv = br.get_splices(fr);
 		if(vv.size() <= 0) continue;
 		assert(vv.size() % 2 == 0);
+
+		fb.insert(fr.h1->hid);
+		fb.insert(fr.h2->hid);
 
 		for(int k = 0; k < vv.size() / 2; k++)
 		{
@@ -140,7 +144,8 @@ int bundle::build_junctions()
 
 	for(int i = 0; i < bb.hits.size(); i++)
 	{
-		if(bb.hits[i].bridged == true) continue;
+		//if(bb.hits[i].bridged == true) continue;
+		if(fb.find(bb.hits[i].hid) != fb.end()) continue;
 		if((bb.hits[i].flag & 0x100) >= 1) continue;
 		if(br.breads.find(bb.hits[i].qname) != br.breads.end()) continue;
 
