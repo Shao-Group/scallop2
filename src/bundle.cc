@@ -144,7 +144,6 @@ int bundle::build_junctions()
 
 	for(int i = 0; i < bb.hits.size(); i++)
 	{
-		//if(bb.hits[i].bridged == true) continue;
 		if(fb.find(bb.hits[i].hid) != fb.end()) continue;
 		if((bb.hits[i].flag & 0x100) >= 1) continue;
 		if(br.breads.find(bb.hits[i].qname) != br.breads.end()) continue;
@@ -1058,7 +1057,6 @@ bool bundle::remove_false_boundaries()
 	{
 		fragment &fr = br.fragments[i];
 		if(fr.paths.size() == 1 && fr.paths[0].type != INVALID_PATH) continue;
-		//if(fr.h1->bridged == true || fr.h2->bridged == true) continue;
 
 		// only use uniquely aligned reads
 		//if(fr.h1->nh >= 2 || fr.h2->nh >= 2) continue;
@@ -1490,6 +1488,7 @@ int bundle::output_transcript(transcript &trst, const path &p, const string &gid
 int bundle::build_hyper_set()
 {
 	map<vector<int>, int> m;
+	set<int> fb;
 
 	for(int k = 0; k < br.fragments.size(); k++)
 	{
@@ -1504,16 +1503,14 @@ int bundle::build_hyper_set()
 		if(fr.paths.size() != 1) continue;
 		if(fr.paths[0].type != GOOD_PATH) continue;
 
-		//if(fr.h1->bridged == false) continue;
-		//if(fr.h2->bridged == false) continue;
-
 		vector<int> v = align_fragment(fr);
+		fb.insert(fr.h1->hid);
+		fb.insert(fr.h2->hid);
 		
 		if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, fr.cnt));
 		else m[v] += fr.cnt;
 	}
 
-	
 	// note by Qimin, bridge umi-linked fragments into one single long path
 	for(int k = 0; k < br.umiLink.size(); k++)
 	{
@@ -1528,10 +1525,7 @@ int bundle::build_hyper_set()
 			fragment &fr = br.fragments[(br.umiLink[k][0])];
 
 			if(fr.paths.size() != 1) continue;
-
-			// TODO: "bridged" may not be correct
-			if(fr.h1->bridged == false) continue;
-			if(fr.h2->bridged == false) continue;
+			if(fr.paths[0].type == INVALID_PATH) continue;
 
 			v = align_fragment(fr);
 			if(fr.paths.size() != 1 || fr.paths[0].type == INVALID_PATH) v.clear();
@@ -1607,9 +1601,7 @@ int bundle::build_hyper_set()
 	for(int k = 0; k < bb.hits.size(); k++)
 	{
 		hit &h = bb.hits[k];
-
-		// bridged used here, but maybe okay
-		if(h.bridged == true) continue;
+		if(fb.find(h.hid) != fb.end()) continue;
 
 		vector<int> v = align_hit(h);
 		
