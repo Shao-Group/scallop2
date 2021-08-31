@@ -82,14 +82,12 @@ int bridger::bridge()
 	printf("#fragments = %d, #fixed = %d -> %d -> %d -> %d, ratio = %.2lf -> %.2lf -> %.2lf -> %.2lf, #remain = %d, length = (%d, %d, %d), total paired-end = %d, UMI-linked only = %d, intersection: %d, bridged paired-end = %d, UMI-linked only = %d, intersection: %d\n", 
 			n, n1, n2, n3, n4, r1, r2, r3, r4, n - n4, length_low, length_median, length_high, ct[3], ct[4], ct[5], ct[0], ct[1], ct[2]);
 
-	/*
 	printf("after bridging ... \n");
 	for(int i = 0; i < bd->fragments.size(); i++)
 	{
 		bd->fragments[i].print(i);
 	}
 	printf("===\n");
-	*/
 
 	return 0;
 }
@@ -1525,7 +1523,8 @@ int bridger::update_length()
 	//length_low = insertsize_low;
 	length_median = insertsize_median;
 	length_good = insertsize_good;
-	length_high = length_median * 3.0;
+	//length_high = insertsize_good;
+	length_high = length_median * 2.0;
 	length_low = length_median * 0.3;
 	if(length_low < insertsize_low) length_low = insertsize_low;
 	if(length_high > insertsize_high) length_high = insertsize_high;
