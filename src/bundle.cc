@@ -77,7 +77,7 @@ int bundle::build_intervals()
 	for(int i = 0; i < br.fragments.size(); i++)
 	{
 		fragment &fr = br.fragments[i];
-		if(fr.paths.size() != 1 || fr.paths[0].type == INVALID_PATH) continue;
+		if(fr.paths.size() != 1 || fr.paths[0].type != GOOD_PATH) continue;
 		vector<int32_t> vv = br.get_aligned_intervals(fr);
 		if(vv.size() <= 0) continue;
 		assert(vv.size() % 2 == 0);
