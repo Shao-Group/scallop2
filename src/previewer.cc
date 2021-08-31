@@ -223,7 +223,7 @@ int previewer::solve_insertsize()
 		if(n >= 0.999 * total) break;
 	}
 	
-	if(insertsize_high > insertsize_median * 2.5) insertsize_high = 2.5 * insertsize_median;
+	if(insertsize_high > insertsize_median * 2.0) insertsize_high = 2.0 * insertsize_median;
 
 	insertsize_ave = insertsize_ave * 1.0 / n;
 	insertsize_std = sqrt((sx2 - n * insertsize_ave * insertsize_ave) * 1.0 / n);
