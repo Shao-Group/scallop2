@@ -1502,7 +1502,7 @@ int bundle::build_hyper_set()
 		assert(fr.h2->paired == true);
 
 		if(fr.paths.size() != 1) continue;
-		if(fr.paths[0].type == INVALID_PATH) continue;
+		if(fr.paths[0].type != GOOD_PATH) continue;
 
 		//if(fr.h1->bridged == false) continue;
 		//if(fr.h2->bridged == false) continue;
