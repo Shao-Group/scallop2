@@ -1528,6 +1528,7 @@ int bundle::build_hyper_set()
 			fragment &fr = br.fragments[(br.umiLink[k][0])];
 
 			if(fr.paths.size() != 1) continue;
+			if(fr.paths[0].type != GOOD_PATH) continue;
 
 			// TODO: "bridged" may not be correct
 			if(fr.h1->bridged == false) continue;
