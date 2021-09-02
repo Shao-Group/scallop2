@@ -42,11 +42,8 @@ int scallop::assemble()
 	int c = classify();
 
 	// TODO
-	printf("\nprint splice graph info...\n");
-	gr.print_weights();
-	printf("print phasing path info...\n");
-	hs.print();
-	//int mm = max_matching();
+	//gr.print_weights();
+	//hs.print();
 
 	if(verbose >= 1) printf("process splice graph %s type = %d, vertices = %lu, edges = %lu, phasing paths = %lu\n", gr.gid.c_str(), c, gr.num_vertices(), gr.num_edges(), hs.edges.size());
 
@@ -56,6 +53,10 @@ int scallop::assemble()
 	{	
 		if(gr.num_vertices() > max_num_exons) break;
 
+		printf("*********************\nSplice graph info...\n");
+        	gr.print_weights();
+        	printf("Phasing path info...\n");
+        	hs.print();
 		int mm = max_matching();
 
 		bool b = false;
@@ -1192,7 +1193,7 @@ int scallop::max_matching()
 	}
 	
 	printf("gr.edge list size = %lu\n", el.size());
-	/*
+	
 	for(int i = 0; i < el.size(); i++)
 	{
 		int idx = eli[i];
@@ -1201,21 +1202,21 @@ int scallop::max_matching()
                 int vt = (el[i])->target();
 		printf("el[%d]   gr.edge # %d = %d, (%d, %d)\n", i, idx, e, vs, vt);
 	}
-	*/	
+		
 
 	// get hs info
 	vector<vector<int>> hl; // hyper edges list
 	hl.clear();
 	printf("phasing path size = %lu\n", hs.edges.size());
-	if(hs.edges.size() == 0) return 0;
+	//if(hs.edges.size() == 0) return 0;
 	for(int i = 0; i < hs.edges.size(); i++)
 	{
 		vector<int> e = hs.edges[i];
-		/*
+		
                 printf("phasing path edge # %d: ( ", i);
                 printv(e);
                 printf(")\n");
-		*/
+		
 
 		vector<int> cur_e;
 		cur_e.clear();
@@ -1238,21 +1239,21 @@ int scallop::max_matching()
 	}
 	
 	printf("after split using -1: phasing path size = %lu\n", hl.size());
-	/*
+	
         for(int i = 0; i < hl.size(); i++)
         {
                 vector<int> e = hl[i];
-                printf("phasing path edge # %d: ( ", i);
+                printf("after split phasing path edge # %d: ( ", i);
                 printv(e);
                 printf(")\n");
 	}
-	*/	
+	
 
 	// create bipartite graph
 	int en = el.size();
 	int hn = hl.size();
 	int tn = (en + hn);
-	printf("edge number = %d, phasing path number = %d, total vertexes number in bi-graph = %d\n", en, hn, tn);
+	printf("edge %d, phasing path %d, total number in bi-graph = %d\n", en, hn, tn);
 	int vl1[tn];
 	int vl2[tn];
 	// index 0 ~ (en-1): edge vertex; index en ~ (tn-1): hyper vertex
@@ -1281,16 +1282,18 @@ int scallop::max_matching()
 	{
 		for(int j = 0; j < hn; j++)
 		{
+			
 			int sey = hl[j][0];
 			if(eli[i] == sey)
 			{
 				ge.push_back({i,j+en});
 				continue;
 			}
-			//printf("i = %d, eli = %d, j = %d, sey = %d\n", i, eli[i], j, sey);
 			int sy = (i2e[sey])->source();
 			int ex = (el[i])->target();
-			if(ex <= sy && gr.check_path(ex,sy)) ge.push_back({i,j+en});
+			if(ex <= sy && gr.check_path(ex,sy)) {
+				ge.push_back({i,j+en});
+			}
 		}
 	}
 	
@@ -1326,6 +1329,7 @@ int scallop::max_matching()
 	{
 		for(int j = 0; j < hn; j++)
 		{
+			if(i==j) continue;
                         int eex = hl[i][(hl[i].size()-1)];
                         int ex = (i2e[eex])->target();
                         int sex = hl[i][0];
@@ -1384,8 +1388,8 @@ int scallop::max_matching()
 			}
 		}
 	}
-	/*
-	printf("\nprint bi-graph...\n");
+	
+	printf("\nbi-graph...\n");
         for(int i = 0; i < ge.size(); i++)
         {
                 vector<int> e = ge[i];
@@ -1393,7 +1397,7 @@ int scallop::max_matching()
                 printv(e);
                 printf(")\n");
         }
-	*/
+	
 	int mm = max_matching_core(ge, tn, tn);
 	printf("summary: #edges = %d, #phases = %d, #vertices = %d | max-matching = %d, lower bound = %d\n", en, hn, tn, mm, tn - mm);
 	
