@@ -1503,7 +1503,7 @@ int bundle::build_hyper_set()
 		assert(fr.h2->paired == true);
 
 		if(fr.paths.size() != 1) continue;
-		if(fr.paths[0].type != GOOD_PATH) continue;
+		if(fr.paths[0].type == INVALID_PATH) continue;
 
 		vector<int> v = align_fragment(fr);
 		fb.insert(fr.h1->hid);
