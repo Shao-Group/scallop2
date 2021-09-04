@@ -1107,6 +1107,8 @@ bool bundle::remove_false_boundaries()
 		vertex_info v1 = gr.get_vertex_info(u1);
 		vertex_info v2 = gr.get_vertex_info(u2);
 
+		if(v2.lpos - v1.rpos <= max_filling_gap) continue;
+
 		/*
 		int types = 0;
 		int32_t lengths = 0;
