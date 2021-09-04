@@ -555,8 +555,8 @@ int bundle::revise_splice_graph()
 	bool b = false;
 	while(true)
 	{
-		b = tackle_false_boundaries();
-		if(b == true) continue;
+		//b = tackle_false_boundaries();
+		//if(b == true) continue;
 
 		b = remove_false_boundaries();
 		if(b == true) continue;
