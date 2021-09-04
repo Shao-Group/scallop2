@@ -212,6 +212,8 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0, transcrip
 		if(determine_regional_graph(gr) == true) continue;
 		if(gr.num_edges() <= 0) continue;
 
+		int min = 999999999;
+		transcript_set tss(gr.chrm, 0.9);
 		for(int r = 0; r < assemble_duplicates; r++)
 		{
 			string gid = "gene." + tostring(index) + "." + tostring(k) + "." + tostring(r);
@@ -225,9 +227,11 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0, transcrip
 				for(int i = 0; i < sc.trsts.size(); i++) sc.trsts[i].write(cout);
 			}
 
+			if(sc.trsts.size() < min) min = sc.trsts.size();
+
 			for(int i = 0; i < sc.trsts.size(); i++)
 			{
-				ts1.add(sc.trsts[i], 1, 0, TRANSCRIPT_COUNT_ADD_COVERAGE_MIN, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD);
+				tss.add(sc.trsts[i], 1, 0, TRANSCRIPT_COUNT_ADD_COVERAGE_MIN, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD);
 			}
 			for(int i = 0; i < sc.non_full_trsts.size(); i++)
 			{
@@ -260,6 +264,20 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0, transcrip
 			for(int i = 0; i < ft1.trs.size(); i++) ft1.trs[i].write(cout);
 			}
 			*/
+		}
+		vector<transcript> vv = tss.get_transcripts(1);
+		sort(vv.begin(), vv.end(), [](const transcript &a, const transcript &b) -> bool
+				{
+					if(a.score > b.score) return true;
+					if(a.score < b.score) return false;
+					if(a.coverage > b.coverage) return true;
+					else return false;
+				});
+
+		int m = vv.size() < min ? vv.size() : min;
+		for(int k = 0; k < m; k++)
+		{
+			ts1.add(vv[k], (int)(vv[k].score), 0, TRANSCRIPT_COUNT_ADD_COVERAGE_MIN, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD);
 		}
 	}
 

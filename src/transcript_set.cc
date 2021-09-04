@@ -203,6 +203,7 @@ vector<transcript> transcript_set::get_transcripts(int min_count) const
 		{
 			if(z.count < min_count) continue;
 			v.push_back(z.trst);
+			v[v.size() - 1].score = z.count;
 		}
 	}
 	return v;
@@ -218,6 +219,7 @@ vector<transcript> transcript_set::get_transcripts(int min_count_single, int min
 			if(z.trst.exons.size() <= 1 && z.count < min_count_single) continue;
 			if(z.trst.exons.size() >= 2 && z.count < min_count_multi) continue;
 			v.push_back(z.trst);
+			v[v.size() - 1].score = z.count;
 		}
 	}
 	return v;
