@@ -1108,16 +1108,15 @@ bool bundle::remove_false_boundaries()
 		vertex_info v2 = gr.get_vertex_info(u2);
 
 		if(v2.lpos - v1.rpos <= max_filling_gap) continue;
-		if(tlen > 10000) continue;
 
-		/*
 		int types = 0;
 		int32_t lengths = 0;
 		for(int k = 0; k < fr.paths.size(); k++) types += fr.paths[k].type;
 		for(int k = 0; k < fr.paths.size(); k++) lengths += fr.paths[k].length;
+		if(fr.paths.size() == 1 && types == INVALID_PATH && tlen > insertsize_high * 2) continue;
 
+		/*
 		bool use = true;
-		if(fr.paths.size() == 1 && types == INVALID_PATH && tlen > 10000) use = false;
 		//if(fr.paths.size() == 1 && types == 2 && lengths <= 1.5 * insertsize_high) use = false;
 		//if(fr.paths.size() == 1 && types == 2 && tlen <= 1.5 * insertsize_high) use = false;
 		//if(fr.paths.size() == 1 && types == 2 && lengths <= 2 * tlen) use = false;
@@ -1206,6 +1205,7 @@ bool bundle::tackle_false_boundaries()
 		tlen -= offset1;
 		tlen -= offset2;
 
+
 		// print
 		//fr.print(99);
 		if(verbose >= 2) printf("break fragment %s: total-length = %d, bridge-length = %d\n", fr.h1->qname.c_str(), tlen, fr.paths[0].length);
@@ -1221,9 +1221,10 @@ bool bundle::tackle_false_boundaries()
 
 		/*
 		if(tlen < insertsize_low / 2.0) continue;
-		if(tlen > insertsize_high * 2.0) continue;
 		if(tlen >= fr.paths[0].length) continue;
 		*/
+
+		if(tlen > insertsize_high * 2.0) continue;
 
 		for(int i = 0; i < v.size() - 1; i++)
 		{
