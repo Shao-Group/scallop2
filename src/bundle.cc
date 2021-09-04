@@ -105,6 +105,23 @@ int bundle::build_intervals()
 			fmap += make_pair(ROI(s, t), 1);
 		}
 	}
+
+	for(int i = 0; i < br.fragments.size(); i++)
+	{
+		fragment &fr = br.fragments[i];
+		if(fr.paths.size() != 1 || fr.paths[0].type != VALID_PATH) continue;
+		
+		vector<int> &v = fr.paths[0].v;
+		for(int j = 1; j < v.size() - 1; j++)
+		{
+			region &r = br.regions[v[j]];
+			if(r.ltype != END_BOUNDARY) continue;
+			if(r.rtype != START_BOUNDARY) continue;
+			fmap += make_pair(ROI(r.lpos, r.rpos), 1);
+			printf("fill-gap: %s, %d-%d\n", fr.h1->qname.c_str(), r.lpos, r.rpos);
+		}
+	}
+
 	return 0;
 }
 
