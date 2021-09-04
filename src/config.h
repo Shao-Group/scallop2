@@ -93,6 +93,7 @@ extern bool use_overlap_scoring;
 extern int32_t max_clustering_flank; 
 extern int32_t flank_tiny_length;
 extern double flank_tiny_ratio;
+extern int32_t max_filling_gap;
 
 // for identifying subgraphs
 extern int32_t min_subregion_gap;
