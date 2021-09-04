@@ -117,8 +117,8 @@ int bundle::build_intervals()
 			region &r = br.regions[v[j]];
 			if(r.ltype != END_BOUNDARY) continue;
 			if(r.rtype != START_BOUNDARY) continue;
-			fmap += make_pair(ROI(r.lpos, r.rpos), 1);
-			printf("fill-gap: %s, %d-%d\n", fr.h1->qname.c_str(), r.lpos, r.rpos);
+			if(r.rpos - r.lpos <= 100) fmap += make_pair(ROI(r.lpos, r.rpos), 1);
+			printf("fill-gap: %s, %d-%d, length = %d\n", fr.h1->qname.c_str(), r.lpos, r.rpos, r.rpos - r.lpos);
 		}
 	}
 
