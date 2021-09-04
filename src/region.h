@@ -38,6 +38,8 @@ public:
 	vector<partial_exon> pexons;	// generated partial exons
 
 public:
+	int build_refined();
+	int build_plain();
 	int print(int index) const;
 	bool left_inclusive();
 	bool right_inclusive();
@@ -47,7 +49,8 @@ private:
 	int smooth_join_interval_map();
 	int split_join_interval_map();
 	bool empty_subregion(int32_t p1, int32_t p2);
-	int build_partial_exons();
+	int build_refined_partial_exons();
+	int build_plain_partial_exons();
 };
 
 #endif

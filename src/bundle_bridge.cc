@@ -183,6 +183,36 @@ int bundle_bridge::build_regions()
 	vector<PPI> v(s.begin(), s.end());
 	sort(v.begin(), v.end());
 
+	for(int k = 0; k < v.size() - 1; k++)
+	{
+		int32_t l = v[k].first;
+		int32_t r = v[k + 1].first;
+		int ltype = v[k].second; 
+		int rtype = v[k + 1].second; 
+		if(ltype == LEFT_RIGHT_SPLICE) ltype = RIGHT_SPLICE;
+		if(rtype == LEFT_RIGHT_SPLICE) rtype = LEFT_SPLICE;
+
+		region rr(l, r, ltype, rtype, &(bb.mmap), &(bb.imap));
+		rr.build_plain();
+		for(int j = 0; j < rr.pexons.size(); j++)
+		{
+			partial_exon &pe = rr.pexons[j];
+			if(pe.lpos != l)
+			{
+				assert(pe.ltype == START_BOUNDARY);
+				s.insert(PI(pe.lpos, pe.ltype));
+			}
+			if(pe.rpos != r)
+			{
+				assert(pe.rtype == END_BOUNDARY);
+				s.insert(PI(pe.rpos, pe.rtype));
+			}
+		}
+	}
+
+	v.assign(s.begin(), s.end());
+	sort(v.begin(), v.end());
+
 	regions.clear();
 	for(int k = 0; k < v.size() - 1; k++)
 	{

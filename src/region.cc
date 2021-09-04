@@ -25,14 +25,25 @@ region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split
 	ave = 0;
 	max = 0;
 	dev = 1;
-	build_join_interval_map();
-	smooth_join_interval_map();
-	//split_join_interval_map();
-	build_partial_exons();
 }
 
 region::~region()
 {}
+
+int region::build_refined()
+{
+	build_join_interval_map();
+	smooth_join_interval_map();
+	build_refined_partial_exons();
+	return 0;
+}
+
+int region::build_plain()
+{
+	build_join_interval_map();
+	build_plain_partial_exons();
+	return 0;
+}
 
 int region::build_join_interval_map()
 {
@@ -113,7 +124,6 @@ int region::split_join_interval_map()
 	return 0;
 }
 
-
 int region::smooth_join_interval_map()
 {
 	int32_t gap = min_subregion_gap;
@@ -166,7 +176,30 @@ bool region::empty_subregion(int32_t p1, int32_t p2)
 	return false;
 }
 
-int region::build_partial_exons()
+int region::build_plain_partial_exons()
+{
+	pexons.clear();
+
+	if(jmap.size() == 0) return 0;
+
+	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
+	{
+		int32_t p1 = lower(it->first);
+		int32_t p2 = upper(it->first);
+		assert(p1 < p2);
+	
+		int lt = (p1 == lpos) ? ltype : START_BOUNDARY;
+		int rt = (p2 == rpos) ? rtype : END_BOUNDARY;
+
+		partial_exon pe(p1, p2, lt, rt);
+
+		evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev, pe.max);
+		pexons.push_back(pe);
+	}
+	return 0;
+}
+
+int region::build_refined_partial_exons()
 {
 	pexons.clear();
 

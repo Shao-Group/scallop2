@@ -246,6 +246,7 @@ int bundle::build_regions()
 
 		regions.push_back(region(l, r, ltype, rtype, &fmap, &(bb.imap)));
 	}
+
 	return 0;
 }
 
@@ -256,6 +257,7 @@ int bundle::build_partial_exons()
 	for(int i = 0; i < regions.size(); i++)
 	{
 		region &r = regions[i];
+		r.build_refined();
 		for(int k = 0; k < r.pexons.size(); k++)
 		{
 			partial_exon &pe = r.pexons[k];
