@@ -58,7 +58,7 @@ bool use_overlap_scoring = false;
 int32_t max_clustering_flank = 30;
 int32_t flank_tiny_length = 10;
 double flank_tiny_ratio = 9.9;
-int32_t max_filling_gap = 150;
+int32_t max_filling_gap = 250;
 
 // for identifying subgraphs
 int32_t min_subregion_gap = 3;
