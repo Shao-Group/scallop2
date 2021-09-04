@@ -1107,6 +1107,7 @@ bool bundle::remove_false_boundaries()
 		vertex_info v1 = gr.get_vertex_info(u1);
 		vertex_info v2 = gr.get_vertex_info(u2);
 
+		/*
 		int types = 0;
 		int32_t lengths = 0;
 		for(int k = 0; k < fr.paths.size(); k++) types += fr.paths[k].type;
@@ -1118,10 +1119,12 @@ bool bundle::remove_false_boundaries()
 		//if(fr.paths.size() == 1 && types == 2 && tlen <= 1.5 * insertsize_high) use = false;
 		//if(fr.paths.size() == 1 && types == 2 && lengths <= 2 * tlen) use = false;
 
+		if(use == false) continue;
+		*/
+
 		if(verbose >= 2) printf("%s: u1 = %d, %d-%d, u2 = %d, %d-%d, h1.rpos = %d, h2.lpos = %d, #bridging = %lu, types = %d, lengths = %d, tlen = %d, use = %c\n", 
 				fr.h1->qname.c_str(), u1, v1.lpos, v1.rpos, u2, v2.lpos, v2.rpos, fr.h1->rpos, fr.h2->pos, fr.paths.size(), types, lengths, tlen, use ? 'T' : 'F');
 
-		if(use == false) continue;
 
 		//if(gr.get_vertex_info(u1).rpos == fr.h1->rpos)
 		{
