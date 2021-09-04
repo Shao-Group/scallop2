@@ -1113,7 +1113,7 @@ bool bundle::remove_false_boundaries()
 		int32_t lengths = 0;
 		for(int k = 0; k < fr.paths.size(); k++) types += fr.paths[k].type;
 		for(int k = 0; k < fr.paths.size(); k++) lengths += fr.paths[k].length;
-		if(fr.paths.size() == 1 && types == INVALID_PATH && tlen >= insertsize_high * 1.5) continue;
+		if(fr.paths.size() == 1 && types == INVALID_PATH && tlen >= insertsize_high) continue;
 		//if(fr.paths.size() == 1 && types == INVALID_PATH && tlen >= lengths) continue;
 
 		/*
@@ -1229,7 +1229,7 @@ bool bundle::tackle_false_boundaries()
 		int32_t lengths = 0;
 		for(int k = 0; k < fr.paths.size(); k++) types += fr.paths[k].type;
 		for(int k = 0; k < fr.paths.size(); k++) lengths += fr.paths[k].length;
-		if(fr.paths.size() == 1 && types == INVALID_PATH && tlen >= insertsize_high * 1.5) continue;
+		if(fr.paths.size() == 1 && types == INVALID_PATH && tlen >= insertsize_high) continue;
 		//if(tlen >= insertsize_high * 2.0) continue;
 
 		for(int i = 0; i < v.size() - 1; i++)
