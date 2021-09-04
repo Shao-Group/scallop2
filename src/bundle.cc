@@ -111,7 +111,7 @@ int bundle::build_intervals()
 		fragment &fr = br.fragments[i];
 		if(fr.paths.size() != 1 || fr.paths[0].type != VALID_PATH) continue;
 		
-		vector<int> &v = fr.paths[0].v;
+		vector<int> v = decode_vlist(fr.paths[0].v);
 		for(int j = 1; j < v.size() - 1; j++)
 		{
 			region &r = br.regions[v[j]];
