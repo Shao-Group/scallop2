@@ -1081,6 +1081,8 @@ bool bundle::remove_false_boundaries()
 		vertex_info v1 = gr.get_vertex_info(u1);
 		vertex_info v2 = gr.get_vertex_info(u2);
 
+		if(tlen > insertsize_high * 2.0) continue;
+
 		int types = 0;
 		int32_t lengths = 0;
 		for(int k = 0; k < fr.paths.size(); k++) types += fr.paths[k].type;
