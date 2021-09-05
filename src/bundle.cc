@@ -1087,7 +1087,7 @@ bool bundle::remove_false_boundaries()
 		for(int k = 0; k < fr.paths.size(); k++) lengths += fr.paths[k].length;
 
 		bool use = true;
-		if(fr.paths.size() == 1 && types == 2 && tlen > insertsize_high * 2) use = false;
+		if(fr.paths.size() == 1 && types == 2 && tlen > 10000) use = false;
 		//if(fr.paths.size() == 1 && types == 2 && lengths <= 1.5 * insertsize_high) use = false;
 		//if(fr.paths.size() == 1 && types == 2 && tlen <= 1.5 * insertsize_high) use = false;
 		//if(fr.paths.size() == 1 && types == 2 && lengths <= 2 * tlen) use = false;
@@ -1096,6 +1096,7 @@ bool bundle::remove_false_boundaries()
 				fr.h1->qname.c_str(), u1, v1.lpos, v1.rpos, u2, v2.lpos, v2.rpos, fr.h1->rpos, fr.h2->pos, fr.paths.size(), types, lengths, tlen, use ? 'T' : 'F');
 
 		if(use == false) continue;
+
 
 		//if(gr.get_vertex_info(u1).rpos == fr.h1->rpos)
 		{
@@ -1195,6 +1196,9 @@ bool bundle::tackle_false_boundaries()
 		{
 			partial_exon &px = pexons[v[i + 0]];
 			partial_exon &py = pexons[v[i + 1]];
+
+			if(py.lpos - px.rpos <= 100) continue;
+
 			if(px.rtype == END_BOUNDARY) 
 			{
 				if(verbose >= 2) printf("break ending vertex %d, pos = %d\n", v[i], px.rpos);
