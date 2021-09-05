@@ -1081,15 +1081,13 @@ bool bundle::remove_false_boundaries()
 		vertex_info v1 = gr.get_vertex_info(u1);
 		vertex_info v2 = gr.get_vertex_info(u2);
 
-		if(tlen > insertsize_high * 2.0) continue;
-
 		int types = 0;
 		int32_t lengths = 0;
 		for(int k = 0; k < fr.paths.size(); k++) types += fr.paths[k].type;
 		for(int k = 0; k < fr.paths.size(); k++) lengths += fr.paths[k].length;
 
 		bool use = true;
-		if(fr.paths.size() == 1 && types == 2 && tlen > 10000) use = false;
+		if(fr.paths.size() == 1 && types == 2 && tlen > insertsize_high * 2) use = false;
 		//if(fr.paths.size() == 1 && types == 2 && lengths <= 1.5 * insertsize_high) use = false;
 		//if(fr.paths.size() == 1 && types == 2 && tlen <= 1.5 * insertsize_high) use = false;
 		//if(fr.paths.size() == 1 && types == 2 && lengths <= 2 * tlen) use = false;
