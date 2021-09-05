@@ -138,8 +138,9 @@ int assembler::process(int n)
 		int counts = 0;
 		for(int k = 0; k < bb.hits.size(); k++)
 		{
-			if(bb.hits[k].spos.size() >= 1) counts += 2;
-			else counts += 1;
+			counts += (1 + bb.hits[k].spos.size());
+			//if(bb.hits[k].spos.size() >= 1) counts += 2;
+			//else counts += 1;
 		}
 
 		if(counts < min_num_hits_in_bundle) continue;
