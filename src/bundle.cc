@@ -1097,6 +1097,7 @@ bool bundle::remove_false_boundaries()
 
 		if(use == false) continue;
 
+		if(v2.lpos - v1.rpos <= 100) continue;
 
 		//if(gr.get_vertex_info(u1).rpos == fr.h1->rpos)
 		{
