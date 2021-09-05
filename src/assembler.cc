@@ -144,7 +144,7 @@ int assembler::process(int n)
 			else cnt2++;
 		}
 
-		if(cnt1 <= 1) continue;
+		if(cnt1 <= 2) continue;
 		if(cnt1 * 2 + cnt2 < min_num_hits_in_bundle) continue;
 		if(bb.tid < 0) continue;
 
