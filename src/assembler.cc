@@ -135,7 +135,14 @@ int assembler::process(int n)
 		//printf("bundle %d has %lu reads, %d reads have splices\n", i, bb.hits.size(), splices);
 		*/
 
-		if(bb.hits.size() < min_num_hits_in_bundle) continue;
+		int counts = 0;
+		for(int k = 0; k < bb.hits.size(); k++)
+		{
+			if(bb.hits[k].spos.size() >= 1) counts += 2;
+			else counts += 1;
+		}
+
+		if(counts < min_num_hits_in_bundle) continue;
 		if(bb.tid < 0) continue;
 
 		char buf[1024];

@@ -1097,8 +1097,6 @@ bool bundle::remove_false_boundaries()
 
 		if(use == false) continue;
 
-		//if(v2.lpos - v1.rpos < min_bundle_gap) continue;
-
 		//if(gr.get_vertex_info(u1).rpos == fr.h1->rpos)
 		{
 			if(fb1.find(u1) != fb1.end()) fb1[u1]++;
@@ -1189,19 +1187,14 @@ bool bundle::tackle_false_boundaries()
 		}
 		*/
 
-		/*
 		if(tlen < insertsize_low / 2.0) continue;
 		if(tlen > insertsize_high * 2.0) continue;
 		if(tlen >= fr.paths[0].length) continue;
-		*/
 
 		for(int i = 0; i < v.size() - 1; i++)
 		{
 			partial_exon &px = pexons[v[i + 0]];
 			partial_exon &py = pexons[v[i + 1]];
-
-			//if(py.lpos - px.rpos <= min_bundle_gap) continue;
-
 			if(px.rtype == END_BOUNDARY) 
 			{
 				if(verbose >= 2) printf("break ending vertex %d, pos = %d\n", v[i], px.rpos);
