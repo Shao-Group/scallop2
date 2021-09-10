@@ -54,7 +54,7 @@ int scallop::assemble()
 		if(gr.num_vertices() > max_num_exons) break;
 
 		printf("*********************\nSplice graph info...\n");
-        	gr.print_weights();
+		gr.print_weights();
         	printf("Phasing path info...\n");
         	hs.print();
 		int mm = max_matching();
@@ -1216,7 +1216,6 @@ int scallop::max_matching()
                 printf("phasing path edge # %d: ( ", i);
                 printv(e);
                 printf(")\n");
-		
 
 		vector<int> cur_e;
 		cur_e.clear();
@@ -1228,15 +1227,17 @@ int scallop::max_matching()
 				if(cur_e.size() > 0)
 				{
 					//printf("split\n");
-					hl.push_back(cur_e);
+					if(cur_e.size() > 1) hl.push_back(cur_e);
 					cur_e.clear();
 					continue;
 				}
 				else if(cur_e.size() == 0) continue;
 			}
 		}
-		if(cur_e.size() > 0) hl.push_back(cur_e);
+		if(cur_e.size() > 1) hl.push_back(cur_e);
 	}
+	sort(hl.begin(),hl.end());
+	hl.erase(unique(hl.begin(),hl.end()),hl.end());
 	
 	printf("after split using -1: phasing path size = %lu\n", hl.size());
 	
@@ -1281,14 +1282,26 @@ int scallop::max_matching()
 	for(int i = 0; i < en; i++)
 	{
 		for(int j = 0; j < hn; j++)
-		{
-			
-			int sey = hl[j][0];
+		{	
+			int inpath = 0;
+			for(int k = 0; k < hl[j].size(); k++)
+			{
+				if(eli[i] == hl[j][k])
+				{
+					ge.push_back({i,j+en});
+					inpath = 1;
+					break;
+				}
+			}
+			if(inpath == 1) continue;
+			/*
 			if(eli[i] == sey)
 			{
 				ge.push_back({i,j+en});
 				continue;
 			}
+			*/
+			int sey = hl[j][0];
 			int sy = (i2e[sey])->source();
 			int ex = (el[i])->target();
 			if(ex <= sy && gr.check_path(ex,sy)) {
@@ -1311,9 +1324,10 @@ int scallop::max_matching()
 				if(gr.check_path(ex,sy)) ge.push_back({i+en,j});
 				continue;
 			}
+			/*
 			if(sx <= sy)
 			{
-				for(int k = 0; k < hl[i].size(); k++)
+				for(int k = 1; k < hl[i].size(); k++)
 				{
 					if(eli[j] == hl[i][k])
 					{
@@ -1322,6 +1336,7 @@ int scallop::max_matching()
 					}
 				}
 			}
+			*/
 		}
 	}
 	
@@ -1330,6 +1345,13 @@ int scallop::max_matching()
 		for(int j = 0; j < hn; j++)
 		{
 			if(i==j) continue;
+			/*
+			if((hl[i] == hl[j]) && (i>j)) continue;
+			if(hl[i]==hl[j] && (i<j)){
+				ge.push_back({i+en,j+en});
+				continue;
+			}
+			*/
                         int eex = hl[i][(hl[i].size()-1)];
                         int ex = (i2e[eex])->target();
                         int sex = hl[i][0];
@@ -1340,7 +1362,7 @@ int scallop::max_matching()
 			int sy = (i2e[sey])->source();
                         if(ex <= sy)
                         {
-				if(gr.check_path(ex, sy)) ge.push_back({i+en,j});
+				if(gr.check_path(ex, sy)) ge.push_back({i+en,j+en});
                                 continue;
                         }
 			if(sx <= sy)
