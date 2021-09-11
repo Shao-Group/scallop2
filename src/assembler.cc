@@ -144,7 +144,8 @@ int assembler::process(int n)
 			else cnt2++;
 		}
 
-		if(cnt1 < 5 && cnt1 * 2 + cnt2 < min_num_hits_in_bundle) continue;
+		if(cnt1 + cnt2 < min_num_hits_in_bundle) continue;
+		//if(cnt1 < 5 && cnt1 * 2 + cnt2 < min_num_hits_in_bundle) continue;
 		if(bb.tid < 0) continue;
 
 		char buf[1024];
