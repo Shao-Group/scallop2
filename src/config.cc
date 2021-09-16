@@ -378,6 +378,11 @@ int parse_arguments(int argc, const char ** argv)
 			verbose = atoi(argv[i + 1]);
 			i++;
 		}
+		else if(string(argv[i]) == "--assemble_duplicates")
+		{
+			assemble_duplicates = atoi(argv[i + 1]);
+			i++;
+		}
 		else if(string(argv[i]) == "--batch_bundle_size")
 		{
 			batch_bundle_size = atoi(argv[i + 1]);
@@ -541,6 +546,7 @@ int print_help()
 	printf(" %-42s  %s\n", "--version",  "print current version of Scallop and exit");
 	printf(" %-42s  %s\n", "--preview",  "determine fragment-length-range and library-type and exit");
 	printf(" %-42s  %s\n", "--verbose <0, 1, 2>",  "0: quiet; 1: one line for each graph; 2: with details, default: 1");
+	printf(" %-42s  %s\n", "--assemble_duplicates <integer>",  "the number of consensus runs of the decomposition, default: 10");
 	printf(" %-42s  %s\n", "--library_type <first, second, unstranded>",  "library type of the sample, default: unstranded");
 	printf(" %-42s  %s\n", "--min_transcript_coverage <float>",  "minimum coverage required for a multi-exon transcript, default: 0.5");
 	printf(" %-42s  %s\n", "--min_single_exon_coverage <float>",  "minimum coverage required for a single-exon transcript, default: 20");
