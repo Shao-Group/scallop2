@@ -103,7 +103,7 @@ string fixed_gene_name = "";
 int batch_bundle_size = 100;
 int verbose = 1;
 int assemble_duplicates = 10;
-string version = "v1.1.1";
+string version = "v1.1.2";
 
 int parse_arguments(int argc, const char ** argv)
 {

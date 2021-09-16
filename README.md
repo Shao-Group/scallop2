@@ -9,7 +9,7 @@ The development of Scallop2 has been based on the [Scallop](https://github.com/K
 Scallop2 can be easily installed with conda: [![Anaconda-Server Badge](https://anaconda.org/bioconda/scallop2/badges/installer/conda.svg)](https://anaconda.org/bioconda/scallop2)
 
 Install from source code: download the source code of Scallop2 from
-[here](https://github.com/Shao-Group/scallop2/releases/download/v1.1.1/scallop2-1.1.1.tar.gz).
+[here](https://github.com/Shao-Group/scallop2/releases/download/v1.1.2/scallop2-1.1.2.tar.gz).
 Scallop2 uses additional libraries of Boost and htslib. 
 If they have not been installed in your system, you first
 need to download and install them. You might also need to
