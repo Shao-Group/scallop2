@@ -120,11 +120,16 @@ int parse_arguments(int argc, const char ** argv)
 			output_file = string(argv[i + 1]);
 			i++;
 		}
-                else if(string(argv[i]) == "-f")
-                {
-                        output_file1 = string(argv[i + 1]);
-                        i++;
-                }
+		else if(string(argv[i]) == "-f")
+		{
+			output_file1 = string(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--transcript_fragments")
+		{
+			output_file1 = string(argv[i + 1]);
+			i++;
+		}
 		else if(string(argv[i]) == "-r")
 		{
 			ref_file = string(argv[i + 1]);
@@ -546,9 +551,10 @@ int print_help()
 	printf(" %-42s  %s\n", "--version",  "print current version of Scallop and exit");
 	printf(" %-42s  %s\n", "--preview",  "determine fragment-length-range and library-type and exit");
 	printf(" %-42s  %s\n", "--verbose <0, 1, 2>",  "0: quiet; 1: one line for each graph; 2: with details, default: 1");
-	printf(" %-42s  %s\n", "--assemble_duplicates <integer>",  "the number of consensus runs of the decomposition, default: 10");
+	printf(" %-42s  %s\n", "-f/--transcript_fragments <filename>",  "file to which the assembled non-full-length transcripts will be written to");
 	printf(" %-42s  %s\n", "--library_type <first, second, unstranded>",  "library type of the sample, default: unstranded");
-	printf(" %-42s  %s\n", "--min_transcript_coverage <float>",  "minimum coverage required for a multi-exon transcript, default: 0.5");
+	printf(" %-42s  %s\n", "--assemble_duplicates <integer>",  "the number of consensus runs of the decomposition, default: 10");
+	printf(" %-42s  %s\n", "--min_transcript_coverage <float>",  "minimum coverage required for a multi-exon transcript, default: 1.5");
 	printf(" %-42s  %s\n", "--min_single_exon_coverage <float>",  "minimum coverage required for a single-exon transcript, default: 20");
 	printf(" %-42s  %s\n", "--min_transcript_length_increase <integer>",  "default: 50");
 	printf(" %-42s  %s\n", "--min_transcript_length_base <integer>",  "default: 150, minimum length of a transcript would be");
@@ -556,7 +562,7 @@ int print_help()
 	printf(" %-42s  %s\n", "--min_mapping_quality <integer>",  "ignore reads with mapping quality less than this value, default: 1");
 	printf(" %-42s  %s\n", "--max_num_cigar <integer>",  "ignore reads with CIGAR size larger than this value, default: 1000");
 	printf(" %-42s  %s\n", "--min_bundle_gap <integer>",  "minimum distances required to start a new bundle, default: 100");
-	printf(" %-42s  %s\n", "--min_num_hits_in_bundle <integer>",  "minimum number of reads required in a bundle, default: 10");
+	printf(" %-42s  %s\n", "--min_num_hits_in_bundle <integer>",  "minimum number of reads required in a gene locus, default: 5");
 	printf(" %-42s  %s\n", "--min_flank_length <integer>",  "minimum match length in each side for a spliced read, default: 3");
 
 	return 0;
@@ -564,7 +570,7 @@ int print_help()
 
 int print_copyright()
 {
-	printf("Scallop2 %s (c) 2021 Qimin Zhang and Mingfu Shao, The Pennsylvania State University\n", version.c_str());
+	printf("Scallop2 %s (c) 2021 Qimin Zhang, Qian Shi, and Mingfu Shao, The Pennsylvania State University\n", version.c_str());
 	return 0;
 }
 

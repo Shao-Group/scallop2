@@ -85,7 +85,7 @@ samtools sort input.bam > input.sort.bam
 The reconstructed transcripts shall be written as gtf format into `output.gtf`.
 
 Scallop2 support the following parameters. Please refer
-to the additional explanation below the table.
+to additional explanations below the table.
 
  Parameters | Default Value | Description
  ------------------------- | ------------- | ----------
@@ -93,7 +93,9 @@ to the additional explanation below the table.
  --version | | print version of Scallop2 and exit
  --preview | | show the inferred `library_type` and exit
  --verbose | 1 | chosen from {0, 1, 2}
+ -f/--transcript_fragments    | | file to which the assembled non-full-length transcripts will be written to
  --library_type               | empty | chosen from {empty, unstranded, first, second}
+ --assemble_duplicates		  | 10 | the number of consensus runs of the decomposition
  --min_transcript_coverage    | 1.5 | the minimum coverage required to output a multi-exon transcript
  --min_single_exon_coverage   | 20 | the minimum coverage required to output a single-exon transcript
  --min_transcript_length_base      |150 | the minimum base length of a transcript
@@ -101,7 +103,7 @@ to the additional explanation below the table.
  --min_mapping_quality        | 1 | ignore reads with mapping quality less than this value
  --max_num_cigar              | 1000 | ignore reads with CIGAR size larger than this value
  --min_bundle_gap             | 100 | the minimum distances required to start a new bundle
- --min_num_hits_in_bundle     | 10 | the minimum number of reads required in a bundle
+ --min_num_hits_in_bundle     | 5 | the minimum number of reads required in a bundle
  --min_flank_length           | 3 | the minimum match length required in each side for a spliced read
  --min_splice_bundary_hits    | 1 | the minimum number of spliced reads required to support a junction
 
