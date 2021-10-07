@@ -3,6 +3,7 @@
 Scallop2 is a reference-based transcript assembler
 specifically optimized for paired-/multiple-end RNA-seq data.
 The development of Scallop2 has been based on the [Scallop](https://github.com/Kingsford-Group/scallop) assembler.
+Scripts and documentation that evaluate Scallop2 is available at [scallop2-test](https://github.com/Shao-Group/scallop2-test).
 
 # Installation
 
