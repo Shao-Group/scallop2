@@ -19,6 +19,7 @@ After install these dependencies, you then compile the source code of Scallop2.
 If some of the above dependencies are not installed to the default system 
 directories (for example, `/usr/local`, for most linux distributions),
 their corresponding installing paths should be specified to `configure` of Scallop2.
+The entire installation typically takes a few minutes to complete.
 
 ## Download Boost
 If Boost has not been downloaded/installed, download Boost
@@ -124,3 +125,8 @@ out transcripts whose (predicted) raw counts (number of moleculars) is less than
 short transcripts: the minimum length of a transcript is given by `--min_transcript_length_base`
 \+ `--min_transcript_length_increase` * num-of-exons-in-this-transcript. Transcripts that are less
 than this number will be filtered out.
+
+# Examples 
+The alignments of a set of 10 Illumina paired-end RNA-seq samples
+are available at [doi:10.26208/8c06-w247](https://doi.org/10.26208/8c06-w247).
+Scallop2 usually take a few minteus to an hour to assemble a typical aligned Illumina RNA-seq sample.
