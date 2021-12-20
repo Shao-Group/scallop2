@@ -134,6 +134,7 @@ Scallop2 usually take a few minteus to an hour to assemble a typical aligned Ill
 
 ## Running Scallop2 on a small example
 An small example of input data `example-input.bam` is available in the `example` directory.
+
 Suppose we have installed Scallop2 following the steps in the `Installation`, we have the executable file `scallop2` at `src/scallop2`.
 
 Commands to enter `example` directory and run Scallop2 using `example-input.bam` as input:
@@ -144,6 +145,7 @@ cd ./example
 
 An output file named `example-output.gtf` will appear in the `example` directory.
 The output file stores the reconstructed transcripts assembled by Scallop2 in GTF format. 
+
 The Gene transfer format (GTF) is a file format used to hold information about gene structure, detailed documentation about [GTF format](https://useast.ensembl.org/info/website/upload/gff.html) is available from Ensembl.
 
 We can use the [IGV](https://software.broadinstitute.org/software/igv/home) tool to visualize the input BAM file and the output GTF file.
