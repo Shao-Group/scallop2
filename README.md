@@ -133,7 +133,7 @@ are available at [doi:10.26208/8c06-w247](https://doi.org/10.26208/8c06-w247).
 Scallop2 usually take a few minteus to an hour to assemble a typical aligned Illumina RNA-seq sample.
 
 ## Running Scallop2 on a small example
-An small example of input data `example-input.bam` is available in the `example` directory.
+A small example of input data `example-input.bam` is available in the `example` directory.
 
 Suppose we have installed Scallop2 following the steps in the `Installation`, we have the executable file `scallop2` at `src/scallop2`.
 
@@ -148,5 +148,5 @@ The output file stores the reconstructed transcripts assembled by Scallop2 in GT
 
 The Gene transfer format (GTF) is a file format used to hold information about gene structure, detailed documentation about [GTF format](https://useast.ensembl.org/info/website/upload/gff.html) is available from Ensembl.
 
-We can use the [IGV](https://software.broadinstitute.org/software/igv/home) tool to visualize the input BAM file and the output GTF file.
+We can use [IGV](https://software.broadinstitute.org/software/igv/home) to visualize the input reads (BAM file) and the output assembled transcripts (GTF file).
 A snapshot of IGV visualization of `example-input.bam` and `example-output.gtf` at gene loci chr1:46,303,377-46,321,251 is avaliable at `example/example-IGV-snapshot.png`.
