@@ -135,7 +135,7 @@ Scallop2 usually take a few minteus to an hour to assemble a typical aligned Ill
 ## Running Scallop2 on a small example
 A small example of input data `example-input.bam` is available in the `example` directory.
 
-Suppose we have installed Scallop2 following the steps in the `Installation`, we have the executable file `scallop2` at `src/scallop2`.
+Suppose we have installed Scallop2 following the steps in the `Installation` section, we have the executable file `scallop2` at `src/scallop2`.
 
 Commands to enter `example` directory and run Scallop2 using `example-input.bam` as input:
 ```
