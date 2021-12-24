@@ -70,10 +70,10 @@ double max_intron_contamination_coverage = 2.0;
 double max_decompose_error_ratio[7] = {0.33, 0.05, 0.0, 0.25, 0.30, 0.0, 1.1};
 
 // for selecting paths
-double min_transcript_coverage = 1.5; //1.01->0.5 single cell;
+double min_transcript_coverage = 1.5;
 double min_transcript_coverage_ratio = 0.005;
 double min_single_exon_coverage = 20;
-double min_transcript_numreads = 10; // 20 -> 10 single cell
+double min_transcript_numreads = 10;
 int min_transcript_length_base = 150;
 int min_transcript_length_increase = 50;
 int min_exon_length = 20;
@@ -443,6 +443,7 @@ int parse_arguments(int argc, const char ** argv)
 	if(min_surviving_edge_weight < 0.1 + min_transcript_coverage) 
 	{
 		min_surviving_edge_weight = 0.1 + min_transcript_coverage;
+		if(min_surviving_edge_weight > 10.0) min_surviving_edge_weight = 10.0;
 	}
 
 	// verify arguments

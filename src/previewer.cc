@@ -198,7 +198,7 @@ int previewer::solve_insertsize()
 		total += it->second;
 	}
 
-	if(total < 1000) // single-cell data may have low number of paired-end reads
+	if(total < 100) // single-cell data may have low number of paired-end reads
 	//if(total < 10000)
 	{
 		printf("not enough paired-end reads to create the profile (%d collected)\n", total);
