@@ -32,6 +32,7 @@ int main(int argc, const char **argv)
 	}
 
 	parse_arguments(argc, argv);
+	print_parameters();
 
 	if(verbose >= 1)
 	{
@@ -41,8 +42,8 @@ int main(int argc, const char **argv)
 		printf("\n");
 	}
 
-	previewer pv;
-	pv.preview();
+	previewer pv; 
+	pv.preview(); //resolve strandness and estimate fragment length distirbution
 
 	if(preview_only == true) return 0;
 

@@ -99,13 +99,13 @@ int bundle::build_intervals()
 		{
 			int32_t s = high32(ht.itvm[k]);
 			int32_t t = low32(ht.itvm[k]);
-			fmap += make_pair(ROI(s, t), 1);
+			fmap += make_pair(ROI(s, t), 1); //fmap interval map, stores intervals
 		}
 	}
 	return 0;
 }
 
-int bundle::build_junctions()
+int bundle::build_junctions() //write new similar function to handle BSJs
 {
 	map<int64_t, vector<hit*>> m;		// bridged fragments
 	for(int i = 0; i < br.fragments.size(); i++)

@@ -68,7 +68,7 @@ int assembler::assemble()
 		qcnt += 1;
 
 		// truncate
-		if(ht.tid != bb1.tid || ht.pos > bb1.rpos + min_bundle_gap)
+		if(ht.tid != bb1.tid || ht.pos > bb1.rpos + min_bundle_gap) //ht.tid is chromosome id from defined by bam_hdr_t
 		{
 			pool.push_back(bb1);
 			bb1.clear();
@@ -91,7 +91,7 @@ int assembler::assemble()
 		if(library_type != UNSTRANDED && ht.strand == '.' && ht.xs != '.') ht.strand = ht.xs;
 		if(library_type != UNSTRANDED && ht.strand == '+') bb1.add_hit(ht);
 		if(library_type != UNSTRANDED && ht.strand == '-') bb2.add_hit(ht);
-		if(library_type == UNSTRANDED && ht.xs == '.') bb1.add_hit(ht);
+		if(library_type == UNSTRANDED && ht.xs == '.') bb1.add_hit(ht); //heuristic, adding to both
 		if(library_type == UNSTRANDED && ht.xs == '.') bb2.add_hit(ht);
 		if(library_type == UNSTRANDED && ht.xs == '+') bb1.add_hit(ht);
 		if(library_type == UNSTRANDED && ht.xs == '-') bb2.add_hit(ht);
@@ -103,7 +103,7 @@ int assembler::assemble()
 
 	assign_RPKM();
 
-	filter ft(trsts);
+	filter ft(trsts); //post assembly
 	ft.merge_single_exon_transcripts();
 	trsts = ft.trs;
 
@@ -158,11 +158,11 @@ int assembler::process(int n)
 		bundle bd(bb);
 
 		bd.build(1, true);
-		bd.print(index++);
+		if(verbose >= 1) bd.print(index++);
 		assemble(bd.gr, bd.hs, ts1, ts2);
 
 		bd.build(2, true);
-		bd.print(index++);
+		if(verbose >= 1) bd.print(index++);
 		assemble(bd.gr, bd.hs, ts1, ts2);
 
 		/*
@@ -287,7 +287,7 @@ bool assembler::determine_regional_graph(splice_graph &gr)
 	return all_regional;
 }
 
-int assembler::assign_RPKM()
+int assembler::assign_RPKM() //level of expression of transcripts
 {
 	double factor = 1e9 / qlen;
 	for(int i = 0; i < trsts.size(); i++)

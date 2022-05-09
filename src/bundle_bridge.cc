@@ -37,6 +37,7 @@ int bundle_bridge::build()
 	align_hits_transcripts();
 	index_references();
 
+	build_supplementaries();
 	build_fragments();
 	//group_fragments();
 
@@ -359,6 +360,87 @@ int bundle_bridge::locate_region(int32_t x)
 		else k1 = m;
 	}
 	return -1;
+}
+
+int bundle_bridge::build_supplementaries()
+{
+	int max_index = bb.hits.size() + 1;
+	if(max_index > 1000000) max_index = 1000000;
+
+    vector< vector<int> > vv;
+    vv.resize(max_index);
+
+    //printf("Bundle hit size: %d\n", bb.hits.size());
+    // first build index
+    for(int i = 0; i < bb.hits.size(); i++)
+    {
+        hit &h = bb.hits[i];
+        if(h.isize >= 0) continue;
+        if(h.vlist.size() == 0) continue;
+
+        // TODO
+        if((h.flag & 0x800) == 0) continue;
+
+        // do not use hi; as long as qname, pos and isize are identical
+        // add 0x40 and 0x80
+        int k = (h.qhash % max_index + (h.flag & 0x40) + (h.flag & 0x80)) % max_index;
+        vv[k].push_back(i);
+        //printf("Adding supple\n");
+    }
+
+    for(int i = 0; i < bb.hits.size(); i++)
+    {
+        hit &h = bb.hits[i];
+        if(h.paired == true) continue;
+        if(h.isize <= 0) continue;
+        if(h.vlist.size() == 0) continue;
+        if((h.flag & 0x800) >= 1) continue;       // skip supplemetary
+
+        int k = (h.qhash % max_index + (h.flag & 0x40) + (h.flag & 0x80)) % max_index;
+
+        /*
+        h.print();
+        for(int j = 0; j < vv[k].size(); j++)
+        {
+            hit &z = bb.hits[vv[k][j]];
+            printf(" ");
+            z.print();
+        }
+        */
+        //int x = -1;
+        //printf("Size of supplementary hit vector: %d\n",vv[k].size());
+        for(int j = 0; j < vv[k].size(); j++)
+        {
+            hit &z = bb.hits[vv[k][j]];
+            //if(z.hi != h.hi) continue;
+            //if(z.paired == true) continue;
+            //if(z.pos != h.mpos) continue;
+            //if(z.isize + h.isize != 0) continue;
+            //if(z.qhash != h.qhash) continue;
+            if(z.qname != h.qname) continue;
+            // TODO check 0x40 and 0x80 are the same
+            if(z.flag & 0x40 != h.flag & 0x40 || z.flag & 0x80 != h.flag & 0x80) continue;
+            //x = vv[k][j];
+            h.suppl = &z;
+            break; //Taking the first supplementary read
+        }
+    }
+
+    for(int i = 0; i < bb.hits.size(); i++)
+    {
+    	hit &h = bb.hits[i];
+    	printf("Primary hit:\n");
+	   	h.print();
+
+    	if(h.suppl != NULL)
+    	{
+	    	printf("Supplementary hit:\n");
+	    	h.suppl->print();
+    	}
+    	printf("\n\n");
+	}
+
+    return 0;
 }
 
 int bundle_bridge::build_fragments()

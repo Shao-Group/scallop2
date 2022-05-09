@@ -438,6 +438,7 @@ int parse_arguments(int argc, const char ** argv)
 			insertsize_high = atof(argv[i + 1]);
 			i++;
 		}
+
 	}
 
 	if(min_surviving_edge_weight < 0.1 + min_transcript_coverage) 

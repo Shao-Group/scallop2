@@ -41,8 +41,8 @@ int scallop::assemble()
 {
 	int c = classify();
 
-	gr.print_weights();
-	hs.print();
+	if(verbose >= 1) gr.print_weights();
+	if(verbose >= 1) hs.print();
 
 	if(verbose >= 1) printf("process splice graph %s type = %d, vertices = %lu, edges = %lu, phasing paths = %lu\n", gr.gid.c_str(), c, gr.num_vertices(), gr.num_edges(), hs.edges.size());
 

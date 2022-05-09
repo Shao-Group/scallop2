@@ -47,6 +47,7 @@ hit& hit::operator=(const hit &h)
 	hi = h.hi;
 	nh = h.nh;
 	nm = h.nm;
+	suppl = h.suppl;
 
 	itvm = h.itvm;
 	itvi = h.itvi;
@@ -77,6 +78,7 @@ hit::hit(const hit &h)
 	hi = h.hi;
 	nh = h.nh;
 	nm = h.nm;
+	suppl = h.suppl;
 
 	itvm = h.itvm;
 	itvi = h.itvi;
@@ -100,10 +102,12 @@ hit::hit(bam1_t *b, int id)
 	paired = false;
 	bridged = false;
 	next = NULL;
+	suppl = NULL;
 
 	// compute rpos
 	rpos = pos + (int32_t)bam_cigar2rlen(n_cigar, bam_get_cigar(b));
 	qlen = (int32_t)bam_cigar2qlen(n_cigar, bam_get_cigar(b));
+	//printf("rpos = %d, qlen = %d\n", rpos, qlen);
 
 	// get cigar
 	assert(n_cigar <= max_num_cigar);
@@ -123,7 +127,7 @@ hit::hit(bam1_t *b, int id)
 			q += bam_cigar_oplen(cigar[k]);
 
 		if(k == 0 || k == n_cigar - 1) continue;
-		if(bam_cigar_op(cigar[k]) != BAM_CREF_SKIP) continue;
+		if(bam_cigar_op(cigar[k]) != BAM_CREF_SKIP) continue; //BAM_CREF_SKIP junction
 		if(bam_cigar_op(cigar[k-1]) != BAM_CMATCH) continue;
 		if(bam_cigar_op(cigar[k+1]) != BAM_CMATCH) continue;
 
@@ -195,12 +199,12 @@ string hit::get_qname(bam1_t *b)
 int hit::set_tags(bam1_t *b)
 {
 	ts = '.';
-	uint8_t *p0 = bam_aux_get(b, "ts");
+	uint8_t *p0 = bam_aux_get(b, "ts"); //ts used by minimap2
 	if(p0 && (*p0) == 'A') ts = bam_aux2A(p0);
 	if(p0 && (*p0) == 'a') ts = bam_aux2A(p0);
 
 	xs = '.';
-	uint8_t *p1 = bam_aux_get(b, "XS");
+	uint8_t *p1 = bam_aux_get(b, "XS"); //used by star and hisat
 	if(p1 && (*p1) == 'A') xs = bam_aux2A(p1);
 	if(p1 && (*p1) == 'a') xs = bam_aux2A(p1);
 
@@ -273,7 +277,7 @@ int hit::set_strand()
 {
 	strand = '.';
 	
-	if(library_type == FR_FIRST && ((flag & 0x1) >= 1))
+	if(library_type == FR_FIRST && ((flag & 0x1) >= 1)) //data strand specific if FR_FIRST/FR_SECOND
 	{
 		if((flag & 0x10) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';
 		if((flag & 0x10) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '+';

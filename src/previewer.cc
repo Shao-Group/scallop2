@@ -63,6 +63,8 @@ int previewer::solve_strandness()
 
 	int hid = 0;
 
+	if(verbose >= 1) printf("Solve_strandness\n");
+
     while(sam_read1(sfn, hdr, b1t) >= 0)
 	{
 		if(total >= max_preview_reads) break;
@@ -221,7 +223,7 @@ int previewer::solve_insertsize()
 		if(insertsize_high == -1 && n >= 1.0 * insertsize_high_percentile * total) insertsize_high = it->first;
 		if(n >= 0.999 * total) break;
 	}
-	
+
 	insertsize_ave = insertsize_ave * 1.0 / n;
 	insertsize_std = sqrt((sx2 - n * insertsize_ave * insertsize_ave) * 1.0 / n);
 
@@ -236,7 +238,7 @@ int previewer::solve_insertsize()
 
 	if(verbose >= 1)
 	{
-		printf("preview insertsize: sampled reads = %d, isize = %.2lf +/- %.2lf, median = %d, low = %d, high = %d\n", 
+		printf("preview insertsize: sampled reads = %d, isize = %.2lf +/- %.2lf, median = %d, low = %d, high = %d\n",
 				total, insertsize_ave, insertsize_std, insertsize_median, insertsize_low, insertsize_high);
 	}
 
