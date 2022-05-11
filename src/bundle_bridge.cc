@@ -375,11 +375,24 @@ int bundle_bridge::build_supplementaries()
     for(int i = 0; i < bb.hits.size(); i++)
     {
         hit &h = bb.hits[i];
-        if(h.isize >= 0) continue;
-        if(h.vlist.size() == 0) continue;
+
+        /*if(strcmp(h.qname.c_str(),"SRR1721290.17627808") == 0)
+        {
+        	h.print();
+        	printf("Hash value - %zu\n",h.qhash);
+        	printf("isize - %d\n",h.isize);
+        	printf("vlist size - %u\n",h.vlist.size());
+        	printf("h.flag & 0x800 - %d\n",(h.flag & 0x800));
+        }*/
+
+        //if(h.isize >= 0) continue;
+        //if(h.vlist.size() == 0) continue;
 
         // TODO
         if((h.flag & 0x800) == 0) continue;
+
+        //printf("%s\n",h.qname.c_str());
+        //printf("%zu\n",h.qhash);
 
         // do not use hi; as long as qname, pos and isize are identical
         // add 0x40 and 0x80
@@ -390,25 +403,40 @@ int bundle_bridge::build_supplementaries()
 
     for(int i = 0; i < bb.hits.size(); i++)
     {
+
+
         hit &h = bb.hits[i];
+
+        
+
         if(h.paired == true) continue;
-        if(h.isize <= 0) continue;
-        if(h.vlist.size() == 0) continue;
+        //if(h.isize <= 0) continue;
+        //if(h.vlist.size() == 0) continue;
         if((h.flag & 0x800) >= 1) continue;       // skip supplemetary
+
+        /*if(strcmp(h.qname.c_str(),"SRR1721290.17627808") == 0)
+        {
+        	h.print();
+        	printf("Hash value - %zu\n",h.qhash);
+        	printf("isize - %d\n",h.isize);
+        	printf("vlist size - %u\n",h.vlist.size());
+        	printf("h.flag & 0x800 - %d\n",(h.flag & 0x800));
+        	if(h.paired == true) printf("Paired true\n");
+        	else printf("Paired false\n\n");
+        }*/
+
+        
+
+        //printf("%s\n",h.qname.c_str());
+        
+        /*if(strcmp(h.qname.c_str(),"SRR1721290.17627808") == 0)
+        {
+        	h.print();
+        	printf("Hash value - %zu\n",h.qhash);
+        }*/
 
         int k = (h.qhash % max_index + (h.flag & 0x40) + (h.flag & 0x80)) % max_index;
 
-        /*
-        h.print();
-        for(int j = 0; j < vv[k].size(); j++)
-        {
-            hit &z = bb.hits[vv[k][j]];
-            printf(" ");
-            z.print();
-        }
-        */
-        //int x = -1;
-        //printf("Size of supplementary hit vector: %d\n",vv[k].size());
         for(int j = 0; j < vv[k].size(); j++)
         {
             hit &z = bb.hits[vv[k][j]];
@@ -429,6 +457,7 @@ int bundle_bridge::build_supplementaries()
     for(int i = 0; i < bb.hits.size(); i++)
     {
     	hit &h = bb.hits[i];
+    	if((h.flag & 0x800) >= 1) continue;       // skip supplemetary
     	printf("Primary hit:\n");
 	   	h.print();
 
@@ -439,6 +468,9 @@ int bundle_bridge::build_supplementaries()
     	}
     	printf("\n\n");
 	}
+	printf("-------------------------------------------------------------------------\n");
+	printf("End of bundle\n");
+	printf("-------------------------------------------------------------------------\n\n");
 
     return 0;
 }
