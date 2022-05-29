@@ -27,6 +27,7 @@ public:
 	bundle_base &bb;					// input bundle base
 	set<string> breads;					// bridged reads
 	vector<fragment> fragments;			// to-be-filled fragments
+	vector<int64_t> back_spos;			// back splice positions
 	vector<junction> junctions;			// splice junctions
 	vector<region> regions;				// pexons
 	vector<transcript> ref_trsts;		// overlaped genes in reference
@@ -49,6 +50,8 @@ public:
 	int build_regions();
 
 	int build_supplementaries();
+	int extract_backsplicing_junctions();
+	int refine_backsplicing_junctions();
 	int build_fragments();
 	int group_fragments();
 

@@ -64,7 +64,8 @@ public:
 	int32_t hi;								// HI aux in sam
 	int32_t nm;								// NM aux in sam
 	size_t qhash;							// hash code for qname
-	hit *suppl;								//supplementary hit
+	hit *suppl;								// supplementary hit
+	char end;								// left end 'L', right end 'R'
 
 	// scallop+coral
 	vector<int64_t> itvm;					// matched interval

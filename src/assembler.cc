@@ -82,6 +82,7 @@ int assembler::assemble()
 		// process
 		process(batch_bundle_size);
 
+
 		//printf("read strand = %c, xs = %c, ts = %c\n", ht.strand, ht.xs, ht.ts);
 
 		// add hit
@@ -95,11 +96,18 @@ int assembler::assemble()
 		if(library_type == UNSTRANDED && ht.xs == '.') bb2.add_hit(ht);
 		if(library_type == UNSTRANDED && ht.xs == '+') bb1.add_hit(ht);
 		if(library_type == UNSTRANDED && ht.xs == '-') bb2.add_hit(ht);
+
+
 	}
+
+	//printf("complete\n");
 
 	pool.push_back(bb1);
 	pool.push_back(bb2);
+
 	process(0);
+
+
 
 	assign_RPKM();
 
@@ -165,6 +173,8 @@ int assembler::process(int n)
 		if(verbose >= 1) bd.print(index++);
 		assemble(bd.gr, bd.hs, ts1, ts2);
 
+		//printf("complete\n");
+
 		/*
 		bd.build(1, false);
 		bd.print(index++);
@@ -199,6 +209,7 @@ int assembler::process(int n)
 		ft2.filter_length_coverage();
 		ft2.remove_nested_transcripts();
 		if(ft2.trs.size() >= 1) non_full_trsts.insert(non_full_trsts.end(), ft2.trs.begin(), ft2.trs.end());
+
 	}
 	pool.clear();
 	return 0;

@@ -38,6 +38,8 @@ int bundle_bridge::build()
 	index_references();
 
 	build_supplementaries();
+	extract_backsplicing_junctions();
+	refine_backsplicing_junctions();
 	build_fragments();
 	//group_fragments();
 
@@ -46,10 +48,11 @@ int bundle_bridge::build()
 	return 0;
 }
 
+
 int bundle_bridge::build_junctions()
 {
-	int min_max_boundary_quality = min_mapping_quality;
-	map< int64_t, vector<int> > m;
+	int min_max_boundary_quality = min_mapping_quality; //building a list of all splice pos and the bundle bases that includes the splice pos
+	map< int64_t, vector<int> > m; // map of spos against vector of bundle base indices
 	for(int i = 0; i < bb.hits.size(); i++)
 	{
 		vector<int64_t> v = bb.hits[i].spos;
@@ -67,10 +70,11 @@ int bundle_bridge::build_junctions()
 			}
 			else
 			{
-				m[p].push_back(i);
+				m[p].push_back(i); //map size 0 for chimeric instances as spos size is 0
 			}
 		}
 	}
+	//printf("spos map size = %d\n",m.size());
 
 	map< int64_t, vector<int> >::iterator it;
 	for(it = m.begin(); it != m.end(); it++)
@@ -105,6 +109,7 @@ int bundle_bridge::build_junctions()
 		junctions.push_back(jc);
 
 	}
+	//printf("Junctions size: %d\n", junctions.size());
 	return 0;
 }
 
@@ -159,6 +164,14 @@ int bundle_bridge::extend_junctions()
 		else jc.strand = '-';
 		junctions.push_back(jc);
 	}
+
+	//for(int i=0;i<junctions.size();i++)
+	//{
+
+	//	junctions[i].print();
+	//	printf("\n");
+	//}
+
 	return 0;
 }
 
@@ -362,8 +375,10 @@ int bundle_bridge::locate_region(int32_t x)
 	return -1;
 }
 
+
 int bundle_bridge::build_supplementaries()
 {
+
 	int max_index = bb.hits.size() + 1;
 	if(max_index > 1000000) max_index = 1000000;
 
@@ -376,6 +391,18 @@ int bundle_bridge::build_supplementaries()
     {
         hit &h = bb.hits[i];
 
+        //set paired flag
+        //if(h.flag & 0x01) h.paired = true;
+
+        //set left or right end
+        /*if(h.paired = true)
+        {
+	        if(h.flag & 0x40 == 0 && h.flag & 0x80 == 0) h.end = '.'; //unknown, may be part of a non-linear template
+	        if(h.flag & 0x40 >= 1 && h.flag & 0x80 == 0) h.end = 'F'; //first read
+	        if(h.flag & 0x40 == 0 && h.flag & 0x80 >= 1) h.end = 'L'; //last read
+	        if(h.flag & 0x40 >= 1 && h.flag & 0x80 >= 1) h.end = 'B'; //part of a linear template
+	    }*/
+
         /*if(strcmp(h.qname.c_str(),"SRR1721290.17627808") == 0)
         {
         	h.print();
@@ -385,7 +412,7 @@ int bundle_bridge::build_supplementaries()
         	printf("h.flag & 0x800 - %d\n",(h.flag & 0x800));
         }*/
 
-        //if(h.isize >= 0) continue;
+        //if(h.isize >= 0) continue; //commented out as this was filtering chimeric part of an end of SRR1721290.17627808
         //if(h.vlist.size() == 0) continue;
 
         // TODO
@@ -401,16 +428,16 @@ int bundle_bridge::build_supplementaries()
         //printf("Adding supple\n");
     }
 
+    //printf("End of vv adding\n");
+
     for(int i = 0; i < bb.hits.size(); i++)
     {
-
 
         hit &h = bb.hits[i];
 
         
-
-        if(h.paired == true) continue;
-        //if(h.isize <= 0) continue;
+        if(h.paired == true) continue; 
+        //if(h.isize <= 0) continue; //commented out as this was filtering non chimeric part of an end of SRR1721290.17627808
         //if(h.vlist.size() == 0) continue;
         if((h.flag & 0x800) >= 1) continue;       // skip supplemetary
 
@@ -454,7 +481,24 @@ int bundle_bridge::build_supplementaries()
         }
     }
 
+    /*int count = 0;
     for(int i = 0; i < bb.hits.size(); i++)
+    {
+    	hit &h = bb.hits[i];
+    	if((h.flag & 0x800) >= 1) continue;       // skip supplemetary
+    	//printf("Primary hit:\n");
+	   	//h.print();
+
+    	if(h.suppl != NULL)
+    	{
+	    	//printf("Supplementary hit:\n");
+	    	//h.suppl->print();
+	    	count++;
+    	}
+    	printf("count = %d\n\n", count);
+	}*/
+
+    /*for(int i = 0; i < bb.hits.size(); i++)
     {
     	hit &h = bb.hits[i];
     	if((h.flag & 0x800) >= 1) continue;       // skip supplemetary
@@ -470,9 +514,122 @@ int bundle_bridge::build_supplementaries()
 	}
 	printf("-------------------------------------------------------------------------\n");
 	printf("End of bundle\n");
-	printf("-------------------------------------------------------------------------\n\n");
-
+	printf("-------------------------------------------------------------------------\n\n");*/
+    //printf("end of build supple\n");
     return 0;
+}
+
+int bundle_bridge::extract_backsplicing_junctions()
+{
+        // simply note down the positions (HS, HH, SS, SH)
+        // CASE 1
+        // original hit: 45M25H (at the right side): the ending position of 45M: p1
+        // complementary hit: 26S50M (at the left side): the starting position of 50M: p2
+        // p1 > p2, then the BSJ is p1 -> p2
+
+        // CASE 2
+        // original hit: 26S50M (at the left side): the starting position of 50M: p2 (int32)
+        // complementary hit: 45M25H (at the right side): the ending position of 45M: p1
+        // p1 > p2, then the BSJ is p1 -> p2
+
+        // output: vector<PI32> or vector<int64>
+
+        /*for(int i = 0; i < ..)
+        {
+            //check if the current hit[i] has a complementary hit
+            // if yes:
+            // extract p1 and p2 and 
+            // push this pair (p1, p2) into the resulting vector
+        }*/
+
+		back_spos.clear();
+		int count = 0;
+        for(int i = 0; i < bb.hits.size(); i++)
+    	{
+
+            //check if the current hit[i] has a complementary hit
+        	hit &h = bb.hits[i];
+        	if(h.suppl == NULL) continue;
+
+        	count++;
+
+        	// if yes:
+
+            /*if(strcmp(h.qname.c_str(),"SRR1721290.17627808") == 0)
+			{
+				h.print();
+				h.suppl->print();
+				printf("\n\n");
+			}*/
+
+			// extract p1 and p2
+			int32_t p1;
+			int32_t p2;
+			if(h.pos < h.suppl->pos)
+			{
+				//case 1: original hit left, supplementary right
+				p1 = h.suppl->rpos; //end of suppl
+				p2 = h.pos; //start of org
+				
+			}
+			else
+			{
+				//case 2: original hit right, supplementary left
+				p1 = h.rpos; //end of org
+				p2 = h.suppl->pos; //start of suppl
+			}
+
+			// push this pair (p1, p2) into the resulting vector'
+			if(p1>p2)
+			{
+				back_spos.push_back(pack(p1, p2));
+			}
+			
+        }
+
+        //printf("back_spos size = %d, count = %d\n", back_spos.size(), count);
+
+        /*for(int i=0; i<back_spos.size(); i++)
+        {
+        	int32_t p1 = high32(back_spos[i]);
+			int32_t p2 = low32(back_spos[i]);
+			printf("%d-%d\n",p1,p2);
+        }
+        printf("End of bundle\n\n");*/
+
+        return 0;
+}
+
+int bundle_bridge::refine_backsplicing_junctions()
+{
+        // before calling this function, we should call extract_backsplicing_junctions and build_junctions
+        // given the extracted BSJs
+        // two junction
+
+        // output: vector<PI32> or vector<int64> of (x1, x2)
+        /*for(traverse the bsj_vector)
+        {
+                // p1 vs p2 (p1 > p2)
+                // we need parameters to define "close"
+                // check the junctions: if there exists a junction that is close to p1: if yes, call it x1
+                // check the junctions: if there exists a junction that is close to p2: if yes, call it x2
+                // store (x1, x2) as part of the output
+        }
+        return 0;*/
+	printf("back spos size = %d\n",back_spos.size());
+	printf("junc size = %d\n",junctions.size());
+
+	for(int i=0;i<back_spos.size();i++)
+	{
+		int32_t p1 = high32(back_spos[i]);
+		int32_t p2 = low32(back_spos[i]);
+
+		for(int j=0;j<junctions.size();j++)
+		{
+			junction &junc = junctions[i];
+			printf("junc count = %d\n", junc.count);
+		}
+	}
 }
 
 int bundle_bridge::build_fragments()

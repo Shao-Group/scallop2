@@ -9,7 +9,7 @@ See LICENSE for licensing.
 #ifndef __SPLICE_GRAPH_H__
 #define __SPLICE_GRAPH_H__
 
-#include "directed_graph.h"
+#include "directed_graph.h" //includes graph_base from lib/graph
 #include "vertex_info.h"
 #include "edge_info.h"
 #include "path.h"

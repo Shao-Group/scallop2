@@ -48,6 +48,7 @@ hit& hit::operator=(const hit &h)
 	nh = h.nh;
 	nm = h.nm;
 	suppl = h.suppl;
+	end = '.';
 
 	itvm = h.itvm;
 	itvi = h.itvi;
@@ -79,6 +80,7 @@ hit::hit(const hit &h)
 	nh = h.nh;
 	nm = h.nm;
 	suppl = h.suppl;
+	end = h.end;
 
 	itvm = h.itvm;
 	itvi = h.itvi;
@@ -103,11 +105,17 @@ hit::hit(bam1_t *b, int id)
 	bridged = false;
 	next = NULL;
 	suppl = NULL;
+	end = '.';
 
 	// compute rpos
 	rpos = pos + (int32_t)bam_cigar2rlen(n_cigar, bam_get_cigar(b));
 	qlen = (int32_t)bam_cigar2qlen(n_cigar, bam_get_cigar(b));
 	//printf("rpos = %d, qlen = %d\n", rpos, qlen);
+
+	/*if(strcmp(qname.c_str(),"SRR1721290.17627808") == 0)
+	{
+		print();
+	}*/
 
 	// get cigar
 	assert(n_cigar <= max_num_cigar);
@@ -128,8 +136,8 @@ hit::hit(bam1_t *b, int id)
 
 		if(k == 0 || k == n_cigar - 1) continue;
 		if(bam_cigar_op(cigar[k]) != BAM_CREF_SKIP) continue; //BAM_CREF_SKIP junction
-		if(bam_cigar_op(cigar[k-1]) != BAM_CMATCH) continue;
-		if(bam_cigar_op(cigar[k+1]) != BAM_CMATCH) continue;
+		if(bam_cigar_op(cigar[k-1]) != BAM_CMATCH) continue; //match
+		if(bam_cigar_op(cigar[k+1]) != BAM_CMATCH) continue; //match
 
 		// consider ALL splice positions
 		//if(bam_cigar_oplen(cigar[k-1]) < min_flank_length) continue;
@@ -170,6 +178,7 @@ hit::hit(bam1_t *b, int id)
 	}
 
 	//printf("call regular constructor\n");
+	//printf("end ...................................\n");
 }
 
 int hit::get_aligned_intervals(vector<int64_t> &v) const
@@ -241,6 +250,7 @@ int hit::set_tags(bam1_t *b)
         uint8_t *p6 = bam_aux_get(b, "UB");
         if(p6 && (*p6) == 'H') umi = bam_aux2Z(p6);
 	if(p6 && (*p6) == 'Z') umi = bam_aux2Z(p6);
+
 
 	/*	
 	// TODO: check if UB = UX
@@ -320,8 +330,8 @@ bool hit::operator<(const hit &h) const
 int hit::print() const
 {
 	// print basic information
-	printf("Hit %s: hid = %d, [%d-%d), mpos = %d, flag = %d, quality = %d, strand = %c, xs = %c, ts = %c, isize = %d, qlen = %d, hi = %d, nh = %d, umi = %s, bridged = %c\n", 
-			qname.c_str(), hid, pos, rpos, mpos, flag, qual, strand, xs, ts, isize, qlen, hi, nh, umi.c_str(), bridged ? 'T' : 'F');
+	printf("Hit %s: hid = %d, [%d-%d), mpos = %d, flag = %d, quality = %d, strand = %c, xs = %c, ts = %c, isize = %d, qlen = %d, hi = %d, nh = %d, umi = %s, bridged = %c, paired = %c, spos_size = %d\n", 
+			qname.c_str(), hid, pos, rpos, mpos, flag, qual, strand, xs, ts, isize, qlen, hi, nh, umi.c_str(), bridged ? 'T' : 'F',paired ? 'T' : 'F', spos.size());
 
 	/*
 	printf(" start position (%d - )\n", pos);

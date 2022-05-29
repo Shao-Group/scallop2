@@ -407,7 +407,7 @@ int bundle::build_splice_graph(int mode)
 	gr.add_vertex();
 	vertex_info vi0;
 	vi0.lpos = bb.lpos;
-	vi0.rpos = bb.lpos;
+	vi0.rpos = bb.lpos; //why both lpos,is this the source
 	gr.set_vertex_weight(0, 0);
 	gr.set_vertex_info(0, vi0);
 	for(int i = 0; i < pexons.size(); i++)
@@ -431,7 +431,7 @@ int bundle::build_splice_graph(int mode)
 	gr.add_vertex();
 	vertex_info vin;
 	vin.lpos = bb.rpos;
-	vin.rpos = bb.rpos;
+	vin.rpos = bb.rpos; //both rpos, is this the sink
 	gr.set_vertex_weight(pexons.size() + 1, 0);
 	gr.set_vertex_info(pexons.size() + 1, vin);
 
@@ -442,7 +442,7 @@ int bundle::build_splice_graph(int mode)
 
 		if(b.lexon < 0 || b.rexon < 0) continue;
 
-		const partial_exon &x = pexons[b.lexon];
+		const partial_exon &x = pexons[b.lexon]; //does this have any use
 		const partial_exon &y = pexons[b.rexon];
 
 		edge_descriptor p = gr.add_edge(b.lexon + 1, b.rexon + 1);
@@ -519,8 +519,8 @@ int bundle::build_splice_graph(int mode)
 		gr.set_edge_info(p, ei);
 	}
 
-	gr.strand = bb.strand;
-	gr.chrm = bb.chrm;
+	gr.strand = bb.strand; //setting strand and chrom number as diff splice graphs for diff chromosomes
+	gr.chrm = bb.chrm; //so are we building a splice graph for each bundle we create
 	return 0;
 }
 

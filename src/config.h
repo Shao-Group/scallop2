@@ -139,6 +139,9 @@ extern int verbose;
 extern int assemble_duplicates;
 extern string version;
 
+//for extracting BSJ
+extern int bsj_threshold;
+
 // parse arguments
 int print_command_line(int argc, const char ** argv);
 int parse_arguments(int argc, const char ** argv);
