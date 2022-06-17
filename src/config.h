@@ -140,7 +140,7 @@ extern int assemble_duplicates;
 extern string version;
 
 //for extracting BSJ
-extern int bsj_threshold;
+extern int BSJ_threshold;
 
 // parse arguments
 int print_command_line(int argc, const char ** argv);

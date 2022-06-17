@@ -56,6 +56,8 @@ int bundle_bridge::build_junctions()
 	for(int i = 0; i < bb.hits.size(); i++)
 	{
 		vector<int64_t> v = bb.hits[i].spos;
+		//printf("Spos size: %d\n", v.size());
+
 		if(v.size() == 0) continue;
 
 		for(int k = 0; k < v.size(); k++)
@@ -542,8 +544,9 @@ int bundle_bridge::extract_backsplicing_junctions()
             // push this pair (p1, p2) into the resulting vector
         }*/
 
-		back_spos.clear();
-		int count = 0;
+	back_spos.clear();
+	back_spos_hits.clear(); 
+
         for(int i = 0; i < bb.hits.size(); i++)
     	{
 
@@ -551,10 +554,12 @@ int bundle_bridge::extract_backsplicing_junctions()
         	hit &h = bb.hits[i];
         	if(h.suppl == NULL) continue;
 
-        	count++;
-
         	// if yes:
 
+        	//h.print();
+        	//h.suppl->print();
+        	//printf("\n\n");
+        	
             /*if(strcmp(h.qname.c_str(),"SRR1721290.17627808") == 0)
 			{
 				h.print();
@@ -562,9 +567,9 @@ int bundle_bridge::extract_backsplicing_junctions()
 				printf("\n\n");
 			}*/
 
-			// extract p1 and p2
-			int32_t p1;
-			int32_t p2;
+			// extract p1 and p2, no check done for H/S for now
+			int32_t p1 = 0;
+			int32_t p2 = 0;
 			if(h.pos < h.suppl->pos)
 			{
 				//case 1: original hit left, supplementary right
@@ -579,23 +584,56 @@ int bundle_bridge::extract_backsplicing_junctions()
 				p2 = h.suppl->pos; //start of suppl
 			}
 
-			// push this pair (p1, p2) into the resulting vector'
+			// push this pair (p1, p2) into the resulting vector
 			if(p1>p2)
 			{
+				back_spos_hits.push_back(h);
 				back_spos.push_back(pack(p1, p2));
 			}
+
+			if(back_spos_support.find(p1) == back_spos_support.end())
+			{
+				back_spos_support.insert(pair<int32_t, int>(p1,1));
+			}
+			else
+			{
+				back_spos_support[p1] = back_spos_support[p1] + 1;
+			}
 			
+			if(back_spos_support.find(p2) == back_spos_support.end())
+			{
+				back_spos_support.insert(pair<int32_t, int>(p2,1));
+			}
+			else
+			{
+				back_spos_support[p2] = back_spos_support[p2] + 1;
+			}
         }
 
-        //printf("back_spos size = %d, count = %d\n", back_spos.size(), count);
+        printf("back_spos size = %d\n", back_spos.size());
+
+        //change map to include nearby positions of p1 p2 in count
+
+        printf("Back spos support map:\n");
+
+        map< int32_t, int >::iterator it;
+		for(it = back_spos_support.begin(); it != back_spos_support.end(); it++)
+		{	
+
+			int32_t p = it->first;
+			int support_count = it->second;
+
+			printf("p value=%d, count=%d\n",p,support_count);
+
+		}
 
         /*for(int i=0; i<back_spos.size(); i++)
         {
         	int32_t p1 = high32(back_spos[i]);
 			int32_t p2 = low32(back_spos[i]);
 			printf("%d-%d\n",p1,p2);
-        }
-        printf("End of bundle\n\n");*/
+        }*/
+        //printf("End of bundle\n\n");
 
         return 0;
 }
@@ -611,25 +649,119 @@ int bundle_bridge::refine_backsplicing_junctions()
         {
                 // p1 vs p2 (p1 > p2)
                 // we need parameters to define "close"
-                // check the junctions: if there exists a junction that is close to p1: if yes, call it x1
+                // check the junctions (splice pos): if there exists a junction that is close to p1: if yes, call it x1
                 // check the junctions: if there exists a junction that is close to p2: if yes, call it x2
                 // store (x1, x2) as part of the output
         }
         return 0;*/
-	printf("back spos size = %d\n",back_spos.size());
-	printf("junc size = %d\n",junctions.size());
+
+	//printf("back spos size = %d\n",back_spos.size());
+	//printf("junc size = %d\n",junctions.size());
+
+	corrected_back_spos.clear();
+
+	//map< int64_t, vector<int64_t> > m;
 
 	for(int i=0;i<back_spos.size();i++)
 	{
 		int32_t p1 = high32(back_spos[i]);
 		int32_t p2 = low32(back_spos[i]);
 
+		printf("Start of back spos\n");
+		printf("p1=%d,p2=%d\n\n",p1,p2);
+
+		printf("Primary:\n");
+		back_spos_hits[i].print();
+		printf("Supple:\n");
+		back_spos_hits[i].suppl->print();
+
+		printf("\n");
+
+		int32_t x1 = 0; //initialized to 0 if not such corrected back splice position exist, assert later
+		int32_t x2 = 0;
+
 		for(int j=0;j<junctions.size();j++)
 		{
-			junction &junc = junctions[i];
-			printf("junc count = %d\n", junc.count);
+	
+			junction junc = junctions[j];
+			//printf("junc lpos=%d, junc rpos=%d\n",junc.lpos,junc.rpos);
+			//printf("junc count = %d\n", junc.count);
+
+			if(junc.lpos >= p1-BSJ_threshold && junc.lpos <= p1+BSJ_threshold && x1 == 0)
+			{ 
+				x1 = junc.lpos;
+				printf("lpos of junction close to p1(%d): %d-%d\n",p1,x1,junc.rpos);
+			}
+			else if(junc.rpos >= p1-BSJ_threshold && junc.rpos <= p1+BSJ_threshold & x1 == 0)
+			{
+				x1 = junc.rpos;
+				printf("rpos of junction close to p1(%d): %d-%d\n",p1,junc.lpos,x1);
+			}
+
+
+			if(junc.lpos >= p2-BSJ_threshold && junc.lpos <= p2+BSJ_threshold && x2 == 0)
+			{
+				//there exists a junction that is close to p2: if yes, call it x2 
+				x2 = junc.lpos;
+				printf("lpos of junction close to p2(%d): %d-%d\n",p2,x2,junc.rpos);
+			}
+			else if(junc.rpos >= p2-BSJ_threshold && junc.rpos <= p2+BSJ_threshold && x2 == 0)
+			{
+				x2 = junc.rpos;
+				printf("rpos of junction close to p2(%d): %d-%d\n",p2,junc.lpos,x2);
+			}	
+
+			//printf("End of junction\n");
+
+			if(x1 !=0 && x2 != 0)
+			{
+				printf("Found both x1 and x2 for current p1 and p2\n");
+				break;
+			}
+
 		}
+
+		//if an x1 and x2 is found, we stop traversing and break, we keep tha first x1 and first x2 found
+
+		//If x1 or x2 is zero, check hits supporting p1 or p2 respectively. If support low, false positive.
+		if((x1 == 0 && back_spos_support[p1] < 3) || (x2 == 0 && back_spos_support[p2] < 3)) 
+		{
+			printf("There is a false positive\n");
+			printf("x1=%d, p1 count=%d\n",x1,back_spos_support[p1]);
+			printf("x2=%d, p2 count=%d\n",x2,back_spos_support[p2]);
+			printf("End of back pos\n\n");
+			continue; //discarding both p1 and p2 for false positive p1
+		}
+
+		if(x1 == 0) //if not nearby junc but support high, keep p1 
+		{
+			x1 = p1;
+			printf("x1 0, so x1=%d, p1 count=%d\n",x1,back_spos_support[p1]);
+		}
+		if(x2 == 0) //if not nearby junc but support high, keep p2
+		{
+			x2 = p2;
+			printf("x2 0, so x2=%d, p2 count=%d\n",x2,back_spos_support[p2]);
+		}
+
+		//printf("p1 count:%d, p2 count:%d\n",back_spos_support[p1],back_spos_support[p2]);
+		printf("x1 = %d, x2 = %d\n\n",x1,x2);
+		corrected_back_spos.push_back(pack(x1,x2));
+		
+		
+		printf("End of back pos\n\n");
 	}
+
+	printf("Size of corrected back_spos: %d\n",corrected_back_spos.size());
+
+	for(int i=0;i<corrected_back_spos.size();i++)
+	{
+		int32_t x1 = high32(corrected_back_spos[i]);
+		int32_t x2 = low32(corrected_back_spos[i]);
+		printf("x1 = %d, x2 = %d\n",x1,x2);
+	}
+
+	printf("End of bundle\n\n");
 }
 
 int bundle_bridge::build_fragments()
@@ -916,18 +1048,18 @@ int bundle_bridge::build_fragments()
 			}
 
 			fr.b2 = true;
-                	if(v2.size() <= 1)
-                	{
-                        	fr.b2 = false;
-                	}
-                	else if(v2.size() >= 2 || v2[1] == v2.front() + 1)
-                	{
-                        	if(regions[v2.front()].rpos - fr.h2->pos > max_misalignment1 + fr.h2->nm) fr.b2 = false;
-                	}
-                	else if(v2.size() >= 2 || v2[1] != v2.front() + 1)
-                	{
-                        	if(regions[v2.front()].rpos - fr.h2->pos > max_misalignment2 + fr.h2->nm) fr.b2 = false;
-                	}
+        	if(v2.size() <= 1)
+        	{
+                	fr.b2 = false;
+        	}
+        	else if(v2.size() >= 2 || v2[1] == v2.front() + 1)
+        	{
+                	if(regions[v2.front()].rpos - fr.h2->pos > max_misalignment1 + fr.h2->nm) fr.b2 = false;
+        	}
+        	else if(v2.size() >= 2 || v2[1] != v2.front() + 1)
+        	{
+                	if(regions[v2.front()].rpos - fr.h2->pos > max_misalignment2 + fr.h2->nm) fr.b2 = false;
+        	}
 
 			fragments.push_back(fr);
 			bb.hits[hidx1].paired = true;

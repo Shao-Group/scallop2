@@ -117,6 +117,8 @@ hit::hit(bam1_t *b, int id)
 		print();
 	}*/
 
+	//print();
+
 	// get cigar
 	assert(n_cigar <= max_num_cigar);
 	assert(n_cigar >= 1);
@@ -126,13 +128,22 @@ hit::hit(bam1_t *b, int id)
 	spos.clear();
 	int32_t p = pos;
 	int32_t q = 0;
+
+	//printf("qname: %s, n_cigar size: %d\n",qname.c_str(),n_cigar);
+
     for(int k = 0; k < n_cigar; k++)
 	{
+		/* bam_cigar_type returns a bit flag with:
+ *   bit 1 set if the cigar operation consumes the query
+ *   bit 2 set if the cigar operation consumes the reference/**/
+
 		if (bam_cigar_type(bam_cigar_op(cigar[k]))&2)
 			p += bam_cigar_oplen(cigar[k]);
+		//printf("p=%d,",p);	
 
 		if (bam_cigar_type(bam_cigar_op(cigar[k]))&1)
 			q += bam_cigar_oplen(cigar[k]);
+		//printf("q=%d,",q);
 
 		if(k == 0 || k == n_cigar - 1) continue;
 		if(bam_cigar_op(cigar[k]) != BAM_CREF_SKIP) continue; //BAM_CREF_SKIP junction
@@ -142,10 +153,14 @@ hit::hit(bam1_t *b, int id)
 		// consider ALL splice positions
 		//if(bam_cigar_oplen(cigar[k-1]) < min_flank_length) continue;
 		//if(bam_cigar_oplen(cigar[k+1]) < min_flank_length) continue;
+		//printf("\nPassed conditions of spos\n");
 
 		int32_t s = p - bam_cigar_oplen(cigar[k]);
+		//printf("s=%d\n",s);
 		spos.push_back(pack(s, p));
 	}
+
+	//printf("spos size: %d\n", spos.size());
 
 	// open for scallop+coral
 	itvm.clear();

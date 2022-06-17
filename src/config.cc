@@ -107,7 +107,7 @@ string version = "v1.1.2";
 
 
 //for extracting BSJ
-int bsj_threshold = 100;
+int BSJ_threshold = 50;
 
 int parse_arguments(int argc, const char ** argv)
 {
