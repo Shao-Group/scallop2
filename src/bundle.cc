@@ -34,6 +34,10 @@ int bundle::prepare()
 	compute_strand();
 	build_intervals();
 	build_junctions();
+
+	// add the 3 new functions
+	// build_backsplicing_junctions();
+
 	build_regions();
 	build_partial_exons();
 
@@ -184,6 +188,91 @@ int bundle::build_junctions() //write new similar function to handle BSJs
 		//printf("junction: %s:%d-%d (%d, %d, %d) %d\n", bb.chrm.c_str(), p1, p2, s0, s1, s2, s1 < s2 ? s1 : s2);
 
 		junction jc(it->first, v.size());
+
+		// TODO: assign a correct flag to jc
+		// jc.flag = 1; meaning normal junctions
+		jc.nm = nm;
+		if(s1 == 0 && s2 == 0) jc.strand = '.';
+		else if(s1 >= 1 && s2 >= 1) jc.strand = '.';
+		else if(s1 > s2) jc.strand = '+';
+		else jc.strand = '-';
+		junctions.push_back(jc);
+	}
+	return 0;
+}
+
+int bundle::build_backsplicing_junctions() //write new similar function to handle BSJs
+{
+	map<int64_t, vector<hit*>> m;		// bridged fragments
+
+	for(int i = 0; i < bb.hits.size(); i++)
+	{
+		// consider these hits with BSJ
+		//if(bb.hits[i].bridged == true) continue;
+		//if(br.breads.find(bb.hits[i].qname) != br.breads.end()) continue;
+		//if((bb.hits[i].flag & 0x100) >= 1) continue;
+
+		// TODO: replace this part with x1 and x2
+		//int64_t p = v[k]; modify this part to encode the BSJ
+		if(m.find(p) == m.end())
+		{
+			vector<hit*> hv;
+			hv.push_back(&(bb.hits[i]));
+			m.insert(pair< int64_t, vector<hit*> >(p, hv));
+		}
+		else
+		{
+			m[p].push_back(&(bb.hits[i]));
+		}
+
+		/*
+		vector<int64_t> v = bb.hits[i].spos;
+		if(v.size() == 0) continue;
+
+		for(int k = 0; k < v.size(); k++)
+		{
+			int64_t p = v[k];
+			if(m.find(p) == m.end())
+			{
+				vector<hit*> hv;
+				hv.push_back(&(bb.hits[i]));
+				m.insert(pair< int64_t, vector<hit*> >(p, hv));
+			}
+			else
+			{
+				m[p].push_back(&(bb.hits[i]));
+			}
+		}
+		*/
+	}
+
+	map<int64_t, vector<hit*>>::iterator it;
+	for(it = m.begin(); it != m.end(); it++)
+	{
+		vector<hit*> &v = it->second;
+		if(v.size() < min_splice_boundary_hits) continue;
+
+		int32_t p1 = high32(it->first);
+		int32_t p2 = low32(it->first);
+
+		int s0 = 0;
+		int s1 = 0;
+		int s2 = 0;
+		int nm = 0;
+		for(int k = 0; k < v.size(); k++)
+		{
+			nm += v[k]->nm;
+			if(v[k]->xs == '.') s0++;
+			if(v[k]->xs == '+') s1++;
+			if(v[k]->xs == '-') s2++;
+		}
+
+		//printf("junction: %s:%d-%d (%d, %d, %d) %d\n", bb.chrm.c_str(), p1, p2, s0, s1, s2, s1 < s2 ? s1 : s2);
+
+		junction jc(it->first, v.size());
+
+		// TODO: assign a correct flag to jc
+		// jc.flag = 2; meaning BSJ
 		jc.nm = nm;
 		if(s1 == 0 && s2 == 0) jc.strand = '.';
 		else if(s1 >= 1 && s2 >= 1) jc.strand = '.';
@@ -380,6 +469,9 @@ int bundle::link_partial_exons()
 	for(int i = 0; i < junctions.size(); i++)
 	{
 		junction &b = junctions[i];
+
+		// TODO: if b is normal, do the following
+		// if b is BSJ, do similar but opporsite thing
 		MPI::iterator li = rm.find(b.lpos);
 		MPI::iterator ri = lm.find(b.rpos);
 
@@ -396,6 +488,7 @@ int bundle::link_partial_exons()
 			b.lexon = b.rexon = -1;
 		}
 	}
+
 	return 0;
 }
 
@@ -439,8 +532,10 @@ int bundle::build_splice_graph(int mode)
 	for(int i = 0; i < junctions.size(); i++)
 	{
 		const junction &b = junctions[i];
-
 		if(b.lexon < 0 || b.rexon < 0) continue;
+
+		// TODO: if normal, do the same
+		// if BSJ: do something like: add_edge(b.rexon + 1, b.lexon + 1);
 
 		const partial_exon &x = pexons[b.lexon]; //does this have any use
 		const partial_exon &y = pexons[b.rexon];
@@ -452,6 +547,7 @@ int bundle::build_splice_graph(int mode)
 		ei.strand = b.strand;
 		gr.set_edge_info(p, ei);
 		gr.set_edge_weight(p, b.count);
+
 	}
 
 	// edges: connecting start/end and pexons

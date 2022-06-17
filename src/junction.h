@@ -23,6 +23,8 @@ public:
 	bool operator<(const junction &x) const;
 
 public:
+	// add a flag to mark if this junction is a normal one or BSJ; 
+	// int flag;
 	int32_t lpos;		// left position [left, right)
 	int32_t rpos;		// right position
 	int count;			// number of hits having this splice junction
