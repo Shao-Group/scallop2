@@ -33,6 +33,13 @@ public:
 	bundle_base &bb;				// input bundle base	
 	bundle_bridge br;				// contains fragments
 	split_interval_map fmap;		// matched interval map
+
+	vector<int64_t> back_spos;			// back splice positions
+	vector<int64_t> corrected_back_spos; // corrected back splice positions
+	vector<hit> back_spos_hits;			// store hits corresponding to back_spos
+	vector<hit> corrected_back_spos_hits;	// store hits corresponding to corrected_back_spos
+	map<int32_t, int> back_spos_support; //count supporting reads for back splice position p1/p2 individually
+
 	vector<junction> junctions;		// splice junctions
 	vector<region> regions;			// regions
 	vector<partial_exon> pexons;	// partial exons
@@ -63,6 +70,12 @@ public:
 	int build_intervals();
 	int build_junctions();
 	int correct_junctions();
+
+	int build_supplementaries();
+	int extract_backsplicing_junctions();
+	int refine_backsplicing_junctions();
+	int build_backsplicing_junctions();
+
 	int build_regions();
 	int build_partial_exons();
 	int link_partial_exons();

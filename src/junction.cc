@@ -18,6 +18,7 @@ junction::junction(int64_t _p)
 	lpos = high32(_p);
 	rpos = low32(_p);
 	count = 0;
+	junc_type = 1;
 	strand = '.';
 	lexon = -1;
 	rexon = -1;
@@ -31,6 +32,7 @@ junction::junction(int64_t _p, int _c)
 	lpos = high32(_p);
 	rpos = low32(_p);
 	count = _c;
+	junc_type = 1;
 	strand = '.';
 	lexon = -1;
 	rexon = -1;
@@ -44,6 +46,7 @@ junction::junction(const junction &sp)
 	lpos = sp.lpos;
 	rpos = sp.rpos;
 	count = sp.count;
+	junc_type = sp.junc_type;
 	lexon = sp.lexon;
 	rexon = sp.rexon;
 	strand = sp.strand;

@@ -28,6 +28,7 @@ public:
 	int32_t lpos;		// left position [left, right)
 	int32_t rpos;		// right position
 	int count;			// number of hits having this splice junction
+	int junc_type;		//junc_type = 1 if normal junction, 2 if BSJ.
 	char strand;		// strandness of this junction
 	int nm;				// total mismatch
 

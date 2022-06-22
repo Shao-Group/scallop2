@@ -36,7 +36,10 @@ int bundle::prepare()
 	build_junctions();
 
 	// add the 3 new functions
-	// build_backsplicing_junctions();
+	build_supplementaries();
+	extract_backsplicing_junctions();
+	refine_backsplicing_junctions();
+	build_backsplicing_junctions();
 
 	build_regions();
 	build_partial_exons();
@@ -189,8 +192,8 @@ int bundle::build_junctions() //write new similar function to handle BSJs
 
 		junction jc(it->first, v.size());
 
-		// TODO: assign a correct flag to jc
-		// jc.flag = 1; meaning normal junctions
+		//TODO: assign a correct flag to jc
+		jc.junc_type = 1; //meaning normal junctions
 		jc.nm = nm;
 		if(s1 == 0 && s2 == 0) jc.strand = '.';
 		else if(s1 >= 1 && s2 >= 1) jc.strand = '.';
@@ -201,12 +204,409 @@ int bundle::build_junctions() //write new similar function to handle BSJs
 	return 0;
 }
 
-int bundle::build_backsplicing_junctions() //write new similar function to handle BSJs
+int bundle::build_supplementaries()
 {
-	map<int64_t, vector<hit*>> m;		// bridged fragments
 
-	for(int i = 0; i < bb.hits.size(); i++)
+	int max_index = bb.hits.size() + 1;
+	if(max_index > 1000000) max_index = 1000000;
+
+    vector< vector<int> > vv;
+    vv.resize(max_index);
+
+    //printf("Bundle hit size: %d\n", bb.hits.size());
+    // first build index
+    for(int i = 0; i < bb.hits.size(); i++)
+    {
+        hit &h = bb.hits[i];
+
+
+        /*if(strcmp(h.qname.c_str(),"SRR1721290.17627808") == 0)
+        {
+        	h.print();
+        	printf("Hash value - %zu\n",h.qhash);
+        	printf("isize - %d\n",h.isize);
+        	printf("vlist size - %u\n",h.vlist.size());
+        	printf("h.flag & 0x800 - %d\n",(h.flag & 0x800));
+        }*/
+
+        //if(h.isize >= 0) continue; //commented out as this was filtering chimeric part of an end of SRR1721290.17627808
+        //if(h.vlist.size() == 0) continue;
+
+        // TODO
+        if((h.flag & 0x800) == 0) continue;
+
+        //printf("%s\n",h.qname.c_str());
+        //printf("%zu\n",h.qhash);
+
+        // do not use hi; as long as qname, pos and isize are identical
+        // add 0x40 and 0x80
+        int k = (h.qhash % max_index + (h.flag & 0x40) + (h.flag & 0x80)) % max_index;
+        vv[k].push_back(i);
+        //printf("Adding supple\n");
+    }
+
+    //printf("End of vv adding\n");
+
+    for(int i = 0; i < bb.hits.size(); i++)
+    {
+
+        hit &h = bb.hits[i];
+
+        
+        //if(h.paired == true) continue; 
+        //if(h.isize <= 0) continue; //commented out as this was filtering non chimeric part of an end of SRR1721290.17627808
+        //if(h.vlist.size() == 0) continue;
+        if((h.flag & 0x800) >= 1) continue;       // skip supplemetary
+
+        /*if(strcmp(h.qname.c_str(),"SRR1721290.17627808") == 0)
+        {
+        	h.print();
+        	printf("Hash value - %zu\n",h.qhash);
+        	printf("isize - %d\n",h.isize);
+        	printf("vlist size - %u\n",h.vlist.size());
+        	printf("h.flag & 0x800 - %d\n",(h.flag & 0x800));
+        	if(h.paired == true) printf("Paired true\n");
+        	else printf("Paired false\n\n");
+        }*/
+
+        
+
+        //printf("%s\n",h.qname.c_str());
+        
+        /*if(strcmp(h.qname.c_str(),"SRR1721290.17627808") == 0)
+        {
+        	h.print();
+        	printf("Hash value - %zu\n",h.qhash);
+        }*/
+
+        int k = (h.qhash % max_index + (h.flag & 0x40) + (h.flag & 0x80)) % max_index;
+
+        for(int j = 0; j < vv[k].size(); j++)
+        {
+            hit &z = bb.hits[vv[k][j]];
+            //if(z.hi != h.hi) continue;
+            //if(z.paired == true) continue;
+            //if(z.pos != h.mpos) continue;
+            //if(z.isize + h.isize != 0) continue;
+            //if(z.qhash != h.qhash) continue;
+            if(z.qname != h.qname) continue;
+            // TODO check 0x40 and 0x80 are the same
+            if(z.flag & 0x40 != h.flag & 0x40 || z.flag & 0x80 != h.flag & 0x80) continue;
+            //x = vv[k][j];
+            h.suppl = &z;
+            break; //Taking the first supplementary read
+        }
+    }
+
+    /*int count = 0;
+    for(int i = 0; i < bb.hits.size(); i++)
+    {
+    	hit &h = bb.hits[i];
+    	if((h.flag & 0x800) >= 1) continue;       // skip supplemetary
+    	//printf("Primary hit:\n");
+	   	//h.print();
+
+    	if(h.suppl != NULL)
+    	{
+	    	//printf("Supplementary hit:\n");
+	    	//h.suppl->print();
+	    	count++;
+    	}
+    	printf("count = %d\n\n", count);
+	}*/
+
+    /*for(int i = 0; i < bb.hits.size(); i++)
+    {
+    	hit &h = bb.hits[i];
+    	if((h.flag & 0x800) >= 1) continue;       // skip supplemetary
+    	printf("Primary hit:\n");
+	   	h.print();
+
+    	if(h.suppl != NULL)
+    	{
+	    	printf("Supplementary hit:\n");
+	    	h.suppl->print();
+    	}
+    	printf("\n\n");
+	}
+	printf("-------------------------------------------------------------------------\n");
+	printf("End of bundle\n");
+	printf("-------------------------------------------------------------------------\n\n");
+    //printf("end of build supple\n");*/
+    return 0;
+}
+
+int bundle::extract_backsplicing_junctions()
+{
+        // simply note down the positions (HS, HH, SS, SH)
+        // CASE 1
+        // original hit: 45M25H (at the right side): the ending position of 45M: p1
+        // complementary hit: 26S50M (at the left side): the starting position of 50M: p2
+        // p1 > p2, then the BSJ is p1 -> p2
+
+        // CASE 2
+        // original hit: 26S50M (at the left side): the starting position of 50M: p2 (int32)
+        // complementary hit: 45M25H (at the right side): the ending position of 45M: p1
+        // p1 > p2, then the BSJ is p1 -> p2
+
+        // output: vector<PI32> or vector<int64>
+
+        /*for(int i = 0; i < ..)
+        {
+            //check if the current hit[i] has a complementary hit
+            // if yes:
+            // extract p1 and p2 and 
+            // push this pair (p1, p2) into the resulting vector
+        }*/
+
+	back_spos.clear();
+	back_spos_hits.clear(); 
+
+    for(int i = 0; i < bb.hits.size(); i++)
 	{
+
+        //check if the current hit[i] has a complementary hit
+    	hit &h = bb.hits[i];
+    	if(h.suppl == NULL) continue;
+
+    	// if yes:
+
+    	//h.print();
+    	//h.suppl->print();
+    	//printf("\n\n");
+    	
+        if(strcmp(h.qname.c_str(),"SRR1721290.17627808") == 0)
+		{
+			h.print();
+			h.suppl->print();
+			printf("\n\n");
+		}
+
+		// extract p1 and p2, no check done for H/S for now
+		int32_t p1 = 0;
+		int32_t p2 = 0;
+		if(h.pos < h.suppl->pos)
+		{
+			//case 1: original hit left, supplementary right
+			p1 = h.suppl->rpos; //end of suppl
+			p2 = h.pos; //start of org
+			
+		}
+		else
+		{
+			//case 2: original hit right, supplementary left
+			p1 = h.rpos; //end of org
+			p2 = h.suppl->pos; //start of suppl
+		}
+
+		// push this pair (p1, p2) into the resulting vector
+		if(p1 > p2)
+		{
+			back_spos_hits.push_back(h);
+			back_spos.push_back(pack(p2, p1));
+		}
+
+		//create a map to keep count of hits near p1 and p2
+
+
+		if(back_spos_support.find(p1) == back_spos_support.end())
+		{
+			back_spos_support.insert(pair<int32_t, int>(p1,1));
+		}
+		else
+		{
+			back_spos_support[p1] = back_spos_support[p1] + 1;
+		}
+		
+		if(back_spos_support.find(p2) == back_spos_support.end())
+		{
+			back_spos_support.insert(pair<int32_t, int>(p2,1));
+		}
+		else
+		{
+			back_spos_support[p2] = back_spos_support[p2] + 1;
+		}
+
+		map< int32_t, int >::iterator it;
+		for(it = back_spos_support.begin(); it != back_spos_support.end(); it++) //for now inefficient coding here
+		{	
+			int32_t p = it->first;
+			int support_count = it->second;
+
+			if((h.pos <= p+5 && h.pos >= p-5) || (h.rpos <= p+5 && h.rpos >= p-5))
+			{
+				back_spos_support[p] = back_spos_support[p] + 1;
+			}
+		}
+    }
+
+    printf("back_spos size = %d\n", back_spos.size());
+    printf("back_spos hits size = %d\n", back_spos_hits.size());
+
+    //add nearby positions of p1 p2 in count map
+
+
+    printf("Back spos support map: %d\n", back_spos_support.size());
+
+    map< int32_t, int >::iterator it;
+	for(it = back_spos_support.begin(); it != back_spos_support.end(); it++)
+	{	
+
+		int32_t p = it->first;
+		int support_count = it->second;
+
+		printf("p value=%d, count=%d\n",p,support_count);
+
+	}
+
+    /*for(int i=0; i<back_spos.size(); i++)
+    {
+    	int32_t p1 = high32(back_spos[i]);
+		int32_t p2 = low32(back_spos[i]);
+		printf("%d-%d\n",p1,p2);
+    }*/
+    //printf("End of bundle\n\n");
+
+    return 0;
+}
+
+int bundle::refine_backsplicing_junctions()
+{
+        // before calling this function, we should call extract_backsplicing_junctions and build_junctions
+        // given the extracted BSJs
+        // two junction
+
+        // output: vector<PI32> or vector<int64> of (x1, x2)
+        /*for(traverse the bsj_vector)
+        {
+                // p1 vs p2 (p1 > p2)
+                // we need parameters to define "close"
+                // check the junctions (splice pos): if there exists a junction that is close to p1: if yes, call it x1
+                // check the junctions: if there exists a junction that is close to p2: if yes, call it x2
+                // store (x1, x2) as part of the output
+        }
+        return 0;*/
+
+	//printf("back spos size = %d\n",back_spos.size());
+	//printf("junc size = %d\n",junctions.size());
+
+	corrected_back_spos.clear();
+	corrected_back_spos_hits.clear();
+
+	//map< int64_t, vector<int64_t> > m;
+
+	for(int i=0;i<back_spos.size();i++)
+	{
+		int32_t p2 = high32(back_spos[i]);
+		int32_t p1 = low32(back_spos[i]);
+
+		printf("Start of back spos\n");
+		printf("p1=%d,p2=%d\n\n",p1,p2);
+
+		printf("Primary:\n");
+		back_spos_hits[i].print();
+		printf("Supple:\n");
+		back_spos_hits[i].suppl->print();
+
+		printf("\n");
+
+		int32_t x1 = 0; //initialized to 0 if not such corrected back splice position exist, assert later
+		int32_t x2 = 0;
+
+		for(int j=0;j<junctions.size();j++)
+		{
+	
+			junction junc = junctions[j];
+			//printf("junc lpos=%d, junc rpos=%d\n",junc.lpos,junc.rpos);
+			//printf("junc count = %d\n", junc.count);
+
+			if(junc.lpos >= p1-BSJ_threshold && junc.lpos <= p1+BSJ_threshold && x1 == 0)
+			{ 
+				x1 = junc.lpos;
+				printf("lpos of junction close to p1(%d): %d-%d\n",p1,x1,junc.rpos);
+			}
+			else if(junc.rpos >= p1-BSJ_threshold && junc.rpos <= p1+BSJ_threshold & x1 == 0)
+			{
+				x1 = junc.rpos;
+				printf("rpos of junction close to p1(%d): %d-%d\n",p1,junc.lpos,x1);
+			}
+
+
+			if(junc.lpos >= p2-BSJ_threshold && junc.lpos <= p2+BSJ_threshold && x2 == 0)
+			{
+				//there exists a junction that is close to p2: if yes, call it x2 
+				x2 = junc.lpos;
+				printf("lpos of junction close to p2(%d): %d-%d\n",p2,x2,junc.rpos);
+			}
+			else if(junc.rpos >= p2-BSJ_threshold && junc.rpos <= p2+BSJ_threshold && x2 == 0)
+			{
+				x2 = junc.rpos;
+				printf("rpos of junction close to p2(%d): %d-%d\n",p2,junc.lpos,x2);
+			}	
+
+			//printf("End of junction\n");
+
+			if(x1 !=0 && x2 != 0)
+			{
+				printf("Found both x1 and x2 for current p1 and p2\n");
+				break;
+			}
+
+		}
+
+		//if an x1 and x2 is found, we stop traversing and break, we keep tha first x1 and first x2 found
+
+		//If x1 or x2 is zero, check hits supporting p1 or p2 respectively. If support low, false positive.
+		if((x1 == 0 && back_spos_support[p1] < 3) || (x2 == 0 && back_spos_support[p2] < 3)) 
+		{
+			printf("There is a false positive\n");
+			printf("x1=%d, p1 count=%d\n",x1,back_spos_support[p1]);
+			printf("x2=%d, p2 count=%d\n",x2,back_spos_support[p2]);
+			printf("End of back pos\n\n");
+			continue; //discarding both p1 and p2 for false positive p1
+		}
+
+		if(x1 == 0) //if not nearby junc but support high, keep p1 
+		{
+			x1 = p1;
+			printf("x1 0, so x1=%d, p1 count=%d\n",x1,back_spos_support[p1]);
+		}
+		if(x2 == 0) //if not nearby junc but support high, keep p2
+		{
+			x2 = p2;
+			printf("x2 0, so x2=%d, p2 count=%d\n",x2,back_spos_support[p2]);
+		}
+
+		//printf("p1 count:%d, p2 count:%d\n",back_spos_support[p1],back_spos_support[p2]);
+		printf("x1 = %d, x2 = %d\n\n",x1,x2);
+		corrected_back_spos.push_back(pack(x2,x1));
+		corrected_back_spos_hits.push_back(back_spos_hits[i]);
+		
+		printf("End of back pos\n\n");
+	}
+
+	printf("Size of corrected back_spos: %d\n",corrected_back_spos.size());
+	printf("Size of corrected back_spos_hits: %d\n",corrected_back_spos_hits.size());
+
+	for(int i=0;i<corrected_back_spos.size();i++)
+	{
+		int32_t x1 = high32(corrected_back_spos[i]);
+		int32_t x2 = low32(corrected_back_spos[i]);
+		printf("x1 = %d, x2 = %d\n",x1,x2);
+	}
+
+	printf("End of bundle\n\n");
+}
+
+
+int bundle::build_backsplicing_junctions() 
+{
+	map<int64_t, vector<hit*>> m;		
+
+	for(int i = 0; i < corrected_back_spos.size(); i++)
+	{
+		int64_t x = corrected_back_spos[i];
+
 		// consider these hits with BSJ
 		//if(bb.hits[i].bridged == true) continue;
 		//if(br.breads.find(bb.hits[i].qname) != br.breads.end()) continue;
@@ -214,17 +614,19 @@ int bundle::build_backsplicing_junctions() //write new similar function to handl
 
 		// TODO: replace this part with x1 and x2
 		//int64_t p = v[k]; modify this part to encode the BSJ
-		if(m.find(p) == m.end())
+
+		if(m.find(x) == m.end())
 		{
 			vector<hit*> hv;
-			hv.push_back(&(bb.hits[i]));
-			m.insert(pair< int64_t, vector<hit*> >(p, hv));
+			hv.push_back(&(corrected_back_spos_hits[i]));
+			m.insert(pair< int64_t, vector<hit*> >(x, hv));
 		}
 		else
 		{
-			m[p].push_back(&(bb.hits[i]));
+			m[x].push_back(&(corrected_back_spos_hits[i]));
 		}
 
+		
 		/*
 		vector<int64_t> v = bb.hits[i].spos;
 		if(v.size() == 0) continue;
@@ -246,14 +648,27 @@ int bundle::build_backsplicing_junctions() //write new similar function to handl
 		*/
 	}
 
+	printf("Hit count of corrected junctions:\n");
+	map<int64_t, vector<hit*>>::iterator itn;
+	for(itn = m.begin(); itn != m.end(); itn++)
+	{	
+
+		int32_t x1 = high32(itn->first);
+		int32_t x2 = low32(itn->first);
+		vector<hit*> hit_vect = itn->second;
+
+		printf("x1=%d, x2=%d, hit vector size=%d\n",x1,x2, hit_vect.size());
+	}
+
+
 	map<int64_t, vector<hit*>>::iterator it;
 	for(it = m.begin(); it != m.end(); it++)
 	{
 		vector<hit*> &v = it->second;
 		if(v.size() < min_splice_boundary_hits) continue;
 
-		int32_t p1 = high32(it->first);
-		int32_t p2 = low32(it->first);
+		int32_t p2 = high32(it->first);
+		int32_t p1 = low32(it->first);
 
 		int s0 = 0;
 		int s1 = 0;
@@ -271,8 +686,8 @@ int bundle::build_backsplicing_junctions() //write new similar function to handl
 
 		junction jc(it->first, v.size());
 
-		// TODO: assign a correct flag to jc
-		// jc.flag = 2; meaning BSJ
+		//TODO: assign a correct flag to jc
+		jc.junc_type = 2; //meaning BSJ
 		jc.nm = nm;
 		if(s1 == 0 && s2 == 0) jc.strand = '.';
 		else if(s1 >= 1 && s2 >= 1) jc.strand = '.';
@@ -472,20 +887,45 @@ int bundle::link_partial_exons()
 
 		// TODO: if b is normal, do the following
 		// if b is BSJ, do similar but opporsite thing
-		MPI::iterator li = rm.find(b.lpos);
-		MPI::iterator ri = lm.find(b.rpos);
 
-		assert(li != rm.end());
-		assert(ri != lm.end());
+		if(b.junc_type == 1)
+		{	
 
-		if(li != rm.end() && ri != lm.end())
-		{
-			b.lexon = li->second;
-			b.rexon = ri->second;
+			MPI::iterator li = rm.find(b.lpos);
+			MPI::iterator ri = lm.find(b.rpos);
+
+			assert(li != rm.end());
+			assert(ri != lm.end());
+
+			if(li != rm.end() && ri != lm.end())
+			{
+				b.lexon = li->second;
+				b.rexon = ri->second;
+			}
+			else
+			{
+				b.lexon = b.rexon = -1;
+			}
 		}
-		else
+		else if(b.junc_type == 2)
 		{
-			b.lexon = b.rexon = -1;
+			MPI::iterator li = lm.find(b.lpos);
+			MPI::iterator ri = rm.find(b.rpos);
+
+			assert(li != rm.end());
+			assert(ri != lm.end());
+
+			if(li != lm.end() && ri != rm.end())
+			{
+				b.lexon = li->second;
+				b.rexon = ri->second;
+			}
+			else
+			{
+				b.lexon = b.rexon = -1;
+			}
+			printf("lexon id=%d, rexon id=%d\n",b.lexon,b.rexon);	
+			printf("lexon pos=%d, rexon pos=%d\n",li->first,ri->first);		
 		}
 	}
 
@@ -500,7 +940,7 @@ int bundle::build_splice_graph(int mode)
 	gr.add_vertex();
 	vertex_info vi0;
 	vi0.lpos = bb.lpos;
-	vi0.rpos = bb.lpos; //why both lpos,is this the source
+	vi0.rpos = bb.lpos; //why both lpos,is this the source, yes
 	gr.set_vertex_weight(0, 0);
 	gr.set_vertex_info(0, vi0);
 	for(int i = 0; i < pexons.size(); i++)
@@ -509,6 +949,7 @@ int bundle::build_splice_graph(int mode)
 		int length = r.rpos - r.lpos;
 		assert(length >= 1);
 		gr.add_vertex();
+		//i+1 with source
 		if(mode == 1) gr.set_vertex_weight(i + 1, r.max < min_guaranteed_edge_weight ? min_guaranteed_edge_weight : r.max);
 		if(mode == 2) gr.set_vertex_weight(i + 1, r.ave < min_guaranteed_edge_weight ? min_guaranteed_edge_weight : r.ave);
 		vertex_info vi;
@@ -524,7 +965,7 @@ int bundle::build_splice_graph(int mode)
 	gr.add_vertex();
 	vertex_info vin;
 	vin.lpos = bb.rpos;
-	vin.rpos = bb.rpos; //both rpos, is this the sink
+	vin.rpos = bb.rpos; //both rpos, is this the sink, yes
 	gr.set_vertex_weight(pexons.size() + 1, 0);
 	gr.set_vertex_info(pexons.size() + 1, vin);
 
@@ -534,20 +975,31 @@ int bundle::build_splice_graph(int mode)
 		const junction &b = junctions[i];
 		if(b.lexon < 0 || b.rexon < 0) continue;
 
-		// TODO: if normal, do the same
-		// if BSJ: do something like: add_edge(b.rexon + 1, b.lexon + 1);
-
-		const partial_exon &x = pexons[b.lexon]; //does this have any use
+		const partial_exon &x = pexons[b.lexon]; //does this have any use, no
 		const partial_exon &y = pexons[b.rexon];
 
-		edge_descriptor p = gr.add_edge(b.lexon + 1, b.rexon + 1);
-		assert(b.count >= 1);
-		edge_info ei;
-		ei.weight = b.count;
-		ei.strand = b.strand;
-		gr.set_edge_info(p, ei);
-		gr.set_edge_weight(p, b.count);
-
+		// TODO: if normal, do the same
+		if(b.junc_type == 1)
+		{	
+			edge_descriptor p = gr.add_edge(b.lexon + 1, b.rexon + 1);
+			assert(b.count >= 1);
+			edge_info ei;
+			ei.weight = b.count;
+			ei.strand = b.strand;
+			gr.set_edge_info(p, ei);
+			gr.set_edge_weight(p, b.count);
+		}
+		// if BSJ: do something like: add_edge(b.rexon + 1, b.lexon + 1);
+		else
+		{
+			edge_descriptor p = gr.add_edge(b.rexon + 1, b.lexon + 1);
+			assert(b.count >= 1);
+			edge_info ei;
+			ei.weight = b.count;
+			ei.strand = b.strand;
+			gr.set_edge_info(p, ei);
+			gr.set_edge_weight(p, b.count);			
+		}
 	}
 
 	// edges: connecting start/end and pexons
@@ -617,6 +1069,11 @@ int bundle::build_splice_graph(int mode)
 
 	gr.strand = bb.strand; //setting strand and chrom number as diff splice graphs for diff chromosomes
 	gr.chrm = bb.chrm; //so are we building a splice graph for each bundle we create
+
+	printf("\nPrinting splice graph for current bundle:\n");
+	//gr.print();
+	gr.print_weights();
+	printf("\n");
 	return 0;
 }
 
