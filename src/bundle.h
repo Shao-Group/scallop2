@@ -69,7 +69,7 @@ public:
 	// splice graph
 	int build_intervals();
 	int build_junctions();
-	int correct_junctions();
+	//int correct_junctions();
 
 	int build_supplementaries();
 	int extract_backsplicing_junctions();

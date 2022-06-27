@@ -503,10 +503,10 @@ int bundle::refine_backsplicing_junctions()
 		printf("Start of back spos\n");
 		printf("p1=%d,p2=%d\n\n",p1,p2);
 
-		printf("Primary:\n");
-		back_spos_hits[i].print();
-		printf("Supple:\n");
-		back_spos_hits[i].suppl->print();
+		//printf("Primary:\n");
+		//back_spos_hits[i].print();
+		//printf("Supple:\n");
+		//back_spos_hits[i].suppl->print();
 
 		printf("\n");
 
@@ -657,7 +657,17 @@ int bundle::build_backsplicing_junctions()
 		int32_t x2 = low32(itn->first);
 		vector<hit*> hit_vect = itn->second;
 
-		printf("x1=%d, x2=%d, hit vector size=%d\n",x1,x2, hit_vect.size());
+		printf("x1=%d, x2=%d, hit vector size=%d\n\n",x1,x2, hit_vect.size());
+
+		for(int i=0;i<hit_vect.size();i++)
+		{
+			printf("Primary hit %d:\n",i+1);
+			hit_vect[i]->print();
+			printf("Supple hit %d:\n",i+1);
+			hit_vect[i]->suppl->print();
+			printf("\n");
+		}
+		printf("\n");
 	}
 
 
@@ -1074,6 +1084,8 @@ int bundle::build_splice_graph(int mode)
 	//gr.print();
 	gr.print_weights();
 	printf("\n");
+
+
 	return 0;
 }
 
