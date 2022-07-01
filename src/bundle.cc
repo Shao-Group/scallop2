@@ -2066,6 +2066,17 @@ int bundle::build_hyper_set()
 
 		vector<int> v = align_fragment(fr);
 		
+		// TODO
+		// if (h1 has a supplementary alignment)
+		//	get the alignment of the supplement read => v2
+		//	by calling v2 = align_hit(h1.supplementary);
+		//	the phasing path will be v2 + v
+		// else (h2 has a supplementary alignment)
+		//	get the alignment of the supplement read => v2
+		//	by calling v2 = align_hit(h2.supplementary);
+		//	the phasing path will be v + v2
+		// end 
+
 		if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, fr.cnt));
 		else m[v] += fr.cnt;
 	}
@@ -2169,10 +2180,18 @@ int bundle::build_hyper_set()
 		if(h.bridged == true) continue;
 
 		vector<int> v = align_hit(h);
+
+		// TODO
+		// get the alignment of the supplement read => v2
+		// by calling v2 = align_hit(h.supplementary);
+		// the phasing path will be v + v2
 		
 		if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, 1));
 		else m[v] += 1;
 	}
+
+	// TODO in future: correction of primary/supplementary
+	// when a fragment cannot be bridged
 
 	hs.clear();
 	for(map<vector<int>, int>::iterator it = m.begin(); it != m.end(); it++)
