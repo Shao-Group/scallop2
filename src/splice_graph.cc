@@ -1051,8 +1051,6 @@ int splice_graph::print()
 			printf(" %d, ", (*it1)->source());
 		}
 		printf("\n out-vertices = ");
-		it2 = pei.second;
-
 		for(pei = out_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			printf(" %d, ", (*it1)->target());
