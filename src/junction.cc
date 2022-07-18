@@ -63,8 +63,8 @@ bool junction::operator<(const junction &x) const
 
 int junction::print(const string &chrm, int index) const
 {
-	printf("junction %d: region = %s:%d-%d, region = %d -> %d, pexon = %d -> %d, length = %d, count = %d, strand = %c, nm = %d\n", 
-			index, chrm.c_str(), lpos, rpos, lregion, rregion, lexon, rexon, rpos - lpos, count, strand, nm);
+	printf("junction %d: type = %d, region = %s:%d-%d, region = %d -> %d, pexon = %d -> %d, length = %d, count = %d, strand = %c, nm = %d\n", 
+			index, junc_type, chrm.c_str(), lpos, rpos, lregion, rregion, lexon, rexon, rpos - lpos, count, strand, nm);
 
 	return 0;
 }

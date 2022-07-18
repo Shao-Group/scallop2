@@ -39,7 +39,7 @@ int bundle::prepare()
 	build_supplementaries();
 	extract_backsplicing_junctions();
 	refine_backsplicing_junctions();
-	build_backsplicing_junctions();
+	build_backsplicing_junctions(); //adding this causing core dumped
 
 	build_regions();
 	build_partial_exons();
@@ -52,7 +52,7 @@ int bundle::prepare()
 int bundle::build(int mode, bool revise)
 {
 	build_splice_graph(mode);
-	if(revise == true) revise_splice_graph();
+	//if(revise == true) revise_splice_graph(); //commented out for now
 	build_hyper_set();
 	return 0;
 }
@@ -570,16 +570,18 @@ int bundle::refine_backsplicing_junctions()
 		{
 			x1 = p1;
 			printf("x1 0, so x1=%d, p1 count=%d\n",x1,back_spos_support[p1]);
+			continue; //keeping only those p1 p2 that have junctions for debugging
 		}
 		if(x2 == 0) //if not nearby junc but support high, keep p2
 		{
 			x2 = p2;
 			printf("x2 0, so x2=%d, p2 count=%d\n",x2,back_spos_support[p2]);
+			continue; //keeping only those p1 p2 that have junctions for debugging
 		}
 
 		//printf("p1 count:%d, p2 count:%d\n",back_spos_support[p1],back_spos_support[p2]);
 		printf("x1 = %d, x2 = %d\n\n",x1,x2);
-		corrected_back_spos.push_back(pack(x2,x1));
+		corrected_back_spos.push_back(pack(x2,x1)); //smaller first, then larger pos
 		corrected_back_spos_hits.push_back(back_spos_hits[i]);
 		
 		printf("End of back pos\n\n");
@@ -601,7 +603,7 @@ int bundle::refine_backsplicing_junctions()
 
 int bundle::build_backsplicing_junctions() 
 {
-	map<int64_t, vector<hit*>> m;		
+	map<int64_t, vector<hit*>> m;
 
 	for(int i = 0; i < corrected_back_spos.size(); i++)
 	{
@@ -652,7 +654,6 @@ int bundle::build_backsplicing_junctions()
 	map<int64_t, vector<hit*>>::iterator itn;
 	for(itn = m.begin(); itn != m.end(); itn++)
 	{	
-
 		int32_t x1 = high32(itn->first);
 		int32_t x2 = low32(itn->first);
 		vector<hit*> hit_vect = itn->second;
@@ -675,7 +676,7 @@ int bundle::build_backsplicing_junctions()
 	for(it = m.begin(); it != m.end(); it++)
 	{
 		vector<hit*> &v = it->second;
-		if(v.size() < min_splice_boundary_hits) continue;
+		if(v.size() < min_splice_boundary_hits) continue; // do we need diff threshold for BSJs?
 
 		int32_t p2 = high32(it->first);
 		int32_t p1 = low32(it->first);
@@ -705,6 +706,14 @@ int bundle::build_backsplicing_junctions()
 		else jc.strand = '-';
 		junctions.push_back(jc);
 	}
+
+	/*for(int i=0;i<junctions.size();i++)
+	{
+		junction j = junctions[i];
+		printf("junction %d: type = %d, region = %s:%d-%d, region = %d -> %d, pexon = %d -> %d, length = %d, count = %d, strand = %c, nm = %d\n", 
+			i, j.junc_type, bb.chrm.c_str(), j.lpos, j.rpos, j.lregion, j.rregion, j.lexon, j.rexon, j.rpos - j.lpos, j.count, j.strand, j.nm);
+	}*/
+
 	return 0;
 }
 
@@ -753,6 +762,8 @@ int bundle::build_regions()
 
 		regions.push_back(region(l, r, ltype, rtype, &fmap, &(bb.imap)));
 	}
+
+
 	return 0;
 }
 
@@ -922,8 +933,8 @@ int bundle::link_partial_exons()
 			MPI::iterator li = lm.find(b.lpos);
 			MPI::iterator ri = rm.find(b.rpos);
 
-			assert(li != rm.end());
-			assert(ri != lm.end());
+			assert(li != lm.end()); //assertion failing
+			assert(ri != rm.end());
 
 			if(li != lm.end() && ri != rm.end())
 			{
@@ -938,6 +949,13 @@ int bundle::link_partial_exons()
 			printf("lexon pos=%d, rexon pos=%d\n",li->first,ri->first);		
 		}
 	}
+
+	/*for(int i=0;i<junctions.size();i++)
+	{
+		junction j = junctions[i];
+		printf("junction %d: type = %d, region = %s:%d-%d, region = %d -> %d, pexon = %d -> %d, length = %d, count = %d, strand = %c, nm = %d\n", 
+			i, j.junc_type, bb.chrm.c_str(), j.lpos, j.rpos, j.lregion, j.rregion, j.lexon, j.rexon, j.rpos - j.lpos, j.count, j.strand, j.nm);
+	}*/
 
 	return 0;
 }
@@ -1000,7 +1018,7 @@ int bundle::build_splice_graph(int mode)
 			gr.set_edge_weight(p, b.count);
 		}
 		// if BSJ: do something like: add_edge(b.rexon + 1, b.lexon + 1);
-		else
+		else if(b.junc_type == 2)
 		{
 			edge_descriptor p = gr.add_edge(b.rexon + 1, b.lexon + 1);
 			assert(b.count >= 1);
@@ -1081,7 +1099,7 @@ int bundle::build_splice_graph(int mode)
 	gr.chrm = bb.chrm; //so are we building a splice graph for each bundle we create
 
 	printf("\nPrinting splice graph for current bundle:\n");
-	//gr.print();
+	gr.print();
 	gr.print_weights();
 	printf("\n");
 
@@ -2058,13 +2076,13 @@ int bundle::build_hyper_set()
 		assert(fr.h1->paired == true);
 		assert(fr.h2->paired == true);
 
-		if(fr.paths.size() != 1) continue;
+		if(fr.paths.size() != 1) continue; //continue if not bridged
 		if(fr.paths[0].type != 1) continue;
 
 		//if(fr.h1->bridged == false) continue;
 		//if(fr.h2->bridged == false) continue;
 
-		vector<int> v = align_fragment(fr);
+		vector<int> v = align_fragment(fr); //align bridged fragment to the splice graph, return a list of vertices 
 		
 		// TODO
 		// if (h1 has a supplementary alignment)
@@ -2076,6 +2094,32 @@ int bundle::build_hyper_set()
 		//	by calling v2 = align_hit(h2.supplementary);
 		//	the phasing path will be v + v2
 		// end 
+
+		hit *h1_supple, *h2_supple; 
+		if(fr.h1->suppl != NULL)
+		{
+			h1_supple = fr.h1->suppl;
+			printf("fr.h1 has a supple hit.\n");
+			printf("Primary:\n");
+			fr.h1->print();
+			printf("Supple:\n");
+			h1_supple->print();
+		}
+
+		if(fr.h2->suppl != NULL)
+		{
+			h2_supple = fr.h2->suppl;
+			printf("fr.h2 has a supple hit.\n");
+			printf("Primary:\n");
+			fr.h2->print();
+			printf("Supple:\n");
+			h2_supple->print();
+		}
+
+		if(fr.h1->suppl != NULL || fr.h2->suppl != NULL)
+		{
+			printf("\n");
+		}
 
 		if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, fr.cnt));
 		else m[v] += fr.cnt;

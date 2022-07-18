@@ -1051,6 +1051,8 @@ int splice_graph::print()
 			printf(" %d, ", (*it1)->source());
 		}
 		printf("\n out-vertices = ");
+		it2 = pei.second;
+
 		for(pei = out_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			printf(" %d, ", (*it1)->target());
@@ -1082,7 +1084,7 @@ int splice_graph::print_weights()
 		int32_t p2 = get_vertex_info(t).lpos;
 		double w1 = get_edge_weight(e);
 		double w2 = get_edge_info(e).weight;
-		if(s>=t)
+		if(s>=t) //added for observing back edges
 		{
 			printf("edge (%d, %d) pos = %d-%d length = %d weight = (%.2lf, %.2lf)\n", s, t, p1, p2, (p2>p1)?(p2-p1):(p1-p2) + 1, w1, w2);
 		}

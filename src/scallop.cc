@@ -512,6 +512,14 @@ bool scallop::resolve_trivial_vertex_fast(double jump_ratio)
 	{
 		int i = vv[k];
 		assert(gr.in_degree(i) >= 1);
+        if(gr.out_degree(i) < 1)
+        {		
+        	printf("Size of gr.out_degree = %d, chrm = %s\n",gr.out_degree(i),gr.chrm.c_str());
+            gr.print();
+            gr.print_weights();
+            printf("\n");
+        }
+        //printf("Size of gr.out_degree = %d\n",gr.out_degree(i));
 		assert(gr.out_degree(i) >= 1);
 		bool b = resolve_single_trivial_vertex_fast(i, jump_ratio);
 		if(b == true) flag = true;
