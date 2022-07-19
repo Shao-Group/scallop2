@@ -1002,7 +1002,7 @@ int bundle::build_splice_graph(int mode)
 			gr.set_edge_weight(p, b.count);
 		}
 		// if BSJ: do something like: add_edge(b.rexon + 1, b.lexon + 1);
-		/*else if(b.junc_type == 2)
+		else if(b.junc_type == 2)
 		{
 			edge_descriptor p = gr.add_edge(b.rexon + 1, b.lexon + 1);
 			assert(b.count >= 1);
@@ -1011,7 +1011,7 @@ int bundle::build_splice_graph(int mode)
 			ei.strand = b.strand;
 			gr.set_edge_info(p, ei);
 			gr.set_edge_weight(p, b.count);			
-		}*/
+		}
 	}
 
 	// edges: connecting start/end and pexons
@@ -2087,6 +2087,8 @@ int bundle::build_hyper_set()
 			fr.h1->print();
 			printf("Supple: ");
 			h1_supple->print();
+			printf("fr.h2: ");
+			fr.h2->print();
 
 			vector<int> v2 = align_hit(*h1_supple);
 
@@ -2132,6 +2134,8 @@ int bundle::build_hyper_set()
 			fr.h2->print();
 			printf("Supple: ");
 			h2_supple->print();
+			printf("fr.h1: ");
+			fr.h1->print();
 
 			vector<int> v2 = align_hit(*h2_supple);
 
