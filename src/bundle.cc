@@ -375,17 +375,17 @@ int bundle::extract_backsplicing_junctions()
     	//h.suppl->print();
     	//printf("\n\n");
     	
-        if(strcmp(h.qname.c_str(),"SRR1721290.17627808") == 0)
+        /*if(strcmp(h.qname.c_str(),"SRR1721290.17627808") == 0)
 		{
 			h.print();
 			h.suppl->print();
 			printf("\n\n");
-		}
+		}*/
 
 		// extract p1 and p2, no check done for H/S for now
 		int32_t p1 = 0;
 		int32_t p2 = 0;
-		if(h.pos < h.suppl->pos)
+		if(h.pos < h.suppl->pos) //check this later
 		{
 			//case 1: original hit left, supplementary right
 			p1 = h.suppl->rpos; //end of suppl
@@ -2081,14 +2081,120 @@ int bundle::build_hyper_set()
 
 		if(fr.h1->suppl != NULL)
 		{
+			h1_supp_count++;
 			hit *h1_supple = fr.h1->suppl;
-			printf("fr.h1 has a supple hit.\n");
+
+			/*printf("fr.h1 has a supple hit.\n");
 			printf("Primary: ");
 			fr.h1->print();
 			printf("Supple: ");
 			h1_supple->print();
 			printf("fr.h2: ");
-			fr.h2->print();
+			fr.h2->print();*/
+
+			if(fr.h1->rpos < fr.h2->pos && fr.h2->rpos < h1_supple->pos)
+			{
+				string combo = "h1p_h2_h1s";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;
+			}
+			else if(fr.h1->rpos < h1_supple->pos && h1_supple->rpos < fr.h2->pos)
+			{
+				string combo = "h1p_h1s_h2";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;
+			}
+			else if(h1_supple->rpos < fr.h2->pos && fr.h2->rpos < fr.h1->pos)
+			{
+				string combo = "h1s_h2_h1p";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;				
+			}
+			else if(fr.h2->rpos < fr.h1->pos && fr.h1->rpos < h1_supple->pos)
+			{
+				string combo = "h2_h1p_h1s";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;				
+			}
+			else if(fr.h2->rpos < h1_supple->pos && h1_supple->rpos < fr.h1->pos)
+			{
+				string combo = "h2_h1s_h1p";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;				
+			}
+			else if(h1_supple->rpos < fr.h1->pos && fr.h1->rpos < fr.h2->pos)
+			{
+				string combo = "h1s_h1p_h2";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;
+			}
+
+
+			else if(fr.h1->pos < h1_supple->pos && h1_supple->pos < fr.h2->pos && fr.h1->rpos < h1_supple->rpos && h1_supple->rpos < fr.h2->rpos)
+			{
+				string combo = "h1p_pos<h1s_pos<h2_pos & h1p_rpos<h1s_rpos<h2_rpos";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;				
+			}
+			else if(fr.h1->pos < h1_supple->pos && h1_supple->pos < fr.h2->pos && h1_supple->rpos < fr.h1->rpos && fr.h1->rpos < fr.h2->rpos)
+			{
+				string combo = "h1p_pos<h1s_pos<h2_pos & h1s_rpos<h1p_rpos<h2_rpos";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;
+			}
+			else if(fr.h2->pos < fr.h1->pos && fr.h1->pos < h1_supple->pos && fr.h1->rpos < fr.h2->rpos && fr.h2->rpos < h1_supple->rpos)
+			{
+				string combo = "h2_pos<h1p_pos<h1s_pos & h1p_rpos<h2_rpos<h1s_rpos";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;
+			}
+			else if(fr.h2->pos == fr.h1->pos && fr.h1->pos < h1_supple->pos && fr.h1->rpos < fr.h2->rpos && fr.h2->rpos < h1_supple->rpos)
+			{
+				string combo = "h2_pos=h1p_pos<h1s_pos & h1p_rpos<h2_rpos<h1s_rpos";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;
+			}
+			else if(fr.h1->pos < fr.h2->pos && fr.h2->pos < h1_supple->pos && fr.h1->rpos < fr.h2->rpos && fr.h2->rpos < h1_supple->rpos)
+			{
+				string combo = "h1p_pos<h2_pos<h1s_pos & h1p_rpos<h2_rpos<h1s_rpos";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;				
+			}
+			else if(fr.h1->pos < h1_supple->pos && h1_supple->pos == fr.h2->pos && h1_supple->rpos < fr.h1->rpos && fr.h1->rpos < fr.h2->rpos)
+			{
+                                string combo = "h1p_pos<h1s_pos=h2_pos & h1s_rpos<h1p_rpos<h2_rpos";
+                                if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+                                else frag2graph_freq[combo] += 1;				
+			}
+                        else if(fr.h1->pos < fr.h2->pos && fr.h2->pos < h1_supple->pos && fr.h1->rpos < h1_supple->rpos && h1_supple->rpos < fr.h2->rpos)
+                        {
+                                string combo = "h1p_pos<h2_pos<h1s_pos & h1p_rpos<h1s_rpos<h2_rpos";
+                                if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+                                else frag2graph_freq[combo] += 1;                               
+                        }
+			else if(fr.h2->pos < fr.h1->pos && fr.h1->pos < h1_supple->pos && fr.h1->rpos < h1_supple->rpos && h1_supple->rpos < fr.h2->rpos)
+                        {
+                                string combo = "h2_pos<h1p_pos<h1s_pos & h1p_rpos<h1s_rpos<h2_rpos";
+                                if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+                                else frag2graph_freq[combo] += 1;                               
+                        }
+
+			else
+			{
+				string combo = "h1_else";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;
+
+				printf("fr.h1 has a supple hit.\n");
+				printf("Primary: ");
+				fr.h1->print();
+				printf("Supple: ");
+				h1_supple->print();
+				printf("fr.h2: ");
+				fr.h2->print();
+			}
+
+			//frag2graph_freq.insert(pair<string, int>("test", 2));
 
 			vector<int> v2 = align_hit(*h1_supple);
 
@@ -2125,17 +2231,110 @@ int bundle::build_hyper_set()
 				printf("%d, ",v[i]);
 			}*/
 
+
 		}
+
 		if(fr.h2->suppl != NULL)
 		{
+			h2_supp_count++;
 			hit *h2_supple = fr.h2->suppl;
-			printf("fr.h2 has a supple hit.\n");
+
+			/*printf("fr.h2 has a supple hit.\n");
 			printf("Primary: ");
 			fr.h2->print();
 			printf("Supple: ");
 			h2_supple->print();
 			printf("fr.h1: ");
-			fr.h1->print();
+			fr.h1->print();*/
+
+
+			if(fr.h2->rpos < fr.h1->pos && fr.h1->rpos < h2_supple->pos)
+			{
+				string combo = "h2p_h1_h2s";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;
+			}
+			else if(fr.h2->rpos < h2_supple->pos && h2_supple->rpos < fr.h1->pos)
+			{
+				string combo = "h2p_h2s_h1";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;
+			}
+			else if(h2_supple->rpos < fr.h1->pos && fr.h1->rpos < fr.h2->pos)
+			{
+				string combo = "h2s_h1_h2p";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;				
+			}
+			else if(fr.h1->rpos < fr.h2->pos && fr.h2->rpos < h2_supple->pos)
+			{
+				string combo = "h1_h2p_h2s";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;				
+			}
+			else if(fr.h1->rpos < h2_supple->pos && h2_supple->rpos < fr.h2->pos)
+			{
+				string combo = "h1_h2s_h2p";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;					
+			}
+			else if(h2_supple->rpos < fr.h2->pos && fr.h2->rpos < fr.h1->pos)
+			{
+				string combo = "h2s_h2p_h1";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;				
+			}
+
+			else if(h2_supple->pos < fr.h1->pos && fr.h1->pos < fr.h2->pos && h2_supple->rpos < fr.h1->rpos && fr.h1->rpos < fr.h2->rpos)
+			{
+				string combo = "h2s_pos<h1_pos<h2p_pos & h2s_rpos<h1_rpos<h2p_rpos";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;				
+			}
+			else if(fr.h1->pos < fr.h2->pos && fr.h2->pos < h2_supple->pos && h2_supple->rpos < fr.h2->rpos && fr.h2->rpos == fr.h1->rpos)
+			{
+				string combo = "h1_pos<h2p_pos<h2s_pos & h2s_rpos<h2p_rpos=h1_rpos";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;				
+			}
+			else if(fr.h1->pos < fr.h2->pos && fr.h2->pos < h2_supple->pos && h2_supple->rpos < fr.h1->rpos && fr.h1->rpos < fr.h2->rpos)
+			{
+				string combo = "h1_pos<h2p_pos<h2s_pos & h2s_rpos<h1_rpos<h2p_rpos";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;				
+			}
+			else if(fr.h1->pos < h2_supple->pos && h2_supple->pos < fr.h2->pos && h2_supple->rpos < fr.h1->rpos && fr.h1->rpos < fr.h2->rpos)
+			{
+				string combo = "h1_pos<h2s_pos<h2p_pos & h2s_rpos<h1_rpos<h2p_rpos";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;
+			}
+			else if(fr.h1->pos < h2_supple->pos && h2_supple->pos < fr.h2->pos && h2_supple->rpos < fr.h2->rpos && fr.h2->rpos < fr.h1->rpos)
+			{
+				string combo = "h1_pos<h2s_pos<h2p_pos & h2s_rpos<h2p_rpos<h1_rpos";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;				
+			}
+			else if(fr.h1->pos < h2_supple->pos && h2_supple->pos < fr.h2->pos && h2_supple->rpos < fr.h2->rpos && fr.h2->rpos == fr.h1->rpos)
+			{
+				string combo = "h1_pos<h2s_pos<h2p_pos & h2s_rpos<h2p_rpos=h1_rpos";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;				
+			}
+			else
+			{
+				string combo = "h2_else";
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;
+
+				printf("fr.h2 has a supple hit.\n");
+				printf("Primary: ");
+				fr.h2->print();
+				printf("Supple: ");
+				h2_supple->print();
+				printf("fr.h1: ");
+				fr.h1->print();
+			}
 
 			vector<int> v2 = align_hit(*h2_supple);
 

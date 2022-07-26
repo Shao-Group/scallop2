@@ -141,6 +141,9 @@ extern string version;
 
 //for extracting BSJ
 extern int BSJ_threshold;
+extern map<string, int> frag2graph_freq; //adding data structure to keep frequency profile of fragment to splice graph align cases
+extern int h1_supp_count; //keeps count of the number of h1 hits in ffragment with supple
+extern int h2_supp_count; //keeps count of the number of h2 hits in ffragment with supple
 
 // parse arguments
 int print_command_line(int argc, const char ** argv);
