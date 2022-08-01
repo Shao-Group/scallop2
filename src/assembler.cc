@@ -107,7 +107,13 @@ int assembler::assemble()
 
 	process(0);
 
+	printf("h1_supp_count = %d, h2_supp_count = %d\n\n",h1_supp_count, h2_supp_count);
 
+	map<string, int>::iterator itn;
+	for(itn = frag2graph_freq.begin(); itn != frag2graph_freq.end(); itn++)
+	{
+		printf("Fragment configuration = %s, count = %d\n",itn->first.c_str(),itn->second);
+	}
 
 	assign_RPKM();
 
@@ -169,9 +175,9 @@ int assembler::process(int n)
 		if(verbose >= 1) bd.print(index++);
 		assemble(bd.gr, bd.hs, ts1, ts2);
 
-		bd.build(2, true);
-		if(verbose >= 1) bd.print(index++);
-		assemble(bd.gr, bd.hs, ts1, ts2);
+		//bd.build(2, true); // commented out by Tasfia for as this creates repeats in count of cases
+		//if(verbose >= 1) bd.print(index++);
+		//assemble(bd.gr, bd.hs, ts1, ts2);
 
 		//printf("complete\n");
 
