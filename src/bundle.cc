@@ -36,7 +36,7 @@ int bundle::prepare()
 	build_junctions();
 
 	// add the 3 new functions
-	build_supplementaries();
+
 	extract_backsplicing_junctions();
 	refine_backsplicing_junctions();
 	build_backsplicing_junctions();
@@ -204,137 +204,7 @@ int bundle::build_junctions() //write new similar function to handle BSJs
 	return 0;
 }
 
-int bundle::build_supplementaries()
-{
 
-	int max_index = bb.hits.size() + 1;
-	if(max_index > 1000000) max_index = 1000000;
-
-    vector< vector<int> > vv;
-    vv.resize(max_index);
-
-    //printf("Bundle hit size: %d\n", bb.hits.size());
-    // first build index
-    for(int i = 0; i < bb.hits.size(); i++)
-    {
-        hit &h = bb.hits[i];
-
-
-        /*if(strcmp(h.qname.c_str(),"SRR1721290.17627808") == 0)
-        {
-        	h.print();
-        	printf("Hash value - %zu\n",h.qhash);
-        	printf("isize - %d\n",h.isize);
-        	printf("vlist size - %u\n",h.vlist.size());
-        	printf("h.flag & 0x800 - %d\n",(h.flag & 0x800));
-        }*/
-
-        //if(h.isize >= 0) continue; //commented out as this was filtering chimeric part of an end of SRR1721290.17627808
-        //if(h.vlist.size() == 0) continue;
-
-        // TODO
-        if((h.flag & 0x800) == 0) continue;
-
-        //printf("%s\n",h.qname.c_str());
-        //printf("%zu\n",h.qhash);
-
-        // do not use hi; as long as qname, pos and isize are identical
-        // add 0x40 and 0x80
-        int k = (h.qhash % max_index + (h.flag & 0x40) + (h.flag & 0x80)) % max_index;
-        vv[k].push_back(i);
-        //printf("Adding supple\n");
-    }
-
-    //printf("End of vv adding\n");
-
-    for(int i = 0; i < bb.hits.size(); i++)
-    {
-
-        hit &h = bb.hits[i];
-
-        
-        //if(h.paired == true) continue; 
-        //if(h.isize <= 0) continue; //commented out as this was filtering non chimeric part of an end of SRR1721290.17627808
-        //if(h.vlist.size() == 0) continue;
-        if((h.flag & 0x800) >= 1) continue;       // skip supplemetary
-
-        /*if(strcmp(h.qname.c_str(),"SRR1721290.17627808") == 0)
-        {
-        	h.print();
-        	printf("Hash value - %zu\n",h.qhash);
-        	printf("isize - %d\n",h.isize);
-        	printf("vlist size - %u\n",h.vlist.size());
-        	printf("h.flag & 0x800 - %d\n",(h.flag & 0x800));
-        	if(h.paired == true) printf("Paired true\n");
-        	else printf("Paired false\n\n");
-        }*/
-
-        
-
-        //printf("%s\n",h.qname.c_str());
-        
-        /*if(strcmp(h.qname.c_str(),"SRR1721290.17627808") == 0)
-        {
-        	h.print();
-        	printf("Hash value - %zu\n",h.qhash);
-        }*/
-
-        int k = (h.qhash % max_index + (h.flag & 0x40) + (h.flag & 0x80)) % max_index;
-
-        for(int j = 0; j < vv[k].size(); j++)
-        {
-            hit &z = bb.hits[vv[k][j]];
-            //if(z.hi != h.hi) continue;
-            //if(z.paired == true) continue;
-            //if(z.pos != h.mpos) continue;
-            //if(z.isize + h.isize != 0) continue;
-            //if(z.qhash != h.qhash) continue;
-            if(z.qname != h.qname) continue;
-            // TODO check 0x40 and 0x80 are the same
-            if(z.flag & 0x40 != h.flag & 0x40 || z.flag & 0x80 != h.flag & 0x80) continue;
-            //x = vv[k][j];
-            h.suppl = &z;
-            break; //Taking the first supplementary read
-        }
-    }
-
-    /*int count = 0;
-    for(int i = 0; i < bb.hits.size(); i++)
-    {
-    	hit &h = bb.hits[i];
-    	if((h.flag & 0x800) >= 1) continue;       // skip supplemetary
-    	//printf("Primary hit:\n");
-	   	//h.print();
-
-    	if(h.suppl != NULL)
-    	{
-	    	//printf("Supplementary hit:\n");
-	    	//h.suppl->print();
-	    	count++;
-    	}
-    	printf("count = %d\n\n", count);
-	}*/
-
-    /*for(int i = 0; i < bb.hits.size(); i++)
-    {
-    	hit &h = bb.hits[i];
-    	if((h.flag & 0x800) >= 1) continue;       // skip supplemetary
-    	printf("Primary hit:\n");
-	   	h.print();
-
-    	if(h.suppl != NULL)
-    	{
-	    	printf("Supplementary hit:\n");
-	    	h.suppl->print();
-    	}
-    	printf("\n\n");
-	}
-	printf("-------------------------------------------------------------------------\n");
-	printf("End of bundle\n");
-	printf("-------------------------------------------------------------------------\n\n");
-    //printf("end of build supple\n");*/
-    return 0;
-}
 
 int bundle::extract_backsplicing_junctions()
 {
@@ -465,7 +335,7 @@ int bundle::extract_backsplicing_junctions()
 					current_hit_support = 1;
 					if(p==12248702)
 					{
-						printf("p+k=%d\n",p+k);
+						//printf("p+k=%d\n",p+k);
 					}
 					break;
 				}
@@ -476,10 +346,9 @@ int bundle::extract_backsplicing_junctions()
 				back_spos_support[p] = back_spos_support[p] + 1;
 				if(p==12248702)
 				{
-					printf("printing support:\n");
-					h.print();
+					//printf("printing support:\n");
+					//h.print();
 				}
-
 			}
 		}
     }
@@ -549,10 +418,10 @@ int bundle::refine_backsplicing_junctions()
 		printf("\nStart of back spos\n");
 		printf("p1=%d,p2=%d\n\n",p1,p2);
 
-		//printf("Primary:\n");
-		//back_spos_hits[i].print();
-		//printf("Supple:\n");
-		//back_spos_hits[i].suppl->print();
+		printf("Primary:\n");
+		back_spos_hits[i].print();
+		printf("Supple:\n");
+		back_spos_hits[i].suppl->print();
 
 		printf("\n");
 
@@ -812,6 +681,13 @@ int bundle::build_regions()
 	for(int i=0;i<regions.size();i++)
 	{
 		regions[i].print(i+1);
+		for(int j=0;j<regions[i].pexons.size();j++)
+		{
+			if(regions[i].pexons[j].rpos == 12248702)
+			{
+				printf("got rpos in bundle.cc\n");
+			}
+		}
 	}
 	return 0;
 }
@@ -828,17 +704,21 @@ int bundle::build_partial_exons()
 			partial_exon &pe = r.pexons[k];
 			pe.rid = i;
 			pe.pid = pexons.size();
+			if(pe.rpos == 12248702)
+			{
+				printf("rpos is 12248702\n");
+			}
 			pexons.push_back(pe);
 			if((pe.lpos != bb.lpos || pe.rpos != bb.rpos) && pe.ltype == START_BOUNDARY && pe.rtype == END_BOUNDARY) regional.push_back(true);
 			else regional.push_back(false);
 		}
 	}
 
-	/*for(int i=0;i<pexons.size();i++)
+	for(int i=0;i<pexons.size();i++)
 	{
 		pexons[i].print(i+1);
 	}
-	return 0;*/
+	return 0;
 }
 
 int bundle::build_partial_exon_map()
@@ -984,10 +864,10 @@ int bundle::link_partial_exons()
 		}
 		else if(b.junc_type == 2)
 		{
-			if(b.lpos < 0 || b.rpos < 0)
+			/*if(b.lpos < 0 || b.rpos < 0)
 			{
 				printf("In link pexons, %d-%d\n",b.lpos,b.rpos);
-			}
+			}*/
 			
 			MPI::iterator li = lm.find(b.lpos);
 			MPI::iterator ri = rm.find(b.rpos);

@@ -71,7 +71,6 @@ public:
 	int build_junctions();
 	//int correct_junctions();
 
-	int build_supplementaries();
 	int extract_backsplicing_junctions();
 	int refine_backsplicing_junctions();
 	int build_backsplicing_junctions();

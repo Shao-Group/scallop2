@@ -44,6 +44,7 @@ public:
 	vector<int32_t> get_splices(fragment &fr);
 
 public:
+	int build_supplementaries();
 	int build_junctions();
 	int extend_junctions();
 	int build_regions();

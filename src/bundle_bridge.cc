@@ -30,13 +30,16 @@ bundle_bridge::~bundle_bridge()
 
 int bundle_bridge::build()
 {
+	build_supplementaries();
 	build_junctions();
 	extend_junctions();
+
 	build_regions();
 
 	align_hits_transcripts();
 	index_references();
 	build_fragments();
+
 	//group_fragments();
 
 	bridger bdg(this);
@@ -172,6 +175,139 @@ int bundle_bridge::extend_junctions()
 
 	return 0;
 }
+
+int bundle_bridge::build_supplementaries()
+{
+
+	int max_index = bb.hits.size() + 1;
+	if(max_index > 1000000) max_index = 1000000;
+
+    vector< vector<int> > vv;
+    vv.resize(max_index);
+
+    //printf("Bundle hit size: %d\n", bb.hits.size());
+    // first build index
+    for(int i = 0; i < bb.hits.size(); i++)
+    {
+        hit &h = bb.hits[i];
+
+
+        /*if(strcmp(h.qname.c_str(),"SRR1721290.17627808") == 0)
+        {
+        	h.print();
+        	printf("Hash value - %zu\n",h.qhash);
+        	printf("isize - %d\n",h.isize);
+        	printf("vlist size - %u\n",h.vlist.size());
+        	printf("h.flag & 0x800 - %d\n",(h.flag & 0x800));
+        }*/
+
+        //if(h.isize >= 0) continue; //commented out as this was filtering chimeric part of an end of SRR1721290.17627808
+        //if(h.vlist.size() == 0) continue;
+
+        // TODO
+        if((h.flag & 0x800) == 0) continue;
+
+        //printf("%s\n",h.qname.c_str());
+        //printf("%zu\n",h.qhash);
+
+        // do not use hi; as long as qname, pos and isize are identical
+        // add 0x40 and 0x80
+        int k = (h.qhash % max_index + (h.flag & 0x40) + (h.flag & 0x80)) % max_index;
+        vv[k].push_back(i);
+        //printf("Adding supple\n");
+    }
+
+    //printf("End of vv adding\n");
+
+    for(int i = 0; i < bb.hits.size(); i++)
+    {
+
+        hit &h = bb.hits[i];
+
+        
+        //if(h.paired == true) continue; 
+        //if(h.isize <= 0) continue; //commented out as this was filtering non chimeric part of an end of SRR1721290.17627808
+        //if(h.vlist.size() == 0) continue;
+        if((h.flag & 0x800) >= 1) continue;       // skip supplemetary
+
+        /*if(strcmp(h.qname.c_str(),"SRR1721290.17627808") == 0)
+        {
+        	h.print();
+        	printf("Hash value - %zu\n",h.qhash);
+        	printf("isize - %d\n",h.isize);
+        	printf("vlist size - %u\n",h.vlist.size());
+        	printf("h.flag & 0x800 - %d\n",(h.flag & 0x800));
+        	if(h.paired == true) printf("Paired true\n");
+        	else printf("Paired false\n\n");
+        }*/
+
+        
+
+        //printf("%s\n",h.qname.c_str());
+        
+        /*if(strcmp(h.qname.c_str(),"SRR1721290.17627808") == 0)
+        {
+        	h.print();
+        	printf("Hash value - %zu\n",h.qhash);
+        }*/
+
+        int k = (h.qhash % max_index + (h.flag & 0x40) + (h.flag & 0x80)) % max_index;
+
+        for(int j = 0; j < vv[k].size(); j++)
+        {
+            hit &z = bb.hits[vv[k][j]];
+            //if(z.hi != h.hi) continue;
+            //if(z.paired == true) continue;
+            //if(z.pos != h.mpos) continue;
+            //if(z.isize + h.isize != 0) continue;
+            //if(z.qhash != h.qhash) continue;
+            if(z.qname != h.qname) continue;
+            // TODO check 0x40 and 0x80 are the same
+            if(z.flag & 0x40 != h.flag & 0x40 || z.flag & 0x80 != h.flag & 0x80) continue;
+            //x = vv[k][j];
+            h.suppl = &z;
+            break; //Taking the first supplementary read
+        }
+    }
+
+    /*int count = 0;
+    for(int i = 0; i < bb.hits.size(); i++)
+    {
+    	hit &h = bb.hits[i];
+    	if((h.flag & 0x800) >= 1) continue;       // skip supplemetary
+    	//printf("Primary hit:\n");
+	   	//h.print();
+
+    	if(h.suppl != NULL)
+    	{
+	    	//printf("Supplementary hit:\n");
+	    	//h.suppl->print();
+	    	count++;
+    	}
+    	printf("count = %d\n\n", count);
+	}*/
+
+    /*for(int i = 0; i < bb.hits.size(); i++)
+    {
+    	hit &h = bb.hits[i];
+    	if((h.flag & 0x800) >= 1) continue;       // skip supplemetary
+    	printf("Primary hit:\n");
+	   	h.print();
+
+    	if(h.suppl != NULL)
+    	{
+	    	printf("Supplementary hit:\n");
+	    	h.suppl->print();
+    	}
+    	printf("\n\n");
+	}
+	printf("-------------------------------------------------------------------------\n");
+	printf("End of bundle\n");
+	printf("-------------------------------------------------------------------------\n\n");
+    //printf("end of build supple\n");*/
+    return 0;
+}
+
 
 int bundle_bridge::build_regions()
 {
