@@ -170,6 +170,8 @@ int region::build_partial_exons()
 {
 	pexons.clear();
 
+
+
 	if(jmap.size() == 0) return 0;
 
 	//printf("size = %lu, size2 = %lu, [%d, %d), [%d, %d)\n", jmap.size(), distance(jmap.begin(), jmap.end()), lower(jmap.begin()->first), upper(jmap.begin()->first), lpos, rpos);
@@ -205,6 +207,11 @@ int region::build_partial_exons()
 
 		int lt = (p1 == lpos) ? ltype : START_BOUNDARY;
 		int rt = (p2 == rpos) ? rtype : END_BOUNDARY;
+		
+		if(lpos == 12248702)
+		{
+			printf("lpos is %d\n",lpos);
+		}
 
 		partial_exon pe(p1, p2, lt, rt);
 		if(b == true) pe.type = EMPTY_VERTEX;

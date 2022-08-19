@@ -34,7 +34,7 @@ hit::hit(int32_t p)
 */
 
 hit& hit::operator=(const hit &h)
-{
+{	
 	bam1_core_t::operator=(h);
 	hid = h.hid;
 	rpos = h.rpos;
@@ -61,6 +61,13 @@ hit& hit::operator=(const hit &h)
 	next = h.next;
 
 	umi = h.umi;
+
+	cigar = h.cigar;
+	left_cigar = h.left_cigar;					// S=soft clip, H=hard clip, M=match, .=default
+	right_cigar = h.right_cigar;					// S=soft clip, H=hard clip, M=match, .=default
+	first_pos = h.first_pos;						//.H.M. the three dots are the 1st, 2nd, and 3rd pos respectively
+	second_pos = h.second_pos;
+	third_pos = h.third_pos;
 
 	return *this;
 }
@@ -93,11 +100,19 @@ hit::hit(const hit &h)
 	next = h.next;
 
 	umi = h.umi;
+
+	cigar = h.cigar;
+	left_cigar = h.left_cigar;					// S=soft clip, H=hard clip, M=match, .=default
+	right_cigar = h.right_cigar;					// S=soft clip, H=hard clip, M=match, .=default
+	first_pos = h.first_pos;						//.H.M. the three dots are the 1st, 2nd, and 3rd pos respectively
+	second_pos = h.second_pos;
+	third_pos = h.third_pos;
 }
 
 hit::hit(bam1_t *b, int id) 
 	:bam1_core_t(b->core), hid(id)
 {
+	cigar = bam_get_cigar(b);
 	// fetch query name
 	qname = get_qname(b);
 	qhash = string_hash(qname);
@@ -106,6 +121,12 @@ hit::hit(bam1_t *b, int id)
 	next = NULL;
 	suppl = NULL;
 	end = '.';
+
+	left_cigar = '.';					// S=soft clip, H=hard clip, M=match, .=default
+	right_cigar = '.';					// S=soft clip, H=hard clip, M=match, .=default
+	first_pos = 0;						//.H.M. the three dots are the 1st, 2nd, and 3rd pos respectively
+	second_pos = 0;
+	third_pos = 0;
 
 	// compute rpos
 	rpos = pos + (int32_t)bam_cigar2rlen(n_cigar, bam_get_cigar(b));
@@ -122,7 +143,12 @@ hit::hit(bam1_t *b, int id)
 	// get cigar
 	assert(n_cigar <= max_num_cigar);
 	assert(n_cigar >= 1);
-	uint32_t * cigar = bam_get_cigar(b);
+	//uint32_t * cigar = bam_get_cigar(b); //commented by Tasfia
+
+	if(cigar != NULL && hid==6345)
+	{
+		printf("cigar size in hit.cc = %d\n",n_cigar);
+	}
 
 	// build splice positions
 	spos.clear();
@@ -145,6 +171,8 @@ hit::hit(bam1_t *b, int id)
 			q += bam_cigar_oplen(cigar[k]);
 		//printf("q=%d,",q);
 
+		//printf("cigar size = %d\n",bam_cigar_op(cigar[0]));
+
 		if(k == 0 || k == n_cigar - 1) continue;
 		if(bam_cigar_op(cigar[k]) != BAM_CREF_SKIP) continue; //BAM_CREF_SKIP junction
 		if(bam_cigar_op(cigar[k-1]) != BAM_CMATCH) continue; //match
@@ -158,7 +186,60 @@ hit::hit(bam1_t *b, int id)
 		int32_t s = p - bam_cigar_oplen(cigar[k]);
 		//printf("s=%d\n",s);
 		spos.push_back(pack(s, p));
+
 	}
+
+	int32_t x = pos;
+
+	//assign booleans to see if left splice position H/S and right M or vie versa and stor their lengths
+	if(n_cigar == 2)
+	{
+		if(bam_cigar_op(cigar[0]) == BAM_CSOFT_CLIP && bam_cigar_op(cigar[1]) == BAM_CMATCH)
+		{
+			//printf("First case\n");
+			left_cigar = 'S';
+			right_cigar = 'M';
+			first_pos = pos - bam_cigar_oplen(cigar[0]);
+			second_pos = pos;
+			third_pos = rpos;
+
+			//if(hid == 11789) printf("SM positions: %d-%d-%d\n", first_pos,second_pos,third_pos);
+		}
+		else if(bam_cigar_op(cigar[0]) == BAM_CHARD_CLIP && bam_cigar_op(cigar[1]) == BAM_CMATCH)
+		{
+			//printf("Second case\n");
+			left_cigar = 'H';
+			right_cigar = 'M';
+			first_pos = pos - bam_cigar_oplen(cigar[0]);
+			second_pos = pos;
+			third_pos = rpos;
+
+			//if(hid == 11789) printf("HM positions: %d-%d-%d\n", first_pos,second_pos,third_pos);
+		}
+		else if(bam_cigar_op(cigar[0]) == BAM_CMATCH && bam_cigar_op(cigar[1]) == BAM_CSOFT_CLIP)
+		{
+			//printf("Third case\n");
+			left_cigar = 'M';
+			right_cigar = 'S';
+			first_pos = pos;
+			second_pos = rpos;
+			third_pos = rpos + bam_cigar_oplen(cigar[1]);;
+
+			//if(hid == 20562) printf("MS positions: %d-%d-%d\n", first_pos,second_pos,third_pos);
+		}
+		else if(bam_cigar_op(cigar[0]) == BAM_CMATCH && bam_cigar_op(cigar[1]) == BAM_CHARD_CLIP)
+		{
+			//printf("Fourth case\n");
+			left_cigar = 'M';
+			right_cigar = 'H';
+			first_pos = pos;
+			second_pos = rpos;
+			third_pos = rpos + bam_cigar_oplen(cigar[1]);;
+
+			//if(hid == 11789) printf("MH positions: %d-%d-%d\n", first_pos,second_pos,third_pos);
+		}
+	}
+
 
 	//printf("spos size: %d\n", spos.size());
 

@@ -26,6 +26,6 @@ string partial_exon::label() const
 int partial_exon::print(int index) const
 {
 	printf("partial_exon %d: [%d-%d), type = %d, rid = %d, pid = %d, type = (%d, %d), length = %d, ave-abd = %.1lf, max-abd = %.1lf, std-abd = %.1lf\n",
-			index, rid, pid, lpos, rpos, type, ltype, rtype, rpos - lpos, ave, max, dev);
+			index, lpos, rpos, type, rid, pid, ltype, rtype, rpos - lpos, ave, max, dev);
 	return 0;
 }

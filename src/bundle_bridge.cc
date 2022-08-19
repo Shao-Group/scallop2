@@ -50,7 +50,7 @@ int bundle_bridge::build()
 
 int bundle_bridge::build_junctions()
 {
-	int min_max_boundary_quality = min_mapping_quality; //building a list of all splice pos and the bundle bases that includes the splice pos
+	int min_max_boundary_quality = min_mapping_quality; //building a list of all splice pos and the hit index that includes the splice pos
 	map< int64_t, vector<int> > m; // map of spos against vector of bundle base indices
 	for(int i = 0; i < bb.hits.size(); i++)
 	{
@@ -71,7 +71,7 @@ int bundle_bridge::build_junctions()
 			}
 			else
 			{
-				m[p].push_back(i); //map size 0 for chimeric instances as spos size is 0
+				m[p].push_back(i); 
 			}
 		}
 	}

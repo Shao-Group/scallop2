@@ -56,6 +56,15 @@ public:
 
 public:
 	int hid;								// hit-id
+
+	uint32_t *cigar;
+
+	char left_cigar;						// S=soft clip, H=hard clip, M=match
+	char right_cigar;						// S=soft clip, H=hard clip, M=match
+	int32_t first_pos;						//.H.M. the three dots are the 1st, 2nd, and 3rd pos respectively
+	int32_t second_pos;
+	int32_t third_pos;
+	//vector<uint32_t> cigar_positions;		// stores putative back splice positions
 	vector<int64_t> spos;					// splice positions
 	vector<int> vlist;						// list of spanned vertices in the junction graph
 	int32_t rpos;							// right position mapped to reference [pos, rpos)

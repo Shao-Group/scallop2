@@ -55,6 +55,7 @@ int assembler::assemble()
 		if(p.n_cigar < 1) continue;												// should never happen
 
 		hit ht(b1t, hid++);
+
 		ht.set_tags(b1t);
 		ht.set_strand();
 		//ht.print();
@@ -96,8 +97,6 @@ int assembler::assemble()
 		if(library_type == UNSTRANDED && ht.xs == '.') bb2.add_hit(ht);
 		if(library_type == UNSTRANDED && ht.xs == '+') bb1.add_hit(ht);
 		if(library_type == UNSTRANDED && ht.xs == '-') bb2.add_hit(ht);
-
-
 	}
 
 	//printf("complete\n");
@@ -218,6 +217,7 @@ int assembler::process(int n)
 
 	}
 	pool.clear();
+	//printf("End of bundle-----------\n");
 	return 0;
 }
 
