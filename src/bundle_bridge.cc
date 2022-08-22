@@ -263,10 +263,12 @@ int bundle_bridge::build_supplementaries()
             //if(z.qhash != h.qhash) continue;
             if(z.qname != h.qname) continue;
             // TODO check 0x40 and 0x80 are the same
-            if(z.flag & 0x40 != h.flag & 0x40 || z.flag & 0x80 != h.flag & 0x80) continue;
-            //x = vv[k][j];
-            h.suppl = &z;
-            break; //Taking the first supplementary read
+            if(((z.flag & 0x40) != (h.flag & 0x40)) || ((z.flag & 0x80) != (h.flag & 0x80))) continue;
+
+        	h.suppl = &z;
+        	break;
+
+            //Taking the first supplementary read
         }
     }
 

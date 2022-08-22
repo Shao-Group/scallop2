@@ -39,7 +39,7 @@ int bundle::prepare()
 
 	extract_backsplicing_junctions();
 	refine_backsplicing_junctions();
-	build_backsplicing_junctions();
+	//build_backsplicing_junctions();
 
 	build_regions();
 	build_partial_exons();
@@ -244,11 +244,14 @@ int bundle::extract_backsplicing_junctions()
         //check if the current hit[i] has a complementary hit
     	if(h.suppl == NULL) continue;
     	
-		printf("Current hit:\n");
-		h.print();
-			/*if(strcmp(h.qname.c_str(),"SRR1721290.7717438") == 0)
+		//printf("Current hit:\n");
+		//h.print();
+
+		/*if(strcmp(h.qname.c_str(),"SRR1721290.9762644") == 0)
     	{
     		printf("printed once\n");
+    		h.print();
+    		h.suppl->print();
     	}*/
 
     	// if yes:
@@ -365,7 +368,7 @@ int bundle::extract_backsplicing_junctions()
 			int support_count = it->second;
 			int current_hit_support = 0;
 
-			for(int k=-5;k<=5;k++)
+			for(int k=-5;k<=5;k++)  //change this to include only few bp around the p position
 			{
 				if(p+k >= h.pos && p+k <= h.rpos)
 				{
@@ -381,24 +384,29 @@ int bundle::extract_backsplicing_junctions()
 		}
     }
 
-    printf("back_spos size = %d\n", back_spos.size());
-    printf("back_spos hits size = %d\n", back_spos_hits.size());
-
-    //add nearby positions of p1 p2 in count map
-
-    if(back_spos_support.size() > 0)
+    if(back_spos.size() > 0)
     {
-    	printf("Back spos support map: %d\n", back_spos_support.size());
-    }
 
-    map< int32_t, int >::iterator it;
-	for(it = back_spos_support.begin(); it != back_spos_support.end(); it++)
-	{	
+	    printf("back_spos size = %d\n", back_spos.size());
+	    printf("back_spos hits size = %d\n", back_spos_hits.size());
 
-		int32_t p = it->first;
-		int support_count = it->second;
+	    //add nearby positions of p1 p2 in count map
 
-		printf("p value=%d, count=%d\n",p,support_count);
+	    if(back_spos_support.size() > 0)
+	    {
+	    	printf("Back spos support map: %d\n", back_spos_support.size());
+	    }
+
+	    map< int32_t, int >::iterator it;
+		for(it = back_spos_support.begin(); it != back_spos_support.end(); it++)
+		{	
+
+			int32_t p = it->first;
+			int support_count = it->second;
+
+			printf("p value=%d, count=%d\n",p,support_count);
+
+		}
 
 	}
 
@@ -513,13 +521,13 @@ int bundle::refine_backsplicing_junctions()
 		{
 			x1 = p1;
 			printf("x1 0, so x1=%d, p1 count=%d\n",x1,back_spos_support[p1]);
-			continue; //keeping only those p1 p2 that have junctions for debugging
+			//continue; //keeping only those p1 p2 that have junctions for debugging
 		}
 		if(x2 == 0) //if not nearby junc but support high, keep p2
 		{
 			x2 = p2;
 			printf("x2 0, so x2=%d, p2 count=%d\n",x2,back_spos_support[p2]);
-			continue; //keeping only those p1 p2 that have junctions for debugging
+			//continue; //keeping only those p1 p2 that have junctions for debugging
 		}
 
 		//printf("p1 count:%d, p2 count:%d\n",back_spos_support[p1],back_spos_support[p2]);
@@ -530,16 +538,20 @@ int bundle::refine_backsplicing_junctions()
 		printf("End of back pos\n\n");
 	}
 
-	printf("Size of corrected back_spos: %d\n",corrected_back_spos.size());
-
-	for(int i=0;i<corrected_back_spos.size();i++)
+	if(corrected_back_spos.size() > 0)
 	{
-		int32_t x1 = high32(corrected_back_spos[i]);
-		int32_t x2 = low32(corrected_back_spos[i]);
-		printf("x1 = %d, x2 = %d\n",x1,x2);
-	}
 
-	printf("Size of corrected back_spos_hits: %d\n",corrected_back_spos_hits.size());
+		printf("Size of corrected back_spos: %d\n",corrected_back_spos.size());
+
+		for(int i=0;i<corrected_back_spos.size();i++)
+		{
+			int32_t x1 = high32(corrected_back_spos[i]);
+			int32_t x2 = low32(corrected_back_spos[i]);
+			printf("x1 = %d, x2 = %d\n",x1,x2);
+		}
+
+		printf("Size of corrected back_spos_hits: %d\n",corrected_back_spos_hits.size());
+	}
 
 	//printf("End of bundle\n\n");
 }
@@ -2067,22 +2079,40 @@ int bundle::build_hyper_set()
 		//	the phasing path will be v + v2
 		// end 
 
+
 		if(fr.h1->suppl != NULL)
 		{
 			h1_supp_count++;
 			hit *h1_supple = fr.h1->suppl;
 
-			/*printf("fr.h1 has a supple hit.\n");
+
+			printf("\nfr.h1 has a supple hit.\n");
 			printf("Primary: ");
 			fr.h1->print();
 			printf("Supple: ");
 			h1_supple->print();
 			printf("fr.h2: ");
-			fr.h2->print();*/
+			fr.h2->print();
 
-			if(strcmp(fr.h1->qname.c_str(),"SRR1721290.2704524")==0)
+			/*if(strcmp(fr.h1->qname.c_str(),"SRR1721290.2704524")==0)
 			{
 				printf("found SRR1721290.2704524 in h1 supp\n");
+			}*/
+
+			if(fr.h1->n_cigar != 2 || fr.h1->suppl->n_cigar != 2)
+			{
+				printf("something wrong in h1s\n");
+				printf("h1p:%d-%d-%d\n",fr.h1->first_pos,fr.h1->second_pos,fr.h1->third_pos);
+				printf("h1s:%d-%d-%d\n",h1_supple->first_pos,h1_supple->second_pos,h1_supple->third_pos);
+				printf("h2:%d-%d-%d\n",fr.h2->first_pos,fr.h2->second_pos,fr.h2->third_pos);
+
+				printf("ncigar %d %d %d\n",fr.h1->n_cigar,h1_supple->n_cigar,fr.h2->n_cigar);
+
+				string combo = "special case h1s";
+				printf("%s\n",combo.c_str());
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;
+				continue;
 			}
 
 			//general rule p and s has to be edges
@@ -2092,16 +2122,31 @@ int bundle::build_hyper_set()
 				if(h1_supple->second_pos > h1_supple->pos && fr.h1->second_pos < fr.h1->rpos)
 				{
 					printf("Not compatible in new definition using cigar\n");
-					fr.h1->print();
-					fr.h1->suppl->print();
-					fr.h2->print();
+
+
+					string combo = "Not compatible h1s leftmost h1p rightmost";
+					printf("%s\n",combo.c_str());
+					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+					else frag2graph_freq[combo] += 1;
 				}
 				else if(h1_supple->second_pos == h1_supple->pos && fr.h1->second_pos == fr.h1->rpos)
 				{
 					printf("Compatible in new definition using cigar\n");
-					fr.h1->print();
-					fr.h1->suppl->print();
-					fr.h2->print();				
+	
+
+					string combo = "Compatible h1s leftmost h1p rightmost";
+					printf("%s\n",combo.c_str());
+					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+					else frag2graph_freq[combo] += 1;			
+				}
+				else
+				{
+					printf("Else 1\n");
+					printf("%d-%d-%d\n",fr.h1->first_pos,fr.h1->second_pos,fr.h1->third_pos);
+					printf("%d-%d-%d\n",h1_supple->first_pos,h1_supple->second_pos,h1_supple->third_pos);
+					printf("%d-%d-%d\n",fr.h2->first_pos,fr.h2->second_pos,fr.h2->third_pos);
+
+					printf("ncigar %d %d %d\n",fr.h1->n_cigar,h1_supple->n_cigar,fr.h2->n_cigar);
 				}
 			}
 
@@ -2111,28 +2156,45 @@ int bundle::build_hyper_set()
 				if(fr.h1->second_pos > fr.h1->pos && h1_supple->second_pos < h1_supple->rpos)
 				{
 					printf("Not compatible in new definition using cigar\n");
-					fr.h1->print();
-					fr.h1->suppl->print();
-					fr.h2->print();
+
+
+					string combo = "Not compatible h1p leftmost h1s rightmost";
+					printf("%s\n",combo.c_str());
+					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+					else frag2graph_freq[combo] += 1;
 				}
 				else if(fr.h1->second_pos == fr.h1->pos && h1_supple->second_pos == h1_supple->rpos)
 				{
 					printf("Compatible in new definition using cigar\n");
-					fr.h1->print();
-					fr.h1->suppl->print();
-					fr.h2->print();
+
+
+					string combo = "Compatible h1p leftmost h1s rightmost";
+					printf("%s\n",combo.c_str());
+					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+					else frag2graph_freq[combo] += 1;
+				}
+				else
+				{
+					printf("Else 2\n");
+
+					printf("%d-%d-%d\n",fr.h1->first_pos,fr.h1->second_pos,fr.h1->third_pos);
+					printf("%d-%d-%d\n",h1_supple->first_pos,h1_supple->second_pos,h1_supple->third_pos);
+					printf("%d-%d-%d\n",fr.h2->first_pos,fr.h2->second_pos,fr.h2->third_pos);
+
+					printf("ncigar %d %d %d\n",fr.h1->n_cigar,h1_supple->n_cigar,fr.h2->n_cigar);
 				}
 			}
 
 			else
 			{
 				printf("Not compatible in previous definition\n");
-				fr.h1->print();
-				fr.h1->suppl->print();
-				fr.h2->print();
+
+				string combo = "Not compatible h1s";
+				printf("%s\n",combo.c_str());
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;
 			}
 
-			
 
 			//frag2graph_freq.insert(pair<string, int>("test", 2));
 
@@ -2171,7 +2233,6 @@ int bundle::build_hyper_set()
 				printf("%d, ",v[i]);
 			}*/
 
-
 		}
 
 		if(fr.h2->suppl != NULL)
@@ -2184,13 +2245,31 @@ int bundle::build_hyper_set()
 				printf("found SRR1721290.2704524 in h2 supp\n");
 			}
 
-			/*printf("fr.h2 has a supple hit.\n");
+			printf("\nfr.h2 has a supple hit.\n");
+			printf("h1: ");
+			fr.h1->print();
 			printf("Primary: ");
 			fr.h2->print();
 			printf("Supple: ");
 			h2_supple->print();
 			printf("fr.h1: ");
-			fr.h1->print();*/
+
+			if(fr.h2->n_cigar != 2 || fr.h2->suppl->n_cigar != 2)
+			{
+				printf("something wrong in h2s\n");
+
+				printf("h1:%d-%d-%d\n",fr.h1->first_pos,fr.h1->second_pos,fr.h1->third_pos);
+				printf("h2p:%d-%d-%d\n",fr.h2->first_pos,fr.h2->second_pos,fr.h2->third_pos);
+				printf("h2s:%d-%d-%d\n",h2_supple->first_pos,h2_supple->second_pos,h2_supple->third_pos);
+
+				printf("ncigar %d %d %d\n",fr.h1->n_cigar,fr.h2->n_cigar,h2_supple->n_cigar);
+
+				string combo = "special case h2s";
+				printf("%s\n",combo.c_str());
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;
+				continue;
+			}
 
 			//general rule p and s has to be edges
 			if(h2_supple->pos <= fr.h1->pos && h2_supple->pos <= fr.h2->pos && fr.h2->rpos >= h2_supple->rpos && fr.h2->rpos >= fr.h1->rpos)
@@ -2199,16 +2278,24 @@ int bundle::build_hyper_set()
 				if(h2_supple->second_pos > h2_supple->pos && fr.h2->second_pos < fr.h2->rpos)
 				{
 					printf("Not compatible in new definition using cigar\n");
-					fr.h1->print();
-					fr.h2->print();
-					fr.h2->suppl->print();
+
+					string combo = "Not compatible h2s leftmost h2p rightmost";
+					printf("%s\n",combo.c_str());
+					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+					else frag2graph_freq[combo] += 1;
 				}
 				else if(h2_supple->second_pos == h2_supple->pos && fr.h2->second_pos == fr.h2->rpos)
 				{
-					printf("Compatible in new definition using cigar\n");
-					fr.h1->print();
-					fr.h2->print();
-					fr.h2->suppl->print();		
+					printf("Compatible in new definition using cigar\n");	
+
+					string combo = "Compatible h2s leftmost h2p rightmost";
+					printf("%s\n",combo.c_str());
+					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+					else frag2graph_freq[combo] += 1;	
+				}
+				else
+				{
+					printf("Else 3\n");
 				}
 			}
 
@@ -2218,26 +2305,39 @@ int bundle::build_hyper_set()
 				if(fr.h2->second_pos > fr.h2->pos && h2_supple->second_pos < h2_supple->rpos)
 				{
 					printf("Not compatible in new definition using cigar\n");
-					fr.h1->print();
-					fr.h2->print();
-					fr.h2->suppl->print();
+
+
+					string combo = "Not compatible h2p leftmost h2s rightmost";
+					printf("%s\n",combo.c_str());
+					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+					else frag2graph_freq[combo] += 1;
 				}
 				else if(fr.h2->second_pos == fr.h2->pos && h2_supple->second_pos == h2_supple->rpos)
 				{
 					printf("Compatible in new definition using cigar\n");
-					fr.h1->print();
-					fr.h2->print();
-					fr.h2->suppl->print();
+
+
+					string combo = "Compatible h2p leftmost h2s rightmost";
+					printf("%s\n",combo.c_str());
+					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+					else frag2graph_freq[combo] += 1;
+				}
+				else
+				{
+					printf("Else 4\n");
 				}
 			}
 
 			else
 			{
 				printf("Not compatible in previous definition\n");
-				fr.h1->print();
-				fr.h2->print();
-				fr.h2->suppl->print();
+
+				string combo = "Not compatible h2s";
+				printf("%s\n",combo.c_str());
+				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+				else frag2graph_freq[combo] += 1;
 			}
+		
 			
 
 			vector<int> v2 = align_hit(*h2_supple);
