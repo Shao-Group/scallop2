@@ -38,15 +38,79 @@ int bundle_bridge::build()
 
 	align_hits_transcripts();
 	index_references();
-	build_fragments();
+	build_fragments(); //builds fragment from h1p to h2
 
-	//build_new_fragments();
+	build_circ_fragments(); //will build fragment from h2 to h1s, added by Tasfia
 
 	//group_fragments();
 
 	bridger bdg(this);
 	bdg.bridge();
 	return 0;
+}
+
+int bundle_bridge::build_supplementaries()
+{
+
+	int max_index = bb.hits.size() + 1;
+	if(max_index > 1000000) max_index = 1000000;
+
+    vector< vector<int> > vv;
+    vv.resize(max_index);
+
+    //printf("Bundle hit size: %d\n", bb.hits.size());
+    // first build index
+    for(int i = 0; i < bb.hits.size(); i++)
+    {
+        hit &h = bb.hits[i];
+
+        // TODO
+        if((h.flag & 0x800) == 0) continue;
+
+        //printf("%s\n",h.qname.c_str());
+        //printf("%zu\n",h.qhash);
+
+        // do not use hi; as long as qname, pos and isize are identical
+        // add 0x40 and 0x80
+        int k = (h.qhash % max_index + (h.flag & 0x40) + (h.flag & 0x80)) % max_index;
+        vv[k].push_back(i);
+        //printf("Adding supple\n");
+    }
+
+    //printf("End of vv adding\n");
+
+    for(int i = 0; i < bb.hits.size(); i++)
+    {
+
+        hit &h = bb.hits[i];
+
+        //if(h.paired == true) continue; 
+        //if(h.isize <= 0) continue; //commented out as this was filtering non chimeric part of an end of SRR1721290.17627808
+        //if(h.vlist.size() == 0) continue;
+        if((h.flag & 0x800) >= 1) continue;       // skip supplemetary
+
+        int k = (h.qhash % max_index + (h.flag & 0x40) + (h.flag & 0x80)) % max_index;
+
+        for(int j = 0; j < vv[k].size(); j++)
+        {
+            hit &z = bb.hits[vv[k][j]];
+            //if(z.hi != h.hi) continue;
+            //if(z.paired == true) continue;
+            //if(z.pos != h.mpos) continue;
+            //if(z.isize + h.isize != 0) continue;
+            //if(z.qhash != h.qhash) continue;
+            if(z.qname != h.qname) continue;
+            // TODO check 0x40 and 0x80 are the same
+            if(((z.flag & 0x40) != (h.flag & 0x40)) || ((z.flag & 0x80) != (h.flag & 0x80))) continue;
+
+        	h.suppl = &z;
+        	break;
+
+            //Taking the first supplementary read
+        }
+    }
+
+    return 0;
 }
 
 
@@ -176,140 +240,6 @@ int bundle_bridge::extend_junctions()
 	//}
 
 	return 0;
-}
-
-int bundle_bridge::build_supplementaries()
-{
-
-	int max_index = bb.hits.size() + 1;
-	if(max_index > 1000000) max_index = 1000000;
-
-    vector< vector<int> > vv;
-    vv.resize(max_index);
-
-    //printf("Bundle hit size: %d\n", bb.hits.size());
-    // first build index
-    for(int i = 0; i < bb.hits.size(); i++)
-    {
-        hit &h = bb.hits[i];
-
-
-        /*if(strcmp(h.qname.c_str(),"SRR1721290.17627808") == 0)
-        {
-        	h.print();
-        	printf("Hash value - %zu\n",h.qhash);
-        	printf("isize - %d\n",h.isize);
-        	printf("vlist size - %u\n",h.vlist.size());
-        	printf("h.flag & 0x800 - %d\n",(h.flag & 0x800));
-        }*/
-
-        //if(h.isize >= 0) continue; //commented out as this was filtering chimeric part of an end of SRR1721290.17627808
-        //if(h.vlist.size() == 0) continue;
-
-        // TODO
-        if((h.flag & 0x800) == 0) continue;
-
-        //printf("%s\n",h.qname.c_str());
-        //printf("%zu\n",h.qhash);
-
-        // do not use hi; as long as qname, pos and isize are identical
-        // add 0x40 and 0x80
-        int k = (h.qhash % max_index + (h.flag & 0x40) + (h.flag & 0x80)) % max_index;
-        vv[k].push_back(i);
-        //printf("Adding supple\n");
-    }
-
-    //printf("End of vv adding\n");
-
-    for(int i = 0; i < bb.hits.size(); i++)
-    {
-
-        hit &h = bb.hits[i];
-
-        
-        //if(h.paired == true) continue; 
-        //if(h.isize <= 0) continue; //commented out as this was filtering non chimeric part of an end of SRR1721290.17627808
-        //if(h.vlist.size() == 0) continue;
-        if((h.flag & 0x800) >= 1) continue;       // skip supplemetary
-
-        /*if(strcmp(h.qname.c_str(),"SRR1721290.17627808") == 0)
-        {
-        	h.print();
-        	printf("Hash value - %zu\n",h.qhash);
-        	printf("isize - %d\n",h.isize);
-        	printf("vlist size - %u\n",h.vlist.size());
-        	printf("h.flag & 0x800 - %d\n",(h.flag & 0x800));
-        	if(h.paired == true) printf("Paired true\n");
-        	else printf("Paired false\n\n");
-        }*/
-
-        
-
-        //printf("%s\n",h.qname.c_str());
-        
-        /*if(strcmp(h.qname.c_str(),"SRR1721290.17627808") == 0)
-        {
-        	h.print();
-        	printf("Hash value - %zu\n",h.qhash);
-        }*/
-
-        int k = (h.qhash % max_index + (h.flag & 0x40) + (h.flag & 0x80)) % max_index;
-
-        for(int j = 0; j < vv[k].size(); j++)
-        {
-            hit &z = bb.hits[vv[k][j]];
-            //if(z.hi != h.hi) continue;
-            //if(z.paired == true) continue;
-            //if(z.pos != h.mpos) continue;
-            //if(z.isize + h.isize != 0) continue;
-            //if(z.qhash != h.qhash) continue;
-            if(z.qname != h.qname) continue;
-            // TODO check 0x40 and 0x80 are the same
-            if(((z.flag & 0x40) != (h.flag & 0x40)) || ((z.flag & 0x80) != (h.flag & 0x80))) continue;
-
-        	h.suppl = &z;
-        	break;
-
-            //Taking the first supplementary read
-        }
-    }
-
-    /*int count = 0;
-    for(int i = 0; i < bb.hits.size(); i++)
-    {
-    	hit &h = bb.hits[i];
-    	if((h.flag & 0x800) >= 1) continue;       // skip supplemetary
-    	//printf("Primary hit:\n");
-	   	//h.print();
-
-    	if(h.suppl != NULL)
-    	{
-	    	//printf("Supplementary hit:\n");
-	    	//h.suppl->print();
-	    	count++;
-    	}
-    	printf("count = %d\n\n", count);
-	}*/
-
-    /*for(int i = 0; i < bb.hits.size(); i++)
-    {
-    	hit &h = bb.hits[i];
-    	if((h.flag & 0x800) >= 1) continue;       // skip supplemetary
-    	printf("Primary hit:\n");
-	   	h.print();
-
-    	if(h.suppl != NULL)
-    	{
-	    	printf("Supplementary hit:\n");
-	    	h.suppl->print();
-    	}
-    	printf("\n\n");
-	}
-	printf("-------------------------------------------------------------------------\n");
-	printf("End of bundle\n");
-	printf("-------------------------------------------------------------------------\n\n");
-    //printf("end of build supple\n");*/
-    return 0;
 }
 
 
@@ -513,6 +443,46 @@ int bundle_bridge::locate_region(int32_t x)
 	return -1;
 }
 
+int bundle_bridge::build_circ_fragments()
+{
+	for(int k = 0; k < fragments.size(); k++)
+	{
+		fragment &fr = fragments[k];
+
+		if(fr.type != 0) continue; // note by Qimin, skip if not paired-end fragments
+
+		//if(fr.h1->paired != true) printf("error type: %d\n", fr.type);
+		//assert(fr.h1->paired == true);
+		//assert(fr.h2->paired == true);
+
+		if(fr.paths.size() != 1) continue; //continue if not bridged
+		if(fr.paths[0].type != 1) continue;
+
+
+		if(fr.h1->suppl != NULL)
+		{
+			//need to check compatibility from bundle.cc
+			//if not compatible, continue
+			//if compatible
+			fragment fr(fr.h2, fr.h1->suppl); //h2 and h1s as param or h2s and h1 as parameter
+			fr.frag_type = 2; //this is the second set of fragment,tasfia
+			//do we need to check h1p-h2-h1s order if compatible checked?
+			//need to handle fr.h2 paired
+		}
+		if(fr.h2->suppl != NULL)
+		{
+			//need to check compatibility from bundle.cc
+			//if not compatible, continue
+			//if compatible
+			fragment fr(fr.h2->suppl, fr.h1); //h2 and h1s as param or h2s and h1 as parameter
+			fr.frag_type = 2; //this is the second set of fragment,tasfia
+			//do we need to check h2s-h1-h2p order if compatible checked?
+			//need to handle fr.h1 paired
+		}
+	}
+
+}
+
 int bundle_bridge::build_fragments()
 {
 
@@ -531,7 +501,7 @@ int bundle_bridge::build_fragments()
 	if(max_index > 1000000) max_index = 1000000;
 
 	vector< vector<int> > vv;
-	vv.resize(max_index);
+	vv.resize(max_index); //max_index slots initialized to zero, here max_index is the max hash index, tasfia
 
 	// first build index
 	for(int i = 0; i < bb.hits.size(); i++)
@@ -548,7 +518,7 @@ int bundle_bridge::build_fragments()
 		assert(m.find(si) == m.end());
 		m.insert(PSI(si, i));
 		*/
-		vv[k].push_back(i);
+		vv[k].push_back(i); //vv containes hits of the same hash
 	}
 
 	for(int i = 0; i < bb.hits.size(); i++)
@@ -596,15 +566,16 @@ int bundle_bridge::build_fragments()
 		if(x == -1) continue;
 		if(bb.hits[x].vlist.size() == 0) continue;
 
-		fragment fr(&bb.hits[i], &bb.hits[x]); //h2 and h1s as param
+		fragment fr(&bb.hits[i], &bb.hits[x]); //h2 and h1s as param or h2s and h1 as parameter
+		fr.frag_type = 1; //this is the first set of fragment,tasfia
 
 		//keep it
 		// ===============================
 		// TODO: dit for UMI
-		bb.hits[i].pi = x;
+		bb.hits[i].pi = x; //index of other hit of a fragment stored, i-x are fragment pair indices, partner index
 		bb.hits[x].pi = i;
 		bb.hits[i].fidx = fragments.size();//check if used somewhere
-		bb.hits[x].fidx = fragments.size();
+		bb.hits[x].fidx = fragments.size();//fidx is the fragment index
 		ctp += 1;
 		fr.type = 0; 
 		// ================================

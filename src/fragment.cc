@@ -14,6 +14,7 @@ See LICENSE for licensing.
 fragment::fragment(hit *x1, hit *x2)
 	: h1(x1), h2(x2)
 {
+	frag_type = 1;
 	b1 = false;
 	b2 = false;
 	k1l = 0;

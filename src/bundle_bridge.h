@@ -49,6 +49,7 @@ public:
 	int extend_junctions();
 	int build_regions();
 
+	int build_circ_fragments();
 	int build_fragments();
 	int group_fragments();
 

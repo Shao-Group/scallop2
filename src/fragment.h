@@ -25,6 +25,9 @@ public:
 public:
 	hit* h1;			// list of first mate
 	hit* h2;			// list of second mate
+
+	int frag_type;		//1 if normal fragment from h1p to h2 or h1 to h2p, 2 if from h2 to h1s or h2s to h1
+
 	int cnt;			// count of the equal hits
 	int32_t lpos;		// equals to hits[k1].pos
 	int32_t rpos;		// equals to hits[k2].rpos

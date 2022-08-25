@@ -2324,35 +2324,6 @@ int bundle::build_hyper_set()
 					else frag2graph_freq[combo] += 1;					
 				}
 
-				/*printf("Compatible in previous definition, h1s leftmost, h1p rightmost\n");
-				if(h1_supple->second_pos > h1_supple->pos && fr.h1->second_pos < fr.h1->rpos)
-				{
-					printf("Not compatible in new definition using cigar\n");
-
-					string combo = "Not compatible h1s leftmost h1p rightmost";
-					printf("%s\n",combo.c_str());
-					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-					else frag2graph_freq[combo] += 1;
-				}
-				else if(h1_supple->second_pos == h1_supple->pos && fr.h1->second_pos == fr.h1->rpos)
-				{
-					printf("Compatible in new definition using cigar\n");
-	
-
-					string combo = "Compatible h1s leftmost h1p rightmost";
-					printf("%s\n",combo.c_str());
-					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-					else frag2graph_freq[combo] += 1;			
-				}
-				else
-				{
-					printf("Else 1\n");
-					printf("%d-%d-%d\n",fr.h1->first_pos,fr.h1->second_pos,fr.h1->third_pos);
-					printf("%d-%d-%d\n",h1_supple->first_pos,h1_supple->second_pos,h1_supple->third_pos);
-					printf("%d-%d-%d\n",fr.h2->first_pos,fr.h2->second_pos,fr.h2->third_pos);
-
-					printf("ncigar %d %d %d\n",fr.h1->n_cigar,h1_supple->n_cigar,fr.h2->n_cigar);
-				}*/
 			}
 
 			else if(fr.h1->pos <= fr.h2->pos && fr.h1->pos <= h1_supple->pos && h1_supple->rpos >= fr.h1->rpos && h1_supple->rpos >= fr.h2->rpos)
@@ -2373,36 +2344,7 @@ int bundle::build_hyper_set()
 					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
 					else frag2graph_freq[combo] += 1;					
 				}
-				/*printf("Compatible in previous definition, h1p leftmost, h1s rightmost\n");
-				if(fr.h1->second_pos > fr.h1->pos && h1_supple->second_pos < h1_supple->rpos)
-				{
-					printf("Not compatible in new definition using cigar\n");
 
-					string combo = "Not compatible h1p leftmost h1s rightmost";
-					printf("%s\n",combo.c_str());
-					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-					else frag2graph_freq[combo] += 1;
-				}
-				else if(fr.h1->second_pos == fr.h1->pos && h1_supple->second_pos == h1_supple->rpos)
-				{
-					printf("Compatible in new definition using cigar\n");
-
-
-					string combo = "Compatible h1p leftmost h1s rightmost";
-					printf("%s\n",combo.c_str());
-					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-					else frag2graph_freq[combo] += 1;
-				}
-				else
-				{
-					printf("Else 2\n");
-
-					printf("%d-%d-%d\n",fr.h1->first_pos,fr.h1->second_pos,fr.h1->third_pos);
-					printf("%d-%d-%d\n",h1_supple->first_pos,h1_supple->second_pos,h1_supple->third_pos);
-					printf("%d-%d-%d\n",fr.h2->first_pos,fr.h2->second_pos,fr.h2->third_pos);
-
-					printf("ncigar %d %d %d\n",fr.h1->n_cigar,h1_supple->n_cigar,fr.h2->n_cigar);
-				}*/
 			}
 			else
 			{
@@ -2514,29 +2456,7 @@ int bundle::build_hyper_set()
 					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
 					else frag2graph_freq[combo] += 1;					
 				}
-				/*printf("Compatible in previous definition, h2s leftmost, h2p rightmost\n");
-				if(h2_supple->second_pos > h2_supple->pos && fr.h2->second_pos < fr.h2->rpos)
-				{
-					printf("Not compatible in new definition using cigar\n");
 
-					string combo = "Not compatible h2s leftmost h2p rightmost";
-					printf("%s\n",combo.c_str());
-					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-					else frag2graph_freq[combo] += 1;
-				}
-				else if(h2_supple->second_pos == h2_supple->pos && fr.h2->second_pos == fr.h2->rpos)
-				{
-					printf("Compatible in new definition using cigar\n");	
-
-					string combo = "Compatible h2s leftmost h2p rightmost";
-					printf("%s\n",combo.c_str());
-					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-					else frag2graph_freq[combo] += 1;	
-				}
-				else
-				{
-					printf("Else 3\n");
-				}*/
 			}
 
 			else if(fr.h2->pos <= fr.h1->pos && fr.h2->pos <= h2_supple->pos && h2_supple->rpos >= fr.h2->rpos && h2_supple->rpos >= fr.h1->rpos)
@@ -2557,30 +2477,7 @@ int bundle::build_hyper_set()
 					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
 					else frag2graph_freq[combo] += 1;					
 				}
-				/*printf("Compatible in previous definition, h2p leftmost, h2s rightmost\n");
-				if(fr.h2->second_pos > fr.h2->pos && h2_supple->second_pos < h2_supple->rpos)
-				{
-					printf("Not compatible in new definition using cigar\n");
 
-
-					string combo = "Not compatible h2p leftmost h2s rightmost";
-					printf("%s\n",combo.c_str());
-					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-					else frag2graph_freq[combo] += 1;
-				}
-				else if(fr.h2->second_pos == fr.h2->pos && h2_supple->second_pos == h2_supple->rpos)
-				{
-					printf("Compatible in new definition using cigar\n");
-
-					string combo = "Compatible h2p leftmost h2s rightmost";
-					printf("%s\n",combo.c_str());
-					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-					else frag2graph_freq[combo] += 1;
-				}
-				else
-				{
-					printf("Else 4\n");
-				}*/
 			}
 
 			else
