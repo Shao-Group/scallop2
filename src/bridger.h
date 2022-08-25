@@ -35,15 +35,15 @@ public:
 
 public:
 	bundle_bridge *bd;				// parent bundle
-	vector<path> pnodes;			// path nodes 
+	vector<path> pnodes;			// path nodes (not used)
 	vector< map<int, int> > jsetx;	// junction graph (out) 
 	vector< map<int, int> > jsety;	// junction graph (in)
-	vector< map<int, int> > psetx;	// path graph (out)
-	vector< map<int, int> > psety;	// path graph (in)
+	vector< map<int, int> > psetx;	// path graph (out) (not used)
+	vector< map<int, int> > psety;	// path graph (in) (not used)
 	int max_pnode_length;			// kmer size
 	int32_t length_median;
-	int32_t length_low;
-	int32_t length_high;
+	int32_t length_low;	//DISTRBN OF FRGAMNET length 0
+	int32_t length_high; //DISTRBN OF FRGAMNET length 10000
 
 
 public:

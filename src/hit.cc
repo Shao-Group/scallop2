@@ -62,7 +62,7 @@ hit& hit::operator=(const hit &h)
 
 	umi = h.umi;
 
-	cigar = h.cigar;
+	cigar_vector = h.cigar_vector;
 	left_cigar = h.left_cigar;					// S=soft clip, H=hard clip, M=match, .=default
 	right_cigar = h.right_cigar;					// S=soft clip, H=hard clip, M=match, .=default
 	first_pos = h.first_pos;						//.H.M. the three dots are the 1st, 2nd, and 3rd pos respectively
@@ -101,7 +101,7 @@ hit::hit(const hit &h)
 
 	umi = h.umi;
 
-	cigar = h.cigar;
+	cigar_vector = h.cigar_vector;
 	left_cigar = h.left_cigar;					// S=soft clip, H=hard clip, M=match, .=default
 	right_cigar = h.right_cigar;					// S=soft clip, H=hard clip, M=match, .=default
 	first_pos = h.first_pos;						//.H.M. the three dots are the 1st, 2nd, and 3rd pos respectively
@@ -112,7 +112,6 @@ hit::hit(const hit &h)
 hit::hit(bam1_t *b, int id) 
 	:bam1_core_t(b->core), hid(id)
 {
-	cigar = bam_get_cigar(b);
 	// fetch query name
 	qname = get_qname(b);
 	qhash = string_hash(qname);
@@ -143,7 +142,7 @@ hit::hit(bam1_t *b, int id)
 	// get cigar
 	assert(n_cigar <= max_num_cigar);
 	assert(n_cigar >= 1);
-	//uint32_t * cigar = bam_get_cigar(b); //commented by Tasfia
+	uint32_t * cigar = bam_get_cigar(b); //commented by Tasfia
 
 	if(cigar != NULL && hid==6345)
 	{
@@ -189,10 +188,43 @@ hit::hit(bam1_t *b, int id)
 
 	}
 
-	int32_t x = pos;
+	cigar_vector.clear();
+
+	for(int k = 0; k < n_cigar; k++)
+	{
+		if(bam_cigar_op(cigar[k]) == BAM_CMATCH)
+		{
+			cigar_vector.push_back(pair<char, int32_t>('M',bam_cigar_oplen(cigar[k])));
+		}
+		else if(bam_cigar_op(cigar[k]) == BAM_CSOFT_CLIP)
+		{
+			cigar_vector.push_back(pair<char, int32_t>('S',bam_cigar_oplen(cigar[k])));
+		}
+		else if(bam_cigar_op(cigar[k]) == BAM_CHARD_CLIP)
+		{
+			cigar_vector.push_back(pair<char, int32_t>('H',bam_cigar_oplen(cigar[k])));
+		}
+		else if(bam_cigar_op(cigar[k]) == BAM_CREF_SKIP)
+		{
+			cigar_vector.push_back(pair<char, int32_t>('N',bam_cigar_oplen(cigar[k])));
+		}
+		else if(bam_cigar_op(cigar[k]) == BAM_CINS)
+		{
+			cigar_vector.push_back(pair<char, int32_t>('I',bam_cigar_oplen(cigar[k])));
+		}
+		else if(bam_cigar_op(cigar[k]) == BAM_CDEL)
+		{
+			cigar_vector.push_back(pair<char, int32_t>('D',bam_cigar_oplen(cigar[k])));
+		}
+		else
+		{
+			cigar_vector.push_back(pair<char, int32_t>('.',0));
+		}
+	}
+
 
 	//assign booleans to see if left splice position H/S and right M or vie versa and stor their lengths
-	if(n_cigar == 2)
+	/*if(n_cigar == 2)
 	{
 		if(bam_cigar_op(cigar[0]) == BAM_CSOFT_CLIP && bam_cigar_op(cigar[1]) == BAM_CMATCH)
 		{
@@ -238,7 +270,7 @@ hit::hit(bam1_t *b, int id)
 
 			//if(hid == 11789) printf("MH positions: %d-%d-%d\n", first_pos,second_pos,third_pos);
 		}
-	}
+	}*/
 
 
 	//printf("spos size: %d\n", spos.size());

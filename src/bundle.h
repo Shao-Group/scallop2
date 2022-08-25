@@ -71,6 +71,7 @@ public:
 	int build_junctions();
 	//int correct_junctions();
 
+	int set_chimeric_cigar_positions();
 	int extract_backsplicing_junctions();
 	int refine_backsplicing_junctions();
 	int build_backsplicing_junctions();

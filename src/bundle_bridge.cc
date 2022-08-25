@@ -40,6 +40,8 @@ int bundle_bridge::build()
 	index_references();
 	build_fragments();
 
+	//build_new_fragments();
+
 	//group_fragments();
 
 	bridger bdg(this);
@@ -594,13 +596,14 @@ int bundle_bridge::build_fragments()
 		if(x == -1) continue;
 		if(bb.hits[x].vlist.size() == 0) continue;
 
-		fragment fr(&bb.hits[i], &bb.hits[x]);
+		fragment fr(&bb.hits[i], &bb.hits[x]); //h2 and h1s as param
 
+		//keep it
 		// ===============================
 		// TODO: dit for UMI
 		bb.hits[i].pi = x;
 		bb.hits[x].pi = i;
-		bb.hits[i].fidx = fragments.size();
+		bb.hits[i].fidx = fragments.size();//check if used somewhere
 		bb.hits[x].fidx = fragments.size();
 		ctp += 1;
 		fr.type = 0; 
@@ -614,7 +617,9 @@ int bundle_bridge::build_fragments()
 		fr.k1r = regions[v1.back()].rpos - fr.h1->rpos;
 		fr.k2l = fr.h2->pos - regions[v2.front()].lpos;
 		fr.k2r = regions[v2.back()].rpos - fr.h2->rpos;
+		//keep it
 
+		//inlcude
 		fr.b1 = true;
 		if(v1.size() <= 1) 
 		{

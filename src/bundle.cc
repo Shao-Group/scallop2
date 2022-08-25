@@ -37,6 +37,7 @@ int bundle::prepare()
 
 	// add the 3 new functions
 
+	set_chimeric_cigar_positions();
 	extract_backsplicing_junctions();
 	refine_backsplicing_junctions();
 	//build_backsplicing_junctions();
@@ -205,6 +206,187 @@ int bundle::build_junctions() //write new similar function to handle BSJs
 }
 
 
+int bundle:: set_chimeric_cigar_positions()
+{
+	for(int i = 0; i < bb.hits.size(); i++)
+	{
+		hit &h = bb.hits[i];
+
+		if(h.suppl == NULL) continue;
+
+		/*printf("Primary hit:\n");
+		h.print();
+		printf("Supple hit:\n");
+		h.suppl->print();
+
+
+		printf("cigar prim:");
+		for(int p=0;p<h.n_cigar;p++)
+		{
+			printf("%d%c",h.cigar_vector[p].second,h.cigar_vector[p].first);
+		}
+		printf("\n");
+
+		printf("cigar supp:");
+		for(int p=0;p<h.suppl->n_cigar;p++)
+		{
+			printf("%d%c",h.suppl->cigar_vector[p].second,h.suppl->cigar_vector[p].first);
+		}
+		printf("\n");*/
+
+		
+		int32_t p;
+		int32_t q;
+
+		p = h.pos;
+		int match_index = 0;;
+
+		for(int j=0;j<h.n_cigar;j++)
+		{
+			if(h.cigar_vector[j].first == 'M')
+			{
+				match_index = j;
+				break;
+			}
+		}
+		for(int j=match_index-1;j>=0;j--)
+		{
+			p -= h.cigar_vector[j].second; //subtracting cigars before match index
+		}
+		
+		q = h.suppl->pos;
+		match_index = 0;;
+
+		for(int j=0;j<h.suppl->n_cigar;j++)
+		{
+			if(h.suppl->cigar_vector[j].first == 'M')
+			{
+				match_index = j;
+				break;
+			}
+		}
+		for(int j=match_index-1;j>=0;j--)
+		{
+			q -= h.suppl->cigar_vector[j].second; //subtracting cigars before match index
+		}
+		
+
+		int32_t x = p;
+		int32_t diff_cigar1 = 10000;
+		int32_t diff_cigar2 = 10000;
+		int best_pos_flag = 0;
+
+		for(int j=0;j<h.n_cigar-1;j++)
+		{
+			int32_t y = q;
+			pair<char, int32_t> hp_cigar1 = h.cigar_vector[j];
+			pair<char, int32_t> hp_cigar2 = h.cigar_vector[j+1];
+
+			for(int k=0;k<h.suppl->n_cigar-1;k++)
+			{
+
+				pair<char, int32_t> hs_cigar1 = h.suppl->cigar_vector[k];
+				pair<char, int32_t> hs_cigar2 = h.suppl->cigar_vector[k+1];
+
+				//printf("check %d,%c\n",hp_cigar1.second,hp_cigar1.first);
+
+				if(((hp_cigar1.first == 'S' || hp_cigar1.first == 'H') && hp_cigar2.first == 'M') && (hs_cigar1.first == 'M' && (hs_cigar2.first == 'S' || hs_cigar2.first == 'H')))
+				{
+					diff_cigar1 = abs(hs_cigar1.second - hp_cigar1.second);
+					diff_cigar2 = abs(hs_cigar2.second - hp_cigar2.second);
+				}
+				else if(((hs_cigar1.first == 'S' || hs_cigar1.first == 'H') && hs_cigar2.first == 'M') && (hp_cigar1.first == 'M' && (hp_cigar2.first == 'S' || hp_cigar2.first == 'H')))
+				{
+					diff_cigar1 = abs(hs_cigar1.second - hp_cigar1.second);
+					diff_cigar2 = abs(hs_cigar2.second - hp_cigar2.second);					
+				}
+
+				if(diff_cigar1 < 20 && diff_cigar2 < 20) //setting diff max 20 between complementing cigars
+				{
+					printf("Found best positions\n");
+					best_pos_flag = 1;
+
+					//set first,second and third positions of prim and suppl
+					h.first_pos = x;
+					h.second_pos = x + hp_cigar1.second;
+					h.third_pos = x + hp_cigar1.second + hp_cigar2.second;
+
+					h.suppl->first_pos = y;
+					h.suppl->second_pos = y + hs_cigar1.second;
+					h.suppl->third_pos = y + hs_cigar1.second + hs_cigar2.second;
+
+					h.left_cigar = hp_cigar1.first;
+					h.right_cigar = hp_cigar2.first;
+
+					h.suppl->left_cigar = hs_cigar1.first;
+					h.suppl->right_cigar = hs_cigar2.first;
+
+					break;
+
+				}
+				y += hs_cigar1.second;
+
+			}
+			if(best_pos_flag == 1) break;
+
+			x += hp_cigar1.second;
+		}
+
+		//printf("set_cigar p:%d-%d-%d\n",h.first_pos,h.second_pos,h.third_pos);
+		//printf("set_cigar s:%d-%d-%d\n",h.suppl->first_pos,h.suppl->second_pos,h.suppl->third_pos);
+
+
+		//assign booleans to see if left splice position H/S and right M or vie versa and stor their lengths
+		/*if(h.n_cigar == 2)
+		{
+			if(bam_cigar_op(h.cigar[0]) == BAM_CSOFT_CLIP && bam_cigar_op(h.cigar[1]) == BAM_CMATCH)
+			{
+				//printf("First case\n");
+				h.left_cigar = 'S';
+				h.right_cigar = 'M';
+				h.first_pos = h.pos - bam_cigar_oplen(h.cigar[0]);
+				h.second_pos = h.pos;
+				h.third_pos = h.rpos;
+
+				//if(hid == 11789) printf("SM positions: %d-%d-%d\n", first_pos,second_pos,third_pos);
+			}
+			else if(bam_cigar_op(h.cigar[0]) == BAM_CHARD_CLIP && bam_cigar_op(h.cigar[1]) == BAM_CMATCH)
+			{
+				//printf("Second case\n");
+				h.left_cigar = 'H';
+				h.right_cigar = 'M';
+				h.first_pos = h.pos - bam_cigar_oplen(h.cigar[0]);
+				h.second_pos = h.pos;
+				h.third_pos = h.rpos;
+
+				//if(hid == 11789) printf("HM positions: %d-%d-%d\n", first_pos,second_pos,third_pos);
+			}
+			else if(bam_cigar_op(h.cigar[0]) == BAM_CMATCH && bam_cigar_op(h.cigar[1]) == BAM_CSOFT_CLIP)
+			{
+				//printf("Third case\n");
+				h.left_cigar = 'M';
+				h.right_cigar = 'S';
+				h.first_pos = h.pos;
+				h.second_pos = h.rpos;
+				h.third_pos = h.rpos + bam_cigar_oplen(h.cigar[1]);;
+
+				//if(hid == 20562) printf("MS positions: %d-%d-%d\n", first_pos,second_pos,third_pos);
+			}
+			else if(bam_cigar_op(h.cigar[0]) == BAM_CMATCH && bam_cigar_op(h.cigar[1]) == BAM_CHARD_CLIP)
+			{
+				//printf("Fourth case\n");
+				h.left_cigar = 'M';
+				h.right_cigar = 'H';
+				h.first_pos = h.pos;
+				h.second_pos = h.rpos;
+				h.third_pos = h.rpos + bam_cigar_oplen(h.cigar[1]);;
+
+				//if(hid == 11789) printf("MH positions: %d-%d-%d\n", first_pos,second_pos,third_pos);
+			}
+		}*/
+	}
+}
+
 
 int bundle::extract_backsplicing_junctions()
 {
@@ -236,6 +418,7 @@ int bundle::extract_backsplicing_junctions()
     for(int i = 0; i < bb.hits.size(); i++)
 	{
     	hit &h = bb.hits[i];
+
 		/*if(strcmp(h.qname.c_str(),"SRR1721290.7717438") == 0)
     	{
     		printf("printed once\n");
@@ -243,9 +426,38 @@ int bundle::extract_backsplicing_junctions()
     	}*/
         //check if the current hit[i] has a complementary hit
     	if(h.suppl == NULL) continue;
+
+    	printf("Primary hit:\n");
+		h.print();
+		printf("Supple hit:\n");
+		h.suppl->print();
+
+    	printf("cigar prim:");
+		for(int p=0;p<h.n_cigar;p++)
+		{
+			printf("%d%c",h.cigar_vector[p].second,h.cigar_vector[p].first);
+		}
+		printf("\n");
+
+		printf("cigar supp:");
+		for(int p=0;p<h.suppl->n_cigar;p++)
+		{
+			printf("%d%c",h.suppl->cigar_vector[p].second,h.suppl->cigar_vector[p].first);
+		}
+		printf("\n");
     	
 		//printf("Current hit:\n");
 		//h.print();
+
+		/*if(h.hid == 561069)
+		{
+			for(int j=0;j<h.suppl->cigar_vector.size();j++)
+			{
+				printf("%d,%c\n",h.suppl->cigar_vector[j].second,h.suppl->cigar_vector[j].first);
+			}
+		}
+		printf("cigar vector size:%d\n",h.suppl->cigar_vector.size());*/
+
 
 		/*if(strcmp(h.qname.c_str(),"SRR1721290.9762644") == 0)
     	{
@@ -254,37 +466,17 @@ int bundle::extract_backsplicing_junctions()
     		h.suppl->print();
     	}*/
 
-    	// if yes:
-
-    	//h.print();
-    	//h.suppl->print();
-    	//printf("\n\n");
-    	
-        /*if(strcmp(h.qname.c_str(),"SRR1721290.17627808") == 0)
-		{
-			h.print();
-			h.suppl->print();
-			printf("\n\n");
-		}*/
-
 
 		// extract p1 and p2, from cigar. MS-SM, MH-HM, SM-MS, HM-MH
 		int32_t p1 = 0;
 		int32_t p2 = 0;
 
-		if(h.hid==20562 && h.cigar != NULL)
+		if(h.second_pos == 0 || h.suppl->second_pos == 0)
 		{
-			printf("cigar size in bundle.cc: %d-%d-%d-%c-%c\n",h.first_pos,h.second_pos,h.third_pos,h.left_cigar,h.right_cigar);
+			printf("prim-suppl has a zero in 3 positions of cigar\n");
+			continue;
 		}
 
-		/*if(((bam_cigar_op(h.cigar[0]) == BAM_CSOFT_CLIP || bam_cigar_op(h.cigar[0]) == BAM_CHARD_CLIP) && bam_cigar_op(h.cigar[1]) == BAM_CMATCH) && (bam_cigar_op(h.suppl->cigar[0]) == BAM_CMATCH && (bam_cigar_op(h.suppl->cigar[1]) == BAM_CSOFT_CLIP || bam_cigar_op(h.suppl->cigar[1]) == BAM_CHARD_CLIP)))
-		{
-			printf("Clip case 1\n");
-		}
-		else if(((bam_cigar_op(h.suppl->cigar[0]) == BAM_CSOFT_CLIP || bam_cigar_op(h.suppl->cigar[0]) == BAM_CHARD_CLIP) && bam_cigar_op(h.suppl->cigar[1]) == BAM_CMATCH) && (bam_cigar_op(h.cigar[0]) == BAM_CMATCH && (bam_cigar_op(h.cigar[1]) == BAM_CSOFT_CLIP || bam_cigar_op(h.cigar[1]) == BAM_CHARD_CLIP)))
-		{
-			printf("Clip case 2\n");
-		}*/
 
 		if(h.left_cigar == 'M' && (h.right_cigar == 'S' || h.right_cigar == 'H') && (h.suppl->left_cigar == 'S' || h.suppl->left_cigar == 'H') && h.suppl->right_cigar == 'M')
 		{
@@ -2043,7 +2235,6 @@ int bundle::build_hyper_set()
 {
 	map<vector<int>, int> m;
 
-	int x_count = 0;
 	for(int k = 0; k < br.fragments.size(); k++)
 	{
 		fragment &fr = br.fragments[k];
@@ -2059,11 +2250,6 @@ int bundle::build_hyper_set()
 
 		//if(fr.h1->bridged == false) continue;
 		//if(fr.h2->bridged == false) continue;
-
-		if(fr.h1->hid == 11334)
-		{
-			x_count++;
-		}
 
 
 		vector<int> v = align_fragment(fr); //align bridged fragment to the splice graph, return a list of vertices 
@@ -2085,7 +2271,6 @@ int bundle::build_hyper_set()
 			h1_supp_count++;
 			hit *h1_supple = fr.h1->suppl;
 
-
 			printf("\nfr.h1 has a supple hit.\n");
 			printf("Primary: ");
 			fr.h1->print();
@@ -2094,20 +2279,25 @@ int bundle::build_hyper_set()
 			printf("fr.h2: ");
 			fr.h2->print();
 
-			/*if(strcmp(fr.h1->qname.c_str(),"SRR1721290.2704524")==0)
+			printf("cigar prim:");
+			for(int p=0;p<fr.h1->n_cigar;p++)
 			{
-				printf("found SRR1721290.2704524 in h1 supp\n");
-			}*/
+				printf("%d%c",fr.h1->cigar_vector[p].second,fr.h1->cigar_vector[p].first);
+			}
+			printf("\n");
 
-			if(fr.h1->n_cigar != 2 || fr.h1->suppl->n_cigar != 2)
+			printf("cigar supp:");
+			for(int p=0;p<fr.h1->suppl->n_cigar;p++)
 			{
-				printf("something wrong in h1s\n");
-				printf("h1p:%d-%d-%d\n",fr.h1->first_pos,fr.h1->second_pos,fr.h1->third_pos);
-				printf("h1s:%d-%d-%d\n",h1_supple->first_pos,h1_supple->second_pos,h1_supple->third_pos);
-				printf("h2:%d-%d-%d\n",fr.h2->first_pos,fr.h2->second_pos,fr.h2->third_pos);
+				printf("%d%c",fr.h1->suppl->cigar_vector[p].second,fr.h1->suppl->cigar_vector[p].first);
+			}
+			printf("\n");
 
-				printf("ncigar %d %d %d\n",fr.h1->n_cigar,h1_supple->n_cigar,fr.h2->n_cigar);
+			printf("set_cigar p:%d-%d-%d\n",fr.h1->first_pos,fr.h1->second_pos,fr.h1->third_pos);
+			printf("set_cigar s:%d-%d-%d\n",fr.h1->suppl->first_pos,fr.h1->suppl->second_pos,fr.h1->suppl->third_pos);
 
+			if(fr.h1->first_pos == 0 || fr.h1->suppl->first_pos == 0)
+			{
 				string combo = "special case h1s";
 				printf("%s\n",combo.c_str());
 				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
@@ -2115,14 +2305,29 @@ int bundle::build_hyper_set()
 				continue;
 			}
 
-			//general rule p and s has to be edges
+			//rule p and s has to be edges
 			if(h1_supple->pos <= fr.h2->pos && h1_supple->pos <= fr.h1->pos && fr.h1->rpos >= h1_supple->rpos && fr.h1->rpos >= fr.h2->rpos)
-			{
+			{	
 				printf("Compatible in previous definition, h1s leftmost, h1p rightmost\n");
+				if(h1_supple->second_pos <= fr.h2->pos && h1_supple->second_pos <= fr.h1->pos && fr.h1->second_pos >= h1_supple->rpos && fr.h1->second_pos >= fr.h2->rpos)
+				{
+					string combo = "Compatible h1s leftmost h1p rightmost";
+					printf("%s\n",combo.c_str());
+					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+					else frag2graph_freq[combo] += 1;					
+				}
+				else
+				{
+					string combo = "Not compatible h1s leftmost h1p rightmost";
+					printf("%s\n",combo.c_str());
+					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+					else frag2graph_freq[combo] += 1;					
+				}
+
+				/*printf("Compatible in previous definition, h1s leftmost, h1p rightmost\n");
 				if(h1_supple->second_pos > h1_supple->pos && fr.h1->second_pos < fr.h1->rpos)
 				{
 					printf("Not compatible in new definition using cigar\n");
-
 
 					string combo = "Not compatible h1s leftmost h1p rightmost";
 					printf("%s\n",combo.c_str());
@@ -2147,16 +2352,31 @@ int bundle::build_hyper_set()
 					printf("%d-%d-%d\n",fr.h2->first_pos,fr.h2->second_pos,fr.h2->third_pos);
 
 					printf("ncigar %d %d %d\n",fr.h1->n_cigar,h1_supple->n_cigar,fr.h2->n_cigar);
-				}
+				}*/
 			}
 
 			else if(fr.h1->pos <= fr.h2->pos && fr.h1->pos <= h1_supple->pos && h1_supple->rpos >= fr.h1->rpos && h1_supple->rpos >= fr.h2->rpos)
 			{
 				printf("Compatible in previous definition, h1p leftmost, h1s rightmost\n");
+
+				if(fr.h1->second_pos <= fr.h2->pos && fr.h1->second_pos <= h1_supple->pos && h1_supple->second_pos >= fr.h1->rpos && h1_supple->second_pos >= fr.h2->rpos)
+				{
+					string combo = "Compatible h1p leftmost h1s rightmost";
+					printf("%s\n",combo.c_str());
+					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+					else frag2graph_freq[combo] += 1;
+				}
+				else
+				{
+					string combo = "Not compatible h1p leftmost h1s rightmost";
+					printf("%s\n",combo.c_str());
+					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+					else frag2graph_freq[combo] += 1;					
+				}
+				/*printf("Compatible in previous definition, h1p leftmost, h1s rightmost\n");
 				if(fr.h1->second_pos > fr.h1->pos && h1_supple->second_pos < h1_supple->rpos)
 				{
 					printf("Not compatible in new definition using cigar\n");
-
 
 					string combo = "Not compatible h1p leftmost h1s rightmost";
 					printf("%s\n",combo.c_str());
@@ -2182,9 +2402,8 @@ int bundle::build_hyper_set()
 					printf("%d-%d-%d\n",fr.h2->first_pos,fr.h2->second_pos,fr.h2->third_pos);
 
 					printf("ncigar %d %d %d\n",fr.h1->n_cigar,h1_supple->n_cigar,fr.h2->n_cigar);
-				}
+				}*/
 			}
-
 			else
 			{
 				printf("Not compatible in previous definition\n");
@@ -2240,11 +2459,6 @@ int bundle::build_hyper_set()
 			h2_supp_count++;
 			hit *h2_supple = fr.h2->suppl;
 
-			if(strcmp(fr.h2->qname.c_str(),"SRR1721290.2704524")==0)
-			{
-				printf("found SRR1721290.2704524 in h2 supp\n");
-			}
-
 			printf("\nfr.h2 has a supple hit.\n");
 			printf("h1: ");
 			fr.h1->print();
@@ -2252,17 +2466,27 @@ int bundle::build_hyper_set()
 			fr.h2->print();
 			printf("Supple: ");
 			h2_supple->print();
-			printf("fr.h1: ");
 
-			if(fr.h2->n_cigar != 2 || fr.h2->suppl->n_cigar != 2)
+			printf("cigar prim:");
+			for(int p=0;p<fr.h2->n_cigar;p++)
 			{
-				printf("something wrong in h2s\n");
+				printf("%d%c",fr.h2->cigar_vector[p].second,fr.h2->cigar_vector[p].first);
+			}
+			printf("\n");
 
-				printf("h1:%d-%d-%d\n",fr.h1->first_pos,fr.h1->second_pos,fr.h1->third_pos);
-				printf("h2p:%d-%d-%d\n",fr.h2->first_pos,fr.h2->second_pos,fr.h2->third_pos);
-				printf("h2s:%d-%d-%d\n",h2_supple->first_pos,h2_supple->second_pos,h2_supple->third_pos);
+			printf("cigar supp:");
+			for(int p=0;p<fr.h2->suppl->n_cigar;p++)
+			{
+				printf("%d%c",fr.h2->suppl->cigar_vector[p].second,fr.h2->suppl->cigar_vector[p].first);
+			}
+			printf("\n");
 
-				printf("ncigar %d %d %d\n",fr.h1->n_cigar,fr.h2->n_cigar,h2_supple->n_cigar);
+			printf("set_cigar p:%d-%d-%d\n",fr.h2->first_pos,fr.h2->second_pos,fr.h2->third_pos);
+			printf("set_cigar s:%d-%d-%d\n",fr.h2->suppl->first_pos,fr.h2->suppl->second_pos,fr.h2->suppl->third_pos);
+
+
+			if(fr.h2->first_pos == 0 || fr.h2->suppl->first_pos == 0)
+			{
 
 				string combo = "special case h2s";
 				printf("%s\n",combo.c_str());
@@ -2275,6 +2499,22 @@ int bundle::build_hyper_set()
 			if(h2_supple->pos <= fr.h1->pos && h2_supple->pos <= fr.h2->pos && fr.h2->rpos >= h2_supple->rpos && fr.h2->rpos >= fr.h1->rpos)
 			{
 				printf("Compatible in previous definition, h2s leftmost, h2p rightmost\n");
+
+				if(h2_supple->second_pos <= fr.h1->pos && h2_supple->second_pos <= fr.h2->pos && fr.h2->second_pos >= h2_supple->rpos && fr.h2->second_pos >= fr.h1->rpos)
+				{
+					string combo = "Compatible h2s leftmost h2p rightmost";
+					printf("%s\n",combo.c_str());
+					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+					else frag2graph_freq[combo] += 1;					
+				}
+				else
+				{
+					string combo = "Not compatible h2s leftmost h2p rightmost";
+					printf("%s\n",combo.c_str());
+					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+					else frag2graph_freq[combo] += 1;					
+				}
+				/*printf("Compatible in previous definition, h2s leftmost, h2p rightmost\n");
 				if(h2_supple->second_pos > h2_supple->pos && fr.h2->second_pos < fr.h2->rpos)
 				{
 					printf("Not compatible in new definition using cigar\n");
@@ -2296,12 +2536,28 @@ int bundle::build_hyper_set()
 				else
 				{
 					printf("Else 3\n");
-				}
+				}*/
 			}
 
 			else if(fr.h2->pos <= fr.h1->pos && fr.h2->pos <= h2_supple->pos && h2_supple->rpos >= fr.h2->rpos && h2_supple->rpos >= fr.h1->rpos)
 			{
 				printf("Compatible in previous definition, h2p leftmost, h2s rightmost\n");
+
+				if(fr.h2->second_pos <= fr.h1->pos && fr.h2->second_pos <= h2_supple->pos && h2_supple->second_pos >= fr.h2->rpos && h2_supple->second_pos >= fr.h1->rpos)
+				{
+					string combo = "Compatible h2p leftmost h2s rightmost";
+					printf("%s\n",combo.c_str());
+					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+					else frag2graph_freq[combo] += 1;					
+				}
+				else
+				{
+					string combo = "Not compatible h2p leftmost h2s rightmost";
+					printf("%s\n",combo.c_str());
+					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+					else frag2graph_freq[combo] += 1;					
+				}
+				/*printf("Compatible in previous definition, h2p leftmost, h2s rightmost\n");
 				if(fr.h2->second_pos > fr.h2->pos && h2_supple->second_pos < h2_supple->rpos)
 				{
 					printf("Not compatible in new definition using cigar\n");
@@ -2316,7 +2572,6 @@ int bundle::build_hyper_set()
 				{
 					printf("Compatible in new definition using cigar\n");
 
-
 					string combo = "Compatible h2p leftmost h2s rightmost";
 					printf("%s\n",combo.c_str());
 					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
@@ -2325,7 +2580,7 @@ int bundle::build_hyper_set()
 				else
 				{
 					printf("Else 4\n");
-				}
+				}*/
 			}
 
 			else
@@ -2384,10 +2639,6 @@ int bundle::build_hyper_set()
 		else m[v] += fr.cnt;
 	}
 
-	/*if(x_count > 0)
-	{
-		printf("x_count = %d\n",x_count);
-	}*/
 	
 	
 	// note by Qimin, bridge umi-linked fragments into one single long path
