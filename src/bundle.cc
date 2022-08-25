@@ -579,14 +579,14 @@ int bundle::extract_backsplicing_junctions()
     if(back_spos.size() > 0)
     {
 
-	    printf("back_spos size = %d\n", back_spos.size());
-	    printf("back_spos hits size = %d\n", back_spos_hits.size());
+	    printf("back_spos size = %zu\n", back_spos.size());
+	    printf("back_spos hits size = %zu\n", back_spos_hits.size());
 
 	    //add nearby positions of p1 p2 in count map
 
 	    if(back_spos_support.size() > 0)
 	    {
-	    	printf("Back spos support map: %d\n", back_spos_support.size());
+	    	printf("Back spos support map: %zu\n", back_spos_support.size());
 	    }
 
 	    map< int32_t, int >::iterator it;
@@ -733,7 +733,7 @@ int bundle::refine_backsplicing_junctions()
 	if(corrected_back_spos.size() > 0)
 	{
 
-		printf("Size of corrected back_spos: %d\n",corrected_back_spos.size());
+		printf("Size of corrected back_spos: %zu\n",corrected_back_spos.size());
 
 		for(int i=0;i<corrected_back_spos.size();i++)
 		{
@@ -742,7 +742,7 @@ int bundle::refine_backsplicing_junctions()
 			printf("x1 = %d, x2 = %d\n",x1,x2);
 		}
 
-		printf("Size of corrected back_spos_hits: %d\n",corrected_back_spos_hits.size());
+		printf("Size of corrected back_spos_hits: %zu\n",corrected_back_spos_hits.size());
 	}
 
 	//printf("End of bundle\n\n");
@@ -807,7 +807,7 @@ int bundle::build_backsplicing_junctions()
 		int32_t x2 = low32(itn->first);
 		vector<hit*> hit_vect = itn->second;
 
-		printf("x1=%d, x2=%d, hit vector size=%d\n\n",x1,x2, hit_vect.size());
+		printf("x1=%d, x2=%d, hit vector size=%zu\n\n",x1,x2, hit_vect.size());
 
 		for(int i=0;i<hit_vect.size();i++)
 		{
