@@ -44,6 +44,7 @@ public:
 	vector<int32_t> get_splices(fragment &fr);
 
 public:
+	int set_chimeric_cigar_positions();
 	int build_supplementaries();
 	int build_junctions();
 	int extend_junctions();

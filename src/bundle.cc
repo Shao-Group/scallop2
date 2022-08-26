@@ -37,7 +37,6 @@ int bundle::prepare()
 
 	// add the 3 new functions
 
-	set_chimeric_cigar_positions();
 	extract_backsplicing_junctions();
 	refine_backsplicing_junctions();
 	//build_backsplicing_junctions();
@@ -206,187 +205,6 @@ int bundle::build_junctions() //write new similar function to handle BSJs
 }
 
 
-int bundle:: set_chimeric_cigar_positions()
-{
-	for(int i = 0; i < bb.hits.size(); i++)
-	{
-		hit &h = bb.hits[i];
-
-		if(h.suppl == NULL) continue;
-
-		/*printf("Primary hit:\n");
-		h.print();
-		printf("Supple hit:\n");
-		h.suppl->print();
-
-
-		printf("cigar prim:");
-		for(int p=0;p<h.n_cigar;p++)
-		{
-			printf("%d%c",h.cigar_vector[p].second,h.cigar_vector[p].first);
-		}
-		printf("\n");
-
-		printf("cigar supp:");
-		for(int p=0;p<h.suppl->n_cigar;p++)
-		{
-			printf("%d%c",h.suppl->cigar_vector[p].second,h.suppl->cigar_vector[p].first);
-		}
-		printf("\n");*/
-
-		
-		int32_t p;
-		int32_t q;
-
-		p = h.pos;
-		int match_index = 0;;
-
-		for(int j=0;j<h.n_cigar;j++)
-		{
-			if(h.cigar_vector[j].first == 'M')
-			{
-				match_index = j;
-				break;
-			}
-		}
-		for(int j=match_index-1;j>=0;j--)
-		{
-			p -= h.cigar_vector[j].second; //subtracting cigars before match index
-		}
-		
-		q = h.suppl->pos;
-		match_index = 0;;
-
-		for(int j=0;j<h.suppl->n_cigar;j++)
-		{
-			if(h.suppl->cigar_vector[j].first == 'M')
-			{
-				match_index = j;
-				break;
-			}
-		}
-		for(int j=match_index-1;j>=0;j--)
-		{
-			q -= h.suppl->cigar_vector[j].second; //subtracting cigars before match index
-		}
-		
-
-		int32_t x = p;
-		int32_t diff_cigar1 = 10000;
-		int32_t diff_cigar2 = 10000;
-		int best_pos_flag = 0;
-
-		for(int j=0;j<h.n_cigar-1;j++)
-		{
-			int32_t y = q;
-			pair<char, int32_t> hp_cigar1 = h.cigar_vector[j];
-			pair<char, int32_t> hp_cigar2 = h.cigar_vector[j+1];
-
-			for(int k=0;k<h.suppl->n_cigar-1;k++)
-			{
-
-				pair<char, int32_t> hs_cigar1 = h.suppl->cigar_vector[k];
-				pair<char, int32_t> hs_cigar2 = h.suppl->cigar_vector[k+1];
-
-				//printf("check %d,%c\n",hp_cigar1.second,hp_cigar1.first);
-
-				if(((hp_cigar1.first == 'S' || hp_cigar1.first == 'H') && hp_cigar2.first == 'M') && (hs_cigar1.first == 'M' && (hs_cigar2.first == 'S' || hs_cigar2.first == 'H')))
-				{
-					diff_cigar1 = abs(hs_cigar1.second - hp_cigar1.second);
-					diff_cigar2 = abs(hs_cigar2.second - hp_cigar2.second);
-				}
-				else if(((hs_cigar1.first == 'S' || hs_cigar1.first == 'H') && hs_cigar2.first == 'M') && (hp_cigar1.first == 'M' && (hp_cigar2.first == 'S' || hp_cigar2.first == 'H')))
-				{
-					diff_cigar1 = abs(hs_cigar1.second - hp_cigar1.second);
-					diff_cigar2 = abs(hs_cigar2.second - hp_cigar2.second);					
-				}
-
-				if(diff_cigar1 < 20 && diff_cigar2 < 20) //setting diff max 20 between complementing cigars
-				{
-					printf("Found best positions\n");
-					best_pos_flag = 1;
-
-					//set first,second and third positions of prim and suppl
-					h.first_pos = x;
-					h.second_pos = x + hp_cigar1.second;
-					h.third_pos = x + hp_cigar1.second + hp_cigar2.second;
-
-					h.suppl->first_pos = y;
-					h.suppl->second_pos = y + hs_cigar1.second;
-					h.suppl->third_pos = y + hs_cigar1.second + hs_cigar2.second;
-
-					h.left_cigar = hp_cigar1.first;
-					h.right_cigar = hp_cigar2.first;
-
-					h.suppl->left_cigar = hs_cigar1.first;
-					h.suppl->right_cigar = hs_cigar2.first;
-
-					break;
-
-				}
-				y += hs_cigar1.second;
-
-			}
-			if(best_pos_flag == 1) break;
-
-			x += hp_cigar1.second;
-		}
-
-		//printf("set_cigar p:%d-%d-%d\n",h.first_pos,h.second_pos,h.third_pos);
-		//printf("set_cigar s:%d-%d-%d\n",h.suppl->first_pos,h.suppl->second_pos,h.suppl->third_pos);
-
-
-		//assign booleans to see if left splice position H/S and right M or vie versa and stor their lengths
-		/*if(h.n_cigar == 2)
-		{
-			if(bam_cigar_op(h.cigar[0]) == BAM_CSOFT_CLIP && bam_cigar_op(h.cigar[1]) == BAM_CMATCH)
-			{
-				//printf("First case\n");
-				h.left_cigar = 'S';
-				h.right_cigar = 'M';
-				h.first_pos = h.pos - bam_cigar_oplen(h.cigar[0]);
-				h.second_pos = h.pos;
-				h.third_pos = h.rpos;
-
-				//if(hid == 11789) printf("SM positions: %d-%d-%d\n", first_pos,second_pos,third_pos);
-			}
-			else if(bam_cigar_op(h.cigar[0]) == BAM_CHARD_CLIP && bam_cigar_op(h.cigar[1]) == BAM_CMATCH)
-			{
-				//printf("Second case\n");
-				h.left_cigar = 'H';
-				h.right_cigar = 'M';
-				h.first_pos = h.pos - bam_cigar_oplen(h.cigar[0]);
-				h.second_pos = h.pos;
-				h.third_pos = h.rpos;
-
-				//if(hid == 11789) printf("HM positions: %d-%d-%d\n", first_pos,second_pos,third_pos);
-			}
-			else if(bam_cigar_op(h.cigar[0]) == BAM_CMATCH && bam_cigar_op(h.cigar[1]) == BAM_CSOFT_CLIP)
-			{
-				//printf("Third case\n");
-				h.left_cigar = 'M';
-				h.right_cigar = 'S';
-				h.first_pos = h.pos;
-				h.second_pos = h.rpos;
-				h.third_pos = h.rpos + bam_cigar_oplen(h.cigar[1]);;
-
-				//if(hid == 20562) printf("MS positions: %d-%d-%d\n", first_pos,second_pos,third_pos);
-			}
-			else if(bam_cigar_op(h.cigar[0]) == BAM_CMATCH && bam_cigar_op(h.cigar[1]) == BAM_CHARD_CLIP)
-			{
-				//printf("Fourth case\n");
-				h.left_cigar = 'M';
-				h.right_cigar = 'H';
-				h.first_pos = h.pos;
-				h.second_pos = h.rpos;
-				h.third_pos = h.rpos + bam_cigar_oplen(h.cigar[1]);;
-
-				//if(hid == 11789) printf("MH positions: %d-%d-%d\n", first_pos,second_pos,third_pos);
-			}
-		}*/
-	}
-}
-
 
 int bundle::extract_backsplicing_junctions()
 {
@@ -415,7 +233,7 @@ int bundle::extract_backsplicing_junctions()
 	back_spos_hits.clear(); 
 	back_spos_support.clear();
 	
-    for(int i = 0; i < bb.hits.size(); i++)
+   	 for(int i = 0; i < bb.hits.size(); i++)
 	{
     	hit &h = bb.hits[i];
 
@@ -427,12 +245,12 @@ int bundle::extract_backsplicing_junctions()
         //check if the current hit[i] has a complementary hit
     	if(h.suppl == NULL) continue;
 
-    	printf("Primary hit:\n");
+    		printf("Primary hit:\n");
 		h.print();
 		printf("Supple hit:\n");
 		h.suppl->print();
 
-    	printf("cigar prim:");
+    		printf("cigar prim:");
 		for(int p=0;p<h.n_cigar;p++)
 		{
 			printf("%d%c",h.cigar_vector[p].second,h.cigar_vector[p].first);
@@ -549,7 +367,7 @@ int bundle::extract_backsplicing_junctions()
 		}*/  		
 	}
 
-    for(int i = 0; i < bb.hits.size(); i++)
+    	for(int i = 0; i < bb.hits.size(); i++)
 	{
 		hit &h = bb.hits[i];
 
@@ -2231,7 +2049,7 @@ int bundle::output_transcript(transcript &trst, const path &p, const string &gid
 	return 0;
 }
 
-int bundle::build_hyper_set()
+int bundle::build_hyper_set() //aligns brdiged frags to splice graph and gets set of vertices/phasing paths
 {
 	map<vector<int>, int> m;
 
@@ -2265,272 +2083,6 @@ int bundle::build_hyper_set()
 		//	the phasing path will be v + v2
 		// end 
 
-
-		if(fr.h1->suppl != NULL)
-		{
-			h1_supp_count++;
-			hit *h1_supple = fr.h1->suppl;
-
-			printf("\nfr.h1 has a supple hit.\n");
-			printf("Primary: ");
-			fr.h1->print();
-			printf("Supple: ");
-			h1_supple->print();
-			printf("fr.h2: ");
-			fr.h2->print();
-
-			printf("cigar prim:");
-			for(int p=0;p<fr.h1->n_cigar;p++)
-			{
-				printf("%d%c",fr.h1->cigar_vector[p].second,fr.h1->cigar_vector[p].first);
-			}
-			printf("\n");
-
-			printf("cigar supp:");
-			for(int p=0;p<fr.h1->suppl->n_cigar;p++)
-			{
-				printf("%d%c",fr.h1->suppl->cigar_vector[p].second,fr.h1->suppl->cigar_vector[p].first);
-			}
-			printf("\n");
-
-			printf("set_cigar p:%d-%d-%d\n",fr.h1->first_pos,fr.h1->second_pos,fr.h1->third_pos);
-			printf("set_cigar s:%d-%d-%d\n",fr.h1->suppl->first_pos,fr.h1->suppl->second_pos,fr.h1->suppl->third_pos);
-
-			if(fr.h1->first_pos == 0 || fr.h1->suppl->first_pos == 0)
-			{
-				string combo = "special case h1s";
-				printf("%s\n",combo.c_str());
-				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-				else frag2graph_freq[combo] += 1;
-				continue;
-			}
-
-			//rule p and s has to be edges
-			if(h1_supple->pos <= fr.h2->pos && h1_supple->pos <= fr.h1->pos && fr.h1->rpos >= h1_supple->rpos && fr.h1->rpos >= fr.h2->rpos)
-			{	
-				printf("Compatible in previous definition, h1s leftmost, h1p rightmost\n");
-				if(h1_supple->second_pos <= fr.h2->pos && h1_supple->second_pos <= fr.h1->pos && fr.h1->second_pos >= h1_supple->rpos && fr.h1->second_pos >= fr.h2->rpos)
-				{
-					string combo = "Compatible h1s leftmost h1p rightmost";
-					printf("%s\n",combo.c_str());
-					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-					else frag2graph_freq[combo] += 1;					
-				}
-				else
-				{
-					string combo = "Not compatible h1s leftmost h1p rightmost";
-					printf("%s\n",combo.c_str());
-					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-					else frag2graph_freq[combo] += 1;					
-				}
-
-			}
-
-			else if(fr.h1->pos <= fr.h2->pos && fr.h1->pos <= h1_supple->pos && h1_supple->rpos >= fr.h1->rpos && h1_supple->rpos >= fr.h2->rpos)
-			{
-				printf("Compatible in previous definition, h1p leftmost, h1s rightmost\n");
-
-				if(fr.h1->second_pos <= fr.h2->pos && fr.h1->second_pos <= h1_supple->pos && h1_supple->second_pos >= fr.h1->rpos && h1_supple->second_pos >= fr.h2->rpos)
-				{
-					string combo = "Compatible h1p leftmost h1s rightmost";
-					printf("%s\n",combo.c_str());
-					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-					else frag2graph_freq[combo] += 1;
-				}
-				else
-				{
-					string combo = "Not compatible h1p leftmost h1s rightmost";
-					printf("%s\n",combo.c_str());
-					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-					else frag2graph_freq[combo] += 1;					
-				}
-
-			}
-			else
-			{
-				printf("Not compatible in previous definition\n");
-
-				string combo = "Not compatible h1s";
-				printf("%s\n",combo.c_str());
-				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-				else frag2graph_freq[combo] += 1;
-			}
-
-
-			//frag2graph_freq.insert(pair<string, int>("test", 2));
-
-			vector<int> v2 = align_hit(*h1_supple);
-
-			//printf("\n");
-			printf("v: ");
-			for(int i=0;i<v.size();i++)
-			{
-				printf("%d, ",v[i]);
-			}
-
-			printf("v2: ");
-			for(int i=0;i<v2.size();i++)
-			{
-				printf("%d, ",v2[i]);
-			}	
-
-			//concatenate v2+v and put in v;
-			v2.insert(v2.end(),v.begin(),v.end());
-			v = v2;
-
-			printf("v = Concatenated v2+v: ");
-			for(int i=0;i<v.size();i++)
-			{
-				printf("%d, ",v[i]);
-			}
-			//printf("\n");
-			/*auto last = unique(v.begin(), v.end());
-    		// v now holds {1 2 1 3 4 5 4 x x x}, where 'x' is indeterminate
-    		v.erase(last, v.end());
-
-  			printf("Unique v2+v: ");
-			for(int i=0;i<v.size();i++)
-			{
-				printf("%d, ",v[i]);
-			}*/
-
-		}
-
-		if(fr.h2->suppl != NULL)
-		{
-			h2_supp_count++;
-			hit *h2_supple = fr.h2->suppl;
-
-			printf("\nfr.h2 has a supple hit.\n");
-			printf("h1: ");
-			fr.h1->print();
-			printf("Primary: ");
-			fr.h2->print();
-			printf("Supple: ");
-			h2_supple->print();
-
-			printf("cigar prim:");
-			for(int p=0;p<fr.h2->n_cigar;p++)
-			{
-				printf("%d%c",fr.h2->cigar_vector[p].second,fr.h2->cigar_vector[p].first);
-			}
-			printf("\n");
-
-			printf("cigar supp:");
-			for(int p=0;p<fr.h2->suppl->n_cigar;p++)
-			{
-				printf("%d%c",fr.h2->suppl->cigar_vector[p].second,fr.h2->suppl->cigar_vector[p].first);
-			}
-			printf("\n");
-
-			printf("set_cigar p:%d-%d-%d\n",fr.h2->first_pos,fr.h2->second_pos,fr.h2->third_pos);
-			printf("set_cigar s:%d-%d-%d\n",fr.h2->suppl->first_pos,fr.h2->suppl->second_pos,fr.h2->suppl->third_pos);
-
-
-			if(fr.h2->first_pos == 0 || fr.h2->suppl->first_pos == 0)
-			{
-
-				string combo = "special case h2s";
-				printf("%s\n",combo.c_str());
-				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-				else frag2graph_freq[combo] += 1;
-				continue;
-			}
-
-			//general rule p and s has to be edges
-			if(h2_supple->pos <= fr.h1->pos && h2_supple->pos <= fr.h2->pos && fr.h2->rpos >= h2_supple->rpos && fr.h2->rpos >= fr.h1->rpos)
-			{
-				printf("Compatible in previous definition, h2s leftmost, h2p rightmost\n");
-
-				if(h2_supple->second_pos <= fr.h1->pos && h2_supple->second_pos <= fr.h2->pos && fr.h2->second_pos >= h2_supple->rpos && fr.h2->second_pos >= fr.h1->rpos)
-				{
-					string combo = "Compatible h2s leftmost h2p rightmost";
-					printf("%s\n",combo.c_str());
-					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-					else frag2graph_freq[combo] += 1;					
-				}
-				else
-				{
-					string combo = "Not compatible h2s leftmost h2p rightmost";
-					printf("%s\n",combo.c_str());
-					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-					else frag2graph_freq[combo] += 1;					
-				}
-
-			}
-
-			else if(fr.h2->pos <= fr.h1->pos && fr.h2->pos <= h2_supple->pos && h2_supple->rpos >= fr.h2->rpos && h2_supple->rpos >= fr.h1->rpos)
-			{
-				printf("Compatible in previous definition, h2p leftmost, h2s rightmost\n");
-
-				if(fr.h2->second_pos <= fr.h1->pos && fr.h2->second_pos <= h2_supple->pos && h2_supple->second_pos >= fr.h2->rpos && h2_supple->second_pos >= fr.h1->rpos)
-				{
-					string combo = "Compatible h2p leftmost h2s rightmost";
-					printf("%s\n",combo.c_str());
-					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-					else frag2graph_freq[combo] += 1;					
-				}
-				else
-				{
-					string combo = "Not compatible h2p leftmost h2s rightmost";
-					printf("%s\n",combo.c_str());
-					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-					else frag2graph_freq[combo] += 1;					
-				}
-
-			}
-
-			else
-			{
-				printf("Not compatible in previous definition\n");
-
-				string combo = "Not compatible h2s";
-				printf("%s\n",combo.c_str());
-				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-				else frag2graph_freq[combo] += 1;
-			}
-		
-			
-
-			vector<int> v2 = align_hit(*h2_supple);
-
-			//printf("\n");
-			printf("v: ");
-			for(int i=0;i<v.size();i++)
-			{
-				printf("%d, ",v[i]);
-			}
-
-			printf("v2: ");
-			for(int i=0;i<v2.size();i++)
-			{
-				printf("%d, ",v2[i]);
-			}
-
-			//concatenate v+v2 and put in v;
-			v.insert(v.end(),v2.begin(),v2.end());
-
-			printf("v = Concatenated v+v2: ");
-			for(int i=0;i<v.size();i++)
-			{
-				printf("%d, ",v[i]);
-			}
-			//printf("\n");	
-			/*auto last = unique(v.begin(), v.end());
-    		// v now holds {1 2 1 3 4 5 4 x x x}, where 'x' is indeterminate
-    		v.erase(last, v.end());
-
-  			printf("Unique v2+v: ");
-			for(int i=0;i<v.size();i++)
-			{
-				printf("%d, ",v[i]);
-			}*/	
-		}
-
-		if(fr.h1->suppl != NULL || fr.h2->suppl != NULL)
-		{
-			printf("\n\n");
-		}
 
 		if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, fr.cnt));
 		else m[v] += fr.cnt;
