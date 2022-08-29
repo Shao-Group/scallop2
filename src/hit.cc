@@ -65,6 +65,8 @@ hit& hit::operator=(const hit &h)
 	cigar_vector = h.cigar_vector;
 	left_cigar = h.left_cigar;					// S=soft clip, H=hard clip, M=match, .=default
 	right_cigar = h.right_cigar;					// S=soft clip, H=hard clip, M=match, .=default
+	left_cigar_len = h.left_cigar_len;
+	right_cigar_len = h.right_cigar_len;
 	first_pos = h.first_pos;						//.H.M. the three dots are the 1st, 2nd, and 3rd pos respectively
 	second_pos = h.second_pos;
 	third_pos = h.third_pos;
@@ -104,6 +106,8 @@ hit::hit(const hit &h)
 	cigar_vector = h.cigar_vector;
 	left_cigar = h.left_cigar;					// S=soft clip, H=hard clip, M=match, .=default
 	right_cigar = h.right_cigar;					// S=soft clip, H=hard clip, M=match, .=default
+	left_cigar_len = h.left_cigar_len;
+	right_cigar_len = h.right_cigar_len;
 	first_pos = h.first_pos;						//.H.M. the three dots are the 1st, 2nd, and 3rd pos respectively
 	second_pos = h.second_pos;
 	third_pos = h.third_pos;
@@ -123,6 +127,8 @@ hit::hit(bam1_t *b, int id)
 
 	left_cigar = '.';					// S=soft clip, H=hard clip, M=match, .=default
 	right_cigar = '.';					// S=soft clip, H=hard clip, M=match, .=default
+	left_cigar_len = 0;
+	right_cigar_len = 0;
 	first_pos = 0;						//.H.M. the three dots are the 1st, 2nd, and 3rd pos respectively
 	second_pos = 0;
 	third_pos = 0;

@@ -199,15 +199,69 @@ int bundle_bridge:: set_chimeric_cigar_positions()
 
 				//printf("check %d,%c\n",hp_cigar1.second,hp_cigar1.first);
 
+				int32_t hp_cigar1_len = hp_cigar1.second;
+				int32_t hp_cigar2_len = hp_cigar2.second;
+				int32_t hs_cigar1_len = hs_cigar1.second;
+				int32_t hs_cigar2_len = hs_cigar2.second;
+
 				if(((hp_cigar1.first == 'S' || hp_cigar1.first == 'H') && hp_cigar2.first == 'M') && (hs_cigar1.first == 'M' && (hs_cigar2.first == 'S' || hs_cigar2.first == 'H')))
 				{
-					diff_cigar1 = abs(hs_cigar1.second - hp_cigar1.second);
-					diff_cigar2 = abs(hs_cigar2.second - hp_cigar2.second);
+					if(hp_cigar2.first == 'M' && j+3 < h.cigar_vector.size() && h.cigar_vector[j+3].first == 'M')
+					{
+						//&& h.cigar_vector[j+2].first == 'N' can be I or D as well
+						for(int p=j+3;p<h.cigar_vector.size();p+=2) //traverse all Ms with 1 gap in the middle ex:SMNMNM
+						{
+							if(h.cigar_vector[p].first == 'M')
+							{
+								hp_cigar2_len += h.cigar_vector[p].second;
+							}
+						}			
+					}
+
+					if(hs_cigar1.first == 'M' && k-2 >= 0 && h.suppl->cigar_vector[k-2].first == 'M')
+					{
+						//&& h.suppl->cigar_vector[k-1].first == 'N' can be I or D as well
+						for(int p=k-2;p>=0;p-=2)
+						{
+							if(h.suppl->cigar_vector[p].first == 'M')
+							{
+								hs_cigar1_len += h.suppl->cigar_vector[p].second;
+							}
+						}
+					}
+					
+					diff_cigar1 = abs(hs_cigar1_len - hp_cigar1_len);
+					diff_cigar2 = abs(hs_cigar2_len - hp_cigar2_len);
+				
 				}
 				else if(((hs_cigar1.first == 'S' || hs_cigar1.first == 'H') && hs_cigar2.first == 'M') && (hp_cigar1.first == 'M' && (hp_cigar2.first == 'S' || hp_cigar2.first == 'H')))
 				{
-					diff_cigar1 = abs(hs_cigar1.second - hp_cigar1.second);
-					diff_cigar2 = abs(hs_cigar2.second - hp_cigar2.second);					
+					if(hs_cigar2.first == 'M' && k+3 < h.suppl->cigar_vector.size() && h.suppl->cigar_vector[k+3].first == 'M')
+					{
+						//&& h.suppl->cigar_vector[k+2].first == 'N' can be I or D as well
+						for(int p=k+3;p<h.suppl->cigar_vector.size();p+=2)
+						{
+							if(h.suppl->cigar_vector[p].first == 'M')
+							{
+								hs_cigar2_len += h.suppl->cigar_vector[p].second;
+							}
+						}			
+					}
+
+					if(hp_cigar1.first == 'M' && j-2 >=0 && h.cigar_vector[j-2].first == 'M')
+					{
+						//&& h.cigar_vector[j-1].first == 'N' can be I or D as well
+						for(int p=j-2;p>=0;p-=2)
+						{
+							if(h.cigar_vector[p].first == 'M')
+							{
+								hp_cigar1_len += h.cigar_vector[p].second;
+							}
+						}
+					}
+
+					diff_cigar1 = abs(hs_cigar1_len - hp_cigar1_len);
+					diff_cigar2 = abs(hs_cigar2_len - hp_cigar2_len);					
 				}
 
 				if(diff_cigar1 < 20 && diff_cigar2 < 20) //setting diff max 20 between complementing cigars
@@ -225,10 +279,14 @@ int bundle_bridge:: set_chimeric_cigar_positions()
 					h.suppl->third_pos = y + hs_cigar1.second + hs_cigar2.second;
 
 					h.left_cigar = hp_cigar1.first;
+					h.left_cigar_len = hp_cigar1_len;
 					h.right_cigar = hp_cigar2.first;
+					h.right_cigar_len = hp_cigar2_len;
 
 					h.suppl->left_cigar = hs_cigar1.first;
+					h.suppl->left_cigar_len = hs_cigar1_len;
 					h.suppl->right_cigar = hs_cigar2.first;
+					h.suppl->right_cigar_len = hs_cigar2_len;
 
 					break;
 
@@ -594,7 +652,7 @@ int bundle_bridge::build_circ_fragments()
 
 		if(fr.h1->suppl != NULL)
 		{
-			printf("supple not null\n");
+			//printf("supple not null\n");
 			//need to check compatibility from bundle.cc
 
 			h1_supp_count++;
@@ -634,7 +692,36 @@ int bundle_bridge::build_circ_fragments()
 				continue;
 			}
 
-			//rule p and s has to be edges
+			//use |prim.S/H + suppl.S/H - read-length| <= a threshold as a criteria for discarding cases
+			int32_t len_HS = 0;
+
+			if(fr.h1->left_cigar == 'H' || fr.h1->left_cigar == 'S')
+			{
+				len_HS += fr.h1->left_cigar_len;
+			}
+			else if(fr.h1->right_cigar == 'H' || fr.h1->right_cigar == 'S')
+			{
+				len_HS += fr.h1->right_cigar_len;
+			}
+			if(fr.h1->suppl->left_cigar == 'H' || fr.h1->suppl->left_cigar == 'S')
+			{
+				len_HS += fr.h1->suppl->left_cigar_len;
+			}
+			else if(fr.h1->suppl->right_cigar == 'H' || fr.h1->suppl->right_cigar == 'S')
+			{
+				len_HS += fr.h1->suppl->right_cigar_len;
+			}
+
+			printf("len_HS = %d\n",len_HS);
+
+			if(abs(len_HS - 100) > 5) //here 100 is the estimated read length, replace this with any related exisiting parameter
+			{
+				printf("read length criteria unsatisfied h1s.\n");
+				continue;
+			}
+
+
+			//examples give a rule - p and s has to be edges
 
 			//this case should not occur as h1p should always be on the left of h2
 			if(h1_supple->pos <= fr.h2->pos && h1_supple->pos <= fr.h1->pos && fr.h1->rpos >= h1_supple->rpos && fr.h1->rpos >= fr.h2->rpos)
@@ -737,6 +824,34 @@ int bundle_bridge::build_circ_fragments()
 				printf("%s\n",combo.c_str());
 				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
 				else frag2graph_freq[combo] += 1;
+				continue;
+			}
+
+			//use |prim.S/H + suppl.S/H - read-length| <= a threshold as a criteria for discarding cases
+			int32_t len_HS = 0;
+
+			if(fr.h2->left_cigar == 'H' || fr.h2->left_cigar == 'S')
+			{
+				len_HS += fr.h2->left_cigar_len;
+			}
+			else if(fr.h2->right_cigar == 'H' || fr.h2->right_cigar == 'S')
+			{
+				len_HS += fr.h2->right_cigar_len;
+			}
+			if(fr.h2->suppl->left_cigar == 'H' || fr.h2->suppl->left_cigar == 'S')
+			{
+				len_HS += fr.h2->suppl->left_cigar_len;
+			}
+			else if(fr.h2->suppl->right_cigar == 'H' || fr.h2->suppl->right_cigar == 'S')
+			{
+				len_HS += fr.h2->suppl->right_cigar_len;
+			}
+
+			printf("len_HS = %d\n",len_HS);
+
+			if(abs(len_HS - 100) > 5) //here 100 is the estimated read length, replace this with any related exisiting parameter
+			{
+				printf("read length criteria unsatisfied h2s.\n");
 				continue;
 			}
 

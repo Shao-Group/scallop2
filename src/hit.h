@@ -57,8 +57,12 @@ public:
 public:
 	int hid;								// hit-id
 
-	char left_cigar;						// S=soft clip, H=hard clip, M=match
-	char right_cigar;						// S=soft clip, H=hard clip, M=match
+	char left_cigar;						// S=soft clip, H=hard clip, M=match, I-insertion ... etc
+	char right_cigar;						// S=soft clip, H=hard clip, M=match, I-insertion ... etc
+
+	int32_t left_cigar_len;					// store len of left cigar
+	int32_t right_cigar_len;				// store len of right cigar
+
 	int32_t first_pos;						//.H.M. the three dots are the 1st, 2nd, and 3rd pos respectively
 	int32_t second_pos;
 	int32_t third_pos;
