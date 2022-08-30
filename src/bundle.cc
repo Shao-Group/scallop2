@@ -245,7 +245,7 @@ int bundle::extract_backsplicing_junctions()
         //check if the current hit[i] has a complementary hit
     	if(h.suppl == NULL) continue;
 
-    		printf("Primary hit:\n");
+    	/*printf("Primary hit:\n");
 		h.print();
 		printf("Supple hit:\n");
 		h.suppl->print();
@@ -262,7 +262,7 @@ int bundle::extract_backsplicing_junctions()
 		{
 			printf("%d%c",h.suppl->cigar_vector[p].second,h.suppl->cigar_vector[p].first);
 		}
-		printf("\n");
+		printf("\n");*?
     	
 		//printf("Current hit:\n");
 		//h.print();
@@ -339,7 +339,7 @@ int bundle::extract_backsplicing_junctions()
 
 
 		// push this pair (p1, p2) into the resulting vector
-		if(p1 > p2)
+		if(p1 != 0 && p2 !=0 && p1 > p2)
 		{
 			back_spos_hits.push_back(h);
 			back_spos.push_back(pack(p2, p1));

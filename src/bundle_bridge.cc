@@ -649,6 +649,7 @@ int bundle_bridge::build_circ_fragments()
 		//if(fr.paths.size() != 1) continue; //continue if not bridged
 		//if(fr.paths[0].type != 1) continue;
 
+		int is_compatible = 0; //1 for h1 has a suppl and compatible, 2 for h2 has a suppl and compatible
 
 		if(fr.h1->suppl != NULL)
 		{
@@ -732,7 +733,7 @@ int bundle_bridge::build_circ_fragments()
 					string combo = "Compatible h1s leftmost h1p rightmost";
 					printf("%s\n",combo.c_str());
 					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-					else frag2graph_freq[combo] += 1;					
+					else frag2graph_freq[combo] += 1;				
 				}
 				else
 				{
@@ -755,6 +756,7 @@ int bundle_bridge::build_circ_fragments()
 					printf("%s\n",combo.c_str());
 					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
 					else frag2graph_freq[combo] += 1;
+					is_compatible = 1;
 				}
 				else
 				{
@@ -776,12 +778,6 @@ int bundle_bridge::build_circ_fragments()
 				else frag2graph_freq[combo] += 1;
 				continue;
 			}
-			//if not compatible, continue
-			//if compatible
-			//fragment fr(fr.h2, fr.h1->suppl); //h2 and h1s as param or h2s and h1 as parameter
-			//fr.frag_type = 2; //this is the second set of fragment,tasfia
-			//do we need to check h1p-h2-h1s order if compatible checked?
-			//need to handle fr.h2 paired
 		}
 
 		if(fr.h2->suppl != NULL)
@@ -865,7 +861,8 @@ int bundle_bridge::build_circ_fragments()
 					string combo = "Compatible h2s leftmost h2p rightmost";
 					printf("%s\n",combo.c_str());
 					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-					else frag2graph_freq[combo] += 1;					
+					else frag2graph_freq[combo] += 1;
+					is_compatible = 2;					
 				}
 				else
 				{
@@ -916,13 +913,24 @@ int bundle_bridge::build_circ_fragments()
 			
 			//if compatible
 			//fragment fr(fr.h2->suppl, fr.h1); //h2 and h1s as param or h2s and h1 as parameter
-			//fr.frag_type = 2; //this is the second set of fragment,tasfia
+			//fr.frag_type = 2; //this is the second set of fragment
 
-			//do we need to check h2s-h1-h2p order if compatible checked?
-			//need to handle fr.h1 paired
+			//do we need to check h2s-h1-h2p order if compatible checked? no as ordering already checked, see above
+			//need to handle fr.h1 paired??
+		}
+
+		//if compatible h1s
+		if(is_compatible == 1)
+		{
+			//fragment fr(fr.h2, fr.h1->suppl);
+			fr.frag_type = 2;
+		}
+		else if(is_compatible == 2)
+		{
+			//fragment fr(fr.h2->suppl, fr.h1);
+			fr.frag_type = 2;
 		}
 	}
-
 }
 
 int bundle_bridge::build_fragments()
