@@ -2061,6 +2061,13 @@ int bundle::build_hyper_set() //aligns brdiged frags to splice graph and gets se
 
 		if(fr.h1->paired != true) printf("error type: %d\n", fr.type);
 		assert(fr.h1->paired == true);
+
+		if(fr.h2->paired == false)
+		{
+			printf("h2 paired false\n");
+			fr.h2->print();
+		}
+
 		assert(fr.h2->paired == true);
 
 		if(fr.paths.size() != 1) continue; //continue if not bridged

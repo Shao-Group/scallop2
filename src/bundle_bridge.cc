@@ -896,6 +896,7 @@ int bundle_bridge::build_fragments()
 			if(bb.hits[hidx1].vlist.size() == 0 || bb.hits[hidx2].vlist.size() == 0) continue;
 
 			fragment fr(&bb.hits[hidx1], &bb.hits[hidx2]);
+			fr.frag_type = 1;
 			fr.type = 1;
 			ctu += 1;
 			fr.lpos = bb.hits[hidx1].pos;
@@ -1281,31 +1282,48 @@ int bundle_bridge::build_circ_fragments()
 		//if compatible h1s
 		if(is_compatible == 1)
 		{
+			
+			if(fr.h1->suppl->hid == 21078) printf("got hid 21078\n");
+
+			//fr.h2 and fr.h1 needs to be paired by build_fragments()
+			if(fr.h2->paired != true || fr.h1->paired != true) continue;
+
 			fragment frag(fr.h2, fr.h1->suppl);
+			fr.h1->suppl->paired = true;
 			frag.frag_type = 2;
 			frag.lpos = fr.h2->pos;
 			frag.rpos = fr.h1->suppl->rpos;
 
 			circ_fragments.push_back(frag);
 
+			
 
-			//bb.hits[i].paired = true;
-			//bb.hits[x].paired = true;
+			//fr.h2->paired = true;
+			//fr.h1->suppl->paired = true;
+
 		}
 		else if(is_compatible == 2)
 		{
+			//if(fr.h2->hid == 21078) printf("got hid 21078\n");
+
+			//fr.h2 and fr.h1 needs to be paired by build_fragments()
+			if(fr.h2->paired != true || fr.h1->paired != true) continue;
+
 			fragment frag(fr.h2->suppl, fr.h1);
+			fr.h2->suppl->paired = true;
 			frag.frag_type = 2;
 			frag.lpos = fr.h2->suppl->pos;
 			frag.rpos = fr.h1->rpos;	
 
-			circ_fragments.push_back(frag);		
+			circ_fragments.push_back(frag);	
 
-			//bb.hits[i].paired = true;
-			//bb.hits[x].paired = true;
+			//fr.h2->suppl->paired = true;
+			//fr.h1->paired = true;	
+
 		}
 	}
 
+	//adding the second part fragments to fragments vector
 	printf("fragments vector size before = %zu\n",fragments.size());
 
 	for(int i=0;i<circ_fragments.size();i++)
