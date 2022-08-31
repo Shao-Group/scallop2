@@ -47,6 +47,17 @@ int bundle_bridge::build()
 
 	bridger bdg(this);
 	bdg.bridge();
+
+
+	printf("fragments vector size after = %zu\n",fragments.size());
+
+	for(int i=0;i<fragments.size();i++)
+	{
+		if(fragments[i].frag_type == 2)
+		{
+			fragments[i].print(i+1);
+		}
+	}
 	return 0;
 }
 
@@ -1330,15 +1341,7 @@ int bundle_bridge::build_circ_fragments()
 	{
 		fragments.push_back(circ_fragments[i]);
 	}
-	printf("fragments vector size after = %zu\n",fragments.size());
 
-	for(int i=0;i<fragments.size();i++)
-	{
-		if(fragments[i].frag_type == 2)
-		{
-			fragments[i].print(i+1);
-		}
-	}
 }
 
 int bundle_bridge::group_fragments()
