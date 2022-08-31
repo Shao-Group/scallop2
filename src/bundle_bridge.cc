@@ -55,6 +55,7 @@ int bundle_bridge::build()
 	{
 		if(fragments[i].frag_type == 2)
 		{
+			printf("frag pi = %d\n",fragments[i].pi);
 			fragments[i].print(i+1);
 		}
 	}
@@ -1005,7 +1006,7 @@ int bundle_bridge::build_fragments()
 int bundle_bridge::build_circ_fragments()
 {
 	vector<fragment> circ_fragments;
-	circ_fragments.clear();
+	circ_fragments.clear(); // unbridged second set of fragments, cannot use this for finding partner fragments
 
 	for(int k = 0; k < fragments.size(); k++)
 	{
@@ -1293,8 +1294,9 @@ int bundle_bridge::build_circ_fragments()
 		//if compatible h1s
 		if(is_compatible == 1)
 		{
-			
-			if(fr.h1->suppl->hid == 21078) printf("got hid 21078\n");
+			//if(bb.hits[x].vlist.size() == 0) continue;
+			//printf("vlist size = %zu",fr.h2->vlist.size());
+			//printf("vlist size = %zu",fr.h1->suppl->vlist.size());
 
 			//fr.h2 and fr.h1 needs to be paired by build_fragments()
 			if(fr.h2->paired != true || fr.h1->paired != true) continue;
@@ -1305,17 +1307,18 @@ int bundle_bridge::build_circ_fragments()
 			frag.lpos = fr.h2->pos;
 			frag.rpos = fr.h1->suppl->rpos;
 
+			frag.pi = k;
+			fr.pi = fragments.size() + circ_fragments.size(); //pi not set for all fragments, only those that have second frags, check pi before using if it is -1
+
 			circ_fragments.push_back(frag);
 
 			
-
 			//fr.h2->paired = true;
 			//fr.h1->suppl->paired = true;
 
 		}
 		else if(is_compatible == 2)
 		{
-			//if(fr.h2->hid == 21078) printf("got hid 21078\n");
 
 			//fr.h2 and fr.h1 needs to be paired by build_fragments()
 			if(fr.h2->paired != true || fr.h1->paired != true) continue;
@@ -1324,7 +1327,10 @@ int bundle_bridge::build_circ_fragments()
 			fr.h2->suppl->paired = true;
 			frag.frag_type = 2;
 			frag.lpos = fr.h2->suppl->pos;
-			frag.rpos = fr.h1->rpos;	
+			frag.rpos = fr.h1->rpos;
+
+			frag.pi = k;
+			fr.pi = fragments.size() + circ_fragments.size(); //pi not set for all fragments, only those that have second frags, check pi before using if it is -1
 
 			circ_fragments.push_back(frag);	
 
@@ -1335,12 +1341,81 @@ int bundle_bridge::build_circ_fragments()
 	}
 
 	//adding the second part fragments to fragments vector
-	printf("fragments vector size before = %zu\n",fragments.size());
+	if(circ_fragments.size() > 0)
+	{
+		printf("fragments vector size before = %zu\n",fragments.size());		
+	}
+	
 
 	for(int i=0;i<circ_fragments.size();i++)
 	{
 		fragments.push_back(circ_fragments[i]);
 	}
+
+	if(circ_fragments.size() > 0)
+	{
+		printf("circ fragment vector size = %zu\n",circ_fragments.size());
+	}
+
+	/*if(bb.hits[x].vlist.size() == 0) continue;
+
+	fragment fr(&bb.hits[i], &bb.hits[x]); //h2 and h1s as param or h2s and h1 as parameter
+	fr.frag_type = 1; //this is the first set of fragment
+
+	//keep it
+	// ===============================
+	// TODO: dit for UMI
+	bb.hits[i].pi = x; //index of other hit of a fragment stored, i-x are fragment pair indices, partner index
+	bb.hits[x].pi = i;
+	bb.hits[i].fidx = fragments.size();//check if used somewhere
+	bb.hits[x].fidx = fragments.size();//fidx is the fragment index
+	ctp += 1;
+	fr.type = 0; 
+	// ================================
+	fr.lpos = h.pos;
+	fr.rpos = bb.hits[x].rpos;
+
+	vector<int> v1 = decode_vlist(bb.hits[i].vlist);
+	vector<int> v2 = decode_vlist(bb.hits[x].vlist);
+	fr.k1l = fr.h1->pos - regions[v1.front()].lpos;
+	fr.k1r = regions[v1.back()].rpos - fr.h1->rpos;
+	fr.k2l = fr.h2->pos - regions[v2.front()].lpos;
+	fr.k2r = regions[v2.back()].rpos - fr.h2->rpos;
+	//keep it
+
+	//inlcude
+	fr.b1 = true;
+	if(v1.size() <= 1) 
+	{
+		fr.b1 = false;
+	}
+	else if(v1.size() >= 2 && v1[v1.size() - 2] == v1.back() - 1)
+	{
+		if(fr.h1->rpos - regions[v1.back()].lpos > max_misalignment1 + fr.h1->nm) fr.b1 = false;
+	}
+	else if(v1.size() >= 2 && v1[v1.size() - 2] != v1.back() - 1)
+	{
+		if(fr.h1->rpos - regions[v1.back()].lpos > max_misalignment2 + fr.h1->nm) fr.b1 = false;
+	}
+
+	fr.b2 = true;
+	if(v2.size() <= 1)
+	{
+		fr.b2 = false;
+	}
+	else if(v2.size() >= 2 || v2[1] == v2.front() + 1)
+	{
+		if(regions[v2.front()].rpos - fr.h2->pos > max_misalignment1 + fr.h2->nm) fr.b2 = false;
+	}
+	else if(v2.size() >= 2 || v2[1] != v2.front() + 1)
+	{
+		if(regions[v2.front()].rpos - fr.h2->pos > max_misalignment2 + fr.h2->nm) fr.b2 = false;
+	}
+
+	fragments.push_back(fr);
+
+	bb.hits[i].paired = true;
+	bb.hits[x].paired = true;*/
 
 }
 
