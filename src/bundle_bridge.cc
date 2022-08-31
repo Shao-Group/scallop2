@@ -1283,8 +1283,11 @@ int bundle_bridge::build_circ_fragments()
 		{
 			fragment frag(fr.h2, fr.h1->suppl);
 			frag.frag_type = 2;
+			frag.lpos = fr.h2->pos;
+			frag.rpos = fr.h1->suppl->rpos;
 
 			circ_fragments.push_back(frag);
+
 
 			//bb.hits[i].paired = true;
 			//bb.hits[x].paired = true;
@@ -1293,8 +1296,10 @@ int bundle_bridge::build_circ_fragments()
 		{
 			fragment frag(fr.h2->suppl, fr.h1);
 			frag.frag_type = 2;
+			frag.lpos = fr.h2->suppl->pos;
+			frag.rpos = fr.h1->rpos;	
 
-			circ_fragments.push_back(frag);
+			circ_fragments.push_back(frag);		
 
 			//bb.hits[i].paired = true;
 			//bb.hits[x].paired = true;
