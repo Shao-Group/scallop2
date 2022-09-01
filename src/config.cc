@@ -109,6 +109,7 @@ string version = "v1.1.2";
 //for extracting BSJ
 int BSJ_threshold = 5;
 map<string, int> frag2graph_freq; //adding data structure to keep frequency profile of fragment to splice graph align cases
+map<string, int> circ_frag_bridged_freq; //keeps count of fragment pair bridged cases, TT,TF,FT,FF
 int h1_supp_count = 0; //keeps count of the number of h1 hits in ffragment with supple
 int h2_supp_count = 0; //keeps count of the number of h2 hits in ffragment with supple
 

@@ -31,7 +31,7 @@ bundle_bridge::~bundle_bridge()
 int bundle_bridge::build()
 {
 	build_supplementaries();
-	set_chimeric_cigar_positions(); //seeting h.first_pos/second_pos etc for getting back splice positions using cigars 
+	set_chimeric_cigar_positions(); //setting h.first_pos/second_pos etc for getting back splice positions using cigars 
 	build_junctions();
 	extend_junctions();
 
@@ -1474,7 +1474,7 @@ int bundle_bridge::extract_circ_fragment_pairs()
 		}
 	}
 
-	if(circ_fragment_pairs.size() > 0)
+	/*if(circ_fragment_pairs.size() > 0)
 	{
 		printf("Printing fragment pairs: size = %zu\n\n",circ_fragment_pairs.size());
 
@@ -1482,9 +1482,17 @@ int bundle_bridge::extract_circ_fragment_pairs()
 		{
 			circ_fragment_pairs[i].first.print(i+1);
 			circ_fragment_pairs[i].second.print(i+1);
+			printf("\n");
 		}
+	}*/
+	
+	for(int i=0;i<circ_fragment_pairs.size();i++)
+	{
+		circ_fragment_pairs[i].first.print(i+1);
+		circ_fragment_pairs[i].second.print(i+1);
 		printf("\n");
-	}
+	}	
+
 
 }
 
