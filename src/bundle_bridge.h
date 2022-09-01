@@ -27,6 +27,9 @@ public:
 	bundle_base &bb;					// input bundle base
 	set<string> breads;					// bridged reads
 	vector<fragment> fragments;			// to-be-filled fragments
+
+	vector<pair<fragment,fragment>> circ_fragment_pairs;	//bridged fragment pairs for circular RNA
+
 	vector<junction> junctions;			// splice junctions
 	vector<region> regions;				// pexons
 	vector<transcript> ref_trsts;		// overlaped genes in reference
@@ -49,9 +52,11 @@ public:
 	int build_junctions();
 	int extend_junctions();
 	int build_regions();
+	int build_fragments();
 
 	int build_circ_fragments();
-	int build_fragments();
+	int extract_circ_fragment_pairs();
+	
 	int group_fragments();
 
 	int align_hits_transcripts();

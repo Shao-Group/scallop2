@@ -28,6 +28,7 @@ public:
 
 	int frag_type;		//1 if normal fragment from h1p to h2 or h1 to h2p, 2 if from h2 to h1s or h2s to h1
 	int pi; 			//partner fragment index for circ RNA building
+	int fidx;			//own fragments index
 
 	int cnt;			// count of the equal hits
 	int32_t lpos;		// equals to hits[k1].pos

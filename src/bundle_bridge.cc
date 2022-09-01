@@ -48,17 +48,19 @@ int bundle_bridge::build()
 	bridger bdg(this);
 	bdg.bridge();
 
+	extract_circ_fragment_pairs();
 
-	printf("fragments vector size after = %zu\n",fragments.size());
 
-	for(int i=0;i<fragments.size();i++)
+	//printf("fragments vector size after = %zu\n",fragments.size());
+
+	/*for(int i=0;i<fragments.size();i++)
 	{
 		if(fragments[i].frag_type == 2)
 		{
 			printf("frag pi = %d\n",fragments[i].pi);
 			fragments[i].print(i+1);
 		}
-	}
+	}*/
 	return 0;
 }
 
@@ -314,6 +316,8 @@ int bundle_bridge:: set_chimeric_cigar_positions()
 		//printf("set_cigar p:%d-%d-%d\n",h.first_pos,h.second_pos,h.third_pos);
 		//printf("set_cigar s:%d-%d-%d\n",h.suppl->first_pos,h.suppl->second_pos,h.suppl->third_pos);
 	}
+
+	return 0;
 }
 
 
@@ -1012,7 +1016,7 @@ int bundle_bridge::build_circ_fragments()
 	{
 		fragment &fr = fragments[k];
 
-		if(fr.type != 0) continue; // note by Qimin, skip if not paired-end fragments
+		//if(fr.type != 0) continue; // note by Qimin, skip if not paired-end fragments
 
 		//if(fr.h1->paired != true) printf("error type: %d\n", fr.type);
 		//assert(fr.h1->paired == true);
@@ -1308,10 +1312,11 @@ int bundle_bridge::build_circ_fragments()
 			frag.rpos = fr.h1->suppl->rpos;
 
 			frag.pi = k;
+			frag.fidx = fragments.size() + circ_fragments.size();
 			fr.pi = fragments.size() + circ_fragments.size(); //pi not set for all fragments, only those that have second frags, check pi before using if it is -1
+			fr.fidx = k;
 
 			circ_fragments.push_back(frag);
-
 			
 			//fr.h2->paired = true;
 			//fr.h1->suppl->paired = true;
@@ -1330,7 +1335,9 @@ int bundle_bridge::build_circ_fragments()
 			frag.rpos = fr.h1->rpos;
 
 			frag.pi = k;
+			frag.fidx = fragments.size() + circ_fragments.size();
 			fr.pi = fragments.size() + circ_fragments.size(); //pi not set for all fragments, only those that have second frags, check pi before using if it is -1
+			fr.fidx = k;
 
 			circ_fragments.push_back(frag);	
 
@@ -1356,6 +1363,11 @@ int bundle_bridge::build_circ_fragments()
 	{
 		printf("circ fragment vector size = %zu\n",circ_fragments.size());
 	}
+
+	return 0;
+
+	//printf("fragments size after = %zu\n",fragments.size());
+
 
 	/*if(bb.hits[x].vlist.size() == 0) continue;
 
@@ -1416,6 +1428,63 @@ int bundle_bridge::build_circ_fragments()
 
 	bb.hits[i].paired = true;
 	bb.hits[x].paired = true;*/
+
+}
+
+int bundle_bridge::extract_circ_fragment_pairs()
+{
+	vector<fragment> circ_fragments;
+	circ_fragments.clear();
+	circ_fragment_pairs.clear();
+
+	for(int k = 0; k < fragments.size(); k++)
+	{
+		fragment &fr = fragments[k];
+
+		if(fr.frag_type == 2) 
+		{
+			circ_fragments.push_back(fr);
+		}
+	}
+
+	if(circ_fragments.size() > 0)
+	{
+		printf("Bridged circ fragments vector size = %zu\n",circ_fragments.size());		
+	}
+
+
+	for(int i = 0; i < fragments.size(); i++)
+	{
+		fragment &fr1 = fragments[i];
+
+		if(fr1.frag_type == 2) continue;
+
+		for(int j=0;j<circ_fragments.size();j++)
+		{
+			fragment &fr2 = circ_fragments[j];
+
+			if(strcmp(fr1.h1->qname.c_str(),fr2.h1->qname.c_str()) != 0) continue;
+			if(fr1.pi == -1 || fr2.pi == -1 || fr1.fidx == -1 || fr2.fidx == -1) continue;
+
+			if(fr1.pi == fr2.fidx && fr2.pi == fr1.fidx)
+			{
+				//printf("Found partner fragment\n");
+				circ_fragment_pairs.push_back(pair<fragment,fragment>(fr1,fr2));
+			}
+		}
+	}
+
+	if(circ_fragment_pairs.size() > 0)
+	{
+		printf("Printing fragment pairs: size = %zu\n\n",circ_fragment_pairs.size());
+
+		for(int i=0;i<circ_fragment_pairs.size();i++)
+		{
+			circ_fragment_pairs[i].first.print(i+1);
+			circ_fragment_pairs[i].second.print(i+1);
+		}
+		printf("\n");
+	}
 
 }
 
