@@ -1488,12 +1488,38 @@ int bundle_bridge::extract_circ_fragment_pairs()
 	
 	for(int i=0;i<circ_fragment_pairs.size();i++)
 	{
-		circ_fragment_pairs[i].first.print(i+1);
-		circ_fragment_pairs[i].second.print(i+1);
-		printf("\n");
+		fragment &fr1 = circ_fragment_pairs[i].first;
+		fragment &fr2 = circ_fragment_pairs[i].second;
+
+		if(fr2.h1->bridged == false && fr2.h2->bridged == false)
+		{
+			string combo = "fr2-FF";
+			printf("%s\n",combo.c_str());
+			if(circ_frag_bridged_freq.find(combo) == circ_frag_bridged_freq.end()) circ_frag_bridged_freq.insert(pair<string, int>(combo, 1));
+			else circ_frag_bridged_freq[combo] += 1;
+		}
+		else if(fr2.h1->bridged == false && fr2.h2->bridged == true)
+		{
+			string combo = "fr2-FT";
+			printf("%s\n",combo.c_str());
+			if(circ_frag_bridged_freq.find(combo) == circ_frag_bridged_freq.end()) circ_frag_bridged_freq.insert(pair<string, int>(combo, 1));
+			else circ_frag_bridged_freq[combo] += 1;
+		}
+		else if(fr2.h1->bridged == true && fr2.h2->bridged == false)
+		{
+			string combo = "fr2-TF";
+			printf("%s\n",combo.c_str());
+			if(circ_frag_bridged_freq.find(combo) == circ_frag_bridged_freq.end()) circ_frag_bridged_freq.insert(pair<string, int>(combo, 1));
+			else circ_frag_bridged_freq[combo] += 1;
+		}
+		else if(fr2.h1->bridged == true && fr2.h2->bridged == true)
+		{
+			string combo = "fr2-TT";
+			printf("%s\n",combo.c_str());
+			if(circ_frag_bridged_freq.find(combo) == circ_frag_bridged_freq.end()) circ_frag_bridged_freq.insert(pair<string, int>(combo, 1));
+			else circ_frag_bridged_freq[combo] += 1;
+		}
 	}	
-
-
 }
 
 int bundle_bridge::group_fragments()
