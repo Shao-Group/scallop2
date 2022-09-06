@@ -2058,6 +2058,7 @@ int bundle::build_hyper_set() //aligns brdiged frags to splice graph and gets se
 		fragment &fr = br.fragments[k];
 
 		if(fr.type != 0) continue;	// note by Qimin, skip if not paired-end fragments
+		if(fr.frag_type != 1) continue; //frag_type 2 is for second fragment set of a circular case
 
 		if(fr.h1->paired != true) printf("error type: %d\n", fr.type);
 		assert(fr.h1->paired == true);
@@ -2194,7 +2195,7 @@ int bundle::build_hyper_set() //aligns brdiged frags to splice graph and gets se
 		// by calling v2 = align_hit(h.supplementary);
 		// the phasing path will be v + v2
 
-		if(h.suppl != NULL)
+		/*if(h.suppl != NULL)
 		{
 			vector<int> v2 = align_hit(*h.suppl);
 
@@ -2215,16 +2216,16 @@ int bundle::build_hyper_set() //aligns brdiged frags to splice graph and gets se
 			}
 			printf("\n");
 
-			/*auto last = unique(v.begin(), v.end());
-    		// v now holds {1 2 1 3 4 5 4 x x x}, where 'x' is indeterminate
-    		v.erase(last, v.end());
+			auto last = unique(v.begin(), v.end());
+    			// v now holds {1 2 1 3 4 5 4 x x x}, where 'x' is indeterminate
+    			v.erase(last, v.end());
 
   			printf("Later Unique v2+v: ");
 			for(int i=0;i<v.size();i++)
 			{
 				printf("%d, ",v[i]);
-			}*/	
-		}
+			}	
+		}*/
 		
 		if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, 1));
 		else m[v] += 1;

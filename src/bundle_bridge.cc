@@ -1315,6 +1315,7 @@ int bundle_bridge::build_circ_fragments()
 			fr.type = 0; //needed here?
 			// ================================*/
 
+			frag.type = 0;
 			frag.lpos = fr.h2->pos;
 			frag.rpos = fr.h1->suppl->rpos;
 
@@ -1376,16 +1377,16 @@ int bundle_bridge::build_circ_fragments()
 			fragment frag(fr.h2->suppl, fr.h1);
 			frag.frag_type = 2;
 
-		/*// ===============================
-		// TODO: dit for UMI
-		bb.hits[i].pi = x; //index of other hit of a fragment stored, i-x are fragment pair indices, partner index, not used here
-		bb.hits[x].pi = i;
-		bb.hits[i].fidx = fragments.size();//check if used somewhere
-		bb.hits[x].fidx = fragments.size();//fidx is the fragment index
-		ctp += 1;
-		fr.type = 0; //needed here?
-		// ================================*/
+			/*// ===============================
+			// TODO: dit for UMI
+			bb.hits[i].pi = x; //index of other hit of a fragment stored, i-x are fragment pair indices, partner index, not used here
+			bb.hits[x].pi = i;
+			bb.hits[i].fidx = fragments.size();//check if used somewhere
+			bb.hits[x].fidx = fragments.size();//fidx is the fragment index
+			ctp += 1;
+			// ================================*/
 
+			frag.type = 0;
 			frag.lpos = fr.h2->suppl->pos;
 			frag.rpos = fr.h1->rpos;
 
@@ -1454,62 +1455,6 @@ int bundle_bridge::build_circ_fragments()
 	}
 
 	return 0;
-
-	//printf("fragments size after = %zu\n",fragments.size());
-
-
-	/*if(bb.hits[x].vlist.size() == 0) continue;
-
-	fragment fr(&bb.hits[i], &bb.hits[x]); //h2 and h1s as param or h2s and h1 as parameter
-	fr.frag_type = 1; //this is the first set of fragment
-
-	//keep it
-
-	fr.lpos = h.pos;
-	fr.rpos = bb.hits[x].rpos;
-
-	vector<int> v1 = decode_vlist(bb.hits[i].vlist);
-	vector<int> v2 = decode_vlist(bb.hits[x].vlist);
-	fr.k1l = fr.h1->pos - regions[v1.front()].lpos;
-	fr.k1r = regions[v1.back()].rpos - fr.h1->rpos;
-	fr.k2l = fr.h2->pos - regions[v2.front()].lpos;
-	fr.k2r = regions[v2.back()].rpos - fr.h2->rpos;
-	//keep it
-
-	//inlcude
-	fr.b1 = true;
-	if(v1.size() <= 1) 
-	{
-		fr.b1 = false;
-	}
-	else if(v1.size() >= 2 && v1[v1.size() - 2] == v1.back() - 1)
-	{
-		if(fr.h1->rpos - regions[v1.back()].lpos > max_misalignment1 + fr.h1->nm) fr.b1 = false;
-	}
-	else if(v1.size() >= 2 && v1[v1.size() - 2] != v1.back() - 1)
-	{
-		if(fr.h1->rpos - regions[v1.back()].lpos > max_misalignment2 + fr.h1->nm) fr.b1 = false;
-	}
-
-	fr.b2 = true;
-	if(v2.size() <= 1)
-	{
-		fr.b2 = false;
-	}
-	else if(v2.size() >= 2 || v2[1] == v2.front() + 1)
-	{
-		if(regions[v2.front()].rpos - fr.h2->pos > max_misalignment1 + fr.h2->nm) fr.b2 = false;
-	}
-	else if(v2.size() >= 2 || v2[1] != v2.front() + 1)
-	{
-		if(regions[v2.front()].rpos - fr.h2->pos > max_misalignment2 + fr.h2->nm) fr.b2 = false;
-	}
-
-	fragments.push_back(fr);
-
-	bb.hits[i].paired = true;
-	bb.hits[x].paired = true;*/
-
 }
 
 int bundle_bridge::extract_circ_fragment_pairs()
@@ -1571,6 +1516,8 @@ int bundle_bridge::extract_circ_fragment_pairs()
 	{
 		fragment &fr1 = circ_fragment_pairs[i].first;
 		fragment &fr2 = circ_fragment_pairs[i].second;
+
+		printf("chrm = %s\n",bb.chrm.c_str());
 
 		//bridging info for fr1 hits
 		if(fr1.h1->bridged == false && fr1.h2->bridged == false)
