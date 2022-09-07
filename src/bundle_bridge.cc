@@ -1511,7 +1511,8 @@ int bundle_bridge::extract_circ_fragment_pairs()
 			printf("\n");
 		}
 	}
-	
+
+	//profiling fragment hits bridged or not
 	for(int i=0;i<circ_fragment_pairs.size();i++)
 	{
 		fragment &fr1 = circ_fragment_pairs[i].first;
@@ -1547,6 +1548,35 @@ int bundle_bridge::extract_circ_fragment_pairs()
 			printf("%s\n",combo.c_str());
 			if(circ_frag_bridged_freq.find(combo) == circ_frag_bridged_freq.end()) circ_frag_bridged_freq.insert(pair<string, int>(combo, 1));
 			else circ_frag_bridged_freq[combo] += 1;
+		}
+
+		if(fr1.paths.size() == 1)
+		{
+			string combo = "fr1-path.size = 1";
+			printf("%s\n",combo.c_str());
+			if(circ_frag_bridged_freq.find(combo) == circ_frag_bridged_freq.end()) circ_frag_bridged_freq.insert(pair<string, int>(combo, 1));
+			else circ_frag_bridged_freq[combo] += 1;			
+		}
+		else
+		{
+			string combo = "fr1-path.size != 1";
+			printf("%s\n",combo.c_str());
+			if(circ_frag_bridged_freq.find(combo) == circ_frag_bridged_freq.end()) circ_frag_bridged_freq.insert(pair<string, int>(combo, 1));
+			else circ_frag_bridged_freq[combo] += 1;			
+		}
+		if(fr2.paths.size() == 1)
+		{
+			string combo = "fr2-path.size = 1";
+			printf("%s\n",combo.c_str());
+			if(circ_frag_bridged_freq.find(combo) == circ_frag_bridged_freq.end()) circ_frag_bridged_freq.insert(pair<string, int>(combo, 1));
+			else circ_frag_bridged_freq[combo] += 1;			
+		}
+		else
+		{
+			string combo = "fr2-path.size != 1";
+			printf("%s\n",combo.c_str());
+			if(circ_frag_bridged_freq.find(combo) == circ_frag_bridged_freq.end()) circ_frag_bridged_freq.insert(pair<string, int>(combo, 1));
+			else circ_frag_bridged_freq[combo] += 1;			
 		}
 
 		printf("Printing first fragment:\n");
