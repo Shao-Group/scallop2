@@ -333,14 +333,14 @@ int assembler::write()
 	}
 	fout.close();
 
-        ofstream fout1(output_file1.c_str());
-        if(fout1.fail()) return 0;
-        for(int i = 0; i < non_full_trsts.size(); i++)
-        {
-                transcript &t = non_full_trsts[i];
-                t.write(fout1);
-        }
-        fout1.close();
+    ofstream fout1(output_file1.c_str());
+    if(fout1.fail()) return 0;
+    for(int i = 0; i < non_full_trsts.size(); i++)
+    {
+            transcript &t = non_full_trsts[i];
+            t.write(fout1);
+    }
+    fout1.close();
 
 	return 0;
 }

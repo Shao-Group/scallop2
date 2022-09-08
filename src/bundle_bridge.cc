@@ -1529,7 +1529,7 @@ int bundle_bridge::extract_circ_fragment_pairs()
 		}
 	}
 
-	if(circ_fragment_pairs.size() > 0)
+	/*if(circ_fragment_pairs.size() > 0)
 	{
 		printf("Printing bridged fragment pairs: size = %zu\n\n",circ_fragment_pairs.size());
 
@@ -1539,7 +1539,7 @@ int bundle_bridge::extract_circ_fragment_pairs()
 			circ_fragment_pairs[i].second.print(i+1);
 			printf("\n");
 		}
-	}
+	}*/
 
 	//profiling fragment hits bridged or not
 	for(int i=0;i<circ_fragment_pairs.size();i++)
