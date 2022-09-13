@@ -31,8 +31,8 @@ fragment::fragment(hit *x1, hit *x2)
 
 int fragment::print(int index)
 {
-	printf("fragment %d: name = %s, cnt = %d, lpos = %d, rpos = %d, len = %d, k1l = %d, k1r = %d, k2l = %d, k2r = %d, b1 = %c, b2 = %c, v1 = %lu, v2 = %lu, #paths = %lu, frag_type = %d, pi = %d, fidx = %d,type = %d\n",
-			index, h1->qname.c_str(), cnt, lpos, rpos, rpos - lpos, k1l, k1r, k2l, k2r, b1 ? 'T' : 'F', b2 ? 'T' : 'F', h1->vlist.size(), h2->vlist.size(), paths.size(), frag_type, pi, fidx, type);
+	printf("fragment %d: name = %s, cnt = %d, lpos = %d, rpos = %d, len = %d, k1l = %d, k1r = %d, k2l = %d, k2r = %d, b1 = %c, b2 = %c, v1 = %lu, v2 = %lu, #paths = %lu, frag_type = %d, pi = %d, fidx = %d,type = %d, is_compatible = %d\n",
+			index, h1->qname.c_str(), cnt, lpos, rpos, rpos - lpos, k1l, k1r, k2l, k2r, b1 ? 'T' : 'F', b2 ? 'T' : 'F', h1->vlist.size(), h2->vlist.size(), paths.size(), frag_type, pi, fidx, type, is_compatible);
 	h1->print();
 	h2->print();
 
