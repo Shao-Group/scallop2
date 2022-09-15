@@ -15,7 +15,7 @@ See LICENSE for licensing.
 
 #include "config.h"
 #include "previewer.h"
-#include "assembler.h"
+#include "transformer.h"
 
 using namespace std;
 
@@ -41,13 +41,12 @@ int main(int argc, const char **argv)
 		printf("\n");
 	}
 
-	previewer pv;
-	pv.preview();
+	//previewer pv;
+	//pv.preview();
+	//if(preview_only == true) return 0;
 
-	if(preview_only == true) return 0;
-
-	assembler asmb;
-	asmb.assemble();
+	transformer trfm;
+	trfm.transform();
 
 	return 0;
 }
