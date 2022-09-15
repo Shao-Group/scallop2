@@ -30,11 +30,7 @@ int transformer::build_reference()
 	if(ref_file == "") return 0;
 
 	gm.read(ref_file);
-	for(auto x: gm.g2i)
-	{
-		printf("gene %s has %lu transcripts\n", 
-				x.first.c_str(), gm.genes[x.second].transcripts.size());
-	}
+	//for(auto x: gm.g2i) printf("gene %s has %lu transcripts\n", x.first.c_str(), gm.genes[x.second].transcripts.size());
 
 	trsts = gm.collect_transcripts();
 	for(int k = 0; k < trsts.size(); k++)
@@ -155,7 +151,24 @@ int transformer::process(int n)
 
 		process(bb);
 	}
+
+	pool.clear();
 	return 0;
+}
+
+string transformer::get_transcript_id(string s)
+{
+	string delim = ":";
+
+	auto start = 0U;
+	auto end = s.find(delim);
+	for(int k = 0; k < 2; k++)
+	{
+		start = end + delim.length();
+		end = s.find(delim, start);
+	}
+	//printf("name = %s\n", s.substr(start, end - start).c_str());
+	return s.substr(start, end - start);
 }
 
 int transformer::process(bundle_base &bb)
@@ -164,8 +177,7 @@ int transformer::process(bundle_base &bb)
 	for(int k = 0; k < bb.hits.size(); k++)
 	{
 		hit &h = bb.hits[k];
-		int p = h.qname.find("ENST");
-		string tid = h.qname.substr(p, 17); 
+		string tid = get_transcript_id(h.qname);
 
 		if(ttm.find(tid) == ttm.end()) ttm.insert(make_pair(tid, 1));
 		else ttm[tid]++;
@@ -190,8 +202,49 @@ int transformer::process(bundle_base &bb)
 		num += gm.genes[gm.g2i[x.first]].transcripts.size();
 	}
 
-	printf("bundle with %lu reads in %lu transcripts and in %lu genes (total %d transcripts)\n", 
+	// filtering
+	if(ggm.size() != 1 || ttm.size() != num) return 0;
+
+	printf("## instance bundle with %lu reads in %lu transcripts and in %lu genes (total %d transcripts)\n", 
 			bb.hits.size(), ttm.size(), ggm.size(), num);
+
+	map<vector<int64_t>, int> rmap;
+	for(int k = 0; k < bb.hits.size(); k++)
+	{
+		hit &h = bb.hits[k];
+		vector<int64_t> v;
+		h.get_aligned_intervals(v);
+		if(v.size() <= 0) continue;
+		if(rmap.find(v) == rmap.end()) rmap.insert(make_pair(v, 1));
+		else rmap[v]++;
+	}
+
+	for(auto &x: rmap)
+	{
+		const vector<int64_t> &v = x.first;
+		printf("%d, ", x.second);
+		for(int i = 0; i < v.size(); i++)
+		{
+			printf("%d-%d, ", low32(v[i]), high32(v[i]));
+		}
+		printf("\n");
+	}
+
+	printf("# ground-truth transcripts\n"); 
+
+	for(auto x: ttm)
+	{
+		assert(tmap.find(x.first) != tmap.end());
+		transcript &t = trsts[tmap[x.first]];
+		for(int k = 0; k < t.exons.size(); k++)
+		{
+			printf("%d-%d, ", t.exons[k].first, t.exons[k].second);
+		}
+		printf("\n");
+	}
+
+	printf("\n");
+
 	return 0;
 }
 

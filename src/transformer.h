@@ -44,6 +44,7 @@ private:
 	int process(bundle_base &bb);
 	int build_reference();
 	int write();
+	string get_transcript_id(string qname);
 };
 
 #endif
