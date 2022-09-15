@@ -184,6 +184,7 @@ int transformer::process(bundle_base &bb)
 	}
 
 	map<string, int> ggm;
+	int32_t lbound = -1, rbound = -1;
 	for(auto x: ttm)
 	{
 		if(tmap.find(x.first) == tmap.end()) printf("transcript name = %s count = %d\n", x.first.c_str(), x.second);
@@ -193,6 +194,10 @@ int transformer::process(bundle_base &bb)
 		//int gi = gm.g2i[gid];
 		if(ggm.find(gid) == ggm.end()) ggm.insert(make_pair(gid, 1));
 		else ggm[gid]++;
+
+		transcript &t = trsts[tmap[x.first]];
+		if(lbound == -1 || lbound > t.get_bounds().first) lbound = t.get_bounds().first;
+		if(rbound == -1 || rbound < t.get_bounds().second) rbound = t.get_bounds().second;
 	}
 
 	int num = 0;
@@ -202,8 +207,17 @@ int transformer::process(bundle_base &bb)
 		num += gm.genes[gm.g2i[x.first]].transcripts.size();
 	}
 
+	int32_t ll = lbound;
+	int32_t rr = rbound;
+	if(ll < bb.lpos) ll = bb.lpos;
+	if(rr > bb.rpos) rr = bb.rpos;
+
+	//printf("ll = %d, rr = %d, lbound = %d, rbound = %d, bb.bounds = %d-%d\n", ll, rr, lbound, rbound, bb.lpos, bb.rpos);
+
 	// filtering
 	if(ggm.size() != 1 || ttm.size() != num) return 0;
+	if((rr - ll) < 0.5 * (bb.rpos - bb.lpos)) return 0;
+	if((rr - ll) < 0.5 * (rbound - lbound)) return 0;
 
 	printf("## instance bundle with %lu reads in %lu transcripts and in %lu genes (total %d transcripts)\n", 
 			bb.hits.size(), ttm.size(), ggm.size(), num);
@@ -225,7 +239,7 @@ int transformer::process(bundle_base &bb)
 		printf("%d, ", x.second);
 		for(int i = 0; i < v.size(); i++)
 		{
-			printf("%d-%d, ", low32(v[i]), high32(v[i]));
+			printf("%d-%d, ", high32(v[i]), low32(v[i]));
 		}
 		printf("\n");
 	}
@@ -236,6 +250,7 @@ int transformer::process(bundle_base &bb)
 	{
 		assert(tmap.find(x.first) != tmap.end());
 		transcript &t = trsts[tmap[x.first]];
+		printf("%s, ", t.transcript_id.c_str());
 		for(int k = 0; k < t.exons.size(); k++)
 		{
 			printf("%d-%d, ", t.exons[k].first, t.exons[k].second);
