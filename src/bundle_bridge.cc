@@ -50,6 +50,7 @@ int bundle_bridge::build()
 
 	extract_circ_fragment_pairs();
 	check_circ_fragment_pairs();
+	join_circ_fragment_pairs();
 
 
 	//printf("fragments vector size after = %zu\n",fragments.size());
@@ -1670,6 +1671,99 @@ int bundle_bridge::check_circ_fragment_pairs()
 			fr2.paths[0].print(i+1);
 		}
 	}
+	return 0;
+}
+
+int bundle_bridge::join_circ_fragment_pairs()
+{
+	for(int i=0;i<circ_fragment_pairs.size();i++)
+	{
+		fragment &fr1 = circ_fragment_pairs[i].first;
+		fragment &fr2 = circ_fragment_pairs[i].second;
+
+		if(fr1.paths.size() != 1 || fr2.paths.size() != 1) continue; //not bridged
+		if(fr1.paths[0].type != 1 || fr2.paths[0].type != 1) continue; //insrt size not normal
+
+		join_circ_fragment_pair(circ_fragment_pairs[i],0,0);		
+	}
+
+	return 0;
+}
+
+int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int ex1, int ex2)
+{
+
+	fragment &fr1 = fr_pair.first;
+	fragment &fr2 = fr_pair.second;
+
+	vector<int> v1 = decode_vlist(fr1.paths[0].v);
+	vector<int> v2 = decode_vlist(fr2.paths[0].v);
+	path p;
+
+	assert(v1.size() > ex1);
+	assert(v2.size() > ex2);
+
+	if(fr2.is_compatible == 1)
+	{
+		vector<int>::iterator t1 = v1.end() - ex1;
+		vector<int>::iterator t2 = v2.begin() + ex2;
+
+		int x1 = v1[v1.size() - 1 - ex1];
+		int x2 = v2[ex2];
+
+		if(x1 < x2) return 0;
+
+		vector<int>::iterator it = find(t2, v2.end(), x1);
+		if(it == v2.end()) return 0;
+
+		vector<int>::iterator j1, j2;
+		for(j1 = t1 - 1, j2 = it; j1 >= v1.begin() && j2 >= t2; j1--, j2--)
+		{
+			if((*j1) != (*j2)) return 0;
+		}
+
+		p.ex1 = ex1;
+		p.ex2 = ex2;
+		p.v.insert(p.v.end(), v1.begin(), t1);
+		p.v.insert(p.v.end(), it + 1, v2.end());
+		p.v = encode_vlist(p.v);
+		printf("Printing merged path:\n");
+		printv(p.v);
+		printf("\n");
+	}
+	else if(fr2.is_compatible == 2)
+	{
+		vector<int>::iterator t1 = v2.end() - ex1;
+		vector<int>::iterator t2 = v1.begin() + ex2;
+
+		int x1 = v2[v2.size() - 1 - ex1];
+		int x2 = v1[ex2];
+
+		if(x1 < x2) return 0;
+
+		vector<int>::iterator it = find(t2, v1.end(), x1);
+		if(it == v1.end()) return 0;
+
+		vector<int>::iterator j1, j2;
+		for(j1 = t1 - 1, j2 = it; j1 >= v2.begin() && j2 >= t2; j1--, j2--)
+		{
+			if((*j1) != (*j2)) return 0;
+		}
+
+		p.ex1 = ex1;
+		p.ex2 = ex2;
+		p.v.insert(p.v.end(), v2.begin(), t1);
+		p.v.insert(p.v.end(), it + 1, v1.end());
+		p.v = encode_vlist(p.v);
+		printf("Printing merged path:\n");
+		printv(p.v);
+		printf("\n");
+	}
+	else
+	{
+		printf("is_compatible not 1 or 2\n");
+	}
+
 	return 0;
 }
 
