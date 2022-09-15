@@ -100,7 +100,7 @@ string output_file1;
 // for controling
 bool output_tex_files = false;
 string fixed_gene_name = "";
-int batch_bundle_size = 100;
+int batch_bundle_size = 1;
 int verbose = 1;
 int assemble_duplicates = 10;
 string version = "v1.1.2";

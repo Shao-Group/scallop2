@@ -28,6 +28,8 @@ private:
 	bundle_base bb2;		// -
 	genome gm;				// genome
 	vector<bundle_base> pool;
+	vector<transcript> trsts;
+	map<string, int> tmap;
 
 	int hid;
 	int index;
@@ -40,6 +42,7 @@ public:
 private:
 	int process(int n);
 	int process(bundle_base &bb);
+	int build_reference();
 	int write();
 };
 

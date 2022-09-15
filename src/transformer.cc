@@ -14,6 +14,7 @@ See LICENSE for licensing.
 
 transformer::transformer()
 {
+	build_reference();
     sfn = sam_open(input_file.c_str(), "r");
     hdr = sam_hdr_read(sfn);
     b1t = bam_init1();
@@ -21,15 +22,28 @@ transformer::transformer()
 	index = 0;
 	qlen = 0;
 	qcnt = 0;
+}
 
-	if(ref_file != "")
+
+int transformer::build_reference()
+{
+	if(ref_file == "") return 0;
+
+	gm.read(ref_file);
+	for(auto x: gm.g2i)
 	{
-		gm.read(ref_file);
-		for(auto x: gm.g2i)
-		{
-			printf("gene %s has %lu transcripts\n", x.first.c_str(), gm.genes[x.second].transcripts.size());
-		}
+		printf("gene %s has %lu transcripts\n", 
+				x.first.c_str(), gm.genes[x.second].transcripts.size());
 	}
+
+	trsts = gm.collect_transcripts();
+	for(int k = 0; k < trsts.size(); k++)
+	{
+		transcript &t = trsts[k];
+		assert(tmap.find(t.transcript_id) == tmap.end());
+		tmap.insert(make_pair(t.transcript_id, k));
+	}
+	return 0;
 }
 
 transformer::~transformer()
@@ -146,6 +160,38 @@ int transformer::process(int n)
 
 int transformer::process(bundle_base &bb)
 {
+	map<string, int> ttm;
+	for(int k = 0; k < bb.hits.size(); k++)
+	{
+		hit &h = bb.hits[k];
+		int p = h.qname.find("ENST");
+		string tid = h.qname.substr(p, 17); 
+
+		if(ttm.find(tid) == ttm.end()) ttm.insert(make_pair(tid, 1));
+		else ttm[tid]++;
+	}
+
+	map<string, int> ggm;
+	for(auto x: ttm)
+	{
+		if(tmap.find(x.first) == tmap.end()) printf("transcript name = %s count = %d\n", x.first.c_str(), x.second);
+		assert(tmap.find(x.first) != tmap.end());
+		string gid = trsts[tmap[x.first]].gene_id;
+		//assert(gm.g2i.find(gid) != gm.g2i.end());
+		//int gi = gm.g2i[gid];
+		if(ggm.find(gid) == ggm.end()) ggm.insert(make_pair(gid, 1));
+		else ggm[gid]++;
+	}
+
+	int num = 0;
+	for(auto &x: ggm)
+	{
+		assert(gm.g2i.find(x.first) != gm.g2i.end());
+		num += gm.genes[gm.g2i[x.first]].transcripts.size();
+	}
+
+	printf("bundle with %lu reads in %lu transcripts and in %lu genes (total %d transcripts)\n", 
+			bb.hits.size(), ttm.size(), ggm.size(), num);
 	return 0;
 }
 
