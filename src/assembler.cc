@@ -91,8 +91,8 @@ int assembler::assemble()
 		if(library_type != UNSTRANDED && ht.strand == '.' && ht.xs != '.') ht.strand = ht.xs;
 		if(library_type != UNSTRANDED && ht.strand == '+') bb1.add_hit(ht);
 		if(library_type != UNSTRANDED && ht.strand == '-') bb2.add_hit(ht);
-		if(library_type == UNSTRANDED && ht.xs == '.') bb1.add_hit(ht);
-		if(library_type == UNSTRANDED && ht.xs == '.') bb2.add_hit(ht);
+		if(library_type == UNSTRANDED && ht.xs == '.' && ht.spos.size() <= 0) bb1.add_hit(ht);
+		if(library_type == UNSTRANDED && ht.xs == '.' && ht.spos.size() <= 0) bb2.add_hit(ht);
 		if(library_type == UNSTRANDED && ht.xs == '+') bb1.add_hit(ht);
 		if(library_type == UNSTRANDED && ht.xs == '-') bb2.add_hit(ht);
 	}
