@@ -564,6 +564,7 @@ int bundle::refine_backsplicing_junctions()
 	}
 
 	//printf("End of bundle\n\n");
+	return 0;
 }
 
 

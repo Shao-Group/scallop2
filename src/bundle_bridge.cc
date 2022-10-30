@@ -1651,6 +1651,8 @@ int bundle_bridge::extract_circ_fragment_pairs()
 			else circ_frag_bridged_freq[combo] += 1;		
 		}
 	}
+
+	return 0;
 }
 
 int bundle_bridge::check_circ_fragment_pairs()
