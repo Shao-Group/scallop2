@@ -49,7 +49,7 @@ int bundle_bridge::build()
 	bdg.bridge();
 
 	extract_circ_fragment_pairs();
-	check_circ_fragment_pairs();
+	//print_circ_fragment_pairs();
 	join_circ_fragment_pairs();
 
 
@@ -1032,7 +1032,8 @@ int bundle_bridge::build_circ_fragments()
 			h1_supp_count++;
 			hit *h1_supple = fr.h1->suppl;
 
-			/*printf("\nfr.h1 has a supple hit.\n");
+			printf("\nchrm = %s\n",bb.chrm.c_str());
+			printf("fr.h1 has a supple hit.\n");
 			printf("Primary: ");
 			fr.h1->print();
 			printf("Supple: ");
@@ -1055,12 +1056,12 @@ int bundle_bridge::build_circ_fragments()
 			printf("\n");
 
 			printf("set_cigar p:%d-%d-%d\n",fr.h1->first_pos,fr.h1->second_pos,fr.h1->third_pos);
-			printf("set_cigar s:%d-%d-%d\n",fr.h1->suppl->first_pos,fr.h1->suppl->second_pos,fr.h1->suppl->third_pos);*/
+			printf("set_cigar s:%d-%d-%d\n",fr.h1->suppl->first_pos,fr.h1->suppl->second_pos,fr.h1->suppl->third_pos);
 
 			if(fr.h1->first_pos == 0 || fr.h1->suppl->first_pos == 0)
 			{
 				string combo = "special case h1s";
-				//printf("%s\n",combo.c_str());
+				printf("%s\n",combo.c_str());
 				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
 				else frag2graph_freq[combo] += 1;
 				continue;
@@ -1217,7 +1218,7 @@ int bundle_bridge::build_circ_fragments()
 				len_HS += fr.h2->suppl->right_cigar_len;
 			}
 
-			printf("len_HS = %d\n",len_HS);
+			//printf("len_HS = %d\n",len_HS);
 
 			if(abs(len_HS - 100) > 5) //here 100 is the estimated read length, replace this with any related exisiting parameter
 			{
@@ -1500,21 +1501,21 @@ int bundle_bridge::extract_circ_fragment_pairs()
 
 		if(fr.frag_type == 2) 
 		{
-			circ_fragments.push_back(fr); //bridged
+			circ_fragments.push_back(fr); //bridging function called already
 		}
 	}
 
 	if(circ_fragments.size() > 0)
 	{
-		printf("Bridged circ fragments vector size = %zu\n\n",circ_fragments.size());		
+		printf("After bridging fragments vector size = %zu\n\n",fragments.size());		
 	}
 
 
 	for(int i = 0; i < fragments.size(); i++)
 	{
-		fragment &fr1 = fragments[i];
+		fragment &fr1 = fragments[i]; 
 
-		if(fr1.frag_type == 2) continue;
+		if(fr1.frag_type == 2) continue; //filter and take original fragments of scallop2 
 
 		for(int j=0;j<circ_fragments.size();j++)
 		{
@@ -1526,7 +1527,7 @@ int bundle_bridge::extract_circ_fragment_pairs()
 			if(fr1.pi == fr2.fidx && fr2.pi == fr1.fidx)
 			{
 				//printf("Found partner fragment\n");
-				circ_fragment_pairs.push_back(pair<fragment,fragment>(fr1,fr2));
+				circ_fragment_pairs.push_back(pair<fragment,fragment>(fr1,fr2)); //fr1 is original fragment of scallop2 regardless of which of h1 or h2 has a supplement
 			}
 		}
 	}
@@ -1551,7 +1552,7 @@ int bundle_bridge::extract_circ_fragment_pairs()
 
 		//printf("pairs: is_compatible = %d-%d, %c%c-%c%c\n",fr1.is_compatible, fr2.is_compatible,fr1.h1->bridged == true ? 'T' : 'F',fr1.h2->bridged == true ? 'T' : 'F',fr2.h1->bridged == true ? 'T' : 'F',fr2.h2->bridged == true ? 'T' : 'F');
 
-		printf("chrm = %s\n",bb.chrm.c_str());
+		//printf("chrm = %s\n",bb.chrm.c_str());
 
 		//bridging info for fr1 hits
 		if(fr1.h1->bridged == false && fr1.h2->bridged == false)
@@ -1584,10 +1585,10 @@ int bundle_bridge::extract_circ_fragment_pairs()
 		}
 
 
-		printf("Printing first fragment:\n");
+		/*printf("Printing first fragment:\n");
 		fr1.print(i+1);
 		printf("Printing second fragment:\n");
-		fr2.print(i+1);
+		fr2.print(i+1);*/
 
 		//bridging info for fr2 hits
 		if(fr2.h1->bridged == false && fr2.h2->bridged == false)
@@ -1619,7 +1620,7 @@ int bundle_bridge::extract_circ_fragment_pairs()
 			else circ_frag_bridged_freq[combo] += 1;
 		}
 
-		printf("\n");
+		//printf("\n");
 
 		//counting path.size = 1
 		if(fr1.paths.size() == 1)
@@ -1655,7 +1656,7 @@ int bundle_bridge::extract_circ_fragment_pairs()
 	return 0;
 }
 
-int bundle_bridge::check_circ_fragment_pairs()
+int bundle_bridge::print_circ_fragment_pairs()
 {
 
 	if(circ_fragment_pairs.size() > 0)
@@ -1684,7 +1685,11 @@ int bundle_bridge::join_circ_fragment_pairs()
 		fragment &fr2 = circ_fragment_pairs[i].second;
 
 		if(fr1.paths.size() != 1 || fr2.paths.size() != 1) continue; //not bridged
-		if(fr1.paths[0].type != 1 || fr2.paths[0].type != 1) continue; //insrt size not normal
+		if(fr1.paths[0].type != 1 || fr2.paths[0].type != 1) continue; //insert size not normal
+
+		printf("Printing separate fragments:\n");
+		fr1.print(i+1);
+		fr2.print(i+1);
 
 		join_circ_fragment_pair(circ_fragment_pairs[i],0,0);		
 	}
@@ -1731,7 +1736,7 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		p.v = encode_vlist(p.v);
 		printf("Printing merged path:\n");
 		printv(p.v);
-		printf("\n");
+		printf("\n\n");
 	}
 	else if(fr2.is_compatible == 2)
 	{
@@ -1759,7 +1764,7 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		p.v = encode_vlist(p.v);
 		printf("Printing merged path:\n");
 		printv(p.v);
-		printf("\n");
+		printf("\n\n");
 	}
 	else
 	{

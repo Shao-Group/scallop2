@@ -56,7 +56,7 @@ public:
 
 	int build_circ_fragments();
 	int extract_circ_fragment_pairs();
-	int check_circ_fragment_pairs();
+	int print_circ_fragment_pairs();
 	int join_circ_fragment_pairs();
 	int join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int ex1, int ex2);
 	
