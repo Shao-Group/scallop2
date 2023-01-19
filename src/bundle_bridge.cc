@@ -225,7 +225,7 @@ int bundle_bridge:: set_chimeric_cigar_positions()
 					if(hp_cigar2.first == 'M' && j+3 < h.cigar_vector.size() && h.cigar_vector[j+3].first == 'M')
 					{
 						//&& h.cigar_vector[j+2].first == 'N' can be I or D as well
-						for(int p=j+3;p<h.cigar_vector.size();p+=2) //traverse all Ms with 1 gap in the middle ex:SMNMNM
+						for(int p=j+3;p<h.cigar_vector.size();p+=2) //traverse all Ms with 1 gap in the middle ex:SMNMNM/SIMIMIM/SMDMDMD
 						{
 							if(h.cigar_vector[p].first == 'M')
 							{
@@ -1326,9 +1326,9 @@ int bundle_bridge::build_circ_fragments()
 			vector<int> v1 = decode_vlist(fr.h2->vlist);
 			vector<int> v2 = decode_vlist(fr.h1->suppl->vlist);
 			frag.k1l = frag.h1->pos - regions[v1.front()].lpos;
-			frag.k1r = regions[v1.back()].rpos - fr.h1->rpos;
+			frag.k1r = regions[v1.back()].rpos - frag.h1->rpos;  //frag.h1?
 			frag.k2l = frag.h2->pos - regions[v2.front()].lpos;
-			frag.k2r = regions[v2.back()].rpos - fr.h2->rpos;
+			frag.k2r = regions[v2.back()].rpos - frag.h2->rpos; //frag.h2?
 			//keep it
 
 			//inlcude
@@ -1398,9 +1398,9 @@ int bundle_bridge::build_circ_fragments()
 			vector<int> v1 = decode_vlist(fr.h2->suppl->vlist);
 			vector<int> v2 = decode_vlist(fr.h1->vlist);
 			frag.k1l = frag.h1->pos - regions[v1.front()].lpos;
-			frag.k1r = regions[v1.back()].rpos - fr.h1->rpos;
+			frag.k1r = regions[v1.back()].rpos - frag.h1->rpos;
 			frag.k2l = frag.h2->pos - regions[v2.front()].lpos;
-			frag.k2r = regions[v2.back()].rpos - fr.h2->rpos;
+			frag.k2r = regions[v2.back()].rpos - frag.h2->rpos;
 			//keep it
 
 			//inlcude
@@ -1667,8 +1667,8 @@ int bundle_bridge::print_circ_fragment_pairs()
 			fragment &fr1 = circ_fragment_pairs[i].first;
 			fragment &fr2 = circ_fragment_pairs[i].second;
 
-			if(fr1.paths.size() != 1 || fr2.paths.size() != 1) continue;
-			if(fr1.paths[0].type != 1 || fr2.paths[0].type != 1) continue;
+			if(fr1.paths.size() != 1 || fr2.paths.size() != 1) continue; //check both frags bridged
+			if(fr1.paths[0].type != 1 || fr2.paths[0].type != 1) continue; // 1: within normal range of insertsize;
 
 			fr1.paths[0].print(i+1);
 			fr2.paths[0].print(i+1);
@@ -1688,6 +1688,9 @@ int bundle_bridge::join_circ_fragment_pairs()
 		if(fr1.paths[0].type != 1 || fr2.paths[0].type != 1) continue; //insert size not normal
 
 		printf("Printing separate fragments:\n");
+
+		printf("\nchrm = %s\n",bb.chrm.c_str());
+
 		fr1.print(i+1);
 		fr2.print(i+1);
 

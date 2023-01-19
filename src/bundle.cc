@@ -233,7 +233,7 @@ int bundle::extract_backsplicing_junctions()
 	back_spos_hits.clear(); 
 	back_spos_support.clear();
 	
-   	 for(int i = 0; i < bb.hits.size(); i++)
+   	for(int i = 0; i < bb.hits.size(); i++)
 	{
     	hit &h = bb.hits[i];
 
@@ -367,7 +367,7 @@ int bundle::extract_backsplicing_junctions()
 		}*/  		
 	}
 
-    	for(int i = 0; i < bb.hits.size(); i++)
+	for(int i = 0; i < bb.hits.size(); i++)
 	{
 		hit &h = bb.hits[i];
 
