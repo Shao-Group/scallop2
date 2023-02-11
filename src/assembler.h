@@ -17,6 +17,8 @@ See LICENSE for licensing.
 #include "hyper_set.h"
 #include "transcript_set.h"
 
+#include "circular_transcript.h"
+
 using namespace std;
 
 class assembler
@@ -41,11 +43,14 @@ private:
 	vector<transcript> trsts;
 	vector<transcript> non_full_trsts;
 
+	vector<circular_transcript> circular_trsts; //a vector of circular transcripts class objs from all bundles
+
 public:
 	int assemble();
 
 private:
 	int process(int n);
+	int print_circular_trsts();
 	int assemble(const splice_graph &gr, const hyper_set &hs, transcript_set &ts1, transcript_set &ts2);
 	int assign_RPKM();
 	int write();

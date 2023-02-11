@@ -21,6 +21,8 @@ See LICENSE for licensing.
 #include "gene.h"
 #include "transcript.h"
 
+#include "circular_transcript.h"
+
 using namespace std;
 
 class bundle

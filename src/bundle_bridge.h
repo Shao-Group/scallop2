@@ -14,6 +14,7 @@ See LICENSE for licensing.
 #include "region.h"
 #include "fragment.h"
 #include "transcript.h"
+#include "circular_transcript.h"
 
 using namespace std;
 
@@ -29,6 +30,7 @@ public:
 	vector<fragment> fragments;			// to-be-filled fragments
 
 	vector<pair<fragment,fragment>> circ_fragment_pairs;	//bridged fragment pairs for circular RNA
+	vector<circular_transcript> circ_trsts; //a vector of circular transcripts class objs
 
 	vector<junction> junctions;			// splice junctions
 	vector<region> regions;				// pexons
@@ -59,6 +61,7 @@ public:
 	int print_circ_fragment_pairs();
 	int join_circ_fragment_pairs();
 	int join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int ex1, int ex2);
+	int print_circRNAs();
 	
 	int group_fragments();
 

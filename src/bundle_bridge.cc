@@ -51,7 +51,7 @@ int bundle_bridge::build()
 	extract_circ_fragment_pairs();
 	//print_circ_fragment_pairs();
 	join_circ_fragment_pairs();
-
+	print_circRNAs();
 
 	//printf("fragments vector size after = %zu\n",fragments.size());
 
@@ -1326,7 +1326,7 @@ int bundle_bridge::build_circ_fragments()
 			vector<int> v1 = decode_vlist(fr.h2->vlist);
 			vector<int> v2 = decode_vlist(fr.h1->suppl->vlist);
 			frag.k1l = frag.h1->pos - regions[v1.front()].lpos;
-			frag.k1r = regions[v1.back()].rpos - frag.h1->rpos;  //frag.h1?
+			frag.k1r = regions[v1.back()].rpos - frag.h1->rpos; //frag.h1?
 			frag.k2l = frag.h2->pos - regions[v2.front()].lpos;
 			frag.k2r = regions[v2.back()].rpos - frag.h2->rpos; //frag.h2?
 			//keep it
@@ -1679,6 +1679,7 @@ int bundle_bridge::print_circ_fragment_pairs()
 
 int bundle_bridge::join_circ_fragment_pairs()
 {
+	circ_trsts.clear(); // emptying before storing joined circRNAs
 	for(int i=0;i<circ_fragment_pairs.size();i++)
 	{
 		fragment &fr1 = circ_fragment_pairs[i].first;
@@ -1740,6 +1741,24 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		printf("Printing merged path:\n");
 		printv(p.v);
 		printf("\n\n");
+
+		string temp = bb.chrm.c_str();
+		string circRNA_ID = "chrm" + temp + ":" + tostring(fr1.lpos) + "|" + tostring(fr2.rpos);
+		//printf("circularRNA = %s\n",circRNA_ID.c_str());
+		string chrm_id = bb.chrm.c_str();
+		int32_t start = fr1.lpos;
+		int32_t end = fr2.rpos;
+    	vector<int> circ_path;
+		circ_path.insert(circ_path.begin(), p.v.begin(), p.v.end());
+
+		circular_transcript circ;
+		circ.circRNA_ID = circRNA_ID;
+		circ.chrm_id = chrm_id;
+		circ.start = start;
+		circ.end = end;
+		circ.circ_path.insert(circ.circ_path.begin(),circ_path.begin(),circ_path.end());
+		//circ.print(0);
+		circ_trsts.push_back(circ);
 	}
 	else if(fr2.is_compatible == 2)
 	{
@@ -1768,10 +1787,47 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		printf("Printing merged path:\n");
 		printv(p.v);
 		printf("\n\n");
+
+		string temp = bb.chrm.c_str();
+		//printf("bb chrm = %s",temp.c_str());
+		string circRNA_ID = "chrm" + temp + ":" + tostring(fr2.lpos) + "|" + tostring(fr1.rpos);
+		//printf("circularRNA = %s\n",circRNA_ID.c_str());
+		string chrm_id = bb.chrm.c_str();
+		int32_t start = fr2.lpos;
+		int32_t end = fr1.rpos;
+    	vector<int> circ_path;
+		circ_path.insert(circ_path.begin(), p.v.begin(), p.v.end());
+
+		circular_transcript circ;
+		circ.circRNA_ID = circRNA_ID;
+		circ.chrm_id = chrm_id;
+		circ.start = start;
+		circ.end = end;
+		circ.circ_path.insert(circ.circ_path.begin(),circ_path.begin(),circ_path.end());
+		//circ.print(0);
+		circ_trsts.push_back(circ);
 	}
 	else
 	{
 		printf("is_compatible not 1 or 2\n");
+	}
+
+	return 0;
+}
+
+int bundle_bridge::print_circRNAs()
+{
+	if(circ_trsts.size() > 0)
+	{
+		//printf("circ_trsts size: %lu", circ_trsts.size());
+		printf("Printing circRNAs from current bundle bridge:\n");
+
+		for(int i=0;i<circ_trsts.size();i++)
+		{
+			circ_trsts[i].print(i+1);
+		}
+
+		printf("\n");
 	}
 
 	return 0;

@@ -30,6 +30,7 @@ assembler::assembler()
 	terminate = false;
 	qlen = 0;
 	qcnt = 0;
+	circular_trsts.clear();
 }
 
 assembler::~assembler()
@@ -133,6 +134,8 @@ int assembler::assemble()
 	non_full_trsts = ft1.trs;
 
 	write();
+
+	print_circular_trsts();
 	
 	return 0;
 }
@@ -177,9 +180,15 @@ int assembler::process(int n)
 		transcript_set ts2(bb.chrm, 0.9);		// non-full-length set
 
 		bundle bd(bb);
+		circular_trsts.insert(circular_trsts.end(), bd.br.circ_trsts.begin(), bd.br.circ_trsts.end());
+
+		/*if(circular_trsts.size() > 0)
+		{
+			printf("size of assembler circ vector = %lu\n", circular_trsts.size());
+		}*/
 
 		bd.build(1, true);
-		if(verbose >= 1) bd.print(index++);
+		if(verbose >= 1) bd.print(index++);	
 		assemble(bd.gr, bd.hs, ts1, ts2);
 
 		//bd.build(2, true); // commented out by Tasfia for as this creates repeats in count of cases
@@ -226,6 +235,17 @@ int assembler::process(int n)
 	}
 	pool.clear();
 	//printf("End of bundle-----------\n");
+	return 0;
+}
+
+int assembler::print_circular_trsts()
+{
+	printf("\nPrinting all circRNAs\n");
+	for(int i=0;i<circular_trsts.size();i++)
+	{
+		circular_trsts[i].print(i+1);
+	}
+	printf("\n");
 	return 0;
 }
 
