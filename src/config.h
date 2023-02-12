@@ -127,6 +127,7 @@ extern string ref_file1;
 extern string ref_file2;
 extern string output_file;
 extern string output_file1;
+extern string output_circ_file;
 
 // for controling
 extern bool output_tex_files;

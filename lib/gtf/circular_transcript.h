@@ -16,6 +16,7 @@ public:
     circular_transcript();
     circular_transcript(string circRNA_ID, string chrm_id, int32_t start, int32_t end, vector<int> circ_path);
     circular_transcript(string circRNA_ID, string chrm_id, int32_t start, int32_t end, vector<int> circ_path, int32_t junc_reads, int32_t non_junc_reads);
+    int write(ostream &fout, double cov2 = -1, int count = -1) const;
     int print(int id);
     ~circular_transcript();
 public:

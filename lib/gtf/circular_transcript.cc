@@ -42,6 +42,27 @@ circular_transcript::circular_transcript(string circRNA_ID, string chrm_id, int3
     non_junc_reads = non_junc_reads;
 }
 
+int circular_transcript::write(ostream &fout, double cov2, int count) const
+{
+    fout.precision(4);
+	fout<<fixed;
+
+    fout<<"ID="<<circRNA_ID.c_str()<<"\t";
+    fout<<"chrm="<<chrm_id.c_str()<<"\t";
+    fout<<"start="<<start<<"\t";
+    fout<<"end="<<end<<"\t";
+    fout<<"path vertices= ( ";
+    for(int i=0;i<circ_path.size();i++)
+    {
+        fout<<circ_path[i]<<" "; 
+    }
+    fout<<")";
+    fout<<endl;
+    //fout<< "end";
+
+    return 0;
+}
+
 int circular_transcript::print(int id)
 {
     printf("circRNA %d - ", id);

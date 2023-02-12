@@ -96,6 +96,7 @@ string ref_file1;
 string ref_file2;
 string output_file;
 string output_file1;
+string output_circ_file;
 
 // for controling
 bool output_tex_files = false;
@@ -131,6 +132,11 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "-f")
 		{
 			output_file1 = string(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "-c")
+		{
+			output_circ_file = string(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--transcript_fragments")
@@ -468,6 +474,12 @@ int parse_arguments(int argc, const char ** argv)
 		exit(0);
 	}
 
+	/*if(output_circ_file == "" && preview_only == false)
+	{
+		printf("error: output-file for circRNA is missing.\n");
+		exit(0);
+	}*/
+
 	return 0;
 }
 
@@ -525,6 +537,7 @@ int print_parameters()
 	printf("ref_file2 = %s\n", ref_file2.c_str());
 	printf("output_file = %s\n", output_file.c_str());
 	printf("output_file1 = %s\n", output_file1.c_str());
+	printf("output_circ_file = %s\n", output_circ_file.c_str());
 
 	// for controling
 	printf("library_type = %d\n", library_type);

@@ -134,8 +134,8 @@ int assembler::assemble()
 	non_full_trsts = ft1.trs;
 
 	write();
-
 	print_circular_trsts();
+	write_circular();
 	
 	return 0;
 }
@@ -361,6 +361,29 @@ int assembler::write()
             t.write(fout1);
     }
     fout1.close();
+
+	return 0;
+}
+
+int assembler::write_circular()
+{
+	//printf("file - %s", output_circ_file.c_str());
+	ofstream fcirc(output_circ_file.c_str(), fstream::trunc);
+	
+	if(fcirc.fail())
+	{
+		printf("failed");
+		return 0;
+	}
+
+
+	for(int i = 0; i < circular_trsts.size(); i++)
+	{
+		circular_transcript &t = circular_trsts[i];
+		t.write(fcirc);
+	}
+
+	fcirc.close();
 
 	return 0;
 }
