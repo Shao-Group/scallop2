@@ -72,7 +72,7 @@ public:
 	virtual bool intersect(edge_descriptor ex, edge_descriptor ey) = 0;
 
 	// draw
-	virtual int draw(const string &file, const MIS &mis, const MES &mes, double len) = 0;
+	virtual int draw(const string &file, const MIS &mis, const MES &mes, double len, string label) = 0;
 	virtual int print() const;
 };
 

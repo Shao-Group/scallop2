@@ -147,7 +147,7 @@ bool undirected_graph::intersect(edge_descriptor ex, edge_descriptor ey)
 	return false;
 }
 
-int undirected_graph::draw(const string &file, const MIS &mis, const MES &mes, double len)
+int undirected_graph::draw(const string &file, const MIS &mis, const MES &mes, double len, string label)
 {
 	ofstream fout(file.c_str());
 	if(fout.fail())

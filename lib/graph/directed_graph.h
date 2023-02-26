@@ -59,8 +59,10 @@ public:
 	virtual int check_nest(int x, int r, const vector<int> &tpo);
 
 	// draw
-	int draw(const string &file, const MIS &mis, const MES &mes, double len);
-	int draw(const string &file, const MIS &mis, const MES &mes, double len, const vector<int> &topo);
+	int draw(const string &file, const MIS &mis, const MES &mes, double len, string label = "");
+	int draw(const string &file, const MIS &mis, const MES &mes, double len, const vector<int> &topo, string label = "");
+	int graphviz(const string &file, const MIS &mis, const MES &mes, double len, string label = "");
+	int graphviz(const string &file, const MIS &mis, const MES &mes, double len, const vector<int> &topo, string label = "");
 };
 
 #endif

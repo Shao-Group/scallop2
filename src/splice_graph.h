@@ -109,9 +109,12 @@ public:
 	int locate_vertex(int32_t p, int a, int b);
 
 	// draw and print
-	int draw(const string &file);
-	int draw(const string &file, const MIS &mis, const MES &mes, double len);
-	int draw(const string &file, const MIS &mis, const MES &mes, double len, const vector<int> &tp);
+	int draw(const string &file, string label = "");
+	int draw(const string &file, const MIS &mis, const MES &mes, double len, string label = "");
+	int draw(const string &file, const MIS &mis, const MES &mes, double len, const vector<int> &tp, string label = "");
+	int graphviz(const string &file, string label = "");
+	int graphviz(const string &file, const MIS &mis, const MES &mes, double len, string label = "");
+	int graphviz(const string &file, const MIS &mis, const MES &mes, double len, const vector<int> &tp, string label = "");
 	int print_nontrivial_vertices();
 	int print_weights();
 	int print();

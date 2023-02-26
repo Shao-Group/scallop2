@@ -986,20 +986,23 @@ double splice_graph::compute_average_vertex_weight()
 	return sum;
 }
 
-int splice_graph::draw(const string &file, const MIS &mis, const MES &mes, double len, const vector<int> &tp)
+int splice_graph::draw(const string &file, const MIS &mis, const MES &mes, double len, const vector<int> &tp, string label)
 {
-	return directed_graph::draw(file, mis, mes, len, tp);
+	return directed_graph::draw(file, mis, mes, len, tp, label);
 }
 
-int splice_graph::draw(const string &file, const MIS &mis, const MES &mes, double len)
+int splice_graph::draw(const string &file, const MIS &mis, const MES &mes, double len, string label)
 {
-	return directed_graph::draw(file, mis, mes, len);
+	return directed_graph::draw(file, mis, mes, len, label);
 }
 
-int splice_graph::draw(const string &file)
+int splice_graph::draw(const string &file, string label)
 {
 	MIS mis;
 	char buf[10240];
+
+	string gene_start_end = chrm + ":" + to_string(get_vertex_info(0).lpos) + "-" + to_string(get_vertex_info(num_vertices() - 1).rpos);
+	if (label == "") label = gene_start_end;
 
 	for(int i = 0; i < num_vertices(); i++)
 	{
@@ -1020,7 +1023,48 @@ int splice_graph::draw(const string &file)
 		sprintf(buf, "%.1lf", w);
 		mes.insert(PES(*it1, buf));
 	}
-	draw(file, mis, mes, 4.5);
+	draw(file, mis, mes, 4.5, label);
+	return 0;
+}
+
+int splice_graph::graphviz(const string &file, const MIS &mis, const MES &mes, double len, const vector<int> &tp, string label)
+{
+	return directed_graph::graphviz(file, mis, mes, len, tp, label);
+}
+
+int splice_graph::graphviz(const string &file, const MIS &mis, const MES &mes, double len, string label)
+{
+	return directed_graph::graphviz(file, mis, mes, len, label);
+}
+
+int splice_graph::graphviz(const string &file, string label)
+{
+	MIS mis;
+	char buf[10240];
+
+	string gene_start_end = chrm + ":"  + to_string(get_vertex_info(0).lpos) + "-" + to_string(get_vertex_info(num_vertices() - 1).rpos);
+	if (label == "") label = gene_start_end;
+
+	for(int i = 0; i < num_vertices(); i++)
+	{
+		double w = get_vertex_weight(i);
+		vertex_info vi = get_vertex_info(i);
+		int ll = vi.lpos % 100000;
+		int rr = vi.rpos % 100000;
+		sprintf(buf, "%.1lf:%d-%d", w, ll, rr);
+		mis.insert(PIS(i, buf));
+	}
+
+	MES mes;
+	edge_iterator it1, it2;
+	PEEI pei;
+	for(pei = edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
+	{
+		double w = get_edge_weight(*it1);
+		sprintf(buf, "%.1lf", w);
+		mes.insert(PES(*it1, buf));
+	}
+	graphviz(file, mis, mes, 4.5, label);
 	return 0;
 }
 

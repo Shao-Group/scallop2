@@ -29,3 +29,18 @@ int draw_footer(ofstream & fout)
 	fout<<"\\end{document}\n";
 	return 0;
 }
+
+int graphviz_header(ofstream & fout)
+{
+	fout << "// Install GraphViz and compile";
+	fout << "// dot -Tsvg gene.xxxx.dot > gene.xxxx.svg\n";
+	fout << "digraph {\n";
+	fout << "rankdir=\"LR\"\n";
+	return 0; 
+}
+
+int graphviz_footer(ofstream & fout)
+{
+	fout << "}\n";
+	return 0;
+}

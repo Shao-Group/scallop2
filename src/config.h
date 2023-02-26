@@ -130,6 +130,7 @@ extern string output_file1;
 
 // for controling
 extern bool output_tex_files;
+extern bool output_graphviz_files;
 extern string fixed_gene_name;
 extern int max_num_bundles;
 extern int library_type;

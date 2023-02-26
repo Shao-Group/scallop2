@@ -22,7 +22,8 @@ scallop::scallop(const splice_graph &g, const hyper_set &h, bool r)
 	: gr(g), hs(h), random_ordering(r)
 {
 	round = 0;
-	if(output_tex_files == true) gr.draw(gr.gid + "." + tostring(round++) + ".tex");
+	if(output_tex_files == true) gr.draw(gr.gid + ".pre.tex");
+	if(output_graphviz_files == true) gr.graphviz(gr.gid + ".pre.dot");
 
 	gr.get_edge_indices(i2e, e2i);
 	//add_pseudo_hyper_edges();
@@ -100,6 +101,9 @@ int scallop::assemble()
 
 		break;
 	}
+	
+	if(output_tex_files == true) gr.draw(gr.gid + ".post.tex");
+	if(output_graphviz_files == true) gr.graphviz(gr.gid + ".post.dot");
 
 	collect_existing_st_paths();
 	greedy_decompose();
@@ -1481,7 +1485,7 @@ int scallop::print()
 	int n1 = 0;
 	for(int i = 1; i < gr.num_vertices() - 1; i++) 
 	{
-		if(gr.degree(i) == 0) n0++;
+		if(gr.degree(i) == 0) n0++;œ
 		if(gr.degree(i) >= 1) n1++;
 	}
 	assert(nonzeroset.size() == n1);

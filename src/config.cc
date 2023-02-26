@@ -99,6 +99,7 @@ string output_file1;
 
 // for controling
 bool output_tex_files = false;
+bool output_graphviz_files = false;
 string fixed_gene_name = "";
 int batch_bundle_size = 100;
 int verbose = 1;
@@ -160,6 +161,10 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "-t")
 		{
 			output_tex_files = true;
+		}
+		else if(string(argv[i]) == "-z")
+		{
+			output_graphviz_files = true;
 		}
 
 		// user specified
@@ -520,6 +525,7 @@ int print_parameters()
 	// for controling
 	printf("library_type = %d\n", library_type);
 	printf("output_tex_files = %c\n", output_tex_files ? 'T' : 'F');
+	printf("output_graphviz_files = %c\n", output_graphviz_files ? 'T' : 'F');
 	printf("fixed_gene_name = %s\n", fixed_gene_name.c_str());
 	printf("use_second_alignment = %c\n", use_second_alignment ? 'T' : 'F');
 	printf("uniquely_mapped_only = %c\n", uniquely_mapped_only ? 'T' : 'F');

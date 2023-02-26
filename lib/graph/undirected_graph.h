@@ -37,7 +37,7 @@ public:
 	vector<int> assign_connected_components();
 
 	// print and draw
-	int draw(const string &file, const MIS &mis, const MES &mes, double len);
+	int draw(const string &file, const MIS &mis, const MES &mes, double len, string label = "");
 };
 
 #endif

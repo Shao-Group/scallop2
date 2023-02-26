@@ -714,14 +714,14 @@ int directed_graph::check_nest(int x, int y, set<edge_descriptor> &se, const vec
 	else return -1;
 }
 
-int directed_graph::draw(const string &file, const MIS &mis, const MES &mes, double len)
+int directed_graph::draw(const string &file, const MIS &mis, const MES &mes, double len, string label)
 {
 	vector<int> tp;
 	for(int i = 0; i < num_vertices(); i++) tp.push_back(i);
-	return draw(file, mis, mes, len, tp);
+	return draw(file, mis, mes, len, tp, label);
 }
 
-int directed_graph::draw(const string &file, const MIS &mis, const MES &mes, double len, const vector<int> &tp)
+int directed_graph::draw(const string &file, const MIS &mis, const MES &mes, double len, const vector<int> &tp, string label)
 {
 	ofstream fout(file.c_str());
 	if(fout.fail())
@@ -735,7 +735,7 @@ int directed_graph::draw(const string &file, const MIS &mis, const MES &mes, dou
 	fout<<"\\def\\len{"<<len<<"cm}\n";
 
 	// draw file name
-	fout<<"\\node[draw, thick, red] at (1.6 * \\len, 0.58 * \\len) {"<<file.c_str()<<"};\n";
+	fout<<"\\node[draw, thick, red] at (1.6 * \\len, 0.58 * \\len) {"<<file.c_str() << ": " << label <<"};\n";
 
 	// draw vertices
 	char sx[1024];
@@ -804,3 +804,89 @@ int directed_graph::draw(const string &file, const MIS &mis, const MES &mes, dou
 	return 0;
 }
 
+int directed_graph::graphviz(const string &file, const MIS &mis, const MES &mes, double len, string label)
+{
+	vector<int> tp;
+	for(int i = 0; i < num_vertices(); i++) tp.push_back(i);
+	return graphviz(file, mis, mes, len, tp, label);
+}
+
+int directed_graph::graphviz(const string &file, const MIS &mis, const MES &mes, double len, const vector<int> &tp, string label)
+{
+	ofstream fout(file.c_str());
+	if(fout.fail())
+	{
+		printf("open file %s error.\n", file.c_str());
+		return 0;
+	}
+
+	graphviz_header(fout);
+
+	// draw file name
+	fout<< "label=\"" << file.c_str() << "\\n" << label <<"\"\n";
+	fout<< "labeljust=l" << "\n" << "labelloc=t\n";
+
+	// draw vertices
+	char sx[1024];
+	char sy[1024];
+	double pos = 0;
+
+	for(int ii = 0; ii < tp.size(); ii++)
+	{
+		int i = tp[ii];
+		int d = degree(i);
+		if(d == 0) continue;
+
+		pos++;
+
+		sprintf(sx, "s%d", i);
+		string s = "";
+		MIS::const_iterator it = mis.find(i);
+		if(it != mis.end()) s = it->second;
+		fout.precision(0);
+		fout<<fixed;
+
+		fout<< sx << " [label=\"" << i << "\\n" << s.c_str() << "\"]" << "\n";
+	}
+
+	// draw edges
+	for(int i = 0; i < num_vertices(); i++)
+	{
+		set<int> ss = adjacent_vertices(i);
+		for(set<int>::iterator it = ss.begin(); it != ss.end(); it++)
+		{
+
+			int j = (*it);
+			//assert(i < j);
+
+			string s;
+			char buf[1024];
+			PEEI pei;
+			edge_iterator oi1, oi2;
+			int cnt = 0;
+			for(pei = out_edges(i), oi1 = pei.first, oi2 = pei.second; oi1 != oi2; oi1++)
+			{
+				if((*oi1)->target() != j) continue;
+				cnt++;
+				MES::const_iterator it = mes.find(*oi1);
+				if(it == mes.end()) continue;
+				if(cnt == 1) s.append(it->second);
+				else s.append(", " + it->second);
+			}
+
+			sprintf(sx, "s%d", i);
+			sprintf(sy, "s%d", j);
+
+			string edgestyle = "[color=\"black\", ";
+			if(cnt >= 2) edgestyle = "[color=\"black:white:black\", ";
+			fout << sx << "->" << sy ;
+			fout << edgestyle;
+			fout<< "label=\"(" << s.c_str() <<")\"]\n";
+		}
+	}
+
+	graphviz_footer(fout);
+
+	fout.close();
+	return 0;
+}
