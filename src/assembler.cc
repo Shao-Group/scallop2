@@ -134,6 +134,7 @@ int assembler::assemble()
 	non_full_trsts = ft1.trs;
 
 	write();
+	printf("size of circular vector = %lu\n",circular_trsts.size());
 	print_circular_trsts();
 	write_circular();
 	

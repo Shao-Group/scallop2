@@ -1453,7 +1453,8 @@ int bundle_bridge::build_circ_fragments()
 	//fragments.clear();
 	for(int i=0;i<circ_fragments.size();i++)
 	{
-		fragments.push_back(circ_fragments[i]);
+		fragments.push_back(circ_fragments[i]); //pushing the circ fragments at the end of the main fragments list, 
+												//does this create any problem in the main scallop2 output??
 	}
 
 	if(circ_fragments.size() > 0)
@@ -1737,27 +1738,36 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		p.ex2 = ex2;
 		p.v.insert(p.v.end(), v1.begin(), t1);
 		p.v.insert(p.v.end(), it + 1, v2.end());
-		p.v = encode_vlist(p.v);
+		//p.v = encode_vlist(p.v);
 		printf("Printing merged path:\n");
 		printv(p.v);
 		printf("\n\n");
 
-		string temp = bb.chrm.c_str();
-		string circRNA_ID = "chrm" + temp + ":" + tostring(fr1.lpos) + "|" + tostring(fr2.rpos);
+		//string temp = bb.chrm.c_str();
+		//string transcript_id = "chrm" + temp + ":" + tostring(fr1.lpos) + "|" + tostring(fr2.rpos);
 		//printf("circularRNA = %s\n",circRNA_ID.c_str());
 		string chrm_id = bb.chrm.c_str();
+		char strand = bb.strand;
 		int32_t start = fr1.lpos;
 		int32_t end = fr2.rpos;
     	vector<int> circ_path;
 		circ_path.insert(circ_path.begin(), p.v.begin(), p.v.end());
 
 		circular_transcript circ;
-		circ.circRNA_ID = circRNA_ID;
-		circ.chrm_id = chrm_id;
+		//circ.transcript_id = transcript_id;
+		circ.seqname = chrm_id;
+		circ.source = "scallop2";
+		circ.feature = "circRNA";
+		circ.strand = strand;
 		circ.start = start;
 		circ.end = end;
 		circ.circ_path.insert(circ.circ_path.begin(),circ_path.begin(),circ_path.end());
 		//circ.print(0);
+		
+		for(int i=0;i<circ.circ_path.size();i++)
+		{
+			circ.circ_path_regions.push_back(regions[circ.circ_path[i]]);
+		}
 		circ_trsts.push_back(circ);
 	}
 	else if(fr2.is_compatible == 2)
@@ -1783,27 +1793,37 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		p.ex2 = ex2;
 		p.v.insert(p.v.end(), v2.begin(), t1);
 		p.v.insert(p.v.end(), it + 1, v1.end());
-		p.v = encode_vlist(p.v);
+		//p.v = encode_vlist(p.v);
 		printf("Printing merged path:\n");
 		printv(p.v);
 		printf("\n\n");
 
-		string temp = bb.chrm.c_str();
+		//string temp = bb.chrm.c_str();
 		//printf("bb chrm = %s",temp.c_str());
-		string circRNA_ID = "chrm" + temp + ":" + tostring(fr2.lpos) + "|" + tostring(fr1.rpos);
+		//string transcript_id = "chrm" + temp + ":" + tostring(fr2.lpos) + "|" + tostring(fr1.rpos);
 		//printf("circularRNA = %s\n",circRNA_ID.c_str());
 		string chrm_id = bb.chrm.c_str();
+		char strand = bb.strand;
 		int32_t start = fr2.lpos;
 		int32_t end = fr1.rpos;
     	vector<int> circ_path;
 		circ_path.insert(circ_path.begin(), p.v.begin(), p.v.end());
 
 		circular_transcript circ;
-		circ.circRNA_ID = circRNA_ID;
-		circ.chrm_id = chrm_id;
+		//circ.transcript_id = transcript_id;
+		circ.seqname = chrm_id;
+		circ.source = "scallop2";
+		circ.feature = "circRNA";
+		circ.strand = strand;
 		circ.start = start;
 		circ.end = end;
 		circ.circ_path.insert(circ.circ_path.begin(),circ_path.begin(),circ_path.end());
+
+		for(int i=0;i<circ.circ_path.size();i++)
+		{
+			circ.circ_path_regions.push_back(regions[circ.circ_path[i]]);
+		}
+
 		//circ.print(0);
 		circ_trsts.push_back(circ);
 	}

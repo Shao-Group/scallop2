@@ -14,6 +14,7 @@ See LICENSE for licensing.
 #include "edge_info.h"
 #include "path.h"
 #include "gene.h"
+#include "circular_transcript.h"
 
 #include <map>
 #include <cassert>

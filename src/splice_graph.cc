@@ -1171,15 +1171,16 @@ int splice_graph::output_transcripts(vector<transcript> &v, const vector<path> &
 
 int splice_graph::output_transcripts1(vector<transcript> &v, vector<transcript> &v1, const vector<path> &p) const
 {
-        for(int i = 0; i < p.size(); i++)
-        {
-                string tid = gid + "." + tostring(i);
+	for(int i = 0; i < p.size(); i++)
+	{
+		string tid = gid + "." + tostring(i);
 		transcript trst;
-                output_transcript(trst, p[i], tid);
+		output_transcript(trst, p[i], tid);
 		if(p[i].nf == 1) v1.push_back(trst);
 		else if(p[i].nf == 0) v.push_back(trst);
-        }
-        return 0;
+	}
+
+    return 0;
 }
 
 int splice_graph::output_transcript(transcript &trst, const path &p, const string &tid) const
