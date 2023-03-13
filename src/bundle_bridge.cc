@@ -1758,6 +1758,8 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		circ.seqname = chrm_id;
 		circ.source = "scallop2";
 		circ.feature = "circRNA";
+		circ.gene_id = "gene"; //later change this to bundle id
+		circ.transcript_id = fr1.h1->qname; //use hit qname, same for all hits in fragments
 		circ.strand = strand;
 		circ.start = start;
 		circ.end = end;
@@ -1814,6 +1816,8 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		circ.seqname = chrm_id;
 		circ.source = "scallop2";
 		circ.feature = "circRNA";
+		circ.gene_id = "gene"; //later change this to bundle id
+		circ.transcript_id = fr1.h1->qname; //use hit qname, same for all hits in fragments
 		circ.strand = strand;
 		circ.start = start;
 		circ.end = end;

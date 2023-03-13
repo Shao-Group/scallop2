@@ -9,8 +9,8 @@
 
 circular_transcript::circular_transcript()
 {
+    //chrm_id = "";
     seqname = "";
-    chrm_id = "";
     source = "";
     feature = "";
     gene_id = "";
@@ -25,7 +25,7 @@ circular_transcript::circular_transcript()
 	coverage = 0;
     covratio = 0;
 	RPKM = 0;
-    FPKM;
+    FPKM = 0;
 	TPM = 0;
 
     junc_reads = 0;
@@ -62,17 +62,18 @@ int circular_transcript::write(ostream &fout, double cov2, int count) const
     fout.precision(4);
 	fout<<fixed;
     
-    fout<<"chrm_id="<<chrm_id.c_str()<<"\t";
+    //fout<<"chrm_id="<<chrm_id.c_str()<<"\t";
     fout<<"seqname="<<seqname.c_str()<<"\t";
     fout<<"source="<<source.c_str()<<"\t";
     fout<<"feature="<<feature.c_str()<<"\t";
     fout<<"start="<<start<<"\t";
     fout<<"end="<<end<<"\t";
-	fout<<"score="<<score<<"\t";							// score, now as expression
+	fout<<"score="<<score<<"\t";							// score, for now as zero
 	fout<<"strand="<<strand<<"\t";							// strand
 	fout<<".\t";								            // frame
 	fout<<"gene_id \""<<gene_id.c_str()<<"\"; ";
 	fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
+    fout<<"coverage \""<<coverage<<"\";"<<endl;
     
     fout<<"path vertices= ( ";
     for(int i=0;i<circ_path.size();i++)
@@ -85,9 +86,52 @@ int circular_transcript::write(ostream &fout, double cov2, int count) const
     fout<<"path coordinates= ";
     for(int i=0;i<circ_path_regions.size();i++)
     {
-        fout<<"["<<circ_path_regions[i].lpos<<","<<circ_path_regions[i].rpos<<") "; 
+        if(circ_path_regions.size() == 1)
+        {
+            fout<<"["<<start<<","<<end<<") ";
+        }
+        else
+        {
+            if(i == 0)
+            {
+                fout<<"["<<start<<","<<circ_path_regions[i].rpos<<") ";
+            }
+            if(i == circ_path_regions.size()-1)
+            {
+                fout<<"["<<circ_path_regions[i].lpos<<","<<end<<") ";
+            }
+            if(i > 0 && i < circ_path_regions.size()-1)
+            {
+                fout<<"["<<circ_path_regions[i].lpos<<","<<circ_path_regions[i].rpos<<") "; 
+            }
+        }
     }
     fout<<endl;
+
+    int cnt = 0;
+    for(int i=0;i<circ_path_regions.size();i++)
+    {
+        region r = circ_path_regions[i];
+        fout<<"pexon size "<<r.pexons.size()<<endl;
+
+        for(int j=0;j<r.pexons.size();j++)
+        {
+            partial_exon p = r.pexons[j];
+
+            fout<<"seqname="<<seqname.c_str()<<"\t";
+            fout<<"source="<<source.c_str()<<"\t";
+            fout<<"feature="<<"exon"<<"\t";
+            fout<<"start="<<p.lpos<<"\t";
+            fout<<"end="<<p.rpos<<"\t";
+            fout<<"score="<<score<<"\t";							// score, for now as zero
+            fout<<"strand="<<strand<<"\t";							// strand
+            fout<<".\t";								            // frame
+            fout<<"gene_id \""<<gene_id.c_str()<<"\"; ";
+            fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
+            fout<<"exon_number \""<<++cnt<<"\"; ";
+            fout<<"coverage \""<<coverage<<"\";"<<endl;
+        }
+    }
 
     return 0;
 }

@@ -24,8 +24,8 @@ public:
     ~circular_transcript();
 public:
 
-    string seqname;
-    string chrm_id;
+	//string chrm_id;
+    string seqname; //chromosome id
 	string source;
 	string feature;
 	string gene_id; //is it needed for circRNA? this infor comes from splice graphs of each gene, difficult to extract for circRNA
