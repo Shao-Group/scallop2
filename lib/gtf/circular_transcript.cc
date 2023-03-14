@@ -83,10 +83,36 @@ int circular_transcript::write(ostream &fout, double cov2, int count) const
     fout<<")";
     fout<<endl;
 
+    join_interval_map jmap;
+	for(int k = 0; k < circ_path_regions.size() ; k++)
+	{
+		int32_t p1 = circ_path_regions[k].lpos;
+		int32_t p2 = circ_path_regions[k].rpos;
+		jmap += make_pair(ROI(p1, p2), 1);
+	}
+
+	int cnt = 0;
+	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
+	{
+        fout<<"seqname="<<seqname.c_str()<<"\t";
+        fout<<"source="<<source.c_str()<<"\t";
+        fout<<"feature=exon\t";
+        fout<<"start="<<lower(it->first)<<"\t"; //is +1 needed here?
+        fout<<"end="<<upper(it->first)<<"\t";
+        fout<<"score="<<score<<"\t";							// score, for now as zero
+        fout<<"strand="<<strand<<"\t";							// strand
+        fout<<".\t";								            // frame
+        fout<<"gene_id \""<<gene_id.c_str()<<"\"; ";
+        fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
+		fout<<"exon_number \""<<++cnt<<"\"; ";
+		fout<<"coverage \""<<coverage<<"\";"<<endl;
+	}
+
     fout<<"path coordinates= ";
     for(int i=0;i<circ_path_regions.size();i++)
     {
-        if(circ_path_regions.size() == 1)
+        fout<<"["<<circ_path_regions[i].lpos<<","<<circ_path_regions[i].rpos<<") "; 
+        /*if(circ_path_regions.size() == 1)
         {
             fout<<"["<<start<<","<<end<<") ";
         }
@@ -104,34 +130,9 @@ int circular_transcript::write(ostream &fout, double cov2, int count) const
             {
                 fout<<"["<<circ_path_regions[i].lpos<<","<<circ_path_regions[i].rpos<<") "; 
             }
-        }
+        }*/
     }
-    fout<<endl;
-
-    int cnt = 0;
-    for(int i=0;i<circ_path_regions.size();i++)
-    {
-        region r = circ_path_regions[i];
-        fout<<"pexon size "<<r.pexons.size()<<endl;
-
-        for(int j=0;j<r.pexons.size();j++)
-        {
-            partial_exon p = r.pexons[j];
-
-            fout<<"seqname="<<seqname.c_str()<<"\t";
-            fout<<"source="<<source.c_str()<<"\t";
-            fout<<"feature="<<"exon"<<"\t";
-            fout<<"start="<<p.lpos<<"\t";
-            fout<<"end="<<p.rpos<<"\t";
-            fout<<"score="<<score<<"\t";							// score, for now as zero
-            fout<<"strand="<<strand<<"\t";							// strand
-            fout<<".\t";								            // frame
-            fout<<"gene_id \""<<gene_id.c_str()<<"\"; ";
-            fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
-            fout<<"exon_number \""<<++cnt<<"\"; ";
-            fout<<"coverage \""<<coverage<<"\";"<<endl;
-        }
-    }
+    fout<<endl<<endl;
 
     return 0;
 }
