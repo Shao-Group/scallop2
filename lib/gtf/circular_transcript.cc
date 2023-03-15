@@ -91,28 +91,58 @@ int circular_transcript::write(ostream &fout, double cov2, int count) const
 		jmap += make_pair(ROI(p1, p2), 1);
 	}
 
-	int cnt = 0;
+	vector<region> merged_regions;
+    merged_regions.clear();
 	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
 	{
+        region r(lower(it->first), upper(it->first), '.', '.');
+        merged_regions.push_back(r);
+	}
+
+    int cnt = 0;
+    for(int i=0;i<merged_regions.size();i++)
+    {
         fout<<"seqname="<<seqname.c_str()<<"\t";
         fout<<"source="<<source.c_str()<<"\t";
         fout<<"feature=exon\t";
-        fout<<"start="<<lower(it->first)<<"\t"; //is +1 needed here?
-        fout<<"end="<<upper(it->first)<<"\t";
+
+        if(merged_regions.size() == 1)
+        {
+            fout<<"start="<<start<<"\t";           //is +1 needed here?
+            fout<<"end="<<end<<"\t";
+        }
+        else
+        {
+            if(i == 0)
+            {
+                fout<<"start="<<start<<"\t";           //is +1 needed here?
+                fout<<"end="<<merged_regions[i].rpos<<"\t";             
+            }
+            if(i == circ_path_regions.size()-1)
+            {
+                fout<<"start="<<merged_regions[i].lpos<<"\t";           //is +1 needed here?
+                fout<<"end="<<end<<"\t";
+            }
+            if(i > 0 && i < circ_path_regions.size()-1)
+            {
+                fout<<"start="<<merged_regions[i].lpos<<"\t";           //is +1 needed here?
+                fout<<"end="<<merged_regions[i].rpos<<"\t";
+            }
+        }
+
         fout<<"score="<<score<<"\t";							// score, for now as zero
         fout<<"strand="<<strand<<"\t";							// strand
         fout<<".\t";								            // frame
         fout<<"gene_id \""<<gene_id.c_str()<<"\"; ";
         fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
-		fout<<"exon_number \""<<++cnt<<"\"; ";
-		fout<<"coverage \""<<coverage<<"\";"<<endl;
-	}
+        fout<<"exon_number \""<<++cnt<<"\"; ";
+        fout<<"coverage \""<<coverage<<"\";"<<endl;
+    }
 
     fout<<"path coordinates= ";
     for(int i=0;i<circ_path_regions.size();i++)
     {
-        fout<<"["<<circ_path_regions[i].lpos<<","<<circ_path_regions[i].rpos<<") "; 
-        /*if(circ_path_regions.size() == 1)
+        if(circ_path_regions.size() == 1)
         {
             fout<<"["<<start<<","<<end<<") ";
         }
@@ -130,7 +160,7 @@ int circular_transcript::write(ostream &fout, double cov2, int count) const
             {
                 fout<<"["<<circ_path_regions[i].lpos<<","<<circ_path_regions[i].rpos<<") "; 
             }
-        }*/
+        }
     }
     fout<<endl<<endl;
 
