@@ -63,25 +63,25 @@ int circular_transcript::write(ostream &fout, double cov2, int count) const
 	fout<<fixed;
     
     //fout<<"chrm_id="<<chrm_id.c_str()<<"\t";
-    fout<<"seqname="<<seqname.c_str()<<"\t";
-    fout<<"source="<<source.c_str()<<"\t";
-    fout<<"feature="<<feature.c_str()<<"\t";
-    fout<<"start="<<start<<"\t";
-    fout<<"end="<<end<<"\t";
-	fout<<"score="<<score<<"\t";							// score, for now as zero
-	fout<<"strand="<<strand<<"\t";							// strand
+    fout<<seqname.c_str()<<"\t";
+    fout<<source.c_str()<<"\t";
+    fout<<feature.c_str()<<"\t";
+    fout<<start<<"\t";
+    fout<<end<<"\t";
+	fout<<score<<"\t";							// score, for now as zero
+	fout<<strand<<"\t";							// strand
 	fout<<".\t";								            // frame
 	fout<<"gene_id \""<<gene_id.c_str()<<"\"; ";
 	fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
-    fout<<"coverage \""<<coverage<<"\";"<<endl;
+    fout<<"cov \""<<coverage<<"\";"<<endl;
     
-    fout<<"path vertices= ( ";
+    /*fout<<"path vertices= ( ";
     for(int i=0;i<circ_path.size();i++)
     {
         fout<<circ_path[i]<<" "; 
     }
     fout<<")";
-    fout<<endl;
+    fout<<endl;*/
 
     join_interval_map jmap;
 	for(int k = 0; k < circ_path_regions.size() ; k++)
@@ -102,44 +102,44 @@ int circular_transcript::write(ostream &fout, double cov2, int count) const
     int cnt = 0;
     for(int i=0;i<merged_regions.size();i++)
     {
-        fout<<"seqname="<<seqname.c_str()<<"\t";
-        fout<<"source="<<source.c_str()<<"\t";
-        fout<<"feature=exon\t";
+        fout<<seqname.c_str()<<"\t";
+        fout<<source.c_str()<<"\t";
+        fout<<"exon\t";
 
         if(merged_regions.size() == 1)
         {
-            fout<<"start="<<start<<"\t";           //is +1 needed here?
-            fout<<"end="<<end<<"\t";
+            fout<<start<<"\t";          
+            fout<<end<<"\t";
         }
         else
         {
             if(i == 0)
             {
-                fout<<"start="<<start<<"\t";           //is +1 needed here?
-                fout<<"end="<<merged_regions[i].rpos<<"\t";             
+                fout<<start<<"\t";           
+                fout<<merged_regions[i].rpos<<"\t";             
             }
             if(i == circ_path_regions.size()-1)
             {
-                fout<<"start="<<merged_regions[i].lpos<<"\t";           //is +1 needed here?
-                fout<<"end="<<end<<"\t";
+                fout<<merged_regions[i].lpos<<"\t";           //is +1 needed here?
+                fout<<end<<"\t";
             }
             if(i > 0 && i < circ_path_regions.size()-1)
             {
-                fout<<"start="<<merged_regions[i].lpos<<"\t";           //is +1 needed here?
-                fout<<"end="<<merged_regions[i].rpos<<"\t";
+                fout<<merged_regions[i].lpos<<"\t";           //is +1 needed here?
+                fout<<merged_regions[i].rpos<<"\t";
             }
         }
 
-        fout<<"score="<<score<<"\t";							// score, for now as zero
-        fout<<"strand="<<strand<<"\t";							// strand
+        fout<<score<<"\t";							// score, for now as zero
+        fout<<strand<<"\t";							// strand
         fout<<".\t";								            // frame
         fout<<"gene_id \""<<gene_id.c_str()<<"\"; ";
         fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
-        fout<<"exon_number \""<<++cnt<<"\"; ";
-        fout<<"coverage \""<<coverage<<"\";"<<endl;
+        fout<<"exon \""<<++cnt<<"\"; "<<endl;
+        //fout<<"coverage \""<<coverage<<"\";"<<endl;
     }
 
-    fout<<"path coordinates= ";
+    /*fout<<"path coordinates= ";
     for(int i=0;i<circ_path_regions.size();i++)
     {
         if(circ_path_regions.size() == 1)
@@ -162,7 +162,7 @@ int circular_transcript::write(ostream &fout, double cov2, int count) const
             }
         }
     }
-    fout<<endl<<endl;
+    fout<<endl<<endl;*/
 
     return 0;
 }
