@@ -1743,10 +1743,10 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		printv(p.v);
 		printf("\n\n");
 
-		//string temp = bb.chrm.c_str();
-		//string transcript_id = "chrm" + temp + ":" + tostring(fr1.lpos) + "|" + tostring(fr2.rpos);
-		//printf("circularRNA = %s\n",circRNA_ID.c_str());
 		string chrm_id = bb.chrm.c_str();
+		string circRNA_id = "chrm" + chrm_id + ":" + tostring(fr1.lpos) + "|" + tostring(fr2.rpos) + "|";
+		//printf("circularRNA = %s\n",circRNA_id.c_str());
+		
 		char strand = bb.strand;
 		int32_t start = fr1.lpos;
 		int32_t end = fr2.rpos;
@@ -1754,7 +1754,7 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		circ_path.insert(circ_path.begin(), p.v.begin(), p.v.end());
 
 		circular_transcript circ;
-		//circ.transcript_id = transcript_id;
+		circ.circRNA_id = circRNA_id;
 		circ.seqname = chrm_id;
 		circ.source = "scallop2";
 		circ.feature = "circRNA";
@@ -1764,11 +1764,11 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		circ.start = start;
 		circ.end = end;
 		circ.circ_path.insert(circ.circ_path.begin(),circ_path.begin(),circ_path.end());
-		//circ.print(0);
 		
 		for(int i=0;i<circ.circ_path.size();i++)
 		{
 			circ.circ_path_regions.push_back(regions[circ.circ_path[i]]);
+			circ.circRNA_id = circ.circRNA_id + tostring(circ.circ_path[i]) + "|";
 		}
 		circ_trsts.push_back(circ);
 	}
@@ -1800,11 +1800,10 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		printv(p.v);
 		printf("\n\n");
 
-		//string temp = bb.chrm.c_str();
-		//printf("bb chrm = %s",temp.c_str());
-		//string transcript_id = "chrm" + temp + ":" + tostring(fr2.lpos) + "|" + tostring(fr1.rpos);
-		//printf("circularRNA = %s\n",circRNA_ID.c_str());
 		string chrm_id = bb.chrm.c_str();
+		string circRNA_id = "chrm" + chrm_id + ":" + tostring(fr2.lpos) + "|" + tostring(fr1.rpos) + "|";
+		//printf("circularRNA = %s\n",circRNA_id.c_str());
+		
 		char strand = bb.strand;
 		int32_t start = fr2.lpos;
 		int32_t end = fr1.rpos;
@@ -1812,7 +1811,7 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		circ_path.insert(circ_path.begin(), p.v.begin(), p.v.end());
 
 		circular_transcript circ;
-		//circ.transcript_id = transcript_id;
+		circ.circRNA_id = circRNA_id;
 		circ.seqname = chrm_id;
 		circ.source = "scallop2";
 		circ.feature = "circRNA";
@@ -1826,9 +1825,8 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		for(int i=0;i<circ.circ_path.size();i++)
 		{
 			circ.circ_path_regions.push_back(regions[circ.circ_path[i]]);
+			circ.circRNA_id = circ.circRNA_id + tostring(circ.circ_path[i]) + "|";
 		}
-
-		//circ.print(0);
 		circ_trsts.push_back(circ);
 	}
 	else

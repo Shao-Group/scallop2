@@ -9,7 +9,7 @@
 
 circular_transcript::circular_transcript()
 {
-    //chrm_id = "";
+    circRNA_id = "";
     seqname = "";
     source = "";
     feature = "";
@@ -36,7 +36,7 @@ circular_transcript::circular_transcript()
 
 circular_transcript::circular_transcript(string circRNA_ID, string chrm_id, int32_t start, int32_t end, vector<int> circ_path)
 {
-    transcript_id = circRNA_ID;
+    circRNA_id = circRNA_ID;
     seqname = chrm_id;
     start = start;
     end = end;
@@ -46,7 +46,7 @@ circular_transcript::circular_transcript(string circRNA_ID, string chrm_id, int3
 
 circular_transcript::circular_transcript(string circRNA_ID, string chrm_id, int32_t start, int32_t end, vector<int> circ_path, int32_t junc_reads, int32_t non_junc_reads)
 {
-    transcript_id = circRNA_ID;
+    circRNA_id = circRNA_ID;
     seqname = chrm_id;
     start = start;
     end = end;
@@ -170,7 +170,7 @@ int circular_transcript::write(ostream &fout, double cov2, int count) const
 int circular_transcript::print(int id)
 {
     printf("circRNA %d - ", id);
-    printf("seqname: %s, transcript_id: %s, start: %d, end: %d, path: ",seqname.c_str(), transcript_id.c_str(), start, end);
+    printf("circRNA_id: %s, seqname: %s, transcript_id: %s, start: %d, end: %d, path: ",circRNA_id.c_str(), seqname.c_str(), transcript_id.c_str(), start, end);
     for(int i = 0; i < circ_path.size() - 1; i++)
 	{
 		printf("%d, ", circ_path[i]);

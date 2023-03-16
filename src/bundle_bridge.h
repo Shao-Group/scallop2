@@ -30,7 +30,7 @@ public:
 	vector<fragment> fragments;			// to-be-filled fragments
 
 	vector<pair<fragment,fragment>> circ_fragment_pairs;	//bridged fragment pairs for circular RNA
-	vector<circular_transcript> circ_trsts; //a vector of circular transcripts class objs
+	vector<circular_transcript> circ_trsts; //a vector of circular transcripts class objs, with duplicates
 
 	vector<junction> junctions;			// splice junctions
 	vector<region> regions;				// pexons

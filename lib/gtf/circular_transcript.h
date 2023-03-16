@@ -24,7 +24,7 @@ public:
     ~circular_transcript();
 public:
 
-	//string chrm_id;
+	string circRNA_id;
     string seqname; //chromosome id
 	string source;
 	string feature;
@@ -37,7 +37,7 @@ public:
 	double score;
 	char strand; //is it needed for circRNA? this infor comes from splice graphs of each gene, difficult to extract for circRNA
 	int frame;
-	double coverage;
+	int coverage;
 	double covratio;
 	double RPKM;
 	double FPKM;

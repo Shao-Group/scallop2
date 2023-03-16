@@ -44,12 +44,14 @@ private:
 	vector<transcript> non_full_trsts;
 
 	vector<circular_transcript> circular_trsts; //a vector of circular transcripts class objs from all bundles
+	map <string, pair<circular_transcript, int>> circ_trst_map; // a map of distinct circ trsts with circRNA_id as key and the corresponding circRNA object
 
 public:
 	int assemble();
 
 private:
 	int process(int n);
+	int remove_duplicate_circ_trsts();
 	int print_circular_trsts();
 	int assemble(const splice_graph &gr, const hyper_set &hs, transcript_set &ts1, transcript_set &ts2);
 	int assign_RPKM();

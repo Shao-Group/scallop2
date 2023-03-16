@@ -31,6 +31,7 @@ assembler::assembler()
 	qlen = 0;
 	qcnt = 0;
 	circular_trsts.clear();
+	circ_trst_map.clear();
 }
 
 assembler::~assembler()
@@ -135,6 +136,7 @@ int assembler::assemble()
 
 	write();
 	printf("size of circular vector = %lu\n",circular_trsts.size());
+	remove_duplicate_circ_trsts();
 	print_circular_trsts();
 	write_circular();
 	
@@ -239,13 +241,47 @@ int assembler::process(int n)
 	return 0;
 }
 
+int assembler::remove_duplicate_circ_trsts()
+{
+	for(int i=0;i<circular_trsts.size();i++)
+	{
+		circular_transcript circ = circular_trsts[i];
+
+		if(circ_trst_map.find(circ.circRNA_id) != circ_trst_map.end())// already circRNA present in map
+		{
+			circ_trst_map[circ.circRNA_id].second++;
+			circ_trst_map[circ.circRNA_id].first.transcript_id =  circ_trst_map[circ.circRNA_id].first.transcript_id + "|" + circ.transcript_id; //concatenate all hit names of hits generating this circRNA as the circRNA transcript_id
+		}
+		else //circRNA not present in map
+		{
+			circ_trst_map.insert(pair<string,pair<circular_transcript, int>>(circ.circRNA_id,pair<circular_transcript, int>(circ,1)));
+		}
+	}
+	printf("circ_trst_map size = %lu\n",circ_trst_map.size());
+
+	map<string, pair<circular_transcript, int>>::iterator itn;
+	for(itn = circ_trst_map.begin(); itn != circ_trst_map.end(); itn++)
+	{
+		printf("key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
+	}
+
+	return 0;
+}
+
 int assembler::print_circular_trsts()
 {
 	printf("\nPrinting all circRNAs\n");
-	for(int i=0;i<circular_trsts.size();i++)
+
+	map<string, pair<circular_transcript, int>>::iterator itn;
+	int cnt = 1;
+	for(itn = circ_trst_map.begin(); itn != circ_trst_map.end(); itn++)
 	{
-		circular_trsts[i].print(i+1);
+		circular_transcript &circ = itn->second.first;
+		circ.coverage = itn->second.second;
+		//circ.transcript_id = "circular_transcript";
+		circ.print(cnt++);
 	}
+
 	printf("\n");
 	return 0;
 }
@@ -377,12 +413,18 @@ int assembler::write_circular()
 		return 0;
 	}
 
+	map<string, pair<circular_transcript, int>>::iterator itn;
+	for(itn = circ_trst_map.begin(); itn != circ_trst_map.end(); itn++)
+	{
+		circular_transcript &circ = itn->second.first;
+		circ.write(fcirc);
+	}
 
-	for(int i = 0; i < circular_trsts.size(); i++)
+	/*for(int i = 0; i < circular_trsts.size(); i++)
 	{
 		circular_transcript &t = circular_trsts[i];
 		t.write(fcirc);
-	}
+	}*/
 
 	fcirc.close();
 
