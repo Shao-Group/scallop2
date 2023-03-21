@@ -1128,7 +1128,7 @@ int bundle_bridge::build_circ_fragments()
 				if(fr.h1->second_pos <= fr.h2->pos && fr.h1->second_pos <= h1_supple->pos && h1_supple->second_pos >= fr.h1->rpos && h1_supple->second_pos >= fr.h2->rpos)
 				{
 					string combo = "Compatible h1p leftmost h1s rightmost";
-					//printf("%s\n",combo.c_str());
+					printf("%s\n",combo.c_str());
 					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
 					else frag2graph_freq[combo] += 1;
 					is_compatible = 1;
@@ -1162,8 +1162,9 @@ int bundle_bridge::build_circ_fragments()
 			h2_supp_count++;
 			hit *h2_supple = fr.h2->suppl;
 
-			/*printf("\nfr.h2 has a supple hit.\n");
-			printf("h1: ");
+			printf("\nchrm = %s\n",bb.chrm.c_str());
+			printf("\nfr.h2 has a supple hit.\n");
+			printf("fr.h1: ");
 			fr.h1->print();
 			printf("Primary: ");
 			fr.h2->print();
@@ -1185,14 +1186,13 @@ int bundle_bridge::build_circ_fragments()
 			printf("\n");
 
 			printf("set_cigar p:%d-%d-%d\n",fr.h2->first_pos,fr.h2->second_pos,fr.h2->third_pos);
-			printf("set_cigar s:%d-%d-%d\n",fr.h2->suppl->first_pos,fr.h2->suppl->second_pos,fr.h2->suppl->third_pos);*/
+			printf("set_cigar s:%d-%d-%d\n",fr.h2->suppl->first_pos,fr.h2->suppl->second_pos,fr.h2->suppl->third_pos);
 
 
 			if(fr.h2->first_pos == 0 || fr.h2->suppl->first_pos == 0)
 			{
-
 				string combo = "special case h2s";
-				//printf("%s\n",combo.c_str());
+				printf("%s\n",combo.c_str());
 				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
 				else frag2graph_freq[combo] += 1;
 				continue;
@@ -1234,7 +1234,7 @@ int bundle_bridge::build_circ_fragments()
 				if(h2_supple->second_pos <= fr.h1->pos && h2_supple->second_pos <= fr.h2->pos && fr.h2->second_pos >= h2_supple->rpos && fr.h2->second_pos >= fr.h1->rpos)
 				{
 					string combo = "Compatible h2s leftmost h2p rightmost";
-					//printf("%s\n",combo.c_str());
+					printf("%s\n",combo.c_str());
 					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
 					else frag2graph_freq[combo] += 1;
 					is_compatible = 2;					
@@ -1375,7 +1375,17 @@ int bundle_bridge::build_circ_fragments()
 		{
 
 			//fr.h2 and fr.h1 needs to be paired by build_fragments()
-			if(fr.h2->paired != true || fr.h1->paired != true) continue; //first set of fragment needs to be paired
+			if(fr.h2->paired != true || fr.h1->paired != true) //first set of fragment needs to be paired
+			{
+				printf("fr.h2 in first set not paired\n");
+				fr.h2->print();
+				continue;
+			}
+
+			/*if(strcmp(fr.h2->qname.c_str(),"SRR1721290.13713350") == 0)
+			{
+				printf("SRR1721290.13713350 read passed pair condition\n");
+			}*/
 
 			fr.h2->suppl->paired = true; //setting supple paired true to avoid assertion later in build hyper set
 			fragment frag(fr.h2->suppl, fr.h1);
@@ -1447,7 +1457,7 @@ int bundle_bridge::build_circ_fragments()
 	//adding the second part fragments to fragments vector
 	if(circ_fragments.size() > 0)
 	{
-		printf("fragments vector size before = %zu\n",fragments.size());		
+		printf("\nfragments vector size before = %zu\n",fragments.size());		
 	}
 	
 	//fragments.clear();
@@ -1522,11 +1532,17 @@ int bundle_bridge::extract_circ_fragment_pairs()
 		{
 			fragment &fr2 = circ_fragments[j];
 
-			if(strcmp(fr1.h1->qname.c_str(),fr2.h1->qname.c_str()) != 0) continue;
+			//if(strcmp(fr1.h1->qname.c_str(),fr2.h1->qname.c_str()) != 0) continue; //check this cond
 			if(fr1.pi == -1 || fr2.pi == -1 || fr1.fidx == -1 || fr2.fidx == -1) continue;
+
+
 
 			if(fr1.pi == fr2.fidx && fr2.pi == fr1.fidx)
 			{
+				if(strcmp(fr2.h1->qname.c_str(),"SRR1721290.13713350") == 0)
+				{
+					printf("SRR1721290.13713350 read passed\n");
+				}
 				//printf("Found partner fragment\n");
 				circ_fragment_pairs.push_back(pair<fragment,fragment>(fr1,fr2)); //fr1 is original fragment of scallop2 regardless of which of h1 or h2 has a supplement
 			}
