@@ -66,7 +66,7 @@ int circular_transcript::write(ostream &fout, double cov2, int count) const
     fout<<seqname.c_str()<<"\t";
     fout<<source.c_str()<<"\t";
     fout<<feature.c_str()<<"\t";
-    fout<<start<<"\t";
+    fout<<start + 1<<"\t";
     fout<<end<<"\t";
 	fout<<score<<"\t";							// score, for now as zero
 	fout<<strand<<"\t";							// strand
@@ -108,24 +108,24 @@ int circular_transcript::write(ostream &fout, double cov2, int count) const
 
         if(merged_regions.size() == 1)
         {
-            fout<<start<<"\t";          
+            fout<<start + 1<<"\t";          
             fout<<end<<"\t";
         }
         else
         {
             if(i == 0)
             {
-                fout<<start<<"\t";           
+                fout<<start + 1<<"\t";           
                 fout<<merged_regions[i].rpos<<"\t";             
             }
             if(i == circ_path_regions.size()-1)
             {
-                fout<<merged_regions[i].lpos<<"\t";           //is +1 needed here?
+                fout<<merged_regions[i].lpos + 1<<"\t";           //is +1 needed here?
                 fout<<end<<"\t";
             }
             if(i > 0 && i < circ_path_regions.size()-1)
             {
-                fout<<merged_regions[i].lpos<<"\t";           //is +1 needed here?
+                fout<<merged_regions[i].lpos + 1<<"\t";           //is +1 needed here?
                 fout<<merged_regions[i].rpos<<"\t";
             }
         }
@@ -138,31 +138,6 @@ int circular_transcript::write(ostream &fout, double cov2, int count) const
         fout<<"exon \""<<++cnt<<"\"; "<<endl;
         //fout<<"coverage \""<<coverage<<"\";"<<endl;
     }
-
-    /*fout<<"path coordinates= ";
-    for(int i=0;i<circ_path_regions.size();i++)
-    {
-        if(circ_path_regions.size() == 1)
-        {
-            fout<<"["<<start<<","<<end<<") ";
-        }
-        else
-        {
-            if(i == 0)
-            {
-                fout<<"["<<start<<","<<circ_path_regions[i].rpos<<") ";
-            }
-            if(i == circ_path_regions.size()-1)
-            {
-                fout<<"["<<circ_path_regions[i].lpos<<","<<end<<") ";
-            }
-            if(i > 0 && i < circ_path_regions.size()-1)
-            {
-                fout<<"["<<circ_path_regions[i].lpos<<","<<circ_path_regions[i].rpos<<") "; 
-            }
-        }
-    }
-    fout<<endl<<endl;*/
 
     return 0;
 }
