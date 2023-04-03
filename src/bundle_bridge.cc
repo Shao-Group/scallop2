@@ -1692,7 +1692,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 		fragment &fr2 = circ_fragment_pairs[i].second;
 
 		if(fr1.paths.size() != 1 || fr2.paths.size() != 1) continue; //not bridged
-		//if(fr1.paths[0].type != 1 || fr2.paths[0].type != 1) continue; //insert size not normal
+		//if(fr1.paths[0].type != 1 || fr2.paths[0].type != 1) continue; //within normal range of insertsize;
 
 		printf("Printing separate fragments:\n");
 

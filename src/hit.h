@@ -89,6 +89,7 @@ public:
 	bool concordant;						// whether it is concordant
 	bool paired;							// whether this hit has been paired
 	bool bridged;							// whether this hit has been bridged 
+	bool outward;							// whether this hit is an outward hit
 	char strand;							// strandness
 	char xs;								// XS aux in sam
 	char ts;								// ts tag used in minimap2
@@ -104,6 +105,7 @@ public:
  	static string get_qname(bam1_t *b);
 	int set_tags(bam1_t *b);
 	int set_strand();
+	int set_outward();
 	int set_concordance();
 	int get_aligned_intervals(vector<int64_t> &v) const;
 	int print() const;

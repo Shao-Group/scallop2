@@ -32,6 +32,8 @@ assembler::assembler()
 	qcnt = 0;
 	circular_trsts.clear();
 	circ_trst_map.clear();
+	outward_count = 0;
+	non_outward_count = 0;
 }
 
 assembler::~assembler()
@@ -60,7 +62,17 @@ int assembler::assemble()
 
 		ht.set_tags(b1t);
 		ht.set_strand();
+		ht.set_outward();
 		//ht.print();
+
+		if(ht.outward == true)
+		{
+			outward_count++;
+		}
+		else
+		{
+			non_outward_count++;
+		}
 
 		//if(ht.nh >= 2 && p.qual < min_mapping_quality) continue;
 		//if(ht.nm > max_edit_distance) continue;

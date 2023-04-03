@@ -57,6 +57,7 @@ hit& hit::operator=(const hit &h)
 	vlist = h.vlist;
 	paired = h.paired;
 	bridged = h.bridged;
+	outward = h.outward;
 	qhash = h.qhash;
 	next = h.next;
 
@@ -98,6 +99,7 @@ hit::hit(const hit &h)
 	vlist = h.vlist;
 	paired = h.paired;
 	bridged = h.bridged;
+	outward = h.outward;
 	qhash = h.qhash;
 	next = h.next;
 
@@ -121,6 +123,7 @@ hit::hit(bam1_t *b, int id)
 	qhash = string_hash(qname);
 	paired = false;
 	bridged = false;
+	outward = false;
 	next = NULL;
 	suppl = NULL;
 	end = '.';
@@ -449,6 +452,26 @@ int hit::set_strand()
 		if((flag & 0x10) >= 1) strand = '-';
 	}
 
+	return 0;
+}
+
+int hit::set_outward()
+{
+	// TODO: compare pos and mpos, while considering those bits
+	// for this current
+	outward = false;
+
+	if(library_type == FR_FIRST && ((flag & 0x1) >= 1)) //data strand specific if FR_FIRST/FR_SECOND
+	{
+		if((flag & 0x40) >= 1 && (flag & 0x80) <= 0 && pos > mpos) outward = true;
+		if((flag & 0x40) >= 0 && (flag & 0x80) <= 1 && pos < mpos) outward = true;
+	}
+	
+	if(library_type == FR_SECOND && ((flag & 0x1) >= 1))
+	{
+		if((flag & 0x40) >= 1 && (flag & 0x80) <= 0 && pos < mpos) outward = true;
+		if((flag & 0x40) >= 0 && (flag & 0x80) <= 1 && pos > mpos) outward = true;
+	}
 	return 0;
 }
 
