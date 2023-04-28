@@ -1744,10 +1744,12 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		p.v.insert(p.v.end(), v1.begin(), t1);
 		p.v.insert(p.v.end(), it + 1, v2.end());
 		//p.v = encode_vlist(p.v);
-		printf("Printing merged path:\n");
-		printv(p.v);
-		printf("\n\n");
-
+		if(fr1.lpos == 40428472 && fr2.rpos == 40430301)
+		{
+			printf("Printing merged path in fr2 iscomp 1:\n");
+			printv(p.v);
+			printf("\n\n");
+		}
 		string chrm_id = bb.chrm.c_str();
 		string circRNA_id = "chrm" + chrm_id + ":" + tostring(fr1.lpos) + "|" + tostring(fr2.rpos) + "|";
 		//printf("circularRNA = %s\n",circRNA_id.c_str());
@@ -1773,8 +1775,40 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		for(int i=0;i<circ.circ_path.size();i++)
 		{
 			circ.circ_path_regions.push_back(regions[circ.circ_path[i]]);
-			circ.circRNA_id = circ.circRNA_id + tostring(circ.circ_path[i]) + "|";
+			//circ.circRNA_id = circ.circRNA_id + tostring(circ.circ_path[i]) + "|";
 		}
+
+		join_interval_map jmap;
+		for(int k = 0; k < circ.circ_path_regions.size(); k++)
+		{
+			int32_t p1 = circ.circ_path_regions[k].lpos;
+			int32_t p2 = circ.circ_path_regions[k].rpos;
+			jmap += make_pair(ROI(p1, p2), 1);
+		}
+
+		for(JIMI it = jmap.begin(); it != jmap.end(); it++)
+		{
+			region r(lower(it->first), upper(it->first), '.', '.');
+			circ.merged_regions.push_back(r);
+		}
+
+		if(circ.merged_regions.size() == 1)
+		{
+			circ.merged_regions[0].lpos = circ.start;
+			circ.merged_regions[0].rpos = circ.end; 
+		}
+		else if(circ.merged_regions.size() > 1)
+		{
+			circ.merged_regions[0].lpos = circ.start;
+			circ.merged_regions[circ.merged_regions.size()-1].rpos = circ.end; 			
+		}
+
+		for(int i=0;i<circ.merged_regions.size();i++)
+    	{
+			region r = circ.merged_regions[i];
+			circ.circRNA_id = circ.circRNA_id + tostring(r.lpos) + "|" + tostring(r.rpos) + "|";
+		}
+
 		circ_trsts.push_back(circ);
 	}
 	else if(fr2.is_compatible == 2)
@@ -1801,10 +1835,12 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		p.v.insert(p.v.end(), v2.begin(), t1);
 		p.v.insert(p.v.end(), it + 1, v1.end());
 		//p.v = encode_vlist(p.v);
-		printf("Printing merged path:\n");
-		printv(p.v);
-		printf("\n\n");
-
+		if(fr2.lpos == 40428472 && fr1.rpos == 40430301)
+		{
+			printf("Printing merged path in fr2 iscomp 2:\n");
+			printv(p.v);
+			printf("\n\n");
+		}
 		string chrm_id = bb.chrm.c_str();
 		string circRNA_id = "chrm" + chrm_id + ":" + tostring(fr2.lpos) + "|" + tostring(fr1.rpos) + "|";
 		//printf("circularRNA = %s\n",circRNA_id.c_str());
@@ -1830,8 +1866,40 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		for(int i=0;i<circ.circ_path.size();i++)
 		{
 			circ.circ_path_regions.push_back(regions[circ.circ_path[i]]);
-			circ.circRNA_id = circ.circRNA_id + tostring(circ.circ_path[i]) + "|";
+			//circ.circRNA_id = circ.circRNA_id + tostring(circ.circ_path[i]) + "|";
 		}
+
+		join_interval_map jmap;
+		for(int k = 0; k < circ.circ_path_regions.size(); k++)
+		{
+			int32_t p1 = circ.circ_path_regions[k].lpos;
+			int32_t p2 = circ.circ_path_regions[k].rpos;
+			jmap += make_pair(ROI(p1, p2), 1);
+		}
+
+		for(JIMI it = jmap.begin(); it != jmap.end(); it++)
+		{
+			region r(lower(it->first), upper(it->first), '.', '.');
+			circ.merged_regions.push_back(r);
+		}
+
+		if(circ.merged_regions.size() == 1)
+		{
+			circ.merged_regions[0].lpos = circ.start;
+			circ.merged_regions[0].rpos = circ.end; 
+		}
+		else if(circ.merged_regions.size() > 1)
+		{
+			circ.merged_regions[0].lpos = circ.start;
+			circ.merged_regions[circ.merged_regions.size()-1].rpos = circ.end; 			
+		}
+
+		for(int i=0;i<circ.merged_regions.size();i++)
+    	{
+			region r = circ.merged_regions[i];
+			circ.circRNA_id = circ.circRNA_id + tostring(r.lpos) + "|" + tostring(r.rpos) + "|";
+		}		
+		
 		circ_trsts.push_back(circ);
 	}
 	else

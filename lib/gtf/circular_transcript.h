@@ -45,6 +45,7 @@ public:
 
     vector<int> circ_path;
 	vector<region> circ_path_regions;
+	vector<region> merged_regions;
 
     //string circRNA_ID;
 	//int32_t start;

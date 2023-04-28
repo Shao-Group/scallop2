@@ -283,6 +283,16 @@ int assembler::print_circular_trsts()
 	}
 
 	printf("\n");
+
+	for(itn = circ_trst_map.begin(); itn != circ_trst_map.end(); itn++)
+	{
+		circular_transcript circ = itn->second.first;
+		if(circ.start == 40428472 && circ.end == 40430301)
+		{
+			printf("Printing duplicate circRNA:\n");
+			circ.print(0);
+		}
+	}
 	return 0;
 }
 

@@ -32,6 +32,7 @@ circular_transcript::circular_transcript()
     non_junc_reads = 0;
     circ_path.clear();
     circ_path_regions.clear();
+    merged_regions.clear();
 }
 
 circular_transcript::circular_transcript(string circRNA_ID, string chrm_id, int32_t start, int32_t end, vector<int> circ_path)
@@ -83,7 +84,7 @@ int circular_transcript::write(ostream &fout, double cov2, int count) const
     fout<<")";
     fout<<endl;*/
 
-    join_interval_map jmap;
+    /*join_interval_map jmap;
 	for(int k = 0; k < circ_path_regions.size() ; k++)
 	{
 		int32_t p1 = circ_path_regions[k].lpos;
@@ -97,7 +98,7 @@ int circular_transcript::write(ostream &fout, double cov2, int count) const
 	{
         region r(lower(it->first), upper(it->first), '.', '.');
         merged_regions.push_back(r);
-	}
+	}*/
 
     int cnt = 0;
     for(int i=0;i<merged_regions.size();i++)
@@ -106,7 +107,7 @@ int circular_transcript::write(ostream &fout, double cov2, int count) const
         fout<<source.c_str()<<"\t";
         fout<<"exon\t";
 
-        if(merged_regions.size() == 1)
+        /*if(merged_regions.size() == 1)
         {
             fout<<start + 1<<"\t";          
             fout<<end<<"\t";
@@ -120,15 +121,18 @@ int circular_transcript::write(ostream &fout, double cov2, int count) const
             }
             if(i == circ_path_regions.size()-1)
             {
-                fout<<merged_regions[i].lpos + 1<<"\t";           //is +1 needed here?
+                fout<<merged_regions[i].lpos + 1<<"\t";           //is +1 needed here? yes
                 fout<<end<<"\t";
             }
             if(i > 0 && i < circ_path_regions.size()-1)
             {
-                fout<<merged_regions[i].lpos + 1<<"\t";           //is +1 needed here?
+                fout<<merged_regions[i].lpos + 1<<"\t";           //is +1 needed here? yes
                 fout<<merged_regions[i].rpos<<"\t";
             }
-        }
+        }*/
+
+        fout<<merged_regions[i].lpos + 1<<"\t";           
+        fout<<merged_regions[i].rpos<<"\t";
 
         fout<<score<<"\t";							// score, for now as zero
         fout<<strand<<"\t";							// strand
@@ -157,7 +161,12 @@ int circular_transcript::print(int id)
         printf("[%d, %d) ",circ_path_regions[i].lpos,circ_path_regions[i].rpos); 
     }
     printf("\n");
-
+    printf("merged coordinates= ");
+        for(int i=0;i<merged_regions.size();i++)
+    {
+        printf("[%d, %d) ",merged_regions[i].lpos,merged_regions[i].rpos); 
+    }
+    printf("\n");
     return 0;
 
 }
