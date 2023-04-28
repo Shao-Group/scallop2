@@ -50,5 +50,8 @@ int main(int argc, const char **argv)
 	assembler asmb;
 	asmb.assemble();
 
+	printf("Outward count = %d\n", asmb.outward_count);
+	printf("Non outward count = %d\n", asmb.non_outward_count);
+
 	return 0;
 }
