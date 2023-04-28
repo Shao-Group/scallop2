@@ -47,8 +47,6 @@ private:
 	map <string, pair<circular_transcript, int>> circ_trst_map; // a map of distinct circ trsts with circRNA_id as key and the corresponding circRNA object
 
 public:
-	int outward_count;
-	int non_outward_count;
 	int assemble();
 
 private:
