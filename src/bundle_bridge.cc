@@ -506,6 +506,7 @@ int bundle_bridge::align_hits_transcripts()
 	{
 		align_hit(m, bb.hits[i], bb.hits[i].vlist);
 		bb.hits[i].vlist = encode_vlist(bb.hits[i].vlist);
+		remove_tiny_boundary(bb.hits[i]);
 	}
 
 	ref_phase.resize(ref_trsts.size());
@@ -616,6 +617,44 @@ int bundle_bridge::align_transcript(const map<int32_t, int> &m, const transcript
 		for(int j = sp[k].first; j <= sp[k].second; j++) vv.push_back(j);
 	}
 
+	return 0;
+}
+
+int bundle_bridge::remove_tiny_boundary(hit &h1)
+{
+	vector<int> v1 = decode_vlist(h1.vlist);
+	int n1 = v1.size();
+	if(n1 >= 2 && v1[n1 - 2] + 1 == v1[n1 - 1])
+	{
+		int k = v1[n1 - 1];
+		int32_t total = regions[k].rpos - regions[k].lpos;
+		int32_t flank = h1.rpos - regions[k].lpos;
+
+		if(flank <= flank_tiny_length && 1.0 * flank / total < flank_tiny_ratio)
+		{
+			vector<int> v(v1.begin(), v1.begin() + n1 - 1);
+			assert(v.size() + 1 == v1.size());
+			h1.vlist = encode_vlist(v);
+			h1.rpos = regions[k].lpos;
+		}
+	}
+
+	vector<int> v2 = decode_vlist(h1.vlist);
+	int n2 = v2.size();
+	if(n2 >= 2 && v2[0] + 1 == v2[1])
+	{
+		int k = v2[0];
+		int32_t total = regions[k].rpos - regions[k].lpos;
+		int32_t flank = regions[k].rpos - h1.pos;
+
+		if(flank <= flank_tiny_length && 1.0 * flank / total < flank_tiny_ratio)
+		{
+			vector<int> v(v2.begin() + 1, v2.end());
+			assert(v.size() + 1 == v2.size());
+			h1.vlist = encode_vlist(v);
+			h1.pos = regions[k].rpos;
+		}
+	}
 	return 0;
 }
 
@@ -798,6 +837,8 @@ int bundle_bridge::build_fragments()
 
 	//printf("total bb.hits = %lu, total fragments = %lu\n", bb.hits.size(), fragments.size());
 	
+	// by shao, exit here (no UMI)
+	return 0;
 
 	// TODO
 	// ===============================================

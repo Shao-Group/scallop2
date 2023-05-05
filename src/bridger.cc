@@ -58,7 +58,7 @@ int bridger::bridge()
 	int n2 = get_paired_fragments();
 
 	// first round of briding hard fragments
-	remove_tiny_boundary();//remove false alignment
+	//remove_tiny_boundary();//remove false alignment
 	bridge_hard_fragments();
 	filter_paths();
 	int n3 = get_paired_fragments();
