@@ -1460,6 +1460,7 @@ int bundle_bridge::build_circ_fragments()
 	{
 		fragments.push_back(circ_fragments[i]); //pushing the circ fragments at the end of the main fragments list, 
 												//does this create any problem in the main scallop2 output??
+												//no as this is a separate module just for circRNA
 	}
 
 	if(circ_fragments.size() > 0)
@@ -1730,6 +1731,11 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 
 		if(x1 < x2) return 0;
 
+		if(strcmp(fr2.h1->qname.c_str(),"simulate:2195") == 0)
+		{
+			printf("simulate:2195 is in fr2.is_compatible 1\n");
+		}
+
 		vector<int>::iterator it = find(t2, v2.end(), x1);
 		if(it == v2.end()) return 0;
 
@@ -1744,12 +1750,11 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		p.v.insert(p.v.end(), v1.begin(), t1);
 		p.v.insert(p.v.end(), it + 1, v2.end());
 		//p.v = encode_vlist(p.v);
-		if(fr1.lpos == 40428472 && fr2.rpos == 40430301)
-		{
-			printf("Printing merged path in fr2 iscomp 1:\n");
-			printv(p.v);
-			printf("\n\n");
-		}
+
+		printf("Printing merged path in fr2 iscomp 1:\n");
+		printv(p.v);
+		printf("\n\n");
+	
 		string chrm_id = bb.chrm.c_str();
 		string circRNA_id = "chrm" + chrm_id + ":" + tostring(fr1.lpos) + "|" + tostring(fr2.rpos) + "|";
 		//printf("circularRNA = %s\n",circRNA_id.c_str());
@@ -1835,12 +1840,11 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		p.v.insert(p.v.end(), v2.begin(), t1);
 		p.v.insert(p.v.end(), it + 1, v1.end());
 		//p.v = encode_vlist(p.v);
-		if(fr2.lpos == 40428472 && fr1.rpos == 40430301)
-		{
-			printf("Printing merged path in fr2 iscomp 2:\n");
-			printv(p.v);
-			printf("\n\n");
-		}
+
+		printf("Printing merged path in fr2 iscomp 2:\n");
+		printv(p.v);
+		printf("\n\n");
+		
 		string chrm_id = bb.chrm.c_str();
 		string circRNA_id = "chrm" + chrm_id + ":" + tostring(fr2.lpos) + "|" + tostring(fr1.rpos) + "|";
 		//printf("circularRNA = %s\n",circRNA_id.c_str());

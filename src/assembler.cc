@@ -183,7 +183,11 @@ int assembler::process(int n)
 		transcript_set ts2(bb.chrm, 0.9);		// non-full-length set
 
 		bundle bd(bb);
-		circular_trsts.insert(circular_trsts.end(), bd.br.circ_trsts.begin(), bd.br.circ_trsts.end());
+
+		if(bd.junctions.size() != 0)
+		{
+			circular_trsts.insert(circular_trsts.end(), bd.br.circ_trsts.begin(), bd.br.circ_trsts.end());
+		}
 
 		/*if(circular_trsts.size() > 0)
 		{

@@ -119,6 +119,12 @@ int bridger::bridge_overlapped_fragment(fragment &fr, int ex1, int ex2)
 
 	vector<int>::iterator it = find(t2, v2.end(), x1);
 	if(it == v2.end()) return 0;
+
+	/*if(strcmp(fr.h1->qname.c_str(),"simulate:173319") == 0)
+	{
+		printf("simulate:173319 is in bridge_overlapped_fragments\n");
+	}*/
+
 	vector<int>::iterator j1, j2;
 	for(j1 = t1 - 1, j2 = it; j1 >= v1.begin() && j2 >= t2; j1--, j2--)
 	{
