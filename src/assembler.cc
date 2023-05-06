@@ -73,12 +73,12 @@ int assembler::assemble()
 		// truncate
 		if(ht.tid != bb1.tid || ht.pos > bb1.rpos + min_bundle_gap) //ht.tid is chromosome id from defined by bam_hdr_t
 		{
-			pool.push_back(bb1);
+			if(bb1.hits.size() >= 1) pool.push_back(bb1);
 			bb1.clear();
 		}
 		if(ht.tid != bb2.tid || ht.pos > bb2.rpos + min_bundle_gap)
 		{
-			pool.push_back(bb2);
+			if(bb2.hits.size() >= 1) pool.push_back(bb2);
 			bb2.clear();
 		}
 
@@ -95,16 +95,15 @@ int assembler::assemble()
 		if(library_type != UNSTRANDED && ht.strand == '.' && ht.xs != '.') ht.strand = ht.xs;
 		if(library_type != UNSTRANDED && ht.strand == '+') bb1.add_hit(ht);
 		if(library_type != UNSTRANDED && ht.strand == '-') bb2.add_hit(ht);
-		if(library_type == UNSTRANDED && ht.xs == '.') bb1.add_hit(ht); //heuristic, adding to both
-		if(library_type == UNSTRANDED && ht.xs == '.') bb2.add_hit(ht);
-		if(library_type == UNSTRANDED && ht.xs == '+') bb1.add_hit(ht);
-		if(library_type == UNSTRANDED && ht.xs == '-') bb2.add_hit(ht);
+
+		// only use bb1 if unstranded
+		if(library_type == UNSTRANDED) bb1.add_hit(ht); //heuristic, adding to both
 	}
 
 	//printf("complete\n");
 
-	pool.push_back(bb1);
-	pool.push_back(bb2);
+	if(bb1.hits.size() >= 1) pool.push_back(bb1);
+	if(bb2.hits.size() >= 1) pool.push_back(bb2);
 
 	process(0);
 
