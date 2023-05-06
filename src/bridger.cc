@@ -244,6 +244,7 @@ int bridger::build_junction_graph()
 		int w = (int)(pnodes[i].score);
 		int x = v[0];
 		int y = v[1];
+
 		assert(jsetx[x].find(y) == jsetx[x].end());
 		assert(jsety[y].find(x) == jsety[y].end());
 		jsetx[x].insert(PI(y, w));
@@ -301,6 +302,7 @@ int bridger::build_path_nodes(int max_len)
 {
 	max_pnode_length = max_len;
 	map<vector<int>, int> m;
+	set<int> hs;
 	for(int i = 0; i < bd->fragments.size(); i++)
 	{
 		// TODO, also check length
@@ -310,7 +312,10 @@ int bridger::build_path_nodes(int max_len)
 			vector<int> v = decode_vlist(fr.paths[0].v);
 			if(v.size() <= 1) continue;
 			build_path_nodes(m, v, fr.cnt);		// TODO: consider cnt of fragments
+			hs.insert(fr.h1->hid);
+			hs.insert(fr.h2->hid);
 		}
+		/*
 		else
 		{
 			vector<int> v1 = decode_vlist(fr.h1->vlist);
@@ -318,7 +323,18 @@ int bridger::build_path_nodes(int max_len)
 			build_path_nodes(m, v1, fr.cnt);
 			build_path_nodes(m, v2, fr.cnt);
 		}
+		*/
 	}
+
+	for(int i = 0; i < bd->bb.hits.size(); i++)
+	{
+		// TODO, also check length
+		hit &h = bd->bb.hits[i];
+		if(hs.find(h.hid) != hs.end()) continue;
+		vector<int> v1 = decode_vlist(h.vlist);
+		build_path_nodes(m, v1, 1);
+	}
+
 
 	pnodes.clear();
 	for(map<vector<int>, int>::iterator it = m.begin(); it != m.end(); it++)
