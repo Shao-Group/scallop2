@@ -352,6 +352,8 @@ int bundle_bridge::build_junctions()
 	}
 	//printf("spos map size = %d\n",m.size());
 
+	junctions.clear();
+	junc_map.clear();
 	map< int64_t, vector<int> >::iterator it;
 	for(it = m.begin(); it != m.end(); it++)
 	{
@@ -384,6 +386,8 @@ int bundle_bridge::build_junctions()
 		else jc.strand = '-';
 		junctions.push_back(jc);
 
+		if(junc_map.find(it->first) != junc_map.end()) continue;
+		else junc_map.insert(make_pair(it->first, jc.strand));
 	}
 	//printf("Junctions size: %d\n", junctions.size());
 	return 0;
@@ -1813,10 +1817,10 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		circ.feature = "circRNA";
 		circ.gene_id = "gene"; //later change this to bundle id
 		circ.transcript_id = fr1.h1->qname; //use hit qname, same for all hits in fragments
-		circ.strand = strand;
 		circ.start = start;
 		circ.end = end;
 		circ.circ_path.insert(circ.circ_path.begin(),circ_path.begin(),circ_path.end());
+		circ.strand = infer_circ_strand(circ.circ_path);
 		
 		for(int i=0;i<circ.circ_path.size();i++)
 		{
@@ -1903,10 +1907,10 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		circ.feature = "circRNA";
 		circ.gene_id = "gene"; //later change this to bundle id
 		circ.transcript_id = fr1.h1->qname; //use hit qname, same for all hits in fragments
-		circ.strand = strand;
 		circ.start = start;
 		circ.end = end;
 		circ.circ_path.insert(circ.circ_path.begin(),circ_path.begin(),circ_path.end());
+		circ.strand = infer_circ_strand(circ.circ_path);
 
 		for(int i=0;i<circ.circ_path.size();i++)
 		{
@@ -1953,6 +1957,28 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 	}
 
 	return 0;
+}
+
+char bundle_bridge::infer_circ_strand(const vector<int> &p)
+{
+	if(p.size() <= 1) return '.';
+	int n1 = 0, n2 = 0, n3 = 0;
+	for(int k = 0; k < p.size() - 1; k++)
+	{
+		int32_t x1 = regions[p[k + 0]].rpos;
+		int32_t x2 = regions[p[k + 1]].lpos;
+		if(x1 >= x2) continue;
+		int64_t jc = pack(x1, x2);
+		if(junc_map.find(jc) == junc_map.end()) continue;
+		char c = junc_map[jc];
+		if(c == '.') n1 ++;
+		if(c == '+') n2 ++;
+		if(c == '-') n3 ++;
+	}
+	if(n2 >= 1 && n1 <= 0 && n3 <= 0) return '+';
+	if(n3 >= 1 && n1 <= 0 && n2 <= 0) return '-';
+	printf("MIXED JUNCTION: ./+/- = %d/%d/%d\n", n1, n2, n3);
+	return '.';
 }
 
 int bundle_bridge::print_circRNAs()

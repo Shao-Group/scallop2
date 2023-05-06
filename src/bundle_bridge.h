@@ -33,6 +33,7 @@ public:
 	vector<circular_transcript> circ_trsts; //a vector of circular transcripts class objs, with duplicates
 
 	vector<junction> junctions;			// splice junctions
+	map<int64_t, char> junc_map;			// map junction to strandness
 	vector<region> regions;				// pexons
 	vector<transcript> ref_trsts;		// overlaped genes in reference
 	vector< vector<int> > ref_phase;	// phasing paths for ref transcripts
@@ -62,6 +63,7 @@ public:
 	int join_circ_fragment_pairs();
 	int join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int ex1, int ex2);
 	int print_circRNAs();
+	char infer_circ_strand(const vector<int> &p);
 	
 	int group_fragments();
 
