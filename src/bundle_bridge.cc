@@ -45,6 +45,8 @@ int bundle_bridge::build()
 
 	//group_fragments();
 
+	remove_tiny_boundaries();
+
 	bridger bdg(this);
 	bdg.bridge();
 
@@ -510,7 +512,7 @@ int bundle_bridge::align_hits_transcripts()
 	{
 		align_hit(m, bb.hits[i], bb.hits[i].vlist);
 		bb.hits[i].vlist = encode_vlist(bb.hits[i].vlist);
-		remove_tiny_boundary(bb.hits[i]);
+		//remove_tiny_boundary(bb.hits[i]);
 	}
 
 	ref_phase.resize(ref_trsts.size());
@@ -519,6 +521,15 @@ int bundle_bridge::align_hits_transcripts()
 		align_transcript(m, ref_trsts[i], ref_phase[i]);
 	}
 
+	return 0;
+}
+
+int bundle_bridge::remove_tiny_boundaries()
+{
+	for(int i = 0; i < bb.hits.size(); i++)
+	{
+		remove_tiny_boundary(bb.hits[i]);
+	}
 	return 0;
 }
 

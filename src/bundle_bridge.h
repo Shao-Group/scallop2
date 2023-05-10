@@ -70,6 +70,7 @@ public:
 	int align_hits_transcripts();
 	int align_hit(const map<int32_t, int> &m, const hit &h, vector<int> &v);
 	int align_transcript(const map<int32_t, int> &m, const transcript &t, vector<int> &v);
+	int remove_tiny_boundaries();
 	int remove_tiny_boundary(hit &h);
 	int index_references();
 	int locate_region(int32_t x);
