@@ -150,11 +150,6 @@ hit::hit(bam1_t *b, int id)
 	assert(n_cigar >= 1);
 	uint32_t * cigar = bam_get_cigar(b); //commented by Tasfia
 
-	if(cigar != NULL && hid==6345)
-	{
-		printf("cigar size in hit.cc = %d\n",n_cigar);
-	}
-
 	// build splice positions
 	spos.clear();
 	int32_t p = pos;

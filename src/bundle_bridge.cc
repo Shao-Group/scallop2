@@ -39,7 +39,10 @@ int bundle_bridge::build()
 
 	align_hits_transcripts();
 	index_references();
+
+	printf("Called from bundle_bridge\n");
 	build_fragments(); //builds fragment from h1p to h2
+	printf("\n");
 
 	build_circ_fragments(); //will build fragment from h2 to h1s, added by Tasfia
 
@@ -720,11 +723,17 @@ int bundle_bridge::build_fragments()
 	for(int i = 0; i < bb.hits.size(); i++)
 	{
 		hit &h = bb.hits[i];
+
 		if(h.isize >= 0) continue;
 		if(h.vlist.size() == 0) continue;
 
 		// do not use hi; as long as qname, pos and isize are identical
 		int k = (h.qhash % max_index + h.pos % max_index + (0 - h.isize) % max_index) % max_index;
+
+		if(strcmp(h.qname.c_str(),"simulate:311116") == 0)
+		{
+			printf("hash negative: %d\n",k);
+		}
 		/*
 		SI si(h.qname, h.hi);
 		MSI &m = vv[k];
@@ -737,11 +746,17 @@ int bundle_bridge::build_fragments()
 	for(int i = 0; i < bb.hits.size(); i++)
 	{
 		hit &h = bb.hits[i];
+
 		if(h.paired == true) continue;
 		if(h.isize <= 0) continue;
 		if(h.vlist.size() == 0) continue;
 
 		int k = (h.qhash % max_index + h.mpos % max_index + h.isize % max_index) % max_index;
+
+		if(strcmp(h.qname.c_str(),"simulate:311116") == 0)
+		{
+			printf("hash positive: %d\n",k);
+		}
 
 		/*
 		h.print();
@@ -753,16 +768,30 @@ int bundle_bridge::build_fragments()
 		}
 		*/
 
+		/*if(strcmp(h.qname.c_str(),"simulate:311116") == 0)
+		{
+			printf("simulate:311116 is in hits\n");
+			printf("isize: %d\n",h.isize);
+			printf("vlist size: %zu\n",h.vlist.size());
+		}*/
+
 		int x = -1;
 		for(int j = 0; j < vv[k].size(); j++)
 		{
 			hit &z = bb.hits[vv[k][j]];
+
+			if(strcmp(z.qname.c_str(),"simulate:311116") == 0)
+			{
+				printf("simulate:311116 is in hits\n");
+			}
+
 			//if(z.hi != h.hi) continue;
 			if(z.paired == true) continue;
 			if(z.pos != h.mpos) continue;
 			if(z.isize + h.isize != 0) continue;
 			if(z.qhash != h.qhash) continue;
 			if(z.qname != h.qname) continue;
+
 			x = vv[k][j];
 			break;
 		}
@@ -780,6 +809,12 @@ int bundle_bridge::build_fragments()
 		if(bb.hits[x].vlist.size() == 0) continue;
 
 		fragment fr(&bb.hits[i], &bb.hits[x]); //h2 and h1s as param or h2s and h1 as parameter
+
+		/*if(strcmp(fr.h1->qname.c_str(),"simulate:311116") == 0)
+		{
+			printf("simulate:311116 is in fragments\n");
+		}*/
+
 		fr.frag_type = 1; //this is the first set of fragment,tasfia
 
 		//keep it
@@ -841,6 +876,15 @@ int bundle_bridge::build_fragments()
 
 	//printf("total bb.hits = %lu, total fragments = %lu\n", bb.hits.size(), fragments.size());
 	
+	/*for(int k = 0; k < fragments.size(); k++)
+	{
+		fragment &fr = fragments[k];
+		if(strcmp(fr.h1->qname.c_str(),"simulate:311116") == 0)
+		{
+			printf("simulate:311116 is in build_fragments\n");
+		}
+	}*/
+
 	// by shao, exit here (no UMI)
 	return 0;
 
@@ -1066,6 +1110,10 @@ int bundle_bridge::build_circ_fragments()
 	for(int k = 0; k < fragments.size(); k++)
 	{
 		fragment &fr = fragments[k];
+		if(strcmp(fr.h1->qname.c_str(),"simulate:311116") == 0)
+		{
+			printf("simulate:311116 is in build_circ_fragments\n");
+		}
 
 		int is_compatible = 0; //1 for h1 has a suppl and compatible, 2 for h2 has a suppl and compatible
 
@@ -1191,12 +1239,28 @@ int bundle_bridge::build_circ_fragments()
 			else
 			{
 				//printf("Not compatible in previous definition\n");
-
-				string combo = "Not compatible h1s";
-				//printf("%s\n",combo.c_str());
-				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-				else frag2graph_freq[combo] += 1;
-				continue;
+				if(fr.h1->pos > fr.h2->pos && fr.h1->pos <= h1_supple->pos && h1_supple->rpos >= fr.h1->rpos && h1_supple->rpos >= fr.h2->rpos && fr.h1->pos - fr.h2->pos <= 5)
+				{
+					string combo = "alignment error-h1p_pos>h2_pos";
+					//printf("%s\n",combo.c_str());
+					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+					else frag2graph_freq[combo] += 1;
+				}
+				else if(fr.h1->pos <= fr.h2->pos && fr.h1->pos <= h1_supple->pos && h1_supple->rpos >= fr.h1->rpos && h1_supple->rpos < fr.h2->rpos && fr.h2->rpos - h1_supple->rpos <= 5)
+				{
+					string combo = "alignment error-h2_rpos>h1s_rpos";
+					//printf("%s\n",combo.c_str());
+					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+					else frag2graph_freq[combo] += 1;
+				}
+				else
+				{
+					string combo = "Not compatible h1s";
+					//printf("%s\n",combo.c_str());
+					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+					else frag2graph_freq[combo] += 1;
+					continue;
+				}
 			}
 		}
 
@@ -1208,7 +1272,7 @@ int bundle_bridge::build_circ_fragments()
 			hit *h2_supple = fr.h2->suppl;
 			
 			printf("\nchrm = %s\n",bb.chrm.c_str());
-			printf("\nfr.h2 has a supple hit.\n");
+			printf("fr.h2 has a supple hit.\n");
 			printf("h1: ");
 			fr.h1->print();
 			printf("Primary: ");
@@ -1321,13 +1385,30 @@ int bundle_bridge::build_circ_fragments()
 
 			else
 			{
-				//printf("Not compatible in previous definition\n");
+				if(h2_supple->pos <= fr.h1->pos && h2_supple->pos <= fr.h2->pos && fr.h2->rpos >= h2_supple->rpos && fr.h2->rpos < fr.h1->rpos && fr.h1->rpos - fr.h2->rpos <= 5)
+				{
+					string combo = "alignment error-h1_rpos>h2p_rpos";
+					//printf("%s\n",combo.c_str());
+					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+					else frag2graph_freq[combo] += 1;
+				}
+				else if(h2_supple->pos > fr.h1->pos && h2_supple->pos <= fr.h2->pos && fr.h2->rpos >= h2_supple->rpos && fr.h2->rpos >= fr.h1->rpos && h2_supple->pos - fr.h1->pos <= 5)
+				{
+					string combo = "alignment error-h2s_pos>h1_pos";
+					//printf("%s\n",combo.c_str());
+					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+					else frag2graph_freq[combo] += 1;
+				}
+				else
+				{
+					//printf("Not compatible in previous definition\n");
 
-				string combo = "Not compatible h2s";
-				//printf("%s\n",combo.c_str());
-				if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
-				else frag2graph_freq[combo] += 1;
-				continue;
+					string combo = "Not compatible h2s";
+					//printf("%s\n",combo.c_str());
+					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
+					else frag2graph_freq[combo] += 1;
+					continue;
+				}
 			}
 
 			//if not compatible, continued
@@ -1776,10 +1857,10 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 
 		if(x1 < x2) return 0;
 
-		if(strcmp(fr2.h1->qname.c_str(),"simulate:2195") == 0)
+		/*if(strcmp(fr2.h1->qname.c_str(),"simulate:2195") == 0)
 		{
 			printf("simulate:2195 is in fr2.is_compatible 1\n");
-		}
+		}*/
 
 		vector<int>::iterator it = find(t2, v2.end(), x1);
 		if(it == v2.end()) return 0;
