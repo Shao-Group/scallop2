@@ -44,6 +44,8 @@ int bundle_bridge::build()
 	build_fragments(); //builds fragment from h1p to h2
 	printf("\n");
 
+	fix_alignment_boundaries();
+
 	build_circ_fragments(); //will build fragment from h2 to h1s, added by Tasfia
 
 	//group_fragments();
@@ -1108,6 +1110,132 @@ int bundle_bridge::build_fragments()
 	return 0;
 }
 
+int bundle_bridge::fix_alignment_boundaries()
+{
+	for(int k = 0; k < fragments.size(); k++)
+	{
+		fragment &fr = fragments[k];
+
+		if(fr.h1->suppl != NULL)
+		{
+			hit *h1_supple = fr.h1->suppl;
+
+			/*printf("\nchrm = %s\n",bb.chrm.c_str());
+			printf("fr.h1 has a supple hit.\n");
+			printf("Primary: ");
+			fr.h1->print();
+			printf("Supple: ");
+			h1_supple->print();
+			printf("fr.h2: ");
+			fr.h2->print();*/
+
+			if(fr.h1->pos > fr.h2->pos && fr.h1->pos <= h1_supple->pos && h1_supple->rpos >= fr.h1->rpos && h1_supple->rpos >= fr.h2->rpos && fr.h1->pos - fr.h2->pos <= 5)
+			{
+				string combo = "alignment error-h1p_pos>h2_pos";
+				//printf("%s\n",combo.c_str());
+
+				int32_t diff = fr.h1->pos - fr.h2->pos;
+
+				int first_M_len = 0;
+				for(int i=0;i<fr.h2->cigar_vector.size();i++)
+				{
+					if(fr.h2->cigar_vector[i].first == 'M')
+					{
+						first_M_len = fr.h2->cigar_vector[i].second;
+						break;
+					}
+				}
+
+				if(first_M_len > 5)
+				{
+					fr.h2->pos = fr.h2->pos + diff;
+				}
+			}
+			else if(fr.h1->pos <= fr.h2->pos && fr.h1->pos <= h1_supple->pos && h1_supple->rpos >= fr.h1->rpos && h1_supple->rpos < fr.h2->rpos && fr.h2->rpos - h1_supple->rpos <= 5)
+			{
+				string combo = "alignment error-h2_rpos>h1s_rpos";
+				//printf("%s\n",combo.c_str());
+
+				int32_t diff = fr.h2->rpos - h1_supple->rpos;
+
+				int last_M_len = 0;
+				for(int i=0;i<fr.h2->cigar_vector.size();i++)
+				{
+					if(fr.h2->cigar_vector[i].first == 'M')
+					{
+						last_M_len = fr.h2->cigar_vector[i].second;
+					}
+				}
+
+				if(last_M_len > 5)
+				{
+					fr.h2->rpos = fr.h2->rpos - diff;
+				}
+			}
+		}
+
+		if(fr.h2->suppl != NULL)
+		{
+			hit *h2_supple = fr.h2->suppl;
+			
+			/*printf("\nchrm = %s\n",bb.chrm.c_str());
+			printf("fr.h2 has a supple hit.\n");
+			printf("h1: ");
+			fr.h1->print();
+			printf("Primary: ");
+			fr.h2->print();
+			printf("Supple: ");
+			h2_supple->print();*/
+
+			if(h2_supple->pos <= fr.h1->pos && h2_supple->pos <= fr.h2->pos && fr.h2->rpos >= h2_supple->rpos && fr.h2->rpos < fr.h1->rpos && fr.h1->rpos - fr.h2->rpos <= 5)
+			{
+				string combo = "alignment error-h1_rpos>h2p_rpos";
+				//printf("%s\n",combo.c_str());
+
+				int32_t diff = fr.h1->rpos - fr.h2->rpos;
+
+				int last_M_len = 0;
+				for(int i=0;i<fr.h1->cigar_vector.size();i++)
+				{
+					if(fr.h1->cigar_vector[i].first == 'M')
+					{
+						last_M_len = fr.h1->cigar_vector[i].second;
+					}
+				}
+
+				if(last_M_len > 5)
+				{
+					fr.h1->rpos = fr.h1->rpos - diff;
+				}
+			}
+			else if(h2_supple->pos > fr.h1->pos && h2_supple->pos <= fr.h2->pos && fr.h2->rpos >= h2_supple->rpos && fr.h2->rpos >= fr.h1->rpos && h2_supple->pos - fr.h1->pos <= 5)
+			{
+				string combo = "alignment error-h2s_pos>h1_pos";
+				//printf("%s\n",combo.c_str());
+
+				int32_t diff = h2_supple->pos - fr.h1->pos;
+
+				int first_M_len = 0;
+				for(int i=0;i<fr.h1->cigar_vector.size();i++)
+				{
+					if(fr.h1->cigar_vector[i].first == 'M')
+					{
+						first_M_len = fr.h1->cigar_vector[i].second;
+						break;
+					}
+				}
+
+				if(first_M_len > 5)
+				{
+					fr.h1->pos = fr.h1->pos + diff;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
 
 int bundle_bridge::build_circ_fragments()
 {
@@ -1254,6 +1382,8 @@ int bundle_bridge::build_circ_fragments()
 				{
 					string combo = "alignment error-h1p_pos>h2_pos";
 					//printf("%s\n",combo.c_str());
+					//fr.print(0);
+
 					if(frag2graph_freq.find(combo) == frag2graph_freq.end()) frag2graph_freq.insert(pair<string, int>(combo, 1));
 					else frag2graph_freq[combo] += 1;
 				}

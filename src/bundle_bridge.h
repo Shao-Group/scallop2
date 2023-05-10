@@ -56,6 +56,7 @@ public:
 	int extend_junctions();
 	int build_regions();
 	int build_fragments();
+	int fix_alignment_boundaries();
 
 	int build_circ_fragments();
 	int extract_circ_fragment_pairs();
