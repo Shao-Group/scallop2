@@ -271,7 +271,9 @@ int previewer::process_bundle(bundle_base &bb, map<int32_t, int>& m)
 	br.align_hits_transcripts();
 	br.index_references();
 
+	printf("Called from previewer\n");
 	br.build_fragments();
+	printf("\n");
 	//br.group_fragments();
 
 	bridger bdg(&br);
