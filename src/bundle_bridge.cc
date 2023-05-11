@@ -50,7 +50,7 @@ int bundle_bridge::build()
 
 	//group_fragments();
 
-	//remove_tiny_boundaries();
+	remove_tiny_boundaries();
 	set_fragment_lengths();
 
 	bridger bdg(this);
