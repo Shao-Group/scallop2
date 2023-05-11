@@ -273,6 +273,7 @@ int previewer::process_bundle(bundle_base &bb, map<int32_t, int>& m)
 
 	printf("Called from previewer\n");
 	br.build_fragments();
+	br.set_fragment_lengths();
 	printf("\n");
 	//br.group_fragments();
 
