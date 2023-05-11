@@ -73,6 +73,8 @@ public:
 	int align_transcript(const map<int32_t, int> &m, const transcript &t, vector<int> &v);
 	int remove_tiny_boundaries();
 	int remove_tiny_boundary(hit &h);
+	int set_fragment_lengths();
+	int set_fragment_length(fragment &fr);
 	int index_references();
 	int locate_region(int32_t x);
 };

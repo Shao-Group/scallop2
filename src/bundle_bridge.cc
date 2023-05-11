@@ -44,13 +44,14 @@ int bundle_bridge::build()
 	build_fragments(); //builds fragment from h1p to h2
 	printf("\n");
 
-	fix_alignment_boundaries();
+	//fix_alignment_boundaries();
 
 	build_circ_fragments(); //will build fragment from h2 to h1s, added by Tasfia
 
 	//group_fragments();
 
 	remove_tiny_boundaries();
+	set_fragment_lengths();
 
 	bridger bdg(this);
 	bdg.bridge();
@@ -538,6 +539,62 @@ int bundle_bridge::remove_tiny_boundaries()
 	return 0;
 }
 
+int bundle_bridge::set_fragment_lengths()
+{
+	for(int k = 0; k < fragments.size(); k++)
+	{
+		set_fragment_length(fragments[k]);
+	}
+	return 0;
+}
+
+int bundle_bridge::set_fragment_length(fragment &fr)
+{
+	// TODO: parameters
+	int32_t max_misalignment1 = 20;
+	int32_t max_misalignment2 = 10;
+
+	fr.lpos = fr.h1->pos;
+	fr.rpos = fr.h2->rpos;
+
+	vector<int> v1 = decode_vlist(fr.h1->vlist);
+	vector<int> v2 = decode_vlist(fr.h2->vlist);
+	fr.k1l = fr.h1->pos - regions[v1.front()].lpos;
+	fr.k1r = regions[v1.back()].rpos - fr.h1->rpos;
+	fr.k2l = fr.h2->pos - regions[v2.front()].lpos;
+	fr.k2r = regions[v2.back()].rpos - fr.h2->rpos;
+
+	fr.b1 = true;
+	if(v1.size() <= 1) 
+	{
+		fr.b1 = false;
+	}
+	else if(v1.size() >= 2 && v1[v1.size() - 2] == v1.back() - 1)
+	{
+		if(fr.h1->rpos - regions[v1.back()].lpos > max_misalignment1 + fr.h1->nm) fr.b1 = false;
+	}
+	else if(v1.size() >= 2 && v1[v1.size() - 2] != v1.back() - 1)
+	{
+		if(fr.h1->rpos - regions[v1.back()].lpos > max_misalignment2 + fr.h1->nm) fr.b1 = false;
+	}
+
+	fr.b2 = true;
+	if(v2.size() <= 1)
+	{
+		fr.b2 = false;
+	}
+	else if(v2.size() >= 2 || v2[1] == v2.front() + 1)
+	{
+		if(regions[v2.front()].rpos - fr.h2->pos > max_misalignment1 + fr.h2->nm) fr.b2 = false;
+	}
+	else if(v2.size() >= 2 || v2[1] != v2.front() + 1)
+	{
+		if(regions[v2.front()].rpos - fr.h2->pos > max_misalignment2 + fr.h2->nm) fr.b2 = false;
+	}
+
+	return 0;
+}
+
 int bundle_bridge::align_hit(const map<int32_t, int> &m, const hit &h, vector<int> &vv)
 {
 	vv.clear();
@@ -839,7 +896,11 @@ int bundle_bridge::build_fragments()
 		bb.hits[x].fidx = fragments.size();//fidx is the fragment index
 		ctp += 1;
 		fr.type = 0; 
-		// ================================
+
+		/*
+		// shao: moved to a separate function
+		// and do it later (after remove-tiny-boundary)
+
 		fr.lpos = h.pos;
 		fr.rpos = bb.hits[x].rpos;
 
@@ -879,6 +940,7 @@ int bundle_bridge::build_fragments()
 		{
 			if(regions[v2.front()].rpos - fr.h2->pos > max_misalignment2 + fr.h2->nm) fr.b2 = false;
 		}
+		*/
 
 		fragments.push_back(fr);
 
@@ -1379,6 +1441,8 @@ int bundle_bridge::build_circ_fragments()
 			// ================================*/
 
 			frag.type = 0;
+			
+			/*
 			frag.lpos = fr.h2->pos;
 			frag.rpos = fr.h1->suppl->rpos;
 
@@ -1418,6 +1482,7 @@ int bundle_bridge::build_circ_fragments()
 			{
 				if(regions[v2.front()].rpos - frag.h2->pos > max_misalignment2 + frag.h2->nm) frag.b2 = false;
 			}
+			*/
 
 			frag.pi = k;
 			frag.fidx = fragments.size() + circ_fragments.size();
@@ -1455,6 +1520,8 @@ int bundle_bridge::build_circ_fragments()
 			// ================================*/
 
 			frag.type = 0;
+
+			/*
 			frag.lpos = fr.h2->suppl->pos;
 			frag.rpos = fr.h1->rpos;
 
@@ -1494,6 +1561,7 @@ int bundle_bridge::build_circ_fragments()
 			{
 				if(regions[v2.front()].rpos - frag.h2->pos > max_misalignment2 + frag.h2->nm) frag.b2 = false;
 			}
+			*/
 
 			frag.pi = k;
 			frag.fidx = fragments.size() + circ_fragments.size();
