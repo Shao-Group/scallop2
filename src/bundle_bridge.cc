@@ -44,8 +44,7 @@ int bundle_bridge::build()
 	build_fragments(); //builds fragment from h1p to h2
 	printf("\n");
 
-	//fix_alignment_boundaries();
-
+	fix_alignment_boundaries();
 	build_circ_fragments(); //will build fragment from h2 to h1s, added by Tasfia
 
 	//group_fragments();
