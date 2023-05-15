@@ -48,6 +48,7 @@ int bundle_bridge::build()
 	build_circ_fragments(); //will build fragment from h2 to h1s, added by Tasfia
 
 	//group_fragments();
+	extract_nonsupple_HS_hits();
 
 	remove_tiny_boundaries();
 	set_fragment_lengths();
@@ -1612,6 +1613,77 @@ int bundle_bridge::build_circ_fragments()
 
 	return 0;
 }
+
+int bundle_bridge::extract_nonsupple_HS_hits()
+{
+	map <int32_t,pair<junction, vector<hit>>> junc_HS_map; //key junc lpos/rpos, stores junction and set of hits supporting the junction
+	junc_HS_map.clear();
+
+	for(int i = 0; i < bb.hits.size(); i++)
+    {
+		hit h = bb.hits[i];
+        
+        if((h.flag & 0x800) >= 1) continue; //is a supple hit
+		if(h.suppl != NULL) continue; //has a supple hit
+
+		for(int j=0;j<junctions.size();j++)
+		{
+			junction jc = junctions[j];
+		
+			if(h.cigar_vector[0].first == 'S' || h.cigar_vector[0].first == 'H')
+			{
+				if(h.pos >= jc.rpos - 4 && h.pos <= jc.rpos + 4)
+				{
+					if(junc_HS_map.find(jc.rpos) != junc_HS_map.end())
+					{
+						junc_HS_map[jc.rpos].second.push_back(h);
+					}
+					else
+					{
+						vector<hit> temp;
+						temp.push_back(h);
+						junc_HS_map.insert(pair<int32_t,pair<junction,vector<hit>>>(jc.rpos,pair<junction,vector<hit>>(jc,temp)));
+					}
+				}
+			}
+			if(h.cigar_vector[h.cigar_vector.size()-1].first == 'S' || h.cigar_vector[h.cigar_vector.size()-1].first == 'H')
+			{
+				if(h.rpos >= jc.lpos - 4 && h.rpos <= jc.lpos + 4)
+				{
+					if(junc_HS_map.find(jc.lpos) != junc_HS_map.end())
+					{
+						junc_HS_map[jc.lpos].second.push_back(h);
+					}
+					else
+					{
+						vector<hit> temp;
+						temp.push_back(h);
+						junc_HS_map.insert(pair<int32_t,pair<junction,vector<hit>>>(jc.lpos,pair<junction,vector<hit>>(jc,temp)));
+					}
+				}				
+			}
+		}
+	}
+
+	if(junc_HS_map.size() > 0)
+	{
+		printf("chrm=%s\n",bb.chrm.c_str());
+		printf("junc_HS_map size = %lu\n",junc_HS_map.size());
+
+		map<int32_t, pair<junction, vector<hit>>>::iterator itn;
+		for(itn = junc_HS_map.begin(); itn != junc_HS_map.end(); itn++)
+		{
+			printf("key = %d, count = %lu\n",itn->first,itn->second.second.size());
+			for(int i=0;i<itn->second.second.size();i++)
+			{
+				printf("%s\n",itn->second.second[i].qname.c_str());
+			}
+		}
+	}
+
+	return 0;
+}
+
 
 int bundle_bridge::extract_circ_fragment_pairs()
 {

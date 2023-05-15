@@ -59,6 +59,7 @@ public:
 	int fix_alignment_boundaries();
 
 	int build_circ_fragments();
+	int extract_nonsupple_HS_hits();
 	int extract_circ_fragment_pairs();
 	int print_circ_fragment_pairs();
 	int join_circ_fragment_pairs();
