@@ -1732,7 +1732,7 @@ int bundle_bridge::extract_nonsupple_HS_hits()
 		}
 	}
 
-	if(cnt_lpos >= 5 && cnt_rpos >= 5)
+	if(cnt_lpos >= 4 && cnt_rpos >= 4)
 	{
 		printf("chrm=%s\n",bb.chrm.c_str());
 		printf("Left junction: %d, support: %d\n", max_jc_lpos.lpos, cnt_lpos); //left junc matching with read rpos
