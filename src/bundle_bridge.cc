@@ -1737,43 +1737,43 @@ int bundle_bridge::extract_nonsupple_HS_hits()
 		printf("chrm=%s\n",bb.chrm.c_str());
 		printf("Left junction: %d, support: %d\n", max_jc_lpos.lpos, cnt_lpos); //left junc matching with read rpos
 		printf("Right junction: %d, support: %d\n", max_jc_rpos.rpos, cnt_rpos); //right junc matching with read lpos
-	}
 
-	bridger brdg(this);
-	circular_transcript circ;
+		bridger brdg(this);
+		circular_transcript circ;
 
-	brdg.bridge_clip(max_jc_rpos.rpos, max_jc_lpos.lpos, circ);
+		brdg.bridge_clip(max_jc_rpos.rpos, max_jc_lpos.lpos, circ);
 
-	if(circ.start != 0 && circ.end != 0)
-	{
-		string chrm_id = bb.chrm.c_str();
-		string circRNA_id = "chrm" + chrm_id + ":" + tostring(circ.start) + "|" + tostring(circ.end) + "|";
-		char strand = bb.strand;
-
-		circ.circRNA_id = circRNA_id;
-		circ.seqname = chrm_id;
-		circ.source = "scallop2";
-		circ.feature = "circRNA";
-		circ.gene_id = "gene";
-		circ.strand = infer_circ_strand(circ.circ_path);
-
-		for(int k=0;k<support_jc_rpos.size();k++)
+		if(circ.start != 0 && circ.end != 0)
 		{
-			circ.transcript_id = circ.transcript_id + support_jc_rpos[k].qname.c_str() + "|";
-		}
-		for(int k=0;k<support_jc_lpos.size();k++)
-		{
-			circ.transcript_id = circ.transcript_id + support_jc_lpos[k].qname.c_str() + "|";
-		}
+			string chrm_id = bb.chrm.c_str();
+			string circRNA_id = "chrm" + chrm_id + ":" + tostring(circ.start) + "|" + tostring(circ.end) + "|";
+			char strand = bb.strand;
 
-		for(int i=0;i<circ.merged_regions.size();i++)
-		{
-			region r = circ.merged_regions[i];
-			circ.circRNA_id = circ.circRNA_id + tostring(r.lpos) + "|" + tostring(r.rpos) + "|";
-		}
+			circ.circRNA_id = circRNA_id;
+			circ.seqname = chrm_id;
+			circ.source = "scallop2";
+			circ.feature = "circRNA";
+			circ.gene_id = "gene";
+			circ.strand = infer_circ_strand(circ.circ_path);
 
-		//circ.print(0);
-		circ_trsts.push_back(circ);
+			for(int k=0;k<support_jc_rpos.size();k++)
+			{
+				circ.transcript_id = circ.transcript_id + support_jc_rpos[k].qname.c_str() + "|";
+			}
+			for(int k=0;k<support_jc_lpos.size();k++)
+			{
+				circ.transcript_id = circ.transcript_id + support_jc_lpos[k].qname.c_str() + "|";
+			}
+
+			for(int i=0;i<circ.merged_regions.size();i++)
+			{
+				region r = circ.merged_regions[i];
+				circ.circRNA_id = circ.circRNA_id + tostring(r.lpos) + "|" + tostring(r.rpos) + "|";
+			}
+
+			//circ.print(0);
+			circ_trsts.push_back(circ);
+		}
 	}
 
 	return 0;
