@@ -1694,6 +1694,9 @@ int bundle_bridge::extract_nonsupple_HS_hits()
 	}
 
 	junction max_jc_lpos, max_jc_rpos;
+	vector<hit> support_jc_lpos, support_jc_rpos;
+	support_jc_lpos.clear();
+	support_jc_rpos.clear();
 	int cnt_lpos = 0, cnt_rpos = 0;
 
 	//extract jc boundary lpos and rpos with support >= 5
@@ -1702,6 +1705,7 @@ int bundle_bridge::extract_nonsupple_HS_hits()
 	{
 		junction jc = itn->second.first;
 		int support = itn->second.second.size();
+		vector<hit> support_vec = itn->second.second;
 
 		//printf("inside map check, boundary_match = %c\n",jc.boundary_match);
 
@@ -1712,6 +1716,7 @@ int bundle_bridge::extract_nonsupple_HS_hits()
 				//printf("inside find max lpos\n");
 				cnt_lpos = support;
 				max_jc_lpos = jc;
+				support_jc_lpos.insert(support_jc_lpos.begin(),support_vec.begin(),support_vec.end());
 			}
 		}
 
@@ -1722,6 +1727,7 @@ int bundle_bridge::extract_nonsupple_HS_hits()
 				//printf("inside find max rpos\n");
 				cnt_rpos = support;
 				max_jc_rpos = jc;
+				support_jc_rpos.insert(support_jc_rpos.begin(),support_vec.begin(),support_vec.end());
 			}
 		}
 	}
@@ -1751,7 +1757,14 @@ int bundle_bridge::extract_nonsupple_HS_hits()
 		circ.gene_id = "gene";
 		circ.strand = infer_circ_strand(circ.circ_path);
 
-		//circ.transcript_id
+		for(int k=0;k<support_jc_rpos.size();k++)
+		{
+			circ.transcript_id = circ.transcript_id + support_jc_rpos[k].qname.c_str() + "|";
+		}
+		for(int k=0;k<support_jc_lpos.size();k++)
+		{
+			circ.transcript_id = circ.transcript_id + support_jc_lpos[k].qname.c_str() + "|";
+		}
 
 		for(int i=0;i<circ.merged_regions.size();i++)
 		{
