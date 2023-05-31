@@ -48,6 +48,7 @@ public:
 
 public:
 	int bridge();
+	int bridge_clip(int32_t p1, int32_t p2, circular_transcript &circ);
 	int print();
 
 public:

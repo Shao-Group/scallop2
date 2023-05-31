@@ -90,6 +90,93 @@ int bridger::bridge()
 	return 0;
 }
 
+int bridger::bridge_clip(int32_t p1, int32_t p2, circular_transcript &circ)
+{
+	// locate the regions for p1 and p2
+	int x1 = -1, x2 = -1; //region ids of boundaries that match p1 and p2
+	for(int i=0;i<bd->regions.size();i++)
+	{
+		region r = bd->regions[i];
+		if(r.lpos == p1 && x1 == -1)
+		{
+			x1 = i;
+		}
+		if(r.rpos == p2 && x2 == -1)
+		{
+			x2 = i;
+		}
+		if(x1 != -1 && x2 != -1) break;
+	}
+
+	if(p1 == 13053366 && p2 == 13056491)
+	{
+		printf("Printing x1 and x2: x1 = %d, x2 = %d\n",x1,x2);
+	}
+	
+	if(x1 != -1 && x2 != -1 && x1 > x2) return -1;
+
+	if(x1 != -1 && x2 != -1 && x1 == x2) //single exon circrna
+	{
+		//printf("Entering case equal\n");
+		circ.start = bd->regions[x1].lpos;
+		circ.end = bd->regions[x1].rpos;
+		circ.circ_path.push_back(x1);
+		//printf("check equal x1=%d, x2=%d\n",x1,x2);
+		circ.circ_path_regions.push_back(bd->regions[x1]);
+		circ.merged_regions.push_back(bd->regions[x1]);
+	}
+
+	if(x1 != -1 && x2 != -1 && x1 < x2)
+	{
+		build_junction_graph();
+
+		vector< vector<entry> > table;
+		table.resize(bd->regions.size());
+		printf("check dp x1=%d, x2=%d\n",x1,x2);
+
+		dynamic_programming(x1, x2, table);
+		vector< vector<int> > pb = trace_back(x2, table);
+		if(pb.size() == 0) return -1;
+
+		// just consider the best path
+		vector<int> pp = pb[0];
+
+		/*printf("Print path:");
+		for(int j=0;j<pp.size();j++)
+		{
+			printf("%d ",pp[j]);
+		}*/
+
+		// then pp is path from x1 to x2 (I belive it includes x1 and x2)
+    	// now the circRNA consists the regions in the path pp
+
+		circ.start = bd->regions[x1].lpos;
+		circ.end = bd->regions[x2].rpos;
+		circ.circ_path.insert(circ.circ_path.end(),pp.begin(),pp.end());
+		
+		for(int i=0;i<circ.circ_path.size();i++)
+		{
+			circ.circ_path_regions.push_back(bd->regions[circ.circ_path[i]]);
+		}
+
+		join_interval_map jmap;
+		for(int k = 0; k < circ.circ_path_regions.size(); k++)
+		{
+			int32_t p1 = circ.circ_path_regions[k].lpos;
+			int32_t p2 = circ.circ_path_regions[k].rpos;
+			jmap += make_pair(ROI(p1, p2), 1);
+		}
+
+		for(JIMI it = jmap.begin(); it != jmap.end(); it++)
+		{
+			region r(lower(it->first), upper(it->first), '.', '.');
+			circ.merged_regions.push_back(r);
+		}
+	}
+	
+	return 0;
+}
+
 int bridger::bridge_overlapped_fragments()
 {
 	for(int i = 0; i < bd->fragments.size(); i++)

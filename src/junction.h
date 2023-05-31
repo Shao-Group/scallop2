@@ -31,6 +31,7 @@ public:
 	int junc_type;		//junc_type = 1 if normal junction, 2 if BSJ.
 	char strand;		// strandness of this junction
 	int nm;				// total mismatch
+	char boundary_match; //L if junc lpos matches hits with H/S rpos, R if junc rpos matches hits with H/s lpos
 
 	int lexon;			// pexon index corresponds to lpos
 	int rexon;			// pexon index corresponds to rpos

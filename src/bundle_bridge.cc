@@ -22,6 +22,7 @@ See LICENSE for licensing.
 bundle_bridge::bundle_bridge(bundle_base &b)
 	: bb(b)
 {
+	circ_trsts.clear(); // emptying before storing circRNAs
 	//compute_strand();
 }
 
@@ -40,15 +41,19 @@ int bundle_bridge::build()
 	align_hits_transcripts();
 	index_references();
 
-	printf("Called from bundle_bridge\n");
+	//printf("Called from bundle_bridge\n");
 	build_fragments(); //builds fragment from h1p to h2
-	printf("\n");
+	//printf("\n");
 
 	fix_alignment_boundaries();
 	build_circ_fragments(); //will build fragment from h2 to h1s, added by Tasfia
 
 	//group_fragments();
 	extract_nonsupple_HS_hits();
+	if(circ_trsts.size() > 1)
+	{
+		printf("extra circRNAs = %zu",circ_trsts.size());
+	}
 
 	remove_tiny_boundaries();
 	set_fragment_lengths();
@@ -1629,6 +1634,11 @@ int bundle_bridge::extract_nonsupple_HS_hits()
 		for(int j=0;j<junctions.size();j++)
 		{
 			junction jc = junctions[j];
+
+			if(jc.rpos == 108235235)
+			{
+				printf("108235235 present in junctions\n");
+			}
 		
 			if(h.cigar_vector[0].first == 'S' || h.cigar_vector[0].first == 'H')
 			{
@@ -1642,6 +1652,7 @@ int bundle_bridge::extract_nonsupple_HS_hits()
 					{
 						vector<hit> temp;
 						temp.push_back(h);
+						jc.boundary_match = 'R';
 						junc_HS_map.insert(pair<int32_t,pair<junction,vector<hit>>>(jc.rpos,pair<junction,vector<hit>>(jc,temp)));
 					}
 				}
@@ -1658,6 +1669,7 @@ int bundle_bridge::extract_nonsupple_HS_hits()
 					{
 						vector<hit> temp;
 						temp.push_back(h);
+						jc.boundary_match = 'L';
 						junc_HS_map.insert(pair<int32_t,pair<junction,vector<hit>>>(jc.lpos,pair<junction,vector<hit>>(jc,temp)));
 					}
 				}				
@@ -1679,6 +1691,76 @@ int bundle_bridge::extract_nonsupple_HS_hits()
 				printf("%s\n",itn->second.second[i].qname.c_str());
 			}
 		}
+	}
+
+	junction max_jc_lpos, max_jc_rpos;
+	int cnt_lpos = 0, cnt_rpos = 0;
+
+	//extract jc boundary lpos and rpos with support >= 5
+	map<int32_t, pair<junction, vector<hit>>>::iterator itn;
+	for(itn = junc_HS_map.begin(); itn != junc_HS_map.end(); itn++)
+	{
+		junction jc = itn->second.first;
+		int support = itn->second.second.size();
+
+		//printf("inside map check, boundary_match = %c\n",jc.boundary_match);
+
+		if(jc.boundary_match == 'L')
+		{
+			if(support > cnt_lpos)
+			{
+				//printf("inside find max lpos\n");
+				cnt_lpos = support;
+				max_jc_lpos = jc;
+			}
+		}
+
+		if(jc.boundary_match == 'R')
+		{
+			if(support > cnt_rpos)
+			{
+				//printf("inside find max rpos\n");
+				cnt_rpos = support;
+				max_jc_rpos = jc;
+			}
+		}
+	}
+
+	if(cnt_lpos >= 5 && cnt_rpos >= 5)
+	{
+		printf("chrm=%s\n",bb.chrm.c_str());
+		printf("Left junction: %d, support: %d\n", max_jc_lpos.lpos, cnt_lpos); //left junc matching with read rpos
+		printf("Right junction: %d, support: %d\n", max_jc_rpos.rpos, cnt_rpos); //right junc matching with read lpos
+	}
+
+	bridger brdg(this);
+	circular_transcript circ;
+
+	brdg.bridge_clip(max_jc_rpos.rpos, max_jc_lpos.lpos, circ);
+
+	if(circ.start != 0 && circ.end != 0)
+	{
+		string chrm_id = bb.chrm.c_str();
+		string circRNA_id = "chrm" + chrm_id + ":" + tostring(circ.start) + "|" + tostring(circ.end) + "|";
+		char strand = bb.strand;
+
+		circ.circRNA_id = circRNA_id;
+		circ.seqname = chrm_id;
+		circ.source = "scallop2";
+		circ.feature = "circRNA";
+		circ.gene_id = "gene";
+		circ.strand = infer_circ_strand(circ.circ_path);
+
+		//circ.transcript_id
+
+		for(int i=0;i<circ.merged_regions.size();i++)
+		{
+			region r = circ.merged_regions[i];
+			circ.circRNA_id = circ.circRNA_id + tostring(r.lpos) + "|" + tostring(r.rpos) + "|";
+		}
+
+		//circ.print(0);
+		circ_trsts.push_back(circ);
 	}
 
 	return 0;
@@ -1883,7 +1965,6 @@ int bundle_bridge::print_circ_fragment_pairs()
 
 int bundle_bridge::join_circ_fragment_pairs()
 {
-	circ_trsts.clear(); // emptying before storing joined circRNAs
 	for(int i=0;i<circ_fragment_pairs.size();i++)
 	{
 		fragment &fr1 = circ_fragment_pairs[i].first;

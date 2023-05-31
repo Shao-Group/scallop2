@@ -11,7 +11,9 @@ See LICENSE for licensing.
 #include "config.h"
 
 junction::junction()
-{}
+{
+	boundary_match = '.';
+}
 
 junction::junction(int64_t _p)
 {
@@ -25,6 +27,7 @@ junction::junction(int64_t _p)
 	lregion = -1;
 	rregion = -1;
 	nm = 0;
+	boundary_match = '.';
 }
 
 junction::junction(int64_t _p, int _c)
@@ -39,6 +42,7 @@ junction::junction(int64_t _p, int _c)
 	lregion = -1;
 	rregion = -1;
 	nm = 0;
+	boundary_match = '.';
 }
 
 junction::junction(const junction &sp)
@@ -53,6 +57,7 @@ junction::junction(const junction &sp)
 	lregion = sp.lregion;
 	rregion = sp.rregion;
 	nm = sp.nm;
+	boundary_match = sp.boundary_match;
 }
 
 bool junction::operator<(const junction &x) const
