@@ -1614,6 +1614,8 @@ int bundle::build_hyper_set()
 	{
 		const vector<int> &v = it->first;
 		int c = it->second;
+
+		// TODO
 		if(v.size() >= 2) hs.add_node_list(v, c);
 	}
 	return 0;

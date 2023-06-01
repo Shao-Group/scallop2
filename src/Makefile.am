@@ -37,6 +37,7 @@ scallop2_SOURCES = splice_graph.h splice_graph.cc \
 				   equation.h equation.cc \
 				   gtf.h gtf.cc \
 				   scallop.h scallop.cc \
+				   scallop3.h scallop3.cc \
 				   previewer.h previewer.cc \
 				   assembler.h assembler.cc \
 				   transcript_set.h transcript_set.cc \

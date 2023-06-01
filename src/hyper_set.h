@@ -46,6 +46,7 @@ public:
 	MI get_predecessors(int e);
 	MPII get_routes(int x, directed_graph &gr, MEI &e2i);
 	int print();
+	double get_compatible_bottleneck(const vector<int> &p);
 
 public:
 	int replace(int x, int e);

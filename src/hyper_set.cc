@@ -8,6 +8,7 @@ See LICENSE for licensing.
 #include "config.h"
 #include <algorithm>
 #include <cstdio>
+#include <cfloat>
 
 int hyper_set::clear()
 {
@@ -65,7 +66,8 @@ int hyper_set::build_edges(directed_graph &gr, MEI& e2i)
 			else ve.push_back(e2i[p.first]);
 		}
 
-		if(b == true && ve.size() >= 2)
+		// edit here to consider single edges
+		if(b == true && ve.size() >= 1)
 		{
 			edges.push_back(ve);
 			ecnts.push_back(c);
@@ -631,4 +633,32 @@ int hyper_set::print()
 	}
 	
 	return 0;
+}
+
+double hyper_set::get_compatible_bottleneck(const vector<int> &p)
+{
+	double bt = DBL_MAX;
+	for(int i = 0; i < p.size(); i++)
+	{
+		int e = p[i];
+		double w = 0;
+		if(e2s.find(e) != e2s.end())
+		{
+			set<int> &s = e2s[e];
+			for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+			{
+				vector<int> &f = edges[*it];
+				bool b = false;
+				// check if f is compatible with p
+				if(b == false) continue;
+				w += ecnts[*it];
+			}
+		}
+
+		if(w < bt)
+		{
+			bt = w;
+		}
+	}
+	return bt;
 }
