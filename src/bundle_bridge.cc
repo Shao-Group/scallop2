@@ -49,11 +49,12 @@ int bundle_bridge::build()
 	build_circ_fragments(); //will build fragment from h2 to h1s, added by Tasfia
 
 	//group_fragments();
+
 	extract_nonsupple_HS_hits();
-	if(circ_trsts.size() > 1)
+	/*if(circ_trsts.size() > 1)
 	{
 		printf("extra circRNAs = %zu",circ_trsts.size());
-	}
+	}*/
 
 	remove_tiny_boundaries();
 	set_fragment_lengths();
@@ -1684,11 +1685,17 @@ int bundle_bridge::extract_nonsupple_HS_hits()
 
 		map<int32_t, pair<junction, vector<hit>>>::iterator itn;
 		for(itn = junc_HS_map.begin(); itn != junc_HS_map.end(); itn++)
-		{
-			printf("key = %d, count = %lu\n",itn->first,itn->second.second.size());
+		{ 
+			printf("key = %d, boundary = %c, count = %lu\n",itn->first,itn->second.first.boundary_match,itn->second.second.size());
 			for(int i=0;i<itn->second.second.size();i++)
 			{
-				printf("%s\n",itn->second.second[i].qname.c_str());
+				hit h = itn->second.second[i];
+				printf("%s cigar:",h.qname.c_str());
+				for(int j=0;j<h.cigar_vector.size();j++)
+				{
+					printf("%d%c",h.cigar_vector[j].second,h.cigar_vector[j].first);
+				}
+				printf("\n");
 			}
 		}
 	}
@@ -1716,6 +1723,7 @@ int bundle_bridge::extract_nonsupple_HS_hits()
 				//printf("inside find max lpos\n");
 				cnt_lpos = support;
 				max_jc_lpos = jc;
+				support_jc_lpos.clear();
 				support_jc_lpos.insert(support_jc_lpos.begin(),support_vec.begin(),support_vec.end());
 			}
 		}
@@ -1727,6 +1735,7 @@ int bundle_bridge::extract_nonsupple_HS_hits()
 				//printf("inside find max rpos\n");
 				cnt_rpos = support;
 				max_jc_rpos = jc;
+				support_jc_rpos.clear();
 				support_jc_rpos.insert(support_jc_rpos.begin(),support_vec.begin(),support_vec.end());
 			}
 		}
@@ -1751,7 +1760,7 @@ int bundle_bridge::extract_nonsupple_HS_hits()
 
 			circ.circRNA_id = circRNA_id;
 			circ.seqname = chrm_id;
-			circ.source = "scallop2";
+			circ.source = "scallop2_HS";
 			circ.feature = "circRNA";
 			circ.gene_id = "gene";
 			circ.strand = infer_circ_strand(circ.circ_path);

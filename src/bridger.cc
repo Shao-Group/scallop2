@@ -108,10 +108,9 @@ int bridger::bridge_clip(int32_t p1, int32_t p2, circular_transcript &circ)
 		if(x1 != -1 && x2 != -1) break;
 	}
 
-	if(p1 == 13053366 && p2 == 13056491)
-	{
-		printf("Printing x1 and x2: x1 = %d, x2 = %d\n",x1,x2);
-	}
+
+	printf("Printing x1 and x2: x1 = %d, x2 = %d\n",x1,x2);
+	
 	
 	if(x1 != -1 && x2 != -1 && x1 > x2) return -1;
 
