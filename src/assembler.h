@@ -46,6 +46,7 @@ private:
 	vector<circular_transcript> circular_trsts; //a vector of circular transcripts class objs from all bundles
 	map <string, pair<circular_transcript, int>> circ_trst_map; // a map of distinct circ trsts with circRNA_id as key and the corresponding circRNA object
 
+	vector<circular_transcript> circular_trsts_HS;///a vector of circular transcripts class objs from all HS reads from all bundles
 public:
 	int assemble();
 
@@ -56,6 +57,7 @@ private:
 	int assemble(const splice_graph &gr, const hyper_set &hs, transcript_set &ts1, transcript_set &ts2);
 	int assign_RPKM();
 	int write();
+	int write_circular_boundaries();
 	int write_circular();
 	int compare(splice_graph &gr, const string &ref, const string &tex = "");
 	bool determine_regional_graph(splice_graph &gr);

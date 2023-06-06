@@ -32,6 +32,7 @@ assembler::assembler()
 	qcnt = 0;
 	circular_trsts.clear();
 	circ_trst_map.clear();
+	circular_trsts_HS.clear();
 }
 
 assembler::~assembler()
@@ -122,7 +123,7 @@ int assembler::assemble()
 	{
 		printf("Bridging configuration = %s, count = %d\n",itn2->first.c_str(),itn2->second);
 	}
-
+	
 	assign_RPKM();
 
 	filter ft(trsts); //post assembly
@@ -134,7 +135,10 @@ int assembler::assemble()
 	non_full_trsts = ft1.trs;
 
 	write();
+	printf("size of assembler circ vector HS = %lu\n", circular_trsts_HS.size());
 	printf("size of circular vector = %lu\n",circular_trsts.size());
+	write_circular_boundaries();
+
 	remove_duplicate_circ_trsts();
 	print_circular_trsts();
 	write_circular();
@@ -188,10 +192,7 @@ int assembler::process(int n)
 		circular_trsts.insert(circular_trsts.end(), bd.br.circ_trsts.begin(), bd.br.circ_trsts.end());
 		//}
 
-		/*if(circular_trsts.size() > 0)
-		{
-			printf("size of assembler circ vector = %lu\n", circular_trsts.size());
-		}*/
+		circular_trsts_HS.insert(circular_trsts_HS.end(), bd.br.circ_trsts_HS.begin(), bd.br.circ_trsts_HS.end());
 
 		bd.build(1, true);
 		if(verbose >= 1) bd.print(index++);	
@@ -411,6 +412,37 @@ int assembler::write()
             t.write(fout1);
     }
     fout1.close();
+
+	return 0;
+}
+
+int assembler::write_circular_boundaries()
+{
+	ofstream fout("circ_start_end.txt", fstream::trunc);
+	
+	if(fout.fail())
+	{
+		printf("failed");
+		return 0;
+	}
+
+	for(int i=0;i<circular_trsts_HS.size();i++)
+	{
+		circular_transcript circ = circular_trsts_HS[i];
+		fout<<circ.seqname<<"\t";
+		fout<<circ.start + 1<<"\t";
+    	fout<<circ.end<<endl;
+	}
+
+	for(int i=0;i<circular_trsts.size();i++)
+	{
+		circular_transcript circ = circular_trsts[i];
+		fout<<circ.seqname<<"\t";
+		fout<<circ.start + 1<<"\t";
+    	fout<<circ.end<<endl;
+	}	
+
+	fout.close();
 
 	return 0;
 }

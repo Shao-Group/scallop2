@@ -23,6 +23,7 @@ bundle_bridge::bundle_bridge(bundle_base &b)
 	: bb(b)
 {
 	circ_trsts.clear(); // emptying before storing circRNAs
+	circ_trsts_HS.clear();
 	//compute_strand();
 }
 
@@ -50,6 +51,8 @@ int bundle_bridge::build()
 
 	//group_fragments();
 
+
+	extract_all_non_supple_HS_hits();
 	extract_nonsupple_HS_hits();
 	/*if(circ_trsts.size() > 1)
 	{
@@ -1620,6 +1623,52 @@ int bundle_bridge::build_circ_fragments()
 	return 0;
 }
 
+int bundle_bridge::extract_all_non_supple_HS_hits()
+{
+	vector<hit> left_boundary_hits;
+	vector<hit> right_boundary_hits;
+
+	left_boundary_hits.clear();
+	right_boundary_hits.clear();
+
+	for(int i = 0; i < bb.hits.size(); i++)
+    {
+		hit h = bb.hits[i];
+        
+        if((h.flag & 0x800) >= 1) continue; //is a supple hit
+		if(h.suppl != NULL) continue; //has a supple hit
+
+		if(h.cigar_vector[0].first == 'S' || h.cigar_vector[0].first == 'H')
+		{
+			left_boundary_hits.push_back(h);
+		}
+
+		if(h.cigar_vector[h.cigar_vector.size()-1].first == 'S' || h.cigar_vector[h.cigar_vector.size()-1].first == 'H')
+		{
+			right_boundary_hits.push_back(h);
+		}
+	}
+
+	for(int i=0;i<left_boundary_hits.size();i++)
+	{
+		hit h1 = left_boundary_hits[i];
+		for(int j=0;j<right_boundary_hits.size();j++)
+		{
+			hit h2 = right_boundary_hits[j];
+
+			circular_transcript circ;
+			circ.seqname = bb.chrm.c_str();
+			circ.start = h1.pos;
+			circ.end = h2.rpos;
+
+			circ_trsts_HS.push_back(circ);
+		}
+	}
+
+	//printf("size of circ_trsts_HS:%lu\n",circ_trsts_HS.size());
+	return 0;
+}
+
 int bundle_bridge::extract_nonsupple_HS_hits()
 {
 	map <int32_t,pair<junction, vector<hit>>> junc_HS_map; //key junc lpos/rpos, stores junction and set of hits supporting the junction
@@ -1636,10 +1685,10 @@ int bundle_bridge::extract_nonsupple_HS_hits()
 		{
 			junction jc = junctions[j];
 
-			if(jc.rpos == 108235235)
+			/*if(jc.rpos == 108235235)
 			{
 				printf("108235235 present in junctions\n");
-			}
+			}*/
 		
 			if(h.cigar_vector[0].first == 'S' || h.cigar_vector[0].first == 'H')
 			{

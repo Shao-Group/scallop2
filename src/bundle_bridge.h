@@ -31,6 +31,7 @@ public:
 
 	vector<pair<fragment,fragment>> circ_fragment_pairs;	//bridged fragment pairs for circular RNA
 	vector<circular_transcript> circ_trsts; //a vector of circular transcripts class objs, with duplicates
+	vector<circular_transcript> circ_trsts_HS; ////a vector of circular transcripts from all possible H/S reads, with duplicates
 
 	vector<junction> junctions;			// splice junctions
 	map<int64_t, char> junc_map;			// map junction to strandness
@@ -59,6 +60,7 @@ public:
 	int fix_alignment_boundaries();
 
 	int build_circ_fragments();
+	int extract_all_non_supple_HS_hits();
 	int extract_nonsupple_HS_hits();
 	int extract_circ_fragment_pairs();
 	int print_circ_fragment_pairs();
