@@ -52,8 +52,8 @@ int bundle_bridge::build()
 	//group_fragments();
 
 
-	extract_all_non_supple_HS_hits();
-	extract_nonsupple_HS_hits();
+	//extract_all_non_supple_HS_hits();
+	//extract_nonsupple_HS_hits();
 	/*if(circ_trsts.size() > 1)
 	{
 		printf("extra circRNAs = %zu",circ_trsts.size());

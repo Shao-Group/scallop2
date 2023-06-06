@@ -135,10 +135,11 @@ int assembler::assemble()
 	non_full_trsts = ft1.trs;
 
 	write();
-	printf("size of assembler circ vector HS = %lu\n", circular_trsts_HS.size());
-	printf("size of circular vector = %lu\n",circular_trsts.size());
-	write_circular_boundaries();
 
+	//printf("size of assembler circ vector HS = %lu\n", circular_trsts_HS.size());
+	//write_circular_boundaries();
+
+	printf("size of circular vector = %lu\n",circular_trsts.size());
 	remove_duplicate_circ_trsts();
 	print_circular_trsts();
 	write_circular();
