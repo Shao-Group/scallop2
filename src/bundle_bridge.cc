@@ -2080,8 +2080,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 				}
 			}
 
-			//if(flag == 2 || (fr1.lpos >= bb.lpos-5 && fr1.lpos <= bb.lpos+5 && fr2.rpos >= bb.rpos-5 && fr2.rpos <= bb.rpos+5))
-			if(flag == 2 || (fr1.lpos == bb.lpos && fr2.rpos == bb.rpos))
+			if(flag == 2 || (fr1.lpos >= bb.lpos-5 && fr1.lpos <= bb.lpos+5 && fr2.rpos >= bb.rpos-5 && fr2.rpos <= bb.rpos+5))
 			{
 				printf("Found a case with junc comp 1\n");
 				printf("valid: flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",flag, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
@@ -2116,8 +2115,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 				}
 			}
 
-			//if(flag == 2 || (fr2.lpos >= bb.lpos-5 && fr2.lpos <= bb.lpos+5 && fr1.rpos >= bb.rpos-5 && fr1.rpos <= bb.rpos+5))
-			if(flag == 2 || (fr2.lpos == bb.lpos && fr1.rpos == bb.rpos))
+			if(flag == 2 || (fr2.lpos >= bb.lpos-5 && fr2.lpos <= bb.lpos+5 && fr1.rpos >= bb.rpos-5 && fr1.rpos <= bb.rpos+5))
 			{
 				printf("Found a case with junc comp 2\n");
 				join_circ_fragment_pair(circ_fragment_pairs[i],0,0);
