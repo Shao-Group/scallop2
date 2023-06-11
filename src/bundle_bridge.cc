@@ -1331,7 +1331,7 @@ int bundle_bridge::build_circ_fragments()
 				len_HS += fr.h2->suppl->right_cigar_len;
 			}
 
-			//printf("len_HS = %d\n",len_HS);
+			printf("len_HS = %d\n",len_HS);
 
 			if(abs(len_HS - 100) > 5) //here 100 is the estimated read length, replace this with any related exisiting parameter
 			{
@@ -2044,14 +2044,89 @@ int bundle_bridge::join_circ_fragment_pairs()
 		if(fr1.paths.size() != 1 || fr2.paths.size() != 1) continue; //not bridged
 		//if(fr1.paths[0].type != 1 || fr2.paths[0].type != 1) continue; //insert size not normal
 
-		printf("Printing separate fragments:\n");
+		printf("\nPrinting separate fragments:");
 
 		printf("\nchrm = %s\n",bb.chrm.c_str());
 
 		fr1.print(i+1);
 		fr2.print(i+1);
 
-		join_circ_fragment_pair(circ_fragment_pairs[i],0,0);		
+		//join_circ_fragment_pair(circ_fragment_pairs[i],0,0);
+
+		int flag = 0;
+
+		if(fr2.is_compatible == 1)
+		{
+			for(int j=0;j<junctions.size();j++)
+			{
+				junction jc = junctions[j];
+
+				if(jc.rpos == fr1.lpos)
+				{
+					printf("jc.rpos = %d\n",jc.rpos);
+					flag++;
+					break;
+				}
+			}
+
+			for(int j=0;j<junctions.size();j++)
+			{
+				junction jc = junctions[j];
+				if(jc.lpos == fr2.rpos)
+				{
+					printf("jc.lpos = %d\n",jc.lpos);
+					flag++;
+					break;
+				}
+			}
+
+			//if(flag == 2 || (fr1.lpos >= bb.lpos-5 && fr1.lpos <= bb.lpos+5 && fr2.rpos >= bb.rpos-5 && fr2.rpos <= bb.rpos+5))
+			if(flag == 2 || (fr1.lpos == bb.lpos && fr2.rpos == bb.rpos))
+			{
+				printf("Found a case with junc comp 1\n");
+				printf("valid: flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",flag, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
+				join_circ_fragment_pair(circ_fragment_pairs[i],0,0);
+			}
+			else
+			{
+				printf("Not valid: flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",flag, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
+			}
+		}
+		else if(fr2.is_compatible == 2)
+		{
+			for(int j=0;j<junctions.size();j++)
+			{
+				junction jc = junctions[j];
+				if(jc.rpos == fr2.lpos)
+				{
+					printf("jc.rpos = %d\n",jc.rpos);
+					flag++;
+					break;
+				}
+			}
+			
+			for(int j=0;j<junctions.size();j++)
+			{
+				junction jc = junctions[j];
+				if(jc.lpos == fr1.rpos)
+				{
+					printf("jc.lpos = %d\n",jc.lpos);
+					flag++;
+					break;
+				}
+			}
+
+			//if(flag == 2 || (fr2.lpos >= bb.lpos-5 && fr2.lpos <= bb.lpos+5 && fr1.rpos >= bb.rpos-5 && fr1.rpos <= bb.rpos+5))
+			if(flag == 2 || (fr2.lpos == bb.lpos && fr1.rpos == bb.rpos))
+			{
+				printf("Found a case with junc comp 2\n");
+				join_circ_fragment_pair(circ_fragment_pairs[i],0,0);
+			}
+			else
+			{
+				printf("Not valid: flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",flag, fr2.lpos, fr1.rpos, bb.lpos, bb.rpos);
+			}
+		}
 	}
 
 	return 0;
