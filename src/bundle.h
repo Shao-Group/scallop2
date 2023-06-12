@@ -19,6 +19,7 @@ See LICENSE for licensing.
 #include "hyper_set.h"
 #include "path.h"
 #include "gene.h"
+#include "reference.h"
 #include "transcript.h"
 
 #include "circular_transcript.h"
@@ -28,11 +29,12 @@ using namespace std;
 class bundle
 {
 public:
-	bundle(bundle_base &bb);
+	bundle(bundle_base &bb, reference &ref);
 	virtual ~bundle();
 
 public:
 	bundle_base &bb;				// input bundle base	
+	reference &ref;					// input reference
 	bundle_bridge br;				// contains fragments
 	split_interval_map fmap;		// matched interval map
 

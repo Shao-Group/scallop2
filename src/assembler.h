@@ -16,6 +16,7 @@ See LICENSE for licensing.
 #include "splice_graph.h"
 #include "hyper_set.h"
 #include "transcript_set.h"
+#include "reference.h"
 
 #include "circular_transcript.h"
 
@@ -31,6 +32,7 @@ private:
 	samFile *sfn;
 	bam_hdr_t *hdr;
 	bam1_t *b1t;
+	reference ref;
 	bundle_base bb1;		// +
 	bundle_base bb2;		// -
 	vector<bundle_base> pool;

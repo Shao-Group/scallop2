@@ -21,6 +21,7 @@ See LICENSE for licensing.
 #include "filter.h"
 
 assembler::assembler()
+	: ref(ref_file)
 {
     sfn = sam_open(input_file.c_str(), "r");
     hdr = sam_hdr_read(sfn);
@@ -186,7 +187,7 @@ int assembler::process(int n)
 		transcript_set ts1(bb.chrm, 0.9);		// full-length set
 		transcript_set ts2(bb.chrm, 0.9);		// non-full-length set
 
-		bundle bd(bb);
+		bundle bd(bb, ref);
 
 		//if(bd.junctions.size() != 0)
 		//{

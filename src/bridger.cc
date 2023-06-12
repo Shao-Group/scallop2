@@ -53,8 +53,10 @@ int bridger::bridge()
 	filter_paths();
 	int n1 = get_paired_fragments();
 
-	//bridge_phased_fragments();
-	//filter_paths();
+	// use reference to bridge
+	bridge_phased_fragments();
+	filter_paths();
+
 	int n2 = get_paired_fragments();
 
 	// first round of briding hard fragments

@@ -19,9 +19,10 @@ See LICENSE for licensing.
 #include "util.h"
 #include "undirected_graph.h"
 
-bundle::bundle(bundle_base &b)
-	: bb(b), br(b)
+bundle::bundle(bundle_base &b, reference &r)
+	: bb(b), br(b), ref(r)
 {
+	br.ref_trsts = ref.get_overlapped_transcripts(bb.chrm, bb.strand, bb.lpos, bb.rpos);
 	br.build();
 	prepare();
 }
