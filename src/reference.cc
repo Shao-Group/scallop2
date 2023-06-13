@@ -21,6 +21,10 @@ int reference::build_interval_set_map()
 		if(c == '+') add_interval_set(isms1, k);
 		if(c == '-') add_interval_set(isms2, k);
 	}
+
+	printf("isms0 size: %lu\n",isms0.size());
+	printf("isms1 size: %lu\n",isms1.size());
+	printf("isms2 size: %lu\n",isms2.size());
 	return 0;
 }
 
@@ -42,10 +46,12 @@ int reference::add_interval_set(map<string, interval_set_map> &isms, int k)
 		interval_set_map ism;
 		ism += make_pair(x, s);
 		isms.insert(pair<string, interval_set_map>(chrm, ism));
+		//printf("add_interval_set if cond\n");
 	}
 	else
 	{
 		isms[chrm] += make_pair(x, s);
+		//printf("add_interval_set else cond\n");
 	}
 	return 0;
 }

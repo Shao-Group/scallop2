@@ -22,7 +22,16 @@ See LICENSE for licensing.
 bundle::bundle(bundle_base &b, reference &r)
 	: bb(b), br(b), ref(r)
 {
+	compute_strand();
+	if(bb.strand != '.')
+	{
+		printf("input strand = %c\n",bb.strand);
+	}
 	br.ref_trsts = ref.get_overlapped_transcripts(bb.chrm, bb.strand, bb.lpos, bb.rpos);
+	if(br.ref_trsts.size() > 0)
+	{
+		printf("ref_trsts size: %lu\n",br.ref_trsts.size());
+	}
 	br.build();
 	prepare();
 }
@@ -32,7 +41,7 @@ bundle::~bundle()
 
 int bundle::prepare()
 {
-	compute_strand();
+	//compute_strand();
 	build_intervals();
 	build_junctions();
 
