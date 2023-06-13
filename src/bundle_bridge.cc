@@ -2053,7 +2053,8 @@ int bundle_bridge::join_circ_fragment_pairs()
 
 		//join_circ_fragment_pair(circ_fragment_pairs[i],0,0);
 
-		int flag = 0;
+		int bam_junc_flag = 0;
+		int ref_junc_flag = 0;
 
 		if(fr2.is_compatible == 1)
 		{
@@ -2064,7 +2065,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 				if(jc.rpos == fr1.lpos)
 				{
 					printf("jc.rpos = %d\n",jc.rpos);
-					flag++;
+					bam_junc_flag++;
 					break;
 				}
 			}
@@ -2075,20 +2076,72 @@ int bundle_bridge::join_circ_fragment_pairs()
 				if(jc.lpos == fr2.rpos)
 				{
 					printf("jc.lpos = %d\n",jc.lpos);
-					flag++;
+					bam_junc_flag++;
+					break;
+				}
+			}
+			
+			int temp_flag = 0;
+			for(int t=0;t<ref_trsts.size();t++)
+			{
+				transcript trst = ref_trsts[t];
+				vector<PI32> chain = trst.get_intron_chain();
+
+				for(int k=0;k<chain.size();k++)
+				{
+					// assert(chain[k].first < chain[k].second);
+					// if(chain[k].first <= bb.lpos) continue;
+					// if(chain[k].second >= bb.rpos) continue;
+
+					if(fr1.lpos == chain[k].second)
+					{
+						ref_junc_flag++;
+						temp_flag = 1;
+						break;
+					}
+				}
+
+				if(temp_flag == 1)
+				{
 					break;
 				}
 			}
 
-			if(flag == 2 || (fr1.lpos >= bb.lpos-5 && fr1.lpos <= bb.lpos+5 && fr2.rpos >= bb.rpos-5 && fr2.rpos <= bb.rpos+5))
+			temp_flag = 0;
+			for(int t=0;t<ref_trsts.size();t++)
+			{
+				transcript trst = ref_trsts[t];
+				vector<PI32> chain = trst.get_intron_chain();
+
+				for(int k=0;k<chain.size();k++)
+				{
+					// assert(chain[k].first < chain[k].second);
+					// if(chain[k].first <= bb.lpos) continue;
+					// if(chain[k].second >= bb.rpos) continue;
+
+					if(fr2.rpos == chain[k].first)
+					{
+						ref_junc_flag++;
+						temp_flag = 1;
+						break;
+					}
+				}
+
+				if(temp_flag == 1)
+				{
+					break;
+				}
+			}
+
+			if(bam_junc_flag == 2 || ref_junc_flag == 2 || (fr1.lpos >= bb.lpos-5 && fr1.lpos <= bb.lpos+5 && fr2.rpos >= bb.rpos-5 && fr2.rpos <= bb.rpos+5))
 			{
 				printf("Found a case with junc comp 1\n");
-				printf("valid: flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",flag, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
+				printf("valid: flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
 				join_circ_fragment_pair(circ_fragment_pairs[i],0,0);
 			}
 			else
 			{
-				printf("Not valid: flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",flag, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
+				printf("Not valid: flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
 			}
 		}
 		else if(fr2.is_compatible == 2)
@@ -2099,7 +2152,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 				if(jc.rpos == fr2.lpos)
 				{
 					printf("jc.rpos = %d\n",jc.rpos);
-					flag++;
+					bam_junc_flag++;
 					break;
 				}
 			}
@@ -2110,19 +2163,72 @@ int bundle_bridge::join_circ_fragment_pairs()
 				if(jc.lpos == fr1.rpos)
 				{
 					printf("jc.lpos = %d\n",jc.lpos);
-					flag++;
+					bam_junc_flag++;
 					break;
 				}
 			}
 
-			if(flag == 2 || (fr2.lpos >= bb.lpos-5 && fr2.lpos <= bb.lpos+5 && fr1.rpos >= bb.rpos-5 && fr1.rpos <= bb.rpos+5))
+			int temp_flag = 0;
+			for(int t=0;t<ref_trsts.size();t++)
+			{
+				transcript trst = ref_trsts[t];
+				vector<PI32> chain = trst.get_intron_chain();
+
+				for(int k=0;k<chain.size();k++)
+				{
+					// assert(chain[k].first < chain[k].second);
+					// if(chain[k].first <= bb.lpos) continue;
+					// if(chain[k].second >= bb.rpos) continue;
+
+					if(fr2.lpos == chain[k].second)
+					{
+						ref_junc_flag++;
+						temp_flag = 1;
+						break;
+					}
+				}
+
+				if(temp_flag == 1)
+				{
+					break;
+				}
+			}
+
+			temp_flag = 0;
+			for(int t=0;t<ref_trsts.size();t++)
+			{
+				transcript trst = ref_trsts[t];
+				vector<PI32> chain = trst.get_intron_chain();
+
+				for(int k=0;k<chain.size();k++)
+				{
+					// assert(chain[k].first < chain[k].second);
+					// if(chain[k].first <= bb.lpos) continue;
+					// if(chain[k].second >= bb.rpos) continue;
+
+					if(fr1.rpos == chain[k].first)
+					{
+						ref_junc_flag++;
+						temp_flag = 1;
+						break;
+					}
+				}
+
+				if(temp_flag == 1)
+				{
+					break;
+				}
+			}
+
+			if(bam_junc_flag == 2 || ref_junc_flag == 2 || (fr2.lpos >= bb.lpos-5 && fr2.lpos <= bb.lpos+5 && fr1.rpos >= bb.rpos-5 && fr1.rpos <= bb.rpos+5))
 			{
 				printf("Found a case with junc comp 2\n");
+				printf("valid: flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, fr2.lpos, fr1.rpos, bb.lpos, bb.rpos);
 				join_circ_fragment_pair(circ_fragment_pairs[i],0,0);
 			}
 			else
 			{
-				printf("Not valid: flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",flag, fr2.lpos, fr1.rpos, bb.lpos, bb.rpos);
+				printf("Not valid: flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, fr2.lpos, fr1.rpos, bb.lpos, bb.rpos);
 			}
 		}
 	}
