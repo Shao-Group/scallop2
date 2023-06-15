@@ -37,6 +37,9 @@ int reference::add_interval_set(map<string, interval_set_map> &isms, int k)
 	s.insert(k);
 
 	string chrm = genes[k].get_seqname();
+
+	printf("shao: add gene %d-%d to chrm %s\n", p.first, p.second, chrm.c_str());
+
 	if(isms.find(chrm) == isms.end())
 	{
 		interval_set_map ism;
@@ -65,6 +68,9 @@ vector<transcript> reference::get_overlapped_transcripts(const map<string, inter
 	map<string, interval_set_map>::const_iterator it = isms.find(chrm);
 	if(it == isms.end()) return v;
 	set<int> s = get_overlapped_set(it->second, x, y);
+
+	printf("shao: query %d-%d of chrm %s and found %lu genes\n", x, y, chrm.c_str(), s.size());
+
 	for(set<int>::iterator x = s.begin(); x != s.end(); x++)
 	{
 		v.insert(v.end(), genes[*x].transcripts.begin(), genes[*x].transcripts.end());
