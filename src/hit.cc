@@ -47,6 +47,8 @@ hit& hit::operator=(const hit &h)
 	hi = h.hi;
 	nh = h.nh;
 	nm = h.nm;
+	sa = h.sa;
+	supple_pos = h.supple_pos;
 	suppl = h.suppl;
 	end = '.';
 
@@ -88,6 +90,8 @@ hit::hit(const hit &h)
 	hi = h.hi;
 	nh = h.nh;
 	nm = h.nm;
+	sa = h.sa;
+	supple_pos = h.supple_pos;
 	suppl = h.suppl;
 	end = h.end;
 
@@ -125,6 +129,7 @@ hit::hit(bam1_t *b, int id)
 	suppl = NULL;
 	end = '.';
 
+	supple_pos = 0;
 	left_cigar = '.';					// S=soft clip, H=hard clip, M=match, .=default
 	right_cigar = '.';					// S=soft clip, H=hard clip, M=match, .=default
 	left_cigar_len = 0;
@@ -375,10 +380,39 @@ int hit::set_tags(bam1_t *b)
 	if(p5 && (*p5) == 'c') nm = bam_aux2i(p5);
 
 	// set umi
-        umi = "";
-        uint8_t *p6 = bam_aux_get(b, "UB");
-        if(p6 && (*p6) == 'H') umi = bam_aux2Z(p6);
+	umi = "";
+	uint8_t *p6 = bam_aux_get(b, "UB");
+	if(p6 && (*p6) == 'H') umi = bam_aux2Z(p6);
 	if(p6 && (*p6) == 'Z') umi = bam_aux2Z(p6);
+
+	sa = "";
+	uint8_t *p7 = bam_aux_get(b, "SA"); //sa tag has the supple pos and cigar of curr hit, ex: SA:Z:chr1,14068602,+,51M99H,255,0;
+	if(p7 && (*p7) == 'Z') sa = bam_aux2Z(p7);
+	if(p7 && (*p7) == 'z') sa = bam_aux2Z(p7);
+
+	//printf("umi tag:%s\n",umi.c_str());
+	//printf("sa tag:%s\n",sa.c_str());
+
+	string sa_tag = sa.c_str();
+
+	vector<string> results;
+	stringstream  ss(sa_tag);
+	string str;
+	while (getline(ss, str, ',')) {
+		results.push_back(str);
+	}
+
+	if(results.size() > 0)
+	{
+		/*for(int i=0;i<results.size();i++)
+		{
+			printf("%s ",results[i].c_str());
+		}
+		printf("\n");*/
+
+		supple_pos = atoi(results[1].c_str());
+		//printf("supple_pos = %d\n",supple_pos);
+	}
 
 
 	/*	
@@ -459,8 +493,7 @@ bool hit::operator<(const hit &h) const
 int hit::print() const
 {
 	// print basic information
-	printf("Hit %s: hid = %d, [%d-%d), mpos = %d, flag = %d, quality = %d, strand = %c, xs = %c, ts = %c, isize = %d, qlen = %d, hi = %d, nh = %d, umi = %s, bridged = %c, paired = %c, spos_size = %zu\n", 
-			qname.c_str(), hid, pos, rpos, mpos, flag, qual, strand, xs, ts, isize, qlen, hi, nh, umi.c_str(), bridged ? 'T' : 'F',paired ? 'T' : 'F', spos.size());
+	printf("Hit %s: hid = %d, [%d-%d), mpos = %d, flag = %d, quality = %d, strand = %c, xs = %c, ts = %c, isize = %d, qlen = %d, hi = %d, nh = %d, umi = %s, sa = %s, supple_pos = %d, bridged = %c, paired = %c, spos_size = %zu\n", qname.c_str(), hid, pos, rpos, mpos, flag, qual, strand, xs, ts, isize, qlen, hi, nh, umi.c_str(), sa.c_str(), supple_pos, bridged ? 'T' : 'F',paired ? 'T' : 'F', spos.size());
 
 	/*
 	printf(" start position (%d - )\n", pos);

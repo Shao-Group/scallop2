@@ -108,6 +108,12 @@ int bundle_bridge::build_supplementaries()
         // do not use hi; as long as qname, pos and isize are identical
         // add 0x40 and 0x80
         int k = (h.qhash % max_index + (h.flag & 0x40) + (h.flag & 0x80)) % max_index;
+
+		if(strcmp(h.qname.c_str(),"E00511:127:HJN5NALXX:5:1204:22648:53487") == 0)
+		{
+			printf("Found read h entering E00511:127:HJN5NALXX:5:1204:22648:53487, k=%d\n",k);
+			printf("qhash=%ld,h.flag&0x40=%d,h.flag&0x80=%d,max_index=%d\n",h.qhash,(h.flag & 0x40),(h.flag & 0x80),max_index);
+		}
         vv[k].push_back(i);
         //printf("Adding supple\n");
     }
@@ -126,15 +132,37 @@ int bundle_bridge::build_supplementaries()
 
         int k = (h.qhash % max_index + (h.flag & 0x40) + (h.flag & 0x80)) % max_index;
 
+		if(strcmp(h.qname.c_str(),"E00511:127:HJN5NALXX:5:1204:22648:53487") == 0)
+		{
+			printf("Found read h extracting E00511:127:HJN5NALXX:5:1204:22648:53487, k=%d\n",k);
+			h.print();
+			printf("qhash=%ld,h.flag&0x40=%d,h.flag&0x80=%d,max_index=%d\n",h.qhash,(h.flag & 0x40),(h.flag & 0x80),max_index);
+		}
+
         for(int j = 0; j < vv[k].size(); j++)
         {
             hit &z = bb.hits[vv[k][j]];
+
+			if(strcmp(z.qname.c_str(),"E00511:127:HJN5NALXX:5:1204:22648:53487") == 0)
+			{
+				printf("Found read z E00511:127:HJN5NALXX:5:1204:22648:53487, k=%d\n",k);
+				z.print();
+				printf("Read h corr to read z:\n");
+				h.print();
+			}
+			
             //if(z.hi != h.hi) continue;
             //if(z.paired == true) continue;
             //if(z.pos != h.mpos) continue;
             //if(z.isize + h.isize != 0) continue;
             //if(z.qhash != h.qhash) continue;
             if(z.qname != h.qname) continue;
+
+			if(strcmp(h.qname.c_str(),"E00511:127:HJN5NALXX:5:1204:22648:53487") == 0)
+			{
+				printf("Found read h E00511:127:HJN5NALXX:5:1204:22648:53487\n");
+			}
+			
             // TODO check 0x40 and 0x80 are the same
             if(((z.flag & 0x40) != (h.flag & 0x40)) || ((z.flag & 0x80) != (h.flag & 0x80))) continue;
 
@@ -145,6 +173,7 @@ int bundle_bridge::build_supplementaries()
         }
     }
 
+	//printf("End of bundle bridge extract supple.\n");
     return 0;
 }
 
@@ -2136,12 +2165,12 @@ int bundle_bridge::join_circ_fragment_pairs()
 			if(bam_junc_flag == 2 || ref_junc_flag == 2 || (fr1.lpos >= bb.lpos-5 && fr1.lpos <= bb.lpos+5 && fr2.rpos >= bb.rpos-5 && fr2.rpos <= bb.rpos+5))
 			{
 				printf("Found a case with junc comp 1\n");
-				printf("valid: flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
+				printf("valid: bam_junc_flag = %d, ref_junc_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, ref_junc_flag, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
 				join_circ_fragment_pair(circ_fragment_pairs[i],0,0);
 			}
 			else
 			{
-				printf("Not valid: flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
+				printf("Not valid: bam_junc_flag = %d, ref_junc_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, ref_junc_flag, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
 			}
 		}
 		else if(fr2.is_compatible == 2)
@@ -2223,12 +2252,12 @@ int bundle_bridge::join_circ_fragment_pairs()
 			if(bam_junc_flag == 2 || ref_junc_flag == 2 || (fr2.lpos >= bb.lpos-5 && fr2.lpos <= bb.lpos+5 && fr1.rpos >= bb.rpos-5 && fr1.rpos <= bb.rpos+5))
 			{
 				printf("Found a case with junc comp 2\n");
-				printf("valid: flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, fr2.lpos, fr1.rpos, bb.lpos, bb.rpos);
+				printf("valid: bam_junc_flag = %d, ref_junc_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, ref_junc_flag, fr2.lpos, fr1.rpos, bb.lpos, bb.rpos);
 				join_circ_fragment_pair(circ_fragment_pairs[i],0,0);
 			}
 			else
 			{
-				printf("Not valid: flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, fr2.lpos, fr1.rpos, bb.lpos, bb.rpos);
+				printf("Not valid: bam_junc_flag = %d, ref_junc_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, ref_junc_flag, fr2.lpos, fr1.rpos, bb.lpos, bb.rpos);
 			}
 		}
 	}

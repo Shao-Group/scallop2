@@ -77,6 +77,8 @@ public:
 	int32_t nh;								// NH aux in sam
 	int32_t hi;								// HI aux in sam
 	int32_t nm;								// NM aux in sam
+	string sa;								// SA aux in sam
+	int32_t supple_pos;						// stores position of supple from SA tag
 	size_t qhash;							// hash code for qname
 	hit *suppl;								// supplementary hit
 	char end;								// left end 'L', right end 'R'

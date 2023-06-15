@@ -37,6 +37,10 @@ int bundle_base::add_hit(const hit &ht)
 	if(ht.mpos > ht.rpos && ht.mpos <= ht.rpos + 100000) p = ht.mpos;
 	if(p > rpos) rpos = p;
 
+	//try to include supplementary reads
+	if(ht.supple_pos != 0 && ht.supple_pos > ht.rpos && ht.supple_pos <= ht.rpos + 100000) p = ht.supple_pos;
+	if(p > rpos) rpos = p;
+
 	// set tid
 	if(tid == -1) tid = ht.tid;
 	assert(tid == ht.tid);
