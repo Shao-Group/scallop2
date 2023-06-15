@@ -10,6 +10,7 @@ reference::reference(const string &file)
 	: genome(file)
 {
 	build_interval_set_map();
+	print();
 }
 
 int reference::build_interval_set_map()
