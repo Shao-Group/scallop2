@@ -38,7 +38,7 @@ int reference::add_interval_set(map<string, interval_set_map> &isms, int k)
 
 	string chrm = genes[k].get_seqname();
 
-	printf("shao: add gene %d-%d to chrm %s\n", p.first, p.second, chrm.c_str());
+	printf("shao: add gene %d-%d to chrm %s, gene-id = %s\n", p.first, p.second, chrm.c_str(), genes[k].get_gene_id().c_str());
 
 	if(isms.find(chrm) == isms.end())
 	{
