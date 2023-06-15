@@ -56,8 +56,14 @@ int hyper_set::build_edges(directed_graph &gr, MEI& e2i)
 		if(c < min_router_count) continue;
 
 		const vector<int> &vv = it->first;
+		if(vv.size() <= 0) continue;
+
 		vector<int> ve;
 		bool b = true;
+
+		PEB p0 = gr.edge(0, vv[0]);
+		if(p0.second == true) ve.push_back(e2i[p0.first]);
+
 		for(int k = 0; k < vv.size() - 1; k++)
 		{
 			PEB p = gr.edge(vv[k], vv[k + 1]);
@@ -65,6 +71,9 @@ int hyper_set::build_edges(directed_graph &gr, MEI& e2i)
 			if(p.second == false) ve.push_back(-1);
 			else ve.push_back(e2i[p.first]);
 		}
+
+		PEB pn = gr.edge(vv.back(), gr.num_vertices() - 1);
+		if(pn.second == true) ve.push_back(e2i[pn.first]);
 
 		// edit here to consider single edges
 		if(b == true && ve.size() >= 1)

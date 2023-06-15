@@ -1616,7 +1616,7 @@ int bundle::build_hyper_set()
 		int c = it->second;
 
 		// TODO
-		if(v.size() >= 2) hs.add_node_list(v, c);
+		if(v.size() >= 1) hs.add_node_list(v, c);
 	}
 	return 0;
 }
