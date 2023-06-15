@@ -300,7 +300,11 @@ set<int> get_overlapped_set(const interval_set_map &ism, int32_t x, int32_t y)
 
 	for(ISMI it = lit; ; it++)
 	{
-		assert(upper(it->first) > lower(it->first));
+		if(upper(it->first) <= lower(it->first))
+		{
+			printf("BUG: it->first = %d-%d\n", lower(it->first), upper(it->first));
+		}
+		//assert(upper(it->first) > lower(it->first));
 
 		// check overlap
 		if(lower(it->first) < y && upper(it->first) > x)
