@@ -102,6 +102,7 @@ PISMI locate_boundary_iterators(const interval_set_map &ism, int32_t x, int32_t 
 		assert(lit == ism.end());
 	}
 
+	printf("shao: x = %d, y = %d, lit = [%d, %d)\n", x, y, lower(lit->first), upper(lit->first));
 	return PISMI(lit, rit); 
 }
 
@@ -287,8 +288,11 @@ int evaluate_triangle(const split_interval_map &imap, int ll, int rr, double &av
 
 set<int> get_overlapped_set(const interval_set_map &ism, int32_t x, int32_t y)
 {
-	PISMI pei = locate_boundary_iterators(ism, x, y);
-	ISMI lit = pei.first, rit = pei.second;
+	// potential bug here (shao)
+	//PISMI pei = locate_boundary_iterators(ism, x, y);
+	//ISMI lit = pei.first, rit = pei.second;
+	ISMI lit = locate_right_iterator(ism, x);
+	ISMI rit = locate_left_iterator(ism, y); 
 
 	set<int> s;
 	if(lit == ism.end()) return s;
@@ -297,7 +301,13 @@ set<int> get_overlapped_set(const interval_set_map &ism, int32_t x, int32_t y)
 	for(ISMI it = lit; ; it++)
 	{
 		assert(upper(it->first) > lower(it->first));
-		s.insert((it->second).begin(), (it->second).end());
+
+		// check overlap
+		if(lower(it->first) < y && upper(it->first) > x)
+		{
+			s.insert((it->second).begin(), (it->second).end());
+		}
+		if(it == ism.end()) break;
 		if(it == rit) break;
 	}
 	return s;
