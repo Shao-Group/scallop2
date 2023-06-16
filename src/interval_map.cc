@@ -298,6 +298,9 @@ set<int> get_overlapped_set(const interval_set_map &ism, int32_t x, int32_t y)
 	if(lit == ism.end()) return s;
 	if(rit == ism.end()) return s;
 
+	printf("overlap: x = %d, y = %d, lit = %d-%d\n", x, y, lower(lit->first), upper(lit->first));
+	printf("overlap: x = %d, y = %d, rit = %d-%d\n", x, y, lower(rit->first), upper(rit->first));
+
 	for(ISMI it = lit; ; it++)
 	{
 		if(upper(it->first) <= lower(it->first))
