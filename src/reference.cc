@@ -10,7 +10,6 @@ reference::reference(const string &file)
 	: genome(file)
 {
 	build_interval_set_map();
-	print();
 }
 
 int reference::build_interval_set_map()
@@ -38,9 +37,7 @@ int reference::add_interval_set(map<string, interval_set_map> &isms, int k)
 	s.insert(k);
 
 	string chrm = genes[k].get_seqname();
-
-	printf("shao: add gene %d-%d to chrm %s, gene-id = %s, strand = %c\n", 
-			p.first, p.second, chrm.c_str(), genes[k].get_gene_id().c_str(), genes[k].get_strand());
+	//printf("shao: add gene %d-%d to chrm %s, gene-id = %s, strand = %c\n", p.first, p.second, chrm.c_str(), genes[k].get_gene_id().c_str(), genes[k].get_strand());
 
 	if(isms.find(chrm) == isms.end())
 	{
@@ -71,8 +68,7 @@ vector<transcript> reference::get_overlapped_transcripts(const map<string, inter
 	if(it == isms.end()) return v;
 	set<int> s = get_overlapped_set(it->second, x, y);
 
-	printf("shao: query %d-%d of chrm %s and found %lu genes\n", x, y, chrm.c_str(), s.size());
-
+	//printf("shao: query %d-%d of chrm %s and found %lu genes\n", x, y, chrm.c_str(), s.size());
 	for(set<int>::iterator x = s.begin(); x != s.end(); x++)
 	{
 		v.insert(v.end(), genes[*x].transcripts.begin(), genes[*x].transcripts.end());

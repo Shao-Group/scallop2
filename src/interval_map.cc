@@ -102,7 +102,7 @@ PISMI locate_boundary_iterators(const interval_set_map &ism, int32_t x, int32_t 
 		assert(lit == ism.end());
 	}
 
-	printf("shao: x = %d, y = %d, lit = [%d, %d)\n", x, y, lower(lit->first), upper(lit->first));
+	//printf("shao: x = %d, y = %d, lit = [%d, %d)\n", x, y, lower(lit->first), upper(lit->first));
 	return PISMI(lit, rit); 
 }
 
@@ -297,37 +297,11 @@ set<int> get_overlapped_set(const interval_set_map &ism, int32_t x, int32_t y)
 	for(ISMI it = lit; it != ism.end() && it != rit; it++)
 	{
 		assert(upper(it->first) > lower(it->first));
-		if(upper(it->first) <= lower(it->first))
-		{
-			printf("BUG: it->first = %d-%d\n", lower(it->first), upper(it->first));
-		}
-
-		printf("overlap: x = %d, y = %d, it = %d-%d\n", x, y, lower(it->first), upper(it->first));
+		//if(upper(it->first) <= lower(it->first)) printf("BUG: it->first = %d-%d\n", lower(it->first), upper(it->first));
+		//printf("overlap: x = %d, y = %d, it = %d-%d\n", x, y, lower(it->first), upper(it->first));
 		assert(lower(it->first) < y && upper(it->first) > x);
 		s.insert((it->second).begin(), (it->second).end());
 	}
-
-	/*
-	printf("overlap: x = %d, y = %d, lit = %d-%d\n", x, y, lower(lit->first), upper(lit->first));
-	printf("overlap: x = %d, y = %d, rit = %d-%d\n", x, y, lower(rit->first), upper(rit->first));
-
-	for(ISMI it = lit; ; it++)
-	{
-		if(upper(it->first) <= lower(it->first))
-		{
-			printf("BUG: it->first = %d-%d\n", lower(it->first), upper(it->first));
-		}
-		//assert(upper(it->first) > lower(it->first));
-
-		// check overlap
-		if(lower(it->first) < y && upper(it->first) > x)
-		{
-			s.insert((it->second).begin(), (it->second).end());
-		}
-		if(it == ism.end()) break;
-		if(it == rit) break;
-	}
-	*/
 	return s;
 }
 
