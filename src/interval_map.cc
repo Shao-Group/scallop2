@@ -291,8 +291,8 @@ set<int> get_overlapped_set(const interval_set_map &ism, int32_t x, int32_t y)
 	// potential bug here (shao)
 	//PISMI pei = locate_boundary_iterators(ism, x, y);
 	//ISMI lit = pei.first, rit = pei.second;
-	ISMI lit = locate_right_iterator(ism, x);
-	ISMI rit = locate_left_iterator(ism, y); 
+	ISMI lit = locate_left_iterator(ism, x);
+	ISMI rit = locate_right_iterator(ism, y); 
 
 	set<int> s;
 	if(lit == ism.end()) return s;
