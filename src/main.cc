@@ -23,6 +23,9 @@ int main(int argc, const char **argv)
 {
 	srand(time(0));
 
+	//test_interval_set_map();
+	//return 0;
+
 	if(argc == 1)
 	{
 		print_copyright();
