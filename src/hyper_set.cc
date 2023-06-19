@@ -8,7 +8,7 @@ See LICENSE for licensing.
 #include "config.h"
 #include <algorithm>
 #include <cstdio>
-#include <cfloat>
+#include <climits>
 
 int hyper_set::clear()
 {
@@ -644,22 +644,22 @@ int hyper_set::print()
 	return 0;
 }
 
-double hyper_set::get_compatible_bottleneck(const vector<int> &p)
+int hyper_set::get_compatible_bottleneck(const vector<int> &p)
 {
-	double bt = DBL_MAX;
+	double bt = INT_MAX;
 	for(int i = 0; i < p.size(); i++)
 	{
 		int e = p[i];
-		double w = 0;
+		int w = 0;
 		if(e2s.find(e) != e2s.end())
 		{
 			set<int> &s = e2s[e];
 			for(set<int>::iterator it = s.begin(); it != s.end(); it++)
 			{
 				vector<int> &f = edges[*it];
-				bool b = false;
 				// check if f is compatible with p
-				if(b == false) continue;
+                vector<int> v = consecutive_subset(p, f);
+                if(v.size() == 0) continue;
 				w += ecnts[*it];
 			}
 		}
