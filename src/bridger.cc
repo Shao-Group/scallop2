@@ -50,25 +50,40 @@ int bridger::bridge()
 	int n = bd->fragments.size();
 
 	bridge_overlapped_fragments();
+
 	filter_paths();
 	int n1 = get_paired_fragments();
 
+	vector<fcluster> open_fclusters;
+	cluster_open_fragments(open_fclusters);
+
 	// use reference to bridge
-	bridge_phased_fragments();
-	filter_paths();
+	bridge_phased_fragments(open_fclusters);
+
+	// should not call this function
+	// as it tries to keep only one
+	// bridging path
+	//filter_paths();
 
 	int n2 = get_paired_fragments();
 
 	// first round of briding hard fragments
 	//remove_tiny_boundary();//remove false alignment
-	bridge_hard_fragments();
-	filter_paths();
+	bridge_hard_fragments(open_fclusters);
+
+	// should not call this function
+	// as it tries to keep only one
+	// bridging path
+	//filter_paths();
 	int n3 = get_paired_fragments();
 
-	// 2nd round of briding hard fragments
-	bridge_hard_fragments();
-	filter_paths();
+	// skip the 2nd round of bridgin
+	//// 2nd round of briding hard fragments
+	//bridge_hard_fragments();
+	//filter_paths();
 	int n4 = get_paired_fragments();
+
+	pick_bridge_path();
 
 	double r1 = n1 * 100.0 / n;
 	double r2 = n2 * 100.0 / n;
@@ -237,10 +252,10 @@ int bridger::bridge_overlapped_fragment(fragment &fr, int ex1, int ex2)
 	return 0;
 }
 
-int bridger::bridge_phased_fragments()
+int bridger::bridge_phased_fragments(vector<fcluster> &fclusters)
 {
-	vector<fcluster> fclusters;
-	cluster_open_fragments(fclusters);
+	//vector<fcluster> fclusters;
+	//cluster_open_fragments(fclusters);
 
 	for(int k = 0; k < fclusters.size(); k++)
 	{
@@ -532,6 +547,7 @@ int bridger::bridge_phased_cluster(fcluster &fc)
 			p.v = fc.phase[k];
 			p.length = bd->compute_aligned_length(fr->k1l, fr->k2r, p.v);
 			p.v = encode_vlist(p.v);
+			p.score = 1;
 			if(p.length >= length_low && p.length <= length_high) p.type = 1;
 			else p.type = 2;
 			fr->paths.push_back(p);
@@ -602,7 +618,7 @@ int bridger::build_path_nodes()
 	return 0;
 }
 
-int bridger::bridge_hard_fragments()
+int bridger::bridge_hard_fragments(vector<fcluster> &open)
 {
 	build_junction_graph();
 
@@ -612,8 +628,8 @@ int bridger::bridge_hard_fragments()
 		build_overlap_index();
 	}
 
-	vector<fcluster> open;
-	cluster_open_fragments(open);
+	//vector<fcluster> open;
+	//cluster_open_fragments(open);
 	sort(open.begin(), open.end(), compare_fcluster_v1_v2);
 
 	//print open clusters
@@ -805,13 +821,14 @@ int bridger::bridge_hard_fragments()
 				p.v = pn[be];
 				p.length = bd->compute_aligned_length(fr->k1l, fr->k2r, p.v);
 				p.v = encode_vlist(p.v);
+				p.score = ps[be];
 
 				if(p.length >= length_low && p.length <= length_high)
 				{
 					//bd->breads.insert(fr->h1->qname);
-					p.type = 1;
+					p.type = 3;
 				}
-				else p.type = 2;
+				else p.type = 4;
 
 				fr->paths.push_back(p);
 				//printf(" fragment %d length = %d using path %d, p.type = %d\n", i, p.length, be, p.type);
@@ -1718,6 +1735,42 @@ int bridger::filter_paths()
 			//fr.h1->bridged = true;
 			//fr.h2->bridged = true;
 		}
+	}
+	return 0;
+}
+
+int bridger::pick_bridge_path()
+{
+	for(int k = 0; k < bd->fragments.size(); k++)
+	{
+		fragment &fr = bd->fragments[k];
+
+		if(fr.paths.size() <= 0) 
+		{
+			fr.set_bridged(false);
+			continue;
+		}
+
+		int bestp = -1;
+
+		// let A be the set of b-paths whose type is either 1 or 2 -- ref
+		// let B be the set of b-paths whose type is either 3 or 4 -- reads
+		// if A overlaps with B
+		// then we only consider the intersection
+		// and we pick one whose score is maximized among 3/4 types
+
+
+		// if intersection is empty, we give priority to 3/4
+		// in this case, pick one whose score is maximized among 3/4 types
+
+
+		// if no 3/4 types, pick one randomly from 1/2
+		// later on we can take the #counts in reference into account
+
+		fr.paths[0] = fr.paths[bestp];
+		fr.paths.resize(1);
+		assert(fr.paths.size() == 1);
+		fr.set_bridged(true);
 	}
 	return 0;
 }
