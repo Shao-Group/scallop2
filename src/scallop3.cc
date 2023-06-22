@@ -58,7 +58,28 @@ int scallop3::assemble()
     for(int v = 1; v <= t; v++)
     {
         set< vector<int> > new_paths;
-        for(auto p = hs.edges.begin(); p != hs.edges.end(); p++)
+
+        PEEI pei = gr.in_edges(v);
+		for(auto it = pei.first; it != pei.second; it++)
+		{
+			edge_descriptor e = (*it);
+            printf("-----Current edge: (%d, %d)\n", e->source(), e->target());
+
+            for(int i = 0; i < topnum; i++)
+            {
+                int frontv = e->source();
+                vector<int> new_path = top_paths[frontv][i];
+                if(frontv != 0 && new_path.size() <= 0) continue;
+                if(frontv == 0 && i>0) continue;
+
+                new_path.push_back(e2i[e]);
+                new_paths.insert(new_path);
+                printf("New path: ");
+                print_phasing_path(new_path);
+
+            }
+        }
+        /*for(auto p = hs.edges.begin(); p != hs.edges.end(); p++)
         {
             int backv = i2e[p->back()]->target();
             if(backv != v) continue;
@@ -77,7 +98,7 @@ int scallop3::assemble()
                 //print_phasing_path(new_path);
 
             }
-        }
+        }*/
 
         for(auto np = new_paths.begin(); np != new_paths.end(); np++)
         {
@@ -102,7 +123,7 @@ int scallop3::assemble()
     }
 
     paths.clear();
-    for(int i = 0; i < 1; i++)
+    for(int i = 0; i < topnum; i++)
     {
         if(top_btn[t][i] <= 0) continue;
         path p;
