@@ -38,6 +38,7 @@ int bundle_bridge::build()
 	extend_junctions();
 
 	build_regions();
+	build_partial_exons();
 
 	align_hits_transcripts();
 	index_references();
@@ -540,6 +541,32 @@ int bundle_bridge::build_regions()
 		regions.push_back(rr);
 	}
 
+	return 0;
+}
+
+int bundle_bridge::build_partial_exons()
+{
+	pexons.clear();
+	//regional.clear();
+	for(int i = 0; i < regions.size(); i++)
+	{
+		region &r = regions[i];
+		for(int k = 0; k < r.pexons.size(); k++)
+		{
+			partial_exon &pe = r.pexons[k];
+			pe.rid = i;
+			pe.pid = pexons.size();
+			//if(pe.rpos == 12248702) printf("rpos is 12248702\n");
+			pexons.push_back(pe);
+			//if((pe.lpos != bb.lpos || pe.rpos != bb.rpos) && pe.ltype == START_BOUNDARY && pe.rtype == END_BOUNDARY) regional.push_back(true);
+			//else regional.push_back(false);
+		}
+	}
+
+	for(int i=0;i<pexons.size();i++)
+	{
+		//pexons[i].print(i+1);
+	}
 	return 0;
 }
 

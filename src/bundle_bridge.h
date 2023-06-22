@@ -36,6 +36,7 @@ public:
 	vector<junction> junctions;			// splice junctions
 	map<int64_t, char> junc_map;			// map junction to strandness
 	vector<region> regions;				// pexons
+	vector<partial_exon> pexons;	// partial exons
 	vector<transcript> ref_trsts;		// overlaped genes in reference
 	vector< vector<int> > ref_phase;	// phasing paths for ref transcripts
 	vector< vector<PI> > ref_index;		// the set of trsts that contain each region
@@ -56,6 +57,7 @@ public:
 	int build_junctions();
 	int extend_junctions();
 	int build_regions();
+	int build_partial_exons();
 	int build_fragments();
 	int fix_alignment_boundaries();
 
