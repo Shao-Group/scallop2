@@ -36,7 +36,7 @@ scallop3::~scallop3()
 int scallop3::assemble()
 {
 	
-    gr.print_weights();
+    /*gr.print_weights();
 	hs.print();
 
     cout << "\n#Phasing path: " << hs.edges.size() << endl;
@@ -47,9 +47,11 @@ int scallop3::assemble()
 		printf("\n");
 
     }
-    printf("\n");
+    printf("\n");*/
 
 	printf("process splice graph %s, vertices = %lu, edges = %lu, phasing paths = %lu\n", gr.gid.c_str(), gr.num_vertices(), gr.num_edges(), hs.edges.size());
+
+    hs.add_edge_not_phased(gr.num_edges());
 
     //DP with maximum bottleneck
     int t = gr.num_vertices()-1;
@@ -60,8 +62,8 @@ int scallop3::assemble()
         {
             int backv = i2e[p->back()]->target();
             if(backv != v) continue;
-            printf("Current phasing: ");
-            print_phasing_path(*p);
+            //printf("-----Current phasing: ");
+            //print_phasing_path(*p);
             for(int i = 0; i < topnum; i++)
             {
                 int frontv = i2e[p->front()]->source();
@@ -71,8 +73,8 @@ int scallop3::assemble()
 
                 new_path.insert(new_path.end(), p->begin(), p->end());
                 new_paths.insert(new_path);
-                printf("New path: ");
-                print_phasing_path(new_path);
+                //printf("New path: ");
+                //print_phasing_path(new_path);
 
             }
         }
@@ -85,7 +87,7 @@ int scallop3::assemble()
                 int b = top_btn[v][i];
                 if(btn > b)
 			    {
-				    for(int j = i+1; j < topnum; j++)
+				    for(int j = topnum-1; j>i; j--)
                     {
                         top_btn[v][j] = top_btn[v][j-1];
                         top_paths[v][j] = top_paths[v][j-1];
@@ -100,8 +102,9 @@ int scallop3::assemble()
     }
 
     paths.clear();
-    for(int i = 0; i < topnum; i++)
+    for(int i = 0; i < 1; i++)
     {
+        if(top_btn[t][i] <= 0) continue;
         path p;
         vector<int> &H = top_paths[t][i];
         for(auto it = H.begin(); it != H.end(); it++)
@@ -117,7 +120,7 @@ int scallop3::assemble()
     }
 
     trsts.clear();
-	//gr.output_transcripts(trsts, paths);
+	gr.output_transcripts(trsts, paths);
 
 	if(verbose >= 0) 
 	{

@@ -671,3 +671,27 @@ int hyper_set::get_compatible_bottleneck(const vector<int> &p)
 	}
 	return bt;
 }
+
+int hyper_set::add_edge_not_phased(int num_edges)
+{
+    unordered_map<int, bool> phased_edge;
+    for(int i = 0; i < edges.size(); i++)
+	{
+		vector<int> &v = edges[i];
+        if(v.size()>1) continue;
+
+        assert(phased_edge.find(v[0]) == phased_edge.end());
+        phased_edge[v[0]] = true;
+    }
+
+    for(int e = 0; e < num_edges; e++)
+    {
+        if(phased_edge.find(e) == phased_edge.end())
+        {
+            edges.push_back({e});
+            ecnts.push_back(0);
+        }
+    }
+
+    return 0;
+}

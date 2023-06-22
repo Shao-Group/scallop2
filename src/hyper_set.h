@@ -10,6 +10,7 @@ See LICENSE for licensing.
 #include <map>
 #include <set>
 #include <vector>
+#include <unordered_map>
 
 #include "util.h"
 #include "directed_graph.h"
@@ -47,6 +48,7 @@ public:
 	MPII get_routes(int x, directed_graph &gr, MEI &e2i);
 	int print();
 	int get_compatible_bottleneck(const vector<int> &p);
+    int add_edge_not_phased(int num_edges);
 
 public:
 	int replace(int x, int e);
