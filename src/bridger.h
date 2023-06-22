@@ -49,20 +49,21 @@ public:
 public:
 	int bridge();
 	int bridge_clip(int32_t p1, int32_t p2, circular_transcript &circ);
+	int pick_bridge_path();
 	int print();
 
 public:
 	int bridge_overlapped_fragments();
 	int bridge_overlapped_fragment(fragment &fr, int ex1, int ex2);
 
-	int bridge_phased_fragments();
+	int bridge_phased_fragments(vector<fcluster> &fclusters);
 	int phase_cluster(fcluster &fc);
 	int bridge_phased_cluster(fcluster &fc);
 
 	int remove_tiny_boundary();
 
 	int build_junction_graph();
-	int bridge_hard_fragments();
+	int bridge_hard_fragments(vector<fcluster> &open);
 	int dynamic_programming(int k1, int k2, vector< vector<entry> > &table);
 	vector< vector<int> > trace_back(int k, const vector< vector<entry> > &table);
 	int evaluate_bridging_path(const vector<int> &pb);

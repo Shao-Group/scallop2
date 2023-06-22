@@ -1751,23 +1751,165 @@ int bridger::pick_bridge_path()
 			continue;
 		}
 
-		int bestp = -1;
-
 		// let A be the set of b-paths whose type is either 1 or 2 -- ref
 		// let B be the set of b-paths whose type is either 3 or 4 -- reads
-		// if A overlaps with B
-		// then we only consider the intersection
-		// and we pick one whose score is maximized among 3/4 types
 
+		vector<path> ref_paths;
+		vector<path> read_paths;
 
-		// if intersection is empty, we give priority to 3/4
-		// in this case, pick one whose score is maximized among 3/4 types
+		for(int i=0;i<fr.paths.size();i++)
+		{
+			path p = fr.paths[i];
+			if(p.type == 1 || p.type == 2)
+			{
+				ref_paths.push_back(p);
+			}
+			else if(p.type == 3 || p.type == 4)
+			{
+				read_paths.push_back(p);
+			}
+		}
 
+		if(read_paths.size() > 1)
+		{
+			printf("ref_paths size = %lu, read_paths size = %lu\n",ref_paths.size(),read_paths.size());
+		}
+		//printf("fragment paths size: %lu\n",fr.paths.size());
 
-		// if no 3/4 types, pick one randomly from 1/2
-		// later on we can take the #counts in reference into account
+		map<string,pair<path,int>> ref_paths_map;
+		map<string,pair<path,int>> read_paths_map;
 
-		fr.paths[0] = fr.paths[bestp];
+		for(int i=0;i<ref_paths.size();i++)
+		{
+			path p = ref_paths[i];
+			string hash = "";
+
+			for(int j=0;j<p.v.size();j++)
+			{
+				hash = hash + tostring(p.v[j]) + "|";
+			}
+
+			if(ref_paths_map.find(hash) != ref_paths_map.end()) //path present already in map
+			{
+				ref_paths_map[hash].second++;
+			}
+			else //path not present in map
+			{
+				ref_paths_map.insert(pair<string,pair<path,int>>(hash,pair<path,int>(p,1)));
+			}
+		}
+
+		for(int i=0;i<read_paths.size();i++)
+		{
+			path p = read_paths[i];
+			string hash = "";
+
+			for(int j=0;j<p.v.size();j++)
+			{
+				hash = hash + tostring(p.v[j]) + "|";
+			}
+
+			if(read_paths_map.find(hash) != read_paths_map.end()) //path present already in map
+			{
+				read_paths_map[hash].second++;
+			}
+			else //path not present in map
+			{
+				read_paths_map.insert(pair<string,pair<path,int>>(hash,pair<path,int>(p,1)));
+			}
+		}
+
+		map<string, pair<path, int>>::iterator itn;
+		for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
+		{
+			printf("ref_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
+		}
+		for(itn = read_paths_map.begin(); itn != read_paths_map.end(); itn++)
+		{
+			printf("read_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
+		}
+
+		vector<path> intersection;
+		map<string, pair<path, int>>::iterator itn1;
+		map<string, pair<path, int>>::iterator itn2;
+
+		for(itn1 = read_paths_map.begin(); itn1 != read_paths_map.end(); itn1++)
+		{
+			string p1 = itn1->first;
+			for(itn2 = ref_paths_map.begin(); itn2 != ref_paths_map.end(); itn2++)
+			{
+				string p2 = itn2->first;
+				if(strcmp(p1.c_str(),p2.c_str()) == 0)
+				{
+					intersection.push_back(itn1->second.first);
+				}
+			}
+		}
+
+		// find overlap betwen A and B
+		if(intersection.size() > 0)
+		{
+			printf("intersection size: %lu\n",intersection.size());
+
+			for(int i=0;i<intersection.size();i++)
+			{
+				path p = intersection[i];
+				printf("score: %lf\n",p.score);
+				printv(p.v);
+			}
+			printf("\n");
+		}
+
+		printf("\n");
+
+		int max_score = -1000000;
+		path best_path;
+
+		if(intersection.size() > 0)
+		{	
+			// if A overlaps with B
+			// then we only consider the intersection
+			// and we pick one whose score is maximized among 3/4 types
+			for(int i=0;i<intersection.size();i++)
+			{
+				path p = intersection[i];
+				if(p.score > max_score)
+				{
+					max_score = p.score;
+					best_path = p;
+				}
+			}
+		}
+		else
+		{	
+			// if intersection is empty, we give priority to 3/4
+			// in this case, pick one whose score is maximized among 3/4 types
+
+			if(read_paths_map.size() > 0)
+			{
+				map<string, pair<path, int>>::iterator itn;
+				for(itn = read_paths_map.begin(); itn != read_paths_map.end(); itn++)
+				{
+					if(itn->second.first.score > max_score)
+					{
+						max_score = itn->second.first.score;
+						best_path = itn->second.first;
+					}
+				}
+			}
+			else
+			{
+				// if no 3/4 types, pick one randomly from 1/2
+				// later on we can take the #counts in reference into account
+
+				best_path = ref_paths_map.begin()->second.first;
+
+			}
+
+			
+		}
+
+		fr.paths[0] = best_path;
 		fr.paths.resize(1);
 		assert(fr.paths.size() == 1);
 		fr.set_bridged(true);

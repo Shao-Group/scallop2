@@ -838,10 +838,6 @@ int bundle_bridge::build_fragments()
 		// do not use hi; as long as qname, pos and isize are identical
 		int k = (h.qhash % max_index + h.pos % max_index + (0 - h.isize) % max_index) % max_index;
 
-		if(strcmp(h.qname.c_str(),"simulate:311116") == 0)
-		{
-			printf("hash negative: %d\n",k);
-		}
 		/*
 		SI si(h.qname, h.hi);
 		MSI &m = vv[k];
@@ -860,11 +856,6 @@ int bundle_bridge::build_fragments()
 		if(h.vlist.size() == 0) continue;
 
 		int k = (h.qhash % max_index + h.mpos % max_index + h.isize % max_index) % max_index;
-
-		if(strcmp(h.qname.c_str(),"simulate:311116") == 0)
-		{
-			printf("hash positive: %d\n",k);
-		}
 
 		/*
 		h.print();
