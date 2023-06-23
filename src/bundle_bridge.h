@@ -34,14 +34,14 @@ public:
 	vector<circular_transcript> circ_trsts_HS; ////a vector of circular transcripts from all possible H/S reads, with duplicates
 
 	vector<junction> junctions;			// splice junctions
-	map<int64_t, char> junc_map;			// map junction to strandness
+	map<int64_t, char> junc_map;		// map junction to strandness
 	vector<region> regions;				// pexons
-	vector<partial_exon> pexons;	// partial exons
+	vector<partial_exon> pexons;		// partial exons
 	vector<transcript> ref_trsts;		// overlaped genes in reference
 	vector< vector<int> > ref_phase;	// phasing paths for ref transcripts
 	vector< vector<PI> > ref_index;		// the set of trsts that contain each region
 
-	vector< vector<int> > umiLink;			// umi linked list: fragments index
+	vector< vector<int> > umiLink;		// umi linked list: fragments index
 
 public:
 	int build();

@@ -548,9 +548,11 @@ int bundle_bridge::build_partial_exons()
 {
 	pexons.clear();
 	//regional.clear();
+	//printf("regions size = %lu\n",regions.size());
 	for(int i = 0; i < regions.size(); i++)
 	{
 		region &r = regions[i];
+		printf("r.pexons size = %lu\n",r.pexons.size());
 		for(int k = 0; k < r.pexons.size(); k++)
 		{
 			partial_exon &pe = r.pexons[k];
@@ -562,6 +564,8 @@ int bundle_bridge::build_partial_exons()
 			//else regional.push_back(false);
 		}
 	}
+
+	printf("build pexons size = %lu\n",pexons.size());
 
 	for(int i=0;i<pexons.size();i++)
 	{
@@ -2102,6 +2106,12 @@ int bundle_bridge::join_circ_fragment_pairs()
 
 		int bam_junc_flag = 0;
 		int ref_junc_flag = 0;
+		int pexon_flag = 0;
+
+		char junc_match = '.';
+		char ref_match = '.';
+
+		printf("pexons size = %lu\n",pexons.size());
 
 		if(fr2.is_compatible == 1)
 		{
@@ -2113,6 +2123,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 				{
 					printf("jc.rpos = %d\n",jc.rpos);
 					bam_junc_flag++;
+					junc_match = 'L';
 					break;
 				}
 			}
@@ -2124,6 +2135,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 				{
 					printf("jc.lpos = %d\n",jc.lpos);
 					bam_junc_flag++;
+					junc_match = 'R';
 					break;
 				}
 			}
@@ -2143,6 +2155,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 					if(fr1.lpos == chain[k].second)
 					{
 						ref_junc_flag++;
+						ref_match = 'L';
 						temp_flag = 1;
 						break;
 					}
@@ -2169,6 +2182,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 					if(fr2.rpos == chain[k].first)
 					{
 						ref_junc_flag++;
+						ref_match = 'R';
 						temp_flag = 1;
 						break;
 					}
@@ -2180,7 +2194,42 @@ int bundle_bridge::join_circ_fragment_pairs()
 				}
 			}
 
-			if(bam_junc_flag == 2 || ref_junc_flag == 2 || (fr1.lpos >= bb.lpos-5 && fr1.lpos <= bb.lpos+5 && fr2.rpos >= bb.rpos-5 && fr2.rpos <= bb.rpos+5))
+			if(bam_junc_flag < 2 && ref_junc_flag < 2)
+			{
+				if(bam_junc_flag == 1)
+				{
+					printf("bam_junc_flag is 1, junc_match = %c\n",junc_match);
+				}
+				if(ref_junc_flag == 1)
+				{
+					printf("ref_junc_flag is 1, ref_match = %c\n",junc_match);
+				}
+
+				if(junc_match == 'L' || ref_match == 'L')
+				{
+					for(int p=0;p<pexons.size();p++)
+					{
+						if(pexons[p].rpos == fr2.rpos && pexons[p].rtype == END_BOUNDARY)
+						{
+							pexon_flag = 1;
+							break;
+						}
+					}
+				}
+				else if(junc_match == 'R' || ref_match == 'R')
+				{
+					for(int p=0;p<pexons.size();p++)
+					{
+						if(pexons[p].lpos == fr1.lpos && pexons[p].ltype == START_BOUNDARY)
+						{
+							pexon_flag = 1;
+							break;
+						}
+					}
+				}
+			}
+
+			if(bam_junc_flag == 2 || ref_junc_flag == 2 || pexon_flag == 1 || (fr1.lpos >= bb.lpos-5 && fr1.lpos <= bb.lpos+5 && fr2.rpos >= bb.rpos-5 && fr2.rpos <= bb.rpos+5))
 			{
 				printf("Found a case with junc comp 1\n");
 				printf("valid: bam_junc_flag = %d, ref_junc_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, ref_junc_flag, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
@@ -2199,6 +2248,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 				if(jc.rpos == fr2.lpos)
 				{
 					printf("jc.rpos = %d\n",jc.rpos);
+					junc_match = 'L';
 					bam_junc_flag++;
 					break;
 				}
@@ -2210,6 +2260,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 				if(jc.lpos == fr1.rpos)
 				{
 					printf("jc.lpos = %d\n",jc.lpos);
+					junc_match = 'R';
 					bam_junc_flag++;
 					break;
 				}
@@ -2230,6 +2281,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 					if(fr2.lpos == chain[k].second)
 					{
 						ref_junc_flag++;
+						ref_match = 'L';
 						temp_flag = 1;
 						break;
 					}
@@ -2256,6 +2308,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 					if(fr1.rpos == chain[k].first)
 					{
 						ref_junc_flag++;
+						ref_match = 'R';
 						temp_flag = 1;
 						break;
 					}
@@ -2267,7 +2320,42 @@ int bundle_bridge::join_circ_fragment_pairs()
 				}
 			}
 
-			if(bam_junc_flag == 2 || ref_junc_flag == 2 || (fr2.lpos >= bb.lpos-5 && fr2.lpos <= bb.lpos+5 && fr1.rpos >= bb.rpos-5 && fr1.rpos <= bb.rpos+5))
+			if(bam_junc_flag < 2 && ref_junc_flag < 2)
+			{
+				if(bam_junc_flag == 1)
+				{
+					printf("bam_junc_flag is 1, junc_match = %c\n",junc_match);
+				}
+				if(ref_junc_flag == 1)
+				{
+					printf("ref_junc_flag is 1, ref_match = %c\n",junc_match);
+				}
+
+				if(junc_match == 'L' || ref_match == 'L')
+				{
+					for(int p=0;p<pexons.size();p++)
+					{
+						if(pexons[p].rpos == fr1.rpos && pexons[p].rtype == END_BOUNDARY)
+						{
+							pexon_flag = 1;
+							break;
+						}
+					}
+				}
+				else if(junc_match == 'R' || ref_match == 'R')
+				{
+					for(int p=0;p<pexons.size();p++)
+					{
+						if(pexons[p].lpos == fr2.lpos && pexons[p].ltype == START_BOUNDARY)
+						{
+							pexon_flag = 1;
+							break;
+						}
+					}
+				}
+			}
+
+			if(bam_junc_flag == 2 || ref_junc_flag == 2 || pexon_flag == 1 || (fr2.lpos >= bb.lpos-5 && fr2.lpos <= bb.lpos+5 && fr1.rpos >= bb.rpos-5 && fr1.rpos <= bb.rpos+5))
 			{
 				printf("Found a case with junc comp 2\n");
 				printf("valid: bam_junc_flag = %d, ref_junc_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, ref_junc_flag, fr2.lpos, fr1.rpos, bb.lpos, bb.rpos);
