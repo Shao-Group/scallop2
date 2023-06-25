@@ -48,7 +48,8 @@ public:
 	MPII get_routes(int x, directed_graph &gr, MEI &e2i);
 	int print();
 	int get_compatible_bottleneck(const vector<int> &p);
-    int add_edge_not_phased(int num_edges);
+    int add_edge_not_phased(int num_edges, set<int> &critical_edge);
+
 
 public:
 	int replace(int x, int e);

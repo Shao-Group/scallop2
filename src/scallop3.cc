@@ -37,7 +37,13 @@ int scallop3::assemble()
 {
 	
     /*gr.print_weights();
-	hs.print();
+	hs.print();*/
+
+    printf("process splice graph %s, vertices = %lu, edges = %lu, phasing paths = %lu\n", gr.gid.c_str(), gr.num_vertices(), gr.num_edges(), hs.edges.size());
+
+    set<int> critical_edge;
+    calculate_critical_edges(critical_edge);
+    hs.add_edge_not_phased(gr.num_edges(), critical_edge);
 
     cout << "\n#Phasing path: " << hs.edges.size() << endl;
     for(int i = 0; i < hs.edges.size(); i++)
@@ -47,11 +53,9 @@ int scallop3::assemble()
 		printf("\n");
 
     }
-    printf("\n");*/
+    printf("\n");
 
-	printf("process splice graph %s, vertices = %lu, edges = %lu, phasing paths = %lu\n", gr.gid.c_str(), gr.num_vertices(), gr.num_edges(), hs.edges.size());
 
-    hs.add_edge_not_phased(gr.num_edges());
 
     //DP with maximum bottleneck
     int t = gr.num_vertices()-1;
@@ -59,7 +63,7 @@ int scallop3::assemble()
     {
         set< vector<int> > new_paths;
 
-        PEEI pei = gr.in_edges(v);
+        /*PEEI pei = gr.in_edges(v);
 		for(auto it = pei.first; it != pei.second; it++)
 		{
 			edge_descriptor e = (*it);
@@ -74,12 +78,11 @@ int scallop3::assemble()
 
                 new_path.push_back(e2i[e]);
                 new_paths.insert(new_path);
-                printf("New path: ");
-                print_phasing_path(new_path);
-
+                //printf("New path: ");
+                //print_phasing_path(new_path);
             }
-        }
-        /*for(auto p = hs.edges.begin(); p != hs.edges.end(); p++)
+        }*/
+        for(auto p = hs.edges.begin(); p != hs.edges.end(); p++)
         {
             int backv = i2e[p->back()]->target();
             if(backv != v) continue;
@@ -98,11 +101,15 @@ int scallop3::assemble()
                 //print_phasing_path(new_path);
 
             }
-        }*/
+        }
 
         for(auto np = new_paths.begin(); np != new_paths.end(); np++)
         {
+            printf("New path: ");
+            print_phasing_path(*np);
+
             int btn = hs.get_compatible_bottleneck(*np);
+            printf("Btn = %d\n", btn);
             for(int i = 0; i < topnum; i++)
             {
                 int b = top_btn[v][i];
@@ -110,6 +117,7 @@ int scallop3::assemble()
 			    {
 				    for(int j = topnum-1; j>i; j--)
                     {
+                        if(top_paths[v][j-1].size() == 0)continue;
                         top_btn[v][j] = top_btn[v][j-1];
                         top_paths[v][j] = top_paths[v][j-1];
                     }
@@ -119,6 +127,13 @@ int scallop3::assemble()
 			    }
             }
         }
+        printf("Top %d for vertex %d:\n", topnum, v);
+        for(int i = 0; i < topnum; i++)
+        {
+            print_phasing_path(top_paths[v][i]);
+            printf("Btn = %d\n", top_btn[v][i]);
+        }
+        printf("\n");
 
     }
 
@@ -152,8 +167,42 @@ int scallop3::assemble()
 	return 0;
 }
 
+int scallop3::calculate_critical_edges(set<int> &critical_edge)
+{
+    for(int v = 0; v < gr.num_vertices(); v++)
+    {
+        int critical = true;
+        if(gr.out_degree(v) == 1)
+        {
+            edge_descriptor e = *(gr.out_edges(v).first);
+            int u = e->target();
+            if(gr.in_degree(u) == 1)
+            {
+                PEEI pei = gr.edges();
+                for(auto it = pei.first; it != pei.second; it++)
+                {
+                    edge_descriptor e2 = *it;
+                    int s = e2->source(), t = e2->target();
+                    if(s<=v && t>=u && e!=e2)
+                    {
+                        critical = false;
+                        break;
+                    }
+                }
+                if(critical)
+                {
+                    critical_edge.insert(e2i[e]);
+                    printf("Critical: (%d, %d)\n", v, u);
+                }
+            }
+        }
+    }
+    return 0;
+}
+
 int scallop3::print_phasing_path(const vector<int> &phasing_edge)
 {
+    if(phasing_edge.size() <= 0) return 0;
     set<int> vpath;
     vector<int>::const_iterator it;
     for(it = phasing_edge.begin(); it != phasing_edge.end(); it++)
@@ -162,16 +211,16 @@ int scallop3::print_phasing_path(const vector<int> &phasing_edge)
         edge_descriptor e = i2e[*it];
         int s = e->source();
         int t = e->target();
-        printf("%d(%d, %d), ", *it, s, t);
+        //printf("%d(%d, %d), ", *it, s, t);
         vpath.insert(s);
         vpath.insert(t);
     }
-    printf("\n");
+    //printf("\n");
     set<int>::const_iterator vit;
 
-	//assert(phasing_edge.size() + 1 == vpath.size());
-    if(phasing_edge.size()+1 != vpath.size()) printf("print phasing path wrong.\n");
-    printf("p = ");
+	assert(phasing_edge.size() + 1 == vpath.size());
+    //if(phasing_edge.size()+1 != vpath.size()) printf("print phasing path wrong.\n");
+    //printf("p = ");
     for(vit=vpath.begin(); vit != vpath.end(); vit++)
     {
         cout << *vit << ' ';

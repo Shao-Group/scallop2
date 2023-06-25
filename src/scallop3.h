@@ -50,6 +50,7 @@ public:
 	vector<transcript> trsts;			// predicted transcripts
 
 private:
+    int calculate_critical_edges(set<int> &critical_edge);
     int print_phasing_path(const vector<int> &phasing_edge);
 
 

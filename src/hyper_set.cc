@@ -646,7 +646,7 @@ int hyper_set::print()
 
 int hyper_set::get_compatible_bottleneck(const vector<int> &p)
 {
-	double bt = INT_MAX;
+	double bt = INT_MAX/2;
 	for(int i = 0; i < p.size(); i++)
 	{
 		int e = p[i];
@@ -661,8 +661,14 @@ int hyper_set::get_compatible_bottleneck(const vector<int> &p)
                 vector<int> v = consecutive_subset(p, f);
                 if(v.size() == 0) continue;
 				w += ecnts[*it];
+                if(w > INT_MAX/2)
+                {
+                    w=INT_MAX/2;
+                    break;
+                }
 			}
 		}
+        if(p.size()>1 && i == p.size()-1 && w <= 0) break;//ignore last bottleneck=0
 
 		if(w < bt)
 		{
@@ -672,16 +678,22 @@ int hyper_set::get_compatible_bottleneck(const vector<int> &p)
 	return bt;
 }
 
-int hyper_set::add_edge_not_phased(int num_edges)
+int hyper_set::add_edge_not_phased(int num_edges, set<int>& critical_edge)
 {
     unordered_map<int, bool> phased_edge;
     for(int i = 0; i < edges.size(); i++)
 	{
-		vector<int> &v = edges[i];
-        if(v.size()>1) continue;
+		vector<int> &p = edges[i];
+        if(p.size()>1) continue;
 
-        assert(phased_edge.find(v[0]) == phased_edge.end());
-        phased_edge[v[0]] = true;
+        assert(phased_edge.find(p[0]) == phased_edge.end());
+        if(critical_edge.find(p[0]) != critical_edge.end())
+        {
+            phased_edge[p[0]] = true;
+            ecnts[i] = INT_MAX/2;
+        }
+        else
+            phased_edge[p[0]] = false;
     }
 
     for(int e = 0; e < num_edges; e++)
@@ -689,9 +701,20 @@ int hyper_set::add_edge_not_phased(int num_edges)
         if(phased_edge.find(e) == phased_edge.end())
         {
             edges.push_back({e});
-            ecnts.push_back(0);
+
+            if(critical_edge.find(e) != critical_edge.end())
+            {
+                phased_edge[e] = true;
+                ecnts.push_back(INT_MAX/2);
+            }
+            else
+            {
+                phased_edge[e] = false;
+                ecnts.push_back(0);
+            }
         }
     }
 
     return 0;
 }
+
