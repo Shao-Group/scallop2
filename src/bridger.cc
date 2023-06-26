@@ -540,6 +540,7 @@ int bridger::bridge_phased_cluster(fcluster &fc)
 	for(int i = 0; i < fc.fset.size(); i++)
 	{
 		fragment *fr = fc.fset[i];
+
 		for(int k = 0; k < fc.phase.size(); k++)
 		{
 			path p;
@@ -551,6 +552,13 @@ int bridger::bridge_phased_cluster(fcluster &fc)
 			if(p.length >= length_low && p.length <= length_high) p.type = 1;
 			else p.type = 2;
 			fr->paths.push_back(p);
+
+			if(strcmp(fr->h1->qname.c_str(),"simulate:314681") == 0)
+			{
+				printf("phased fragments simulate:314681\n");
+				printv(p.v);
+				printf("\n");
+			}
 		}
 	}
 	return 0;
@@ -816,6 +824,7 @@ int bridger::bridge_hard_fragments(vector<fcluster> &open)
 			for(int i = 0; i < fc.fset.size(); i++)
 			{
 				fragment *fr = fc.fset[i];
+
 				path p;
 				p.ex1 = p.ex2 = 0;
 				p.v = pn[be];
@@ -832,6 +841,13 @@ int bridger::bridge_hard_fragments(vector<fcluster> &open)
 
 				fr->paths.push_back(p);
 				//printf(" fragment %d length = %d using path %d, p.type = %d\n", i, p.length, be, p.type);
+			
+				if(strcmp(fr->h1->qname.c_str(),"simulate:314681") == 0)
+				{
+					printf("hard fragments simulate:314681\n");
+					printv(p.v);
+					printf("\n");
+				}
 			}
 		}
 	}
@@ -1770,7 +1786,7 @@ int bridger::pick_bridge_path()
 			}
 		}
 
-		if(read_paths.size() > 1)
+		if(strcmp(fr.h1->qname.c_str(),"simulate:314681") == 0)
 		{
 			printf("ref_paths size = %lu, read_paths size = %lu\n",ref_paths.size(),read_paths.size());
 		}
@@ -1818,15 +1834,33 @@ int bridger::pick_bridge_path()
 				read_paths_map.insert(pair<string,pair<path,int>>(hash,pair<path,int>(p,1)));
 			}
 		}
-
-		map<string, pair<path, int>>::iterator itn;
-		for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
+		
+		if(strcmp(fr.h1->qname.c_str(),"simulate:73158") == 0)
 		{
-			printf("ref_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
+			printf("simulate:73158\n");
+			map<string, pair<path, int>>::iterator itn;
+			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
+			{
+				printf("ref_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
+			}
+			for(itn = read_paths_map.begin(); itn != read_paths_map.end(); itn++)
+			{
+				printf("read_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
+			}
 		}
-		for(itn = read_paths_map.begin(); itn != read_paths_map.end(); itn++)
+
+		if(strcmp(fr.h1->qname.c_str(),"simulate:314681") == 0)
 		{
-			printf("read_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
+			printf("simulate:314681\n");
+			map<string, pair<path, int>>::iterator itn;
+			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
+			{
+				printf("ref_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
+			}
+			for(itn = read_paths_map.begin(); itn != read_paths_map.end(); itn++)
+			{
+				printf("read_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
+			}
 		}
 
 		vector<path> intersection;
@@ -1859,8 +1893,6 @@ int bridger::pick_bridge_path()
 			}
 			printf("\n");
 		}
-
-		printf("\n");
 
 		int max_score = -1000000;
 		path best_path;
@@ -1905,10 +1937,14 @@ int bridger::pick_bridge_path()
 				best_path = ref_paths_map.begin()->second.first;
 
 			}
-
-			
+			/*if(strcmp(fr.h1->qname.c_str(),"simulate:314681") == 0)
+			{
+				best_path = ref_paths_map.begin()->second.first;
+			}*/
 		}
 
+		printf("best path:\n");
+		printv(best_path.v);
 		fr.paths[0] = best_path;
 		fr.paths.resize(1);
 		assert(fr.paths.size() == 1);
