@@ -243,12 +243,20 @@ int bridger::bridge_overlapped_fragment(fragment &fr, int ex1, int ex2)
 	p.v = encode_vlist(p.v);
 	if(p.length >= length_low && p.length <= length_high)
 	{
-		p.type = 1;
+		p.type = 3;
 		//bd->breads.insert(fr.h1->qname);
 	}
-	else p.type = 2;
+	else p.type = 4;
 
 	fr.paths.push_back(p);
+
+	if(strcmp(fr.h1->qname.c_str(),"simulate:314681") == 0)
+	{
+		printf("overlapped fragments simulate:314681\n");
+		printv(p.v);
+		printf("\n");
+	}
+
 	return 0;
 }
 
