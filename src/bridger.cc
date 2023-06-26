@@ -57,6 +57,14 @@ int bridger::bridge()
 	vector<fcluster> open_fclusters;
 	cluster_open_fragments(open_fclusters);
 
+	bridge_hard_fragments(open_fclusters);
+
+	// should not call this function
+	// as it tries to keep only one
+	// bridging path
+	//filter_paths();
+	int n3 = get_paired_fragments();
+
 	// use reference to bridge
 	bridge_phased_fragments(open_fclusters);
 
@@ -69,13 +77,7 @@ int bridger::bridge()
 
 	// first round of briding hard fragments
 	//remove_tiny_boundary();//remove false alignment
-	bridge_hard_fragments(open_fclusters);
 
-	// should not call this function
-	// as it tries to keep only one
-	// bridging path
-	//filter_paths();
-	int n3 = get_paired_fragments();
 
 	// skip the 2nd round of bridgin
 	//// 2nd round of briding hard fragments
