@@ -25,8 +25,8 @@ scallop3::scallop3(const splice_graph &g, const hyper_set &h)
 	hs.build(gr, e2i);
 
     topnum = 3;
-    top_paths.resize(gr.num_vertices(), vector< vector<int> >(topnum, vector<int>()));
-    top_btn.resize(gr.num_vertices(), vector<int>(topnum, -1));
+    //top_paths.resize(gr.num_vertices(), vector< vector<int> >(topnum, vector<int>()));
+    //top_btn.resize(gr.num_vertices(), vector<int>(topnum, -1));
 }
 
 scallop3::~scallop3()
@@ -55,8 +55,93 @@ int scallop3::assemble()
     }
     printf("\n");
 
+    int round = 3;
+    int t = gr.num_vertices()-1;
+    map<vector<int>, int> top_rounds;
+    while(round>0)
+    {
+        round--;
+
+        top_paths.clear();
+        top_btn.clear();
+        top_paths.resize(gr.num_vertices(), vector< vector<int> >(topnum, vector<int>()));
+        top_btn.resize(gr.num_vertices(), vector<int>(topnum, -1));
+
+        calculate_max_bottleneck_path();
+        for(int i = 0; i < 1; i++)
+        {
+            if(top_rounds.find(top_paths[t][i]) == top_rounds.end() && top_btn[t][i]>0)
+            {
+                top_rounds[top_paths[t][i]] = top_btn[t][i];
+                printf("\n-----\n");
+                hs.update_edge_count(top_paths[t][i], top_btn[t][i]);
+
+            }
+        }
+
+        printf("\nAfter round %d----Phasing path: ", round);
+        for(int i = 0; i < hs.edges.size(); i++)
+        {
+            if(hs.edges[i].size() > 1) continue;
+            printf("%d: weight = %d, list = ",i, hs.ecnts[i]);
+            print_phasing_path(hs.edges[i]);
+            printf("\n");
+        } 
+        printf("\n");
+        if(top_btn[t][0] <= 0) break;
+        if(topnum>1 && top_btn[t][1]<0) break;
+
+    }
+
+    paths.clear();
+    /*for(int i = 0; i < topnum; i++)
+    {
+        if(top_btn[t][i] <= 0) continue;
+        path p;
+        vector<int> &H = top_paths[t][i];
+        for(auto it = H.begin(); it != H.end(); it++)
+        {
+            int s = i2e[*it]->source();
+            int t = i2e[*it]->target();
+            if(it == H.begin())
+                p.v.push_back(s);
+            p.v.push_back(t);
+        }
+        p.abd = top_btn[t][i];
+        paths.push_back(p);
+    }*/
+
+    for(auto it1 = top_rounds.begin(); it1 != top_rounds.end(); it1++)
+    {
+        path p;
+        const vector<int> &H = it1->first;
+        for(auto it2 = H.begin(); it2 != H.end(); it2++)
+        {
+            int s = i2e[*it2]->source();
+            int t = i2e[*it2]->target();
+            if(it2 == H.begin())
+                p.v.push_back(s);
+            p.v.push_back(t);
+        }
+        p.abd = it1->second;
+        paths.push_back(p);
+    }
+
+    trsts.clear();
+	gr.output_transcripts(trsts, paths);
+
+	if(verbose >= 0) 
+	{
+		for(int i = 0; i < paths.size(); i++) paths[i].print(i);
+		printf("finish assemble bundle %s\n\n", gr.gid.c_str());
+	}
+
+    return 0;
+}
 
 
+int scallop3::calculate_max_bottleneck_path()
+{
     //DP with maximum bottleneck
     int t = gr.num_vertices()-1;
     for(int v = 1; v <= t; v++)
@@ -137,33 +222,6 @@ int scallop3::assemble()
 
     }
 
-    paths.clear();
-    for(int i = 0; i < topnum; i++)
-    {
-        if(top_btn[t][i] <= 0) continue;
-        path p;
-        vector<int> &H = top_paths[t][i];
-        for(auto it = H.begin(); it != H.end(); it++)
-        {
-            int s = i2e[*it]->source();
-            int t = i2e[*it]->target();
-            if(it == H.begin())
-                p.v.push_back(s);
-            p.v.push_back(t);
-        }
-        p.abd = top_btn[t][i];
-        paths.push_back(p);
-    }
-
-    trsts.clear();
-	gr.output_transcripts(trsts, paths);
-
-	if(verbose >= 0) 
-	{
-		for(int i = 0; i < paths.size(); i++) paths[i].print(i);
-		printf("finish assemble bundle %s\n\n", gr.gid.c_str());
-	}
-
 	return 0;
 }
 
@@ -197,6 +255,7 @@ int scallop3::calculate_critical_edges(set<int> &critical_edge)
             }
         }
     }
+    if(critical_edge.size() == gr.num_edges()) critical_edge.clear();
     return 0;
 }
 

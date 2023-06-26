@@ -49,6 +49,7 @@ public:
 	int print();
 	int get_compatible_bottleneck(const vector<int> &p);
     int add_edge_not_phased(int num_edges, set<int> &critical_edge);
+    int update_edge_count(vector<int> &p, int c);
 
 
 public:

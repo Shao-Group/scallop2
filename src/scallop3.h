@@ -51,6 +51,7 @@ public:
 
 private:
     int calculate_critical_edges(set<int> &critical_edge);
+    int calculate_max_bottleneck_path();
     int print_phasing_path(const vector<int> &phasing_edge);
 
 

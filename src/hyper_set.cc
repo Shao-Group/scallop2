@@ -715,6 +715,23 @@ int hyper_set::add_edge_not_phased(int num_edges, set<int>& critical_edge)
         }
     }
 
+    build_index();
+
+    return 0;
+}
+
+int hyper_set::update_edge_count(vector<int> &p, int c)
+{
+    for(int i = 0; i < p.size(); i++)
+    {
+        int e = p[i];
+        for(int j = 0; j < edges.size(); j++)
+        {
+            vector<int> &pp = edges[j];
+            if(pp.size()>1 || pp[0] != e) continue;
+            ecnts[j] -= c;
+        }
+    }
     return 0;
 }
 
