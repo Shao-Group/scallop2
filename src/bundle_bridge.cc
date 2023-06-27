@@ -2208,7 +2208,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 				{
 					for(int p=0;p<pexons.size();p++)
 					{
-						if(pexons[p].rpos == fr2.rpos && pexons[p].rtype == END_BOUNDARY)
+						if(pexons[p].rpos <= fr2.rpos+3 && pexons[p].rpos >= fr2.rpos-3 && pexons[p].rtype == END_BOUNDARY)
 						{
 							pexon_flag = 1;
 							break;
@@ -2219,7 +2219,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 				{
 					for(int p=0;p<pexons.size();p++)
 					{
-						if(pexons[p].lpos == fr1.lpos && pexons[p].ltype == START_BOUNDARY)
+						if(pexons[p].lpos <= fr1.lpos+3 && pexons[p].lpos >= fr1.lpos-3 && pexons[p].ltype == START_BOUNDARY)
 						{
 							pexon_flag = 1;
 							break;
@@ -2334,7 +2334,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 				{
 					for(int p=0;p<pexons.size();p++)
 					{
-						if(pexons[p].rpos == fr1.rpos && pexons[p].rtype == END_BOUNDARY)
+						if(pexons[p].rpos <= fr1.rpos+3 && pexons[p].rpos >= fr1.rpos-3 && pexons[p].rtype == END_BOUNDARY)
 						{
 							pexon_flag = 1;
 							break;
@@ -2343,9 +2343,25 @@ int bundle_bridge::join_circ_fragment_pairs()
 				}
 				else if(junc_match == 'R' || ref_match == 'R')
 				{
+					/*if(strcmp(fr1.h1->qname.c_str(),"simulate:99596") == 0)
+					{
+						printf("simulate:99596 pexons:\n");
+						for(int p=0;p<pexons.size();p++)
+						{
+							pexons[p].print(p+1);
+						}
+					}
+					if(strcmp(fr1.h1->qname.c_str(),"simulate:75809") == 0)
+					{
+						printf("simulate:75809 pexons:\n");
+						for(int p=0;p<pexons.size();p++)
+						{
+							pexons[p].print(p+1);
+						}
+					}*/
 					for(int p=0;p<pexons.size();p++)
 					{
-						if(pexons[p].lpos == fr2.lpos && pexons[p].ltype == START_BOUNDARY)
+						if(pexons[p].lpos <= fr2.lpos+3 && pexons[p].lpos >= fr2.lpos-3 && pexons[p].ltype == START_BOUNDARY)
 						{
 							pexon_flag = 1;
 							break;

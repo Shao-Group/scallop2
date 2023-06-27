@@ -51,7 +51,7 @@ int bridger::bridge()
 
 	bridge_overlapped_fragments();
 
-	filter_paths();
+	//filter_paths();
 	int n1 = get_paired_fragments();
 
 	vector<fcluster> open_fclusters;
@@ -1796,7 +1796,7 @@ int bridger::pick_bridge_path()
 			}
 		}
 
-		if(strcmp(fr.h1->qname.c_str(),"simulate:314681") == 0)
+		if(read_paths.size() > 1)
 		{
 			printf("ref_paths size = %lu, read_paths size = %lu\n",ref_paths.size(),read_paths.size());
 		}
@@ -1947,11 +1947,12 @@ int bridger::pick_bridge_path()
 				best_path = ref_paths_map.begin()->second.first;
 
 			}
-			/*if(strcmp(fr.h1->qname.c_str(),"simulate:314681") == 0)
-			{
-				best_path = ref_paths_map.begin()->second.first;
-			}*/
 		}
+
+		/*if(strcmp(fr.h1->qname.c_str(),"simulate:73158") == 0 && ref_paths_map.size() > 0)
+		{
+			best_path = ref_paths_map.begin()->second.first;
+		}*/
 
 		printf("best path:\n");
 		printv(best_path.v);

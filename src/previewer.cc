@@ -278,6 +278,7 @@ int previewer::process_bundle(bundle_base &bb, map<int32_t, int>& m)
 	//br.group_fragments();
 
 	bridger bdg(&br);
+	//printf("Called from previewer\n");
 	bdg.bridge_overlapped_fragments();
 
 	for(int k = 0; k < br.fragments.size(); k++)
