@@ -2138,6 +2138,20 @@ int bundle_bridge::join_circ_fragment_pairs()
 					break;
 				}
 			}
+
+			if(strcmp(fr1.h1->qname.c_str(),"simulate:55714") == 0)
+			{
+				for(int t=0;t<ref_trsts.size();t++)
+				{
+					printf("ref transcripts for simulate:55714:\n");
+					transcript trst = ref_trsts[t];
+					vector<PI32> chain = trst.get_intron_chain();
+					for(int k=0;k<chain.size();k++)
+					{
+						printf("left: %d, right: %d\n",chain[k].first,chain[k].second);
+					}
+				}
+			}
 			
 			int temp_flag = 0;
 			for(int t=0;t<ref_trsts.size();t++)
@@ -2262,6 +2276,20 @@ int bundle_bridge::join_circ_fragment_pairs()
 					junc_match = 'R';
 					bam_junc_flag++;
 					break;
+				}
+			}
+
+			if(strcmp(fr1.h1->qname.c_str(),"simulate:47588") == 0)
+			{
+				for(int t=0;t<ref_trsts.size();t++)
+				{
+					printf("ref transcripts for simulate:47588:\n");
+					transcript trst = ref_trsts[t];
+					vector<PI32> chain = trst.get_intron_chain();
+					for(int k=0;k<chain.size();k++)
+					{
+						printf("left: %d, right: %d\n",chain[k].first,chain[k].second);
+					}
 				}
 			}
 

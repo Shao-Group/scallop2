@@ -1777,15 +1777,53 @@ int bridger::pick_bridge_path()
 			continue;
 		}
 
+
+		//select set of paths with significantly shorter length than others
+
+		int32_t min_len = 1000000;
+		vector<path> selected_paths;
+		for(int i=0;i<fr.paths.size();i++)
+		{
+			int32_t len = fr.paths[i].length;
+			if(strcmp(fr.h1->qname.c_str(),"simulate:73158") == 0)
+			{
+				printv(fr.paths[i].v);
+				printf("exon len: %d\n",len);
+			}
+			if(len < min_len)
+			{
+				min_len = len;
+			}
+		}
+
+		for(int i=0;i<fr.paths.size();i++)
+		{
+			int32_t len = fr.paths[i].length;
+			printf("min_len = %d, len = %d\n",min_len, len);
+			if(abs(min_len-len) < 150)
+			{
+				selected_paths.push_back(fr.paths[i]);
+			}
+		}
+
+		printf("fr paths size %lu\n",fr.paths.size());
+		if(selected_paths.size() == 0)
+		{
+			printf("selected paths size 0\n");
+			printf("pick path chrm: %s\n",bd->bb.chrm.c_str());
+			printf("pick path frag:\n");
+			fr.print(k+1);
+		}
+
 		// let A be the set of b-paths whose type is either 1 or 2 -- ref
 		// let B be the set of b-paths whose type is either 3 or 4 -- reads
 
 		vector<path> ref_paths;
 		vector<path> read_paths;
 
-		for(int i=0;i<fr.paths.size();i++)
+		for(int i=0;i<selected_paths.size();i++)
 		{
-			path p = fr.paths[i];
+			path p = selected_paths[i];
 			if(p.type == 1 || p.type == 2)
 			{
 				ref_paths.push_back(p);
@@ -1893,15 +1931,15 @@ int bridger::pick_bridge_path()
 		// find overlap betwen A and B
 		if(intersection.size() > 0)
 		{
-			printf("intersection size: %lu\n",intersection.size());
+			//printf("intersection size: %lu\n",intersection.size());
 
 			for(int i=0;i<intersection.size();i++)
 			{
 				path p = intersection[i];
-				printf("score: %lf\n",p.score);
-				printv(p.v);
+				//printf("score: %lf\n",p.score);
+				//printv(p.v);
 			}
-			printf("\n");
+			//printf("\n");
 		}
 
 		int max_score = -1000000;
@@ -1954,8 +1992,8 @@ int bridger::pick_bridge_path()
 			best_path = ref_paths_map.begin()->second.first;
 		}*/
 
-		printf("best path:\n");
-		printv(best_path.v);
+		//printf("best path:\n");
+		//printv(best_path.v);
 		fr.paths[0] = best_path;
 		fr.paths.resize(1);
 		assert(fr.paths.size() == 1);
