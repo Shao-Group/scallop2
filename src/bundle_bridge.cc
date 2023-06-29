@@ -2105,7 +2105,8 @@ int bundle_bridge::join_circ_fragment_pairs()
 
 		int bam_junc_flag = 0;
 		int ref_junc_flag = 0;
-		int pexon_flag = 0;
+		int pexon_flag_single = 0;
+		int pexon_flag_double = 0;
 
 		char junc_match = '.';
 		char ref_match = '.';
@@ -2114,6 +2115,8 @@ int bundle_bridge::join_circ_fragment_pairs()
 
 		if(fr2.is_compatible == 1)
 		{
+
+			//checking if reads junction matches boundary
 			for(int j=0;j<junctions.size();j++)
 			{
 				junction jc = junctions[j];
@@ -2153,6 +2156,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 				}
 			}
 			
+			//checking if ref junction matches boundary
 			int temp_flag = 0;
 			for(int t=0;t<ref_trsts.size();t++)
 			{
@@ -2207,6 +2211,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 				}
 			}
 
+			//checking if pexon matches boundary given a junction match
 			if(bam_junc_flag < 2 && ref_junc_flag < 2)
 			{
 				if(bam_junc_flag == 1)
@@ -2224,7 +2229,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 					{
 						if(pexons[p].rpos <= fr2.rpos+3 && pexons[p].rpos >= fr2.rpos-3 && pexons[p].rtype == END_BOUNDARY)
 						{
-							pexon_flag = 1;
+							pexon_flag_single = 1;
 							break;
 						}
 					}
@@ -2235,22 +2240,41 @@ int bundle_bridge::join_circ_fragment_pairs()
 					{
 						if(pexons[p].lpos <= fr1.lpos+3 && pexons[p].lpos >= fr1.lpos-3 && pexons[p].ltype == START_BOUNDARY)
 						{
-							pexon_flag = 1;
+							pexon_flag_single = 1;
 							break;
 						}
 					}
 				}
 			}
 
-			if(bam_junc_flag == 2 || ref_junc_flag == 2 || pexon_flag == 1 || (fr1.lpos >= bb.lpos-5 && fr1.lpos <= bb.lpos+5 && fr2.rpos >= bb.rpos-5 && fr2.rpos <= bb.rpos+5))
+			//checking if pexon matches boundary given no junction match
+			for(int p=0;p<pexons.size();p++)
+			{
+				if(pexons[p].lpos <= fr1.lpos+3 && pexons[p].lpos >= fr1.lpos-3 && pexons[p].ltype == START_BOUNDARY)
+				{
+					pexon_flag_double++;
+					break;
+				}
+			}
+
+			for(int p=0;p<pexons.size();p++)
+			{
+				if(pexons[p].rpos <= fr2.rpos+3 && pexons[p].rpos >= fr2.rpos-3 && pexons[p].rtype == END_BOUNDARY)
+				{
+					pexon_flag_double++;
+					break;
+				}
+			}
+
+			if(bam_junc_flag == 2 || ref_junc_flag == 2 || pexon_flag_single == 1 || pexon_flag_double == 2 || (fr1.lpos >= bb.lpos-5 && fr1.lpos <= bb.lpos+5 && fr2.rpos >= bb.rpos-5 && fr2.rpos <= bb.rpos+5))
 			{
 				printf("Found a case with junc comp 1\n");
-				printf("valid: bam_junc_flag = %d, ref_junc_flag = %d, pexon_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, ref_junc_flag, pexon_flag, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
+				printf("valid: bam_junc_flag = %d, ref_junc_flag = %d, pexon_flag_single = %d, pexon_flag_double = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, ref_junc_flag, pexon_flag_single, pexon_flag_double, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
 				join_circ_fragment_pair(circ_fragment_pairs[i],0,0);
 			}
 			else
 			{
-				printf("Not valid: bam_junc_flag = %d, ref_junc_flag = %d, pexon_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, ref_junc_flag, pexon_flag, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
+				printf("Not valid: bam_junc_flag = %d, ref_junc_flag = %d, pexon_flag_single = %d, pexon_flag_double = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, ref_junc_flag, pexon_flag_single, pexon_flag_double, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
 			}
 		}
 		else if(fr2.is_compatible == 2)
@@ -2364,7 +2388,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 					{
 						if(pexons[p].rpos <= fr1.rpos+3 && pexons[p].rpos >= fr1.rpos-3 && pexons[p].rtype == END_BOUNDARY)
 						{
-							pexon_flag = 1;
+							pexon_flag_single = 1;
 							break;
 						}
 					}
@@ -2378,35 +2402,46 @@ int bundle_bridge::join_circ_fragment_pairs()
 						{
 							pexons[p].print(p+1);
 						}
-					}
-					if(strcmp(fr1.h1->qname.c_str(),"simulate:75809") == 0)
-					{
-						printf("simulate:75809 pexons:\n");
-						for(int p=0;p<pexons.size();p++)
-						{
-							pexons[p].print(p+1);
-						}
 					}*/
+
 					for(int p=0;p<pexons.size();p++)
 					{
 						if(pexons[p].lpos <= fr2.lpos+3 && pexons[p].lpos >= fr2.lpos-3 && pexons[p].ltype == START_BOUNDARY)
 						{
-							pexon_flag = 1;
+							pexon_flag_single = 1;
 							break;
 						}
 					}
 				}
 			}
 
-			if(bam_junc_flag == 2 || ref_junc_flag == 2 || pexon_flag == 1 || (fr2.lpos >= bb.lpos-5 && fr2.lpos <= bb.lpos+5 && fr1.rpos >= bb.rpos-5 && fr1.rpos <= bb.rpos+5))
+			for(int p=0;p<pexons.size();p++)
+			{
+				if(pexons[p].lpos <= fr2.lpos+3 && pexons[p].lpos >= fr2.lpos-3 && pexons[p].ltype == START_BOUNDARY)
+				{
+					pexon_flag_double++;
+					break;
+				}
+			}
+
+			for(int p=0;p<pexons.size();p++)
+			{
+				if(pexons[p].rpos <= fr1.rpos+3 && pexons[p].rpos >= fr1.rpos-3 && pexons[p].rtype == END_BOUNDARY)
+				{
+					pexon_flag_double++;
+					break;
+				}
+			}
+
+			if(bam_junc_flag == 2 || ref_junc_flag == 2 || pexon_flag_single == 1 || pexon_flag_double == 2 || (fr2.lpos >= bb.lpos-5 && fr2.lpos <= bb.lpos+5 && fr1.rpos >= bb.rpos-5 && fr1.rpos <= bb.rpos+5))
 			{
 				printf("Found a case with junc comp 2\n");
-				printf("valid: bam_junc_flag = %d, ref_junc_flag = %d, pexon_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, ref_junc_flag, pexon_flag, fr2.lpos, fr1.rpos, bb.lpos, bb.rpos);
+				printf("valid: bam_junc_flag = %d, ref_junc_flag = %d, pexon_flag_single = %d, pexon_flag_double = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, ref_junc_flag, pexon_flag_single, pexon_flag_double, fr2.lpos, fr1.rpos, bb.lpos, bb.rpos);
 				join_circ_fragment_pair(circ_fragment_pairs[i],0,0);
 			}
 			else
 			{
-				printf("Not valid: bam_junc_flag = %d, ref_junc_flag = %d, pexon_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, ref_junc_flag, pexon_flag, fr2.lpos, fr1.rpos, bb.lpos, bb.rpos);
+				printf("Not valid: bam_junc_flag = %d, ref_junc_flag = %d, pexon_flag_single = %d, pexon_flag_double = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, ref_junc_flag, pexon_flag_single,pexon_flag_double, fr2.lpos, fr1.rpos, bb.lpos, bb.rpos);
 			}
 		}
 	}

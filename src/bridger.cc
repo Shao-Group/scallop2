@@ -252,13 +252,6 @@ int bridger::bridge_overlapped_fragment(fragment &fr, int ex1, int ex2)
 
 	fr.paths.push_back(p);
 
-	if(strcmp(fr.h1->qname.c_str(),"simulate:314681") == 0)
-	{
-		printf("overlapped fragments simulate:314681\n");
-		printv(p.v);
-		printf("\n");
-	}
-
 	return 0;
 }
 
@@ -562,13 +555,6 @@ int bridger::bridge_phased_cluster(fcluster &fc)
 			if(p.length >= length_low && p.length <= length_high) p.type = 1;
 			else p.type = 2;
 			fr->paths.push_back(p);
-
-			if(strcmp(fr->h1->qname.c_str(),"simulate:314681") == 0)
-			{
-				printf("phased fragments simulate:314681\n");
-				printv(p.v);
-				printf("\n");
-			}
 		}
 	}
 	return 0;
@@ -851,13 +837,6 @@ int bridger::bridge_hard_fragments(vector<fcluster> &open)
 
 				fr->paths.push_back(p);
 				//printf(" fragment %d length = %d using path %d, p.type = %d\n", i, p.length, be, p.type);
-			
-				if(strcmp(fr->h1->qname.c_str(),"simulate:314681") == 0)
-				{
-					printf("hard fragments simulate:314681\n");
-					printv(p.v);
-					printf("\n");
-				}
 			}
 		}
 	}
@@ -1790,6 +1769,11 @@ int bridger::pick_bridge_path()
 				printv(fr.paths[i].v);
 				printf("exon len: %d\n",len);
 			}
+			if(strcmp(fr.h1->qname.c_str(),"simulate:143853") == 0)
+			{
+				printv(fr.paths[i].v);
+				printf("exon len: %d\n",len);
+			}
 			if(len < min_len)
 			{
 				min_len = len;
@@ -1799,21 +1783,21 @@ int bridger::pick_bridge_path()
 		for(int i=0;i<fr.paths.size();i++)
 		{
 			int32_t len = fr.paths[i].length;
-			printf("min_len = %d, len = %d\n",min_len, len);
-			if(abs(min_len-len) < 150)
+			//printf("min_len = %d, len = %d\n",min_len, len);
+			if(abs(min_len-len) < 170)
 			{
 				selected_paths.push_back(fr.paths[i]);
 			}
 		}
 
-		printf("fr paths size %lu\n",fr.paths.size());
+		/*printf("fr paths size %lu\n",fr.paths.size());
 		if(selected_paths.size() == 0)
 		{
 			printf("selected paths size 0\n");
 			printf("pick path chrm: %s\n",bd->bb.chrm.c_str());
 			printf("pick path frag:\n");
 			fr.print(k+1);
-		}
+		}*/
 
 		// let A be the set of b-paths whose type is either 1 or 2 -- ref
 		// let B be the set of b-paths whose type is either 3 or 4 -- reads
@@ -1897,9 +1881,9 @@ int bridger::pick_bridge_path()
 			}
 		}
 
-		if(strcmp(fr.h1->qname.c_str(),"simulate:314681") == 0)
+		if(strcmp(fr.h1->qname.c_str(),"simulate:143853") == 0)
 		{
-			printf("simulate:314681\n");
+			printf("simulate:143853\n");
 			map<string, pair<path, int>>::iterator itn;
 			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
 			{
