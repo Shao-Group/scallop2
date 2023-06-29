@@ -2103,12 +2103,12 @@ int bundle_bridge::join_circ_fragment_pairs()
 
 		//join_circ_fragment_pair(circ_fragment_pairs[i],0,0);
 
-		int bam_junc_flag = 0;
-		int ref_junc_flag = 0;
-		int pexon_flag_single = 0;
-		int pexon_flag_double = 0;
+		
+		int left_boundary_flag = 0;
+		int right_boundary_flag = 0;
 		int pexon_range = 5;
 		int bundle_range = 5;
+		int junc_range = 5;
 
 		char junc_match = '.';
 		char ref_match = '.';
@@ -2118,27 +2118,70 @@ int bundle_bridge::join_circ_fragment_pairs()
 		if(fr2.is_compatible == 1)
 		{
 
-			//checking if reads junction matches boundary
+			//checking if reads junction matches left boundary
 			for(int j=0;j<junctions.size();j++)
 			{
 				junction jc = junctions[j];
 
-				if(jc.rpos == fr1.lpos)
+				if(jc.rpos <= fr1.lpos+junc_range && jc.rpos >= fr1.lpos-junc_range)
 				{
 					printf("jc.rpos = %d\n",jc.rpos);
-					bam_junc_flag++;
+					left_boundary_flag = 1;
 					junc_match = 'L';
 					break;
 				}
 			}
 
+			//checking if ref junction matches left boundary
+			int temp_flag = 0;
+			for(int t=0;t<ref_trsts.size();t++)
+			{
+				transcript trst = ref_trsts[t];
+				vector<PI32> chain = trst.get_intron_chain();
+
+				for(int k=0;k<chain.size();k++)
+				{
+					// assert(chain[k].first < chain[k].second);
+					// if(chain[k].first <= bb.lpos) continue;
+					// if(chain[k].second >= bb.rpos) continue;
+
+					if(chain[k].second <= fr1.lpos+junc_range && chain[k].second >= fr1.lpos-junc_range)
+					{
+						left_boundary_flag = 1;
+						ref_match = 'L';
+						temp_flag = 1;
+						break;
+					}
+				}
+
+				if(temp_flag == 1)
+				{
+					break;
+				}
+			}
+
+			//checking if pexon matches left boundary
+			for(int p=0;p<pexons.size();p++)
+			{
+				if(pexons[p].lpos <= fr1.lpos+pexon_range && pexons[p].lpos >= fr1.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
+				{
+					if(strcmp(fr1.h1->qname.c_str(),"simulate:268744") == 0)
+					{
+						printf("left pexon match, %d\n",pexons[p].ltype);
+					}
+					left_boundary_flag = 1;
+					break;
+				}
+			}
+
+			//checking if reads junction matches right boundary
 			for(int j=0;j<junctions.size();j++)
 			{
 				junction jc = junctions[j];
-				if(jc.lpos == fr2.rpos)
+				if(jc.lpos <= fr2.rpos+junc_range && jc.lpos >= fr2.rpos-junc_range)
 				{
 					printf("jc.lpos = %d\n",jc.lpos);
-					bam_junc_flag++;
+					right_boundary_flag = 1;
 					junc_match = 'R';
 					break;
 				}
@@ -2158,34 +2201,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 				}
 			}
 			
-			//checking if ref junction matches boundary
-			int temp_flag = 0;
-			for(int t=0;t<ref_trsts.size();t++)
-			{
-				transcript trst = ref_trsts[t];
-				vector<PI32> chain = trst.get_intron_chain();
-
-				for(int k=0;k<chain.size();k++)
-				{
-					// assert(chain[k].first < chain[k].second);
-					// if(chain[k].first <= bb.lpos) continue;
-					// if(chain[k].second >= bb.rpos) continue;
-
-					if(fr1.lpos == chain[k].second)
-					{
-						ref_junc_flag++;
-						ref_match = 'L';
-						temp_flag = 1;
-						break;
-					}
-				}
-
-				if(temp_flag == 1)
-				{
-					break;
-				}
-			}
-
+			//checking if ref junction matches right boundary
 			temp_flag = 0;
 			for(int t=0;t<ref_trsts.size();t++)
 			{
@@ -2198,9 +2214,9 @@ int bundle_bridge::join_circ_fragment_pairs()
 					// if(chain[k].first <= bb.lpos) continue;
 					// if(chain[k].second >= bb.rpos) continue;
 
-					if(fr2.rpos == chain[k].first)
+					if(chain[k].first <= fr2.rpos+junc_range && chain[k].first >= fr2.rpos-junc_range)
 					{
-						ref_junc_flag++;
+						right_boundary_flag = 1;
 						ref_match = 'R';
 						temp_flag = 1;
 						break;
@@ -2213,94 +2229,103 @@ int bundle_bridge::join_circ_fragment_pairs()
 				}
 			}
 
-			//checking if pexon matches boundary given a junction match
-			if(bam_junc_flag < 2 && ref_junc_flag < 2)
+			if(strcmp(fr1.h1->qname.c_str(),"simulate:268744") == 0)
 			{
-				if(bam_junc_flag == 1)
+				printf("simulate:268744 pexons:\n");
+				for(int p=0;p<pexons.size();p++)
 				{
-					printf("bam_junc_flag is 1, junc_match = %c\n",junc_match);
-				}
-				if(ref_junc_flag == 1)
-				{
-					printf("ref_junc_flag is 1, ref_match = %c\n",junc_match);
-				}
-
-				if(junc_match == 'L' || ref_match == 'L')
-				{
-					for(int p=0;p<pexons.size();p++)
-					{
-						if(pexons[p].rpos <= fr2.rpos+pexon_range && pexons[p].rpos >= fr2.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
-						{
-							pexon_flag_single = 1;
-							break;
-						}
-					}
-				}
-				else if(junc_match == 'R' || ref_match == 'R')
-				{
-					for(int p=0;p<pexons.size();p++)
-					{
-						if(pexons[p].lpos <= fr1.lpos+pexon_range && pexons[p].lpos >= fr1.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
-						{
-							pexon_flag_single = 1;
-							break;
-						}
-					}
+					pexons[p].print(p+1);
 				}
 			}
 
-			//checking if pexon matches boundary given no junction match
-			for(int p=0;p<pexons.size();p++)
-			{
-				if(pexons[p].lpos <= fr1.lpos+pexon_range && pexons[p].lpos >= fr1.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
-				{
-					pexon_flag_double++;
-					break;
-				}
-			}
-
+		
+			//checking if pexon matches right boundary
 			for(int p=0;p<pexons.size();p++)
 			{
 				if(pexons[p].rpos <= fr2.rpos+pexon_range && pexons[p].rpos >= fr2.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
 				{
-					pexon_flag_double++;
+					if(strcmp(fr1.h1->qname.c_str(),"simulate:268744") == 0)
+					{
+						printf("right pexon match, %d\n",pexons[p].rtype);
+					}
+					right_boundary_flag = 1;
 					break;
 				}
 			}
 
-			if(bam_junc_flag == 2 || ref_junc_flag == 2 || pexon_flag_single == 1 || pexon_flag_double == 2 || (fr1.lpos >= bb.lpos-5 && fr1.lpos <= bb.lpos+5 && fr2.rpos >= bb.rpos-bundle_range && fr2.rpos <= bb.rpos+bundle_range))
+			if((left_boundary_flag == 1 && right_boundary_flag == 1) || (fr1.lpos >= bb.lpos-bundle_range && fr1.lpos <= bb.lpos+bundle_range && fr2.rpos >= bb.rpos-bundle_range && fr2.rpos <= bb.rpos+bundle_range))
 			{
 				printf("Found a case with junc comp 1\n");
-				printf("valid: bam_junc_flag = %d, ref_junc_flag = %d, pexon_flag_single = %d, pexon_flag_double = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, ref_junc_flag, pexon_flag_single, pexon_flag_double, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
+				printf("valid: left_boundary_flag = %d, right_boundary_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",left_boundary_flag, right_boundary_flag, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
 				join_circ_fragment_pair(circ_fragment_pairs[i],0,0);
 			}
 			else
 			{
-				printf("Not valid: bam_junc_flag = %d, ref_junc_flag = %d, pexon_flag_single = %d, pexon_flag_double = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, ref_junc_flag, pexon_flag_single, pexon_flag_double, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
+				printf("Not valid: left_boundary_flag = %d, right_boundary_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",left_boundary_flag, right_boundary_flag, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
 			}
 		}
 		else if(fr2.is_compatible == 2)
 		{
+			//checking if reads junction matches left boundary
 			for(int j=0;j<junctions.size();j++)
 			{
 				junction jc = junctions[j];
-				if(jc.rpos == fr2.lpos)
+				if(jc.rpos <= fr2.lpos+junc_range && jc.rpos >= fr2.lpos-junc_range)
 				{
 					printf("jc.rpos = %d\n",jc.rpos);
 					junc_match = 'L';
-					bam_junc_flag++;
+					left_boundary_flag = 1;
 					break;
 				}
 			}
-			
+
+			//checking if ref junction matches left boundary
+			int temp_flag = 0;
+			for(int t=0;t<ref_trsts.size();t++)
+			{
+				transcript trst = ref_trsts[t];
+				vector<PI32> chain = trst.get_intron_chain();
+
+				for(int k=0;k<chain.size();k++)
+				{
+					// assert(chain[k].first < chain[k].second);
+					// if(chain[k].first <= bb.lpos) continue;
+					// if(chain[k].second >= bb.rpos) continue;
+
+					if(chain[k].second <= fr2.lpos+junc_range && chain[k].second >= fr2.lpos-junc_range)
+					{
+						left_boundary_flag = 1;
+						ref_match = 'L';
+						temp_flag = 1;
+						break;
+					}
+				}
+
+				if(temp_flag == 1)
+				{
+					break;
+				}
+			}
+
+			//checking if pexon matches left boundary
+			for(int p=0;p<pexons.size();p++)
+			{
+				if(pexons[p].lpos <= fr2.lpos+pexon_range && pexons[p].lpos >= fr2.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
+				{
+					left_boundary_flag = 1;
+					break;
+				}
+			}
+
+			//checking if reads junction matches right boundary
 			for(int j=0;j<junctions.size();j++)
 			{
 				junction jc = junctions[j];
-				if(jc.lpos == fr1.rpos)
+				if(jc.lpos <= fr1.rpos+junc_range && jc.lpos >= fr1.rpos-junc_range)
 				{
 					printf("jc.lpos = %d\n",jc.lpos);
 					junc_match = 'R';
-					bam_junc_flag++;
+					right_boundary_flag = 1;
 					break;
 				}
 			}
@@ -2319,33 +2344,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 				}
 			}
 
-			int temp_flag = 0;
-			for(int t=0;t<ref_trsts.size();t++)
-			{
-				transcript trst = ref_trsts[t];
-				vector<PI32> chain = trst.get_intron_chain();
-
-				for(int k=0;k<chain.size();k++)
-				{
-					// assert(chain[k].first < chain[k].second);
-					// if(chain[k].first <= bb.lpos) continue;
-					// if(chain[k].second >= bb.rpos) continue;
-
-					if(fr2.lpos == chain[k].second)
-					{
-						ref_junc_flag++;
-						ref_match = 'L';
-						temp_flag = 1;
-						break;
-					}
-				}
-
-				if(temp_flag == 1)
-				{
-					break;
-				}
-			}
-
+			//checking if ref junction matches right boundary
 			temp_flag = 0;
 			for(int t=0;t<ref_trsts.size();t++)
 			{
@@ -2358,9 +2357,9 @@ int bundle_bridge::join_circ_fragment_pairs()
 					// if(chain[k].first <= bb.lpos) continue;
 					// if(chain[k].second >= bb.rpos) continue;
 
-					if(fr1.rpos == chain[k].first)
+					if(chain[k].first <= fr1.rpos+junc_range && chain[k].first >= fr1.rpos-junc_range)
 					{
-						ref_junc_flag++;
+						right_boundary_flag = 1;
 						ref_match = 'R';
 						temp_flag = 1;
 						break;
@@ -2373,77 +2372,25 @@ int bundle_bridge::join_circ_fragment_pairs()
 				}
 			}
 
-			if(bam_junc_flag < 2 && ref_junc_flag < 2)
-			{
-				if(bam_junc_flag == 1)
-				{
-					printf("bam_junc_flag is 1, junc_match = %c\n",junc_match);
-				}
-				if(ref_junc_flag == 1)
-				{
-					printf("ref_junc_flag is 1, ref_match = %c\n",junc_match);
-				}
-
-				if(junc_match == 'L' || ref_match == 'L')
-				{
-					for(int p=0;p<pexons.size();p++)
-					{
-						if(pexons[p].rpos <= fr1.rpos+pexon_range && pexons[p].rpos >= fr1.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
-						{
-							pexon_flag_single = 1;
-							break;
-						}
-					}
-				}
-				else if(junc_match == 'R' || ref_match == 'R')
-				{
-					if(strcmp(fr1.h1->qname.c_str(),"simulate:68056") == 0)
-					{
-						printf("simulate:68056 pexons:\n");
-						for(int p=0;p<pexons.size();p++)
-						{
-							pexons[p].print(p+1);
-						}
-					}
-
-					for(int p=0;p<pexons.size();p++)
-					{
-						if(pexons[p].lpos <= fr2.lpos+pexon_range && pexons[p].lpos >= fr2.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
-						{
-							pexon_flag_single = 1;
-							break;
-						}
-					}
-				}
-			}
-
-			for(int p=0;p<pexons.size();p++)
-			{
-				if(pexons[p].lpos <= fr2.lpos+pexon_range && pexons[p].lpos >= fr2.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
-				{
-					pexon_flag_double++;
-					break;
-				}
-			}
-
+			//checking if pexon matches right boundary
 			for(int p=0;p<pexons.size();p++)
 			{
 				if(pexons[p].rpos <= fr1.rpos+pexon_range && pexons[p].rpos >= fr1.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
 				{
-					pexon_flag_double++;
+					right_boundary_flag = 1;
 					break;
 				}
 			}
 
-			if(bam_junc_flag == 2 || ref_junc_flag == 2 || pexon_flag_single == 1 || pexon_flag_double == 2 || (fr2.lpos >= bb.lpos-5 && fr2.lpos <= bb.lpos+5 && fr1.rpos >= bb.rpos-bundle_range && fr1.rpos <= bb.rpos+bundle_range))
+			if((left_boundary_flag == 1 && right_boundary_flag == 1) || (fr2.lpos >= bb.lpos-bundle_range && fr2.lpos <= bb.lpos+bundle_range && fr1.rpos >= bb.rpos-bundle_range && fr1.rpos <= bb.rpos+bundle_range))
 			{
 				printf("Found a case with junc comp 2\n");
-				printf("valid: bam_junc_flag = %d, ref_junc_flag = %d, pexon_flag_single = %d, pexon_flag_double = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, ref_junc_flag, pexon_flag_single, pexon_flag_double, fr2.lpos, fr1.rpos, bb.lpos, bb.rpos);
+				printf("valid: left_boundary_flag = %d, right_boundary_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",left_boundary_flag, right_boundary_flag, fr2.lpos, fr1.rpos, bb.lpos, bb.rpos);
 				join_circ_fragment_pair(circ_fragment_pairs[i],0,0);
 			}
 			else
 			{
-				printf("Not valid: bam_junc_flag = %d, ref_junc_flag = %d, pexon_flag_single = %d, pexon_flag_double = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, ref_junc_flag, pexon_flag_single,pexon_flag_double, fr2.lpos, fr1.rpos, bb.lpos, bb.rpos);
+				printf("Not valid: left_boundary_flag = %d, right_boundary_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",left_boundary_flag, right_boundary_flag, fr2.lpos, fr1.rpos, bb.lpos, bb.rpos);
 			}
 		}
 	}
