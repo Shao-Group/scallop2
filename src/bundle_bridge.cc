@@ -2107,6 +2107,8 @@ int bundle_bridge::join_circ_fragment_pairs()
 		int ref_junc_flag = 0;
 		int pexon_flag_single = 0;
 		int pexon_flag_double = 0;
+		int pexon_range = 5;
+		int bundle_range = 5;
 
 		char junc_match = '.';
 		char ref_match = '.';
@@ -2227,7 +2229,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 				{
 					for(int p=0;p<pexons.size();p++)
 					{
-						if(pexons[p].rpos <= fr2.rpos+3 && pexons[p].rpos >= fr2.rpos-3 && pexons[p].rtype == END_BOUNDARY)
+						if(pexons[p].rpos <= fr2.rpos+pexon_range && pexons[p].rpos >= fr2.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
 						{
 							pexon_flag_single = 1;
 							break;
@@ -2238,7 +2240,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 				{
 					for(int p=0;p<pexons.size();p++)
 					{
-						if(pexons[p].lpos <= fr1.lpos+3 && pexons[p].lpos >= fr1.lpos-3 && pexons[p].ltype == START_BOUNDARY)
+						if(pexons[p].lpos <= fr1.lpos+pexon_range && pexons[p].lpos >= fr1.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
 						{
 							pexon_flag_single = 1;
 							break;
@@ -2250,7 +2252,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 			//checking if pexon matches boundary given no junction match
 			for(int p=0;p<pexons.size();p++)
 			{
-				if(pexons[p].lpos <= fr1.lpos+3 && pexons[p].lpos >= fr1.lpos-3 && pexons[p].ltype == START_BOUNDARY)
+				if(pexons[p].lpos <= fr1.lpos+pexon_range && pexons[p].lpos >= fr1.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
 				{
 					pexon_flag_double++;
 					break;
@@ -2259,14 +2261,14 @@ int bundle_bridge::join_circ_fragment_pairs()
 
 			for(int p=0;p<pexons.size();p++)
 			{
-				if(pexons[p].rpos <= fr2.rpos+3 && pexons[p].rpos >= fr2.rpos-3 && pexons[p].rtype == END_BOUNDARY)
+				if(pexons[p].rpos <= fr2.rpos+pexon_range && pexons[p].rpos >= fr2.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
 				{
 					pexon_flag_double++;
 					break;
 				}
 			}
 
-			if(bam_junc_flag == 2 || ref_junc_flag == 2 || pexon_flag_single == 1 || pexon_flag_double == 2 || (fr1.lpos >= bb.lpos-5 && fr1.lpos <= bb.lpos+5 && fr2.rpos >= bb.rpos-5 && fr2.rpos <= bb.rpos+5))
+			if(bam_junc_flag == 2 || ref_junc_flag == 2 || pexon_flag_single == 1 || pexon_flag_double == 2 || (fr1.lpos >= bb.lpos-5 && fr1.lpos <= bb.lpos+5 && fr2.rpos >= bb.rpos-bundle_range && fr2.rpos <= bb.rpos+bundle_range))
 			{
 				printf("Found a case with junc comp 1\n");
 				printf("valid: bam_junc_flag = %d, ref_junc_flag = %d, pexon_flag_single = %d, pexon_flag_double = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, ref_junc_flag, pexon_flag_single, pexon_flag_double, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
@@ -2386,7 +2388,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 				{
 					for(int p=0;p<pexons.size();p++)
 					{
-						if(pexons[p].rpos <= fr1.rpos+3 && pexons[p].rpos >= fr1.rpos-3 && pexons[p].rtype == END_BOUNDARY)
+						if(pexons[p].rpos <= fr1.rpos+pexon_range && pexons[p].rpos >= fr1.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
 						{
 							pexon_flag_single = 1;
 							break;
@@ -2395,18 +2397,18 @@ int bundle_bridge::join_circ_fragment_pairs()
 				}
 				else if(junc_match == 'R' || ref_match == 'R')
 				{
-					/*if(strcmp(fr1.h1->qname.c_str(),"simulate:99596") == 0)
+					if(strcmp(fr1.h1->qname.c_str(),"simulate:68056") == 0)
 					{
-						printf("simulate:99596 pexons:\n");
+						printf("simulate:68056 pexons:\n");
 						for(int p=0;p<pexons.size();p++)
 						{
 							pexons[p].print(p+1);
 						}
-					}*/
+					}
 
 					for(int p=0;p<pexons.size();p++)
 					{
-						if(pexons[p].lpos <= fr2.lpos+3 && pexons[p].lpos >= fr2.lpos-3 && pexons[p].ltype == START_BOUNDARY)
+						if(pexons[p].lpos <= fr2.lpos+pexon_range && pexons[p].lpos >= fr2.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
 						{
 							pexon_flag_single = 1;
 							break;
@@ -2417,7 +2419,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 
 			for(int p=0;p<pexons.size();p++)
 			{
-				if(pexons[p].lpos <= fr2.lpos+3 && pexons[p].lpos >= fr2.lpos-3 && pexons[p].ltype == START_BOUNDARY)
+				if(pexons[p].lpos <= fr2.lpos+pexon_range && pexons[p].lpos >= fr2.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
 				{
 					pexon_flag_double++;
 					break;
@@ -2426,14 +2428,14 @@ int bundle_bridge::join_circ_fragment_pairs()
 
 			for(int p=0;p<pexons.size();p++)
 			{
-				if(pexons[p].rpos <= fr1.rpos+3 && pexons[p].rpos >= fr1.rpos-3 && pexons[p].rtype == END_BOUNDARY)
+				if(pexons[p].rpos <= fr1.rpos+pexon_range && pexons[p].rpos >= fr1.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
 				{
 					pexon_flag_double++;
 					break;
 				}
 			}
 
-			if(bam_junc_flag == 2 || ref_junc_flag == 2 || pexon_flag_single == 1 || pexon_flag_double == 2 || (fr2.lpos >= bb.lpos-5 && fr2.lpos <= bb.lpos+5 && fr1.rpos >= bb.rpos-5 && fr1.rpos <= bb.rpos+5))
+			if(bam_junc_flag == 2 || ref_junc_flag == 2 || pexon_flag_single == 1 || pexon_flag_double == 2 || (fr2.lpos >= bb.lpos-5 && fr2.lpos <= bb.lpos+5 && fr1.rpos >= bb.rpos-bundle_range && fr1.rpos <= bb.rpos+bundle_range))
 			{
 				printf("Found a case with junc comp 2\n");
 				printf("valid: bam_junc_flag = %d, ref_junc_flag = %d, pexon_flag_single = %d, pexon_flag_double = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",bam_junc_flag, ref_junc_flag, pexon_flag_single, pexon_flag_double, fr2.lpos, fr1.rpos, bb.lpos, bb.rpos);
