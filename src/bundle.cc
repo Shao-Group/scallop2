@@ -81,10 +81,18 @@ int bundle::compute_strand()
 		if(bb.hits[i].xs == '-') nq++;
 	}
 
+	// a new way of defining strandness
+	// resulting to more "." strands
+	if(np > 0 && nq == 0) bb.strand = '+';
+	else if(nq > 0 && np == 0) bb.strand = '-';
+	else bb.strand = '.';
+
+	/*
 	if(np > nq) bb.strand = '+';
 	else if(np < nq) bb.strand = '-';
 	else bb.strand = '.';
-
+	*/
+	
 	return 0;
 }
 
