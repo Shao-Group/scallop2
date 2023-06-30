@@ -100,6 +100,11 @@ int bundle_bridge::build_supplementaries()
     {
         hit &h = bb.hits[i];
 
+		if(strcmp(h.qname.c_str(),"simulate:432512") == 0)
+		{
+			printf("Found read simulate:432512\n");
+		}
+
         // TODO
         if((h.flag & 0x800) == 0) continue;
 
@@ -110,10 +115,9 @@ int bundle_bridge::build_supplementaries()
         // add 0x40 and 0x80
         int k = (h.qhash % max_index + (h.flag & 0x40) + (h.flag & 0x80)) % max_index;
 
-		if(strcmp(h.qname.c_str(),"E00511:127:HJN5NALXX:5:1204:22648:53487") == 0)
+		if(strcmp(h.qname.c_str(),"simulate:432512") == 0)
 		{
-			printf("Found read h entering E00511:127:HJN5NALXX:5:1204:22648:53487, k=%d\n",k);
-			printf("qhash=%ld,h.flag&0x40=%d,h.flag&0x80=%d,max_index=%d\n",h.qhash,(h.flag & 0x40),(h.flag & 0x80),max_index);
+			printf("Found read supple simulate:432512, k=%d\n",k);
 		}
         vv[k].push_back(i);
         //printf("Adding supple\n");
@@ -123,7 +127,6 @@ int bundle_bridge::build_supplementaries()
 
     for(int i = 0; i < bb.hits.size(); i++)
     {
-
         hit &h = bb.hits[i];
 
         //if(h.paired == true) continue; 
@@ -133,20 +136,13 @@ int bundle_bridge::build_supplementaries()
 
         int k = (h.qhash % max_index + (h.flag & 0x40) + (h.flag & 0x80)) % max_index;
 
-		if(strcmp(h.qname.c_str(),"E00511:127:HJN5NALXX:5:1204:22648:53487") == 0)
-		{
-			printf("Found read h extracting E00511:127:HJN5NALXX:5:1204:22648:53487, k=%d\n",k);
-			h.print();
-			printf("qhash=%ld,h.flag&0x40=%d,h.flag&0x80=%d,max_index=%d\n",h.qhash,(h.flag & 0x40),(h.flag & 0x80),max_index);
-		}
-
         for(int j = 0; j < vv[k].size(); j++)
         {
             hit &z = bb.hits[vv[k][j]];
 
-			if(strcmp(z.qname.c_str(),"E00511:127:HJN5NALXX:5:1204:22648:53487") == 0)
+			if(strcmp(h.qname.c_str(),"simulate:432512") == 0)
 			{
-				printf("Found read z E00511:127:HJN5NALXX:5:1204:22648:53487, k=%d\n",k);
+				printf("Found read z simulate:432512, k=%d\n",k);
 				z.print();
 				printf("Read h corr to read z:\n");
 				h.print();
@@ -159,10 +155,6 @@ int bundle_bridge::build_supplementaries()
             //if(z.qhash != h.qhash) continue;
             if(z.qname != h.qname) continue;
 
-			if(strcmp(h.qname.c_str(),"E00511:127:HJN5NALXX:5:1204:22648:53487") == 0)
-			{
-				printf("Found read h E00511:127:HJN5NALXX:5:1204:22648:53487\n");
-			}
 			
             // TODO check 0x40 and 0x80 are the same
             if(((z.flag & 0x40) != (h.flag & 0x40)) || ((z.flag & 0x80) != (h.flag & 0x80))) continue;

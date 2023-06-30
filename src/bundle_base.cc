@@ -34,11 +34,15 @@ int bundle_base::add_hit(const hit &ht)
 
 	// try to include more paired-end reads
 	int32_t p = ht.rpos;
-	if(ht.mpos > ht.rpos && ht.mpos <= ht.rpos + 100000) p = ht.mpos;
+	if(ht.mpos > ht.rpos && ht.mpos <= ht.rpos + 1000000) p = ht.mpos;
 	if(p > rpos) rpos = p;
 
 	//try to include supplementary reads
-	if(ht.supple_pos != 0 && ht.supple_pos > ht.rpos && ht.supple_pos <= ht.rpos + 100000) p = ht.supple_pos;
+	if(ht.supple_pos != 0 && ht.supple_pos > ht.rpos && ht.supple_pos <= ht.rpos + 1000000) p = ht.supple_pos;
+	if(strcmp(ht.qname.c_str(),"simulate:432512") == 0)
+	{
+		printf("ht.supple_pos = %d, ht.rpos = %d, ht.rpos+100000 = %d\n",ht.supple_pos, ht.rpos, ht.rpos + 100000);
+	}
 	if(p > rpos) rpos = p;
 
 	// set tid
