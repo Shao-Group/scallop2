@@ -23,7 +23,7 @@ bundle::bundle(bundle_base &b, reference &r)
 	: bb(b), br(b), ref(r)
 {
 	compute_strand();
-	if(bb.strand != '.')
+	//if(bb.strand != '.')
 	{
 		printf("input strand = %c\n",bb.strand);
 	}
