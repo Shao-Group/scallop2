@@ -61,9 +61,18 @@ int reference::add_interval_set(map<string, interval_set_map> &isms, int k)
 vector<transcript> reference::get_overlapped_transcripts(string chrm, char c, int32_t x, int32_t y) const
 {
 	vector<transcript> v;
-	if(c == '.') return get_overlapped_transcripts(isms0, chrm, x, y);
 	if(c == '+') return get_overlapped_transcripts(isms1, chrm, x, y);
 	if(c == '-') return get_overlapped_transcripts(isms2, chrm, x, y);
+	if(c == '.') 
+	{
+		vector<transcript> v0 = get_overlapped_transcripts(isms0, chrm, x, y);
+		vector<transcript> v1 = get_overlapped_transcripts(isms1, chrm, x, y);
+		vector<transcript> v2 = get_overlapped_transcripts(isms2, chrm, x, y);
+		v.insert(v.end(), v0.begin(), v0.end());
+		v.insert(v.end(), v1.begin(), v1.end());
+		v.insert(v.end(), v2.begin(), v2.end());
+		return v;
+	}
 	return v;
 }
 
