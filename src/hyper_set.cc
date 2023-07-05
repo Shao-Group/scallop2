@@ -644,10 +644,11 @@ int hyper_set::print()
 	return 0;
 }
 
-int hyper_set::get_compatible_bottleneck(const vector<int> &p)
+PI hyper_set::get_compatible_bottleneck(const vector<int> &p)
 {
-	double bt = INT_MAX/2;
-	for(int i = 0; i < p.size(); i++)
+	double btn = INT_MAX/2;	
+    int btn_edge = -1;
+    for(int i = 0; i < p.size(); i++)
 	{
 		int e = p[i];
 		int w = 0;
@@ -670,12 +671,50 @@ int hyper_set::get_compatible_bottleneck(const vector<int> &p)
 		}
         if(p.size()>1 && i == p.size()-1 && w <= 0) break;//ignore last bottleneck=0
 
-		if(w < bt)
+		if(w < btn)
 		{
-			bt = w;
+			btn = w;
+            btn_edge=e;
 		}
 	}
-	return bt;
+	return make_pair(btn_edge, btn);
+}
+
+PI hyper_set::get_compatible_bottleneck(const vector<int> &p, const set<int>& ignored)
+{
+	double btn = INT_MAX/2;	
+    int btn_edge = -1;
+    for(int i = 0; i < p.size(); i++)
+	{
+		int e = p[i];
+        if(ignored.find(e) != ignored.end()) continue;//ignore edges within start/end exons
+		int w = 0;
+		if(e2s.find(e) != e2s.end())
+		{
+			set<int> &s = e2s[e];
+			for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+			{
+				vector<int> &f = edges[*it];
+				// check if f is compatible with p
+                vector<int> v = consecutive_subset(p, f);
+                if(v.size() == 0) continue;
+				w += ecnts[*it];
+                if(w > INT_MAX/2)
+                {
+                    w=INT_MAX/2;
+                    break;
+                }
+			}
+		}
+        if(p.size()>1 && i == p.size()-1 && w <= 0) break;//ignore last bottleneck=0
+
+		if(w < btn)
+		{
+			btn = w;
+            btn_edge=e;
+		}
+	}
+	return make_pair(btn_edge, btn);
 }
 
 int hyper_set::add_edge_not_phased(int num_edges, set<int>& critical_edge)

@@ -47,7 +47,8 @@ public:
 	MI get_predecessors(int e);
 	MPII get_routes(int x, directed_graph &gr, MEI &e2i);
 	int print();
-	int get_compatible_bottleneck(const vector<int> &p);
+	PI get_compatible_bottleneck(const vector<int> &p);
+    PI get_compatible_bottleneck(const vector<int> &p, const set<int>& ignored);
     int add_edge_not_phased(int num_edges, set<int> &critical_edge);
     int update_edge_count(vector<int> &p, int c);
 

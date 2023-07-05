@@ -53,6 +53,8 @@ private:
     int calculate_critical_edges(set<int> &critical_edge);
     int calculate_max_bottleneck_path();
     int print_phasing_path(const vector<int> &phasing_edge);
+    int edge_within_start_exon(const vector<int>& p, set<int>& start_edges);
+    int edge_within_end_exon(const vector<int>& p, set<int>& end_edges);
 
 
 };
