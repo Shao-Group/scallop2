@@ -54,7 +54,7 @@ int dp_solution_size = 10;
 int dp_stack_size = 5;
 bool use_overlap_scoring = false;
 int32_t max_clustering_flank = 30;
-int32_t flank_tiny_length = 10;
+int32_t flank_tiny_length = 15;
 double flank_tiny_ratio = 0.4;
 
 // for identifying subgraphs

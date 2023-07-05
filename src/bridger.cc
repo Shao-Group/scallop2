@@ -1824,6 +1824,21 @@ int bridger::pick_bridge_path()
 					printf(" read path\n");
 				}
 			}
+			if(strcmp(fr.h1->qname.c_str(),"simulate:842858") == 0)
+			{
+				printf("simulate:842858\n");
+				printv(fr.paths[i].v);
+				printf("exon len: %d",len);
+
+				if(fr.paths[i].type == 1 || fr.paths[i].type == 2)
+				{
+					printf(" ref path\n");
+				}
+				else
+				{
+					printf(" read path\n");
+				}
+			}
 
 			if(len < min_len)
 			{
@@ -1963,6 +1978,20 @@ int bridger::pick_bridge_path()
 		if(strcmp(fr.h1->qname.c_str(),"simulate:695766") == 0)
 		{
 			printf("simulate:695766\n");
+			map<string, pair<path, int>>::iterator itn;
+			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
+			{
+				printf("ref_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
+			}
+			for(itn = read_paths_map.begin(); itn != read_paths_map.end(); itn++)
+			{
+				printf("read_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
+			}
+		}
+
+		if(strcmp(fr.h1->qname.c_str(),"simulate:842858") == 0)
+		{
+			printf("simulate:842858\n");
 			map<string, pair<path, int>>::iterator itn;
 			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
 			{

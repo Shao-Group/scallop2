@@ -2179,11 +2179,11 @@ int bundle_bridge::join_circ_fragment_pairs()
 				}
 			}
 
-			if(strcmp(fr1.h1->qname.c_str(),"simulate:55714") == 0)
+			if(strcmp(fr1.h1->qname.c_str(),"simulate:514432") == 0)
 			{
 				for(int t=0;t<ref_trsts.size();t++)
 				{
-					printf("ref transcripts for simulate:55714:\n");
+					printf("ref transcripts for simulate:514432:\n");
 					transcript trst = ref_trsts[t];
 					vector<PI32> chain = trst.get_intron_chain();
 					for(int k=0;k<chain.size();k++)
@@ -2322,7 +2322,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 				}
 			}
 
-			if(strcmp(fr1.h1->qname.c_str(),"simulate:47588") == 0)
+			/*if(strcmp(fr1.h1->qname.c_str(),"simulate:47588") == 0)
 			{
 				for(int t=0;t<ref_trsts.size();t++)
 				{
@@ -2334,7 +2334,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 						printf("left: %d, right: %d\n",chain[k].first,chain[k].second);
 					}
 				}
-			}
+			}*/
 
 			//checking if ref junction matches right boundary
 			temp_flag = 0;
