@@ -36,9 +36,13 @@ public:
 	double abd;
 	double prlen;
 	double score;
-	double reads;
+	double reads; //scallop3: #of compatible phasing paths
 
 	int nf;				// 1: empty = true, non full length path; 0: empty = false, full length path
+
+    vector<int> e; //scallop3: path of edge ids
+    int btn; //scallop3: bottleneck
+    int btn_edge; //scallop3: bottleneck edge ID
 
 public:
 	int clear();

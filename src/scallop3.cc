@@ -63,9 +63,7 @@ int scallop3::assemble()
         round--;
 
         top_paths.clear();
-        top_btn.clear();
-        top_paths.resize(gr.num_vertices(), vector< vector<int> >(topnum, vector<int>()));
-        top_btn.resize(gr.num_vertices(), vector<int>(topnum, -1));
+        top_paths.resize(gr.num_vertices(), vector<path>(topnum, path()));
 
         calculate_max_bottleneck_path();
         /*for(int i = 0; i < 1; i++)
@@ -95,18 +93,20 @@ int scallop3::assemble()
     paths.clear();
     for(int i = 0; i < 1; i++)
     {
-        if(top_btn[t][i] <= 0) continue;
-        path p;
-        vector<int> &H = top_paths[t][i];
-        for(auto it = H.begin(); it != H.end(); it++)
+        path &p = top_paths[t][i];
+        if(p.btn <= 0) continue;
+        bool empty = false;
+        p.v.push_back(0);
+        for(auto it = p.e.begin(); it != p.e.end(); it++)
         {
             int s = i2e[*it]->source();
             int t = i2e[*it]->target();
-            if(it == H.begin())
-                p.v.push_back(s);
             p.v.push_back(t);
+            if(gr.get_vertex_info(t).type == EMPTY_VERTEX) empty = true;
         }
-        p.abd = top_btn[t][i];
+        if(empty) p.nf = 1;
+        else p.nf = 0;
+        p.abd = p.btn;
         paths.push_back(p);
     }
 
@@ -127,7 +127,8 @@ int scallop3::assemble()
     }*/
 
     trsts.clear();
-	gr.output_transcripts(trsts, paths);
+    non_full_trsts.clear();
+	gr.output_transcripts1(trsts, non_full_trsts, paths);
 
 	if(verbose >= 0) 
 	{
@@ -175,7 +176,7 @@ int scallop3::calculate_max_bottleneck_path()
             for(int i = 0; i < topnum; i++)
             {
                 int frontv = i2e[p->front()]->source();
-                vector<int> new_path = top_paths[frontv][i];
+                vector<int> new_path = top_paths[frontv][i].e;
                 if(frontv != 0 && new_path.size() <= 0) continue;
                 if(frontv == 0 && i>0) continue;
 
@@ -189,34 +190,38 @@ int scallop3::calculate_max_bottleneck_path()
 
         for(auto np = new_paths.begin(); np != new_paths.end(); np++)
         {
-            printf("New path: ");
+            printf("\nNew path: ");
             print_phasing_path(*np);
 
             set<int> edge_btn_ignored;
+            path p;
+            p.e = *np;
             edge_within_start_exon(*np, edge_btn_ignored);
-            if(v == t) edge_within_end_exon(*np, edge_btn_ignored);
-           
-            PI btnP = hs.get_compatible_bottleneck(*np, edge_btn_ignored);
+            calculate_compatible_phasing_cnt(p);
+
+            if(v == t) 
+            {
+                edge_within_end_exon(*np, edge_btn_ignored);
+            }
+
+            tie(p.btn_edge, p.btn) = hs.get_compatible_bottleneck(*np, edge_btn_ignored);
             //PI btnP = hs.get_compatible_bottleneck(*np);
-            int btn = btnP.second;
-            int btn_edge = btnP.first;
-            if(btn_edge == -1)
+            if(p.btn_edge == -1)
                 printf("Currently no btn.\n");
             else
-                printf("Edge(%d, %d) is btn = %d\n", i2e[btn_edge]->source(), i2e[btn_edge]->target(), btn);
+                printf("Edge(%d, %d) is btn = %d\n", i2e[p.btn_edge]->source(), i2e[p.btn_edge]->target(), p.btn);
             for(int i = 0; i < topnum; i++)
             {
-                int b = top_btn[v][i];
-                if(btn > b)
+                path &op = top_paths[v][i];
+                if(p.btn > op.btn || (p.btn==op.btn && p.reads>op.reads))
+                //if(p.reads>op.reads)
 			    {
 				    for(int j = topnum-1; j>i; j--)
                     {
-                        if(top_paths[v][j-1].size() == 0)continue;
-                        top_btn[v][j] = top_btn[v][j-1];
+                        if(top_paths[v][j-1].e.size() == 0)continue;
                         top_paths[v][j] = top_paths[v][j-1];
                     }
-                    top_btn[v][i] =  btn;
-				    top_paths[v][i] = *np;
+                    top_paths[v][i] = p;
                     break;
 			    }
             }
@@ -224,8 +229,8 @@ int scallop3::calculate_max_bottleneck_path()
         printf("Top %d for vertex %d:\n", topnum, v);
         for(int i = 0; i < topnum; i++)
         {
-            print_phasing_path(top_paths[v][i]);
-            printf("Btn = %d\n", top_btn[v][i]);
+            print_phasing_path(top_paths[v][i].e);
+            printf("Btn = %d\n", top_paths[v][i].btn);
         }
         printf("\n");
 
@@ -357,5 +362,18 @@ int scallop3::edge_within_end_exon(const vector<int>& p, set<int>& output)
         }
     }
     printf("\n");
+    return 0;
+}
+
+int scallop3::calculate_compatible_phasing_cnt(path &p)
+{
+    p.reads = 0;
+    for(int i = 0; i < hs.edges.size(); i++)
+    {
+        vector<int> v = consecutive_subset(p.e, hs.edges[i]);
+        if(v.size() == 0) continue;
+        p.reads += hs.ecnts[i];
+    }
+    printf("#phasing cnt: %.1f\n", p.reads);
     return 0;
 }

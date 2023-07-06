@@ -41,13 +41,14 @@ public:
 	hyper_set hs;						// hyper edges
 
     //DP entries
-    vector< vector< vector<int> > > top_paths; //top_paths[v]: top-3 paths until v
-    vector< vector<int> > top_btn; //top_btn[v]: bottleneck of top-3 paths until v
+    vector< vector<path> > top_paths; //top_paths[v]: top-3 paths until v
+    //vector< vector<int> > top_btn; //top_btn[v]: bottleneck of top-3 paths until v
     int topnum;
 
     //output
 	vector<path> paths;					// predicted paths
 	vector<transcript> trsts;			// predicted transcripts
+    vector<transcript> non_full_trsts;		// predicted non full length transcripts
 
 private:
     int calculate_critical_edges(set<int> &critical_edge);
@@ -55,7 +56,7 @@ private:
     int print_phasing_path(const vector<int> &phasing_edge);
     int edge_within_start_exon(const vector<int>& p, set<int>& start_edges);
     int edge_within_end_exon(const vector<int>& p, set<int>& end_edges);
-
+    int calculate_compatible_phasing_cnt(path &p);
 
 };
 

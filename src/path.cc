@@ -23,6 +23,10 @@ path::path()
 	fcindex = -1;
 	ex1 = 0;
 	ex2 = 0;
+
+    e.clear();
+    btn = -1;
+    btn_edge = -1;
 }
 
 path::~path()
@@ -45,6 +49,10 @@ int path::clear()
 	score = 0;
 	length = 0;
 	fcindex = -1;
+
+    e.clear();
+    btn = -1;
+    btn_edge = -1;
 	return 0;
 }
 
