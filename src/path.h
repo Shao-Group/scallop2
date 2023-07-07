@@ -13,6 +13,7 @@ See LICENSE for licensing.
 
 #include <vector>
 #include <stdint.h>
+#include "region.h"
 
 using namespace std;
 
@@ -39,6 +40,10 @@ public:
 	double reads;
 
 	int nf;				// 1: empty = true, non full length path; 0: empty = false, full length path
+
+	vector<region> path_regions;
+	vector<region> merged_regions;
+	vector<pair<int32_t,int32_t>> junc_regions;
 
 public:
 	int clear();

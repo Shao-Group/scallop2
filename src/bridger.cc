@@ -1779,11 +1779,11 @@ int bridger::pick_bridge_path()
 					printf(" read path\n");
 				}
 
-				/*for(int j=0;j<path_v.size();j++)
+				for(int j=0;j<path_v.size();j++)
 				{
 					printf("%d-%d, ",bd->regions[path_v[j]].lpos, bd->regions[path_v[j]].rpos);
 				}
-				printf("\n");*/
+				printf("\n");
 			}
 
 			if(strcmp(fr.h1->qname.c_str(),"simulate:432500") == 0)
@@ -1802,11 +1802,11 @@ int bridger::pick_bridge_path()
 					printf(" read path\n");
 				}
 
-				/*for(int j=0;j<path_v.size();j++)
+				for(int j=0;j<path_v.size();j++)
 				{
 					printf("%d-%d, ",bd->regions[path_v[j]].lpos, bd->regions[path_v[j]].rpos);
 				}
-				printf("\n");*/
+				printf("\n");
 			}
 
 			if(strcmp(fr.h1->qname.c_str(),"simulate:448707") == 0)
@@ -1825,11 +1825,11 @@ int bridger::pick_bridge_path()
 					printf(" read path\n");
 				}
 
-				/*for(int j=0;j<path_v.size();j++)
+				for(int j=0;j<path_v.size();j++)
 				{
 					printf("%d-%d, ",bd->regions[path_v[j]].lpos, bd->regions[path_v[j]].rpos);
 				}
-				printf("\n");*/
+				printf("\n");
 			}
 		
 			if(len < min_len)
@@ -1862,119 +1862,108 @@ int bridger::pick_bridge_path()
 
 		for(int i=0;i<fr.paths.size();i++)
 		{
-			path p1 = fr.paths[i];
+			path *p1 = &fr.paths[i];
 			//find juncs of p1
 
-			vector<int> p1_v = decode_vlist(p1.v);
-			
-			vector<pair<int,int>> p1_juncs;
+			vector<int> p1_v = decode_vlist(p1->v);
 
-			for(int k=1;k<p1_v.size();k++)
+			//convert path vertices to regions
+			for(int i=0;i<p1_v.size();i++)
 			{
-				if(p1_v[k] != p1_v[k-1] + 1)
+				p1->path_regions.push_back(bd->regions[p1_v[i]]);
+			}
+
+			//merge consecutive regions
+			join_interval_map jmap;
+			for(int i = 0; i < p1->path_regions.size(); i++)
+			{
+				int32_t left = p1->path_regions[i].lpos;
+				int32_t right = p1->path_regions[i].rpos;
+				jmap += make_pair(ROI(left, right), 1);
+			}
+
+			for(JIMI it = jmap.begin(); it != jmap.end(); it++)
+			{
+				region r(lower(it->first), upper(it->first), '.', '.');
+				p1->merged_regions.push_back(r);
+			}
+			
+
+			for(int i=1;i<p1->merged_regions.size();i++)
+			{
+				if(p1->merged_regions[i].lpos != p1->merged_regions[i-1].rpos)
 				{
-					p1_juncs.push_back(pair<int,int>(p1_v[k-1]+1, p1_v[k]-1));
+					p1->junc_regions.push_back(pair<int32_t,int32_t>(p1->merged_regions[i-1].rpos+1, p1->merged_regions[i].lpos-1));
 				}
 			}
 			if(strcmp(fr.h1->qname.c_str(),"simulate:73158") == 0)
 			{
-				printf("finding juncs\n");
 				printv(p1_v);
-				for(int k=0;k<p1_juncs.size();k++)
+				printf("\n");
+				for(int i=0;i<p1->merged_regions.size();i++)
 				{
-					printf("%d-%d, ",p1_juncs[k].first,p1_juncs[k].second);
+					printf("%d-%d, ",p1->merged_regions[i].lpos, p1->merged_regions[i].rpos);
 				}
+				printf("\nfinding juncs\n");
+				for(int i=0;i<p1->junc_regions.size();i++)
+				{
+					printf("%d-%d, ",p1->junc_regions[i].first,p1->junc_regions[i].second);
+				}
+				printf("\n");
 			}
 
-			for(int k=0;k<p1_juncs.size();k++)
+			if(strcmp(fr.h1->qname.c_str(),"simulate:448707") == 0)
 			{
-				pair<int,int> junc = p1_juncs[k];
-				int j_len = junc.second-junc.first+1; 
-				vector<int> j_vec;
-				//printf("j_len = %d\n",j_len);
-				if(j_len == 1)
+				printv(p1_v);
+				printf("\n");
+				for(int i=0;i<p1->merged_regions.size();i++)
 				{
-					j_vec.push_back(junc.first);
+					printf("%d-%d, ",p1->merged_regions[i].lpos, p1->merged_regions[i].rpos);
 				}
-				else
+				printf("\nfinding juncs\n");
+				for(int i=0;i<p1->junc_regions.size();i++)
 				{
-					for(int j=junc.first;j<=junc.second;j++)
-					{
-						j_vec.push_back(j);
-					}
+					printf("%d-%d, ",p1->junc_regions[i].first,p1->junc_regions[i].second);
 				}
-
-				/*for(int j=0;j<j_vec.size();j++)
-				{
-					printf("%d, ",j_vec[j]);
-				}*/
-
-				
-				for(int j=0;j<fr.paths.size();j++)
-				{
-					path p2 = fr.paths[j];
-					vector<int> p2_v = decode_vlist(p2.v);
-					int exist = 0;
-
-					for(int t=0;t<p2_v.size();t++)
-					{
-						if(junc.first == p2_v[t])
-						{
-							exist++;
-						}
-					}
-					for(int t=0;t<p2_v.size();t++)
-					{
-						if(junc.second == p2_v[t])
-						{
-							exist++;
-						}
-					}
-
-					if(exist == 2)
-					{
-						remove_list.push_back(p2);
-					}
-				}
-
-				/*for(int j=0;j<fr.paths.size();j++)
-				{
-					path p2 = fr.paths[j];
-					vector<int> p2_v = decode_vlist(p2.v);
-
-					if(p2_v.size() >= j_len)
-					{
-						for(int t=0;t<=p2_v.size()-j_len;t++)
-						{
-							int flag = 0;
-							for(int s=0;s<j_len;s++)
-							{
-								if(p2_v[t+s] != j_vec[s])
-								{
-									flag = 1;
-									break;
-								}
-							}
-
-							if(flag == 0)
-							{
-								remove_list.push_back(p2);
-								break;
-							}
-						}
-					}
-				}*/
+				printf("\n");
 			}
 		}
 
-		/*printf("remove list:\n");
+		for(int i=0;i<fr.paths.size();i++)
+		{
+			path p1 = fr.paths[i];
+
+			//printf("p1 junc size; %lu\n",p1.junc_regions.size());
+
+			for(int j=0;j<p1.junc_regions.size();j++)
+			{
+				pair<int32_t,int32_t> junc = p1.junc_regions[j];
+				
+				for(int s=0;s<fr.paths.size();s++)
+				{
+					path p2 = fr.paths[s];
+					//printf("p2 merged size; %lu\n",p2.merged_regions.size());
+
+					for(int t=0;t<p2.merged_regions.size();t++)
+					{
+						if(junc.first >= p2.merged_regions[t].lpos && junc.second <= p2.merged_regions[t].rpos)
+						{
+							remove_list.push_back(p2);
+							break;
+						}
+					}
+				}
+			}
+		}
+		
 		if(remove_list.size()  > 0)
 		{
+			printf("remove list:\n");
 			for(int i=0;i<remove_list.size();i++)
 			{
 				printv(decode_vlist(remove_list[i].v));
 			}
-		}*/
+		}
 
 		map<string,int> remove_map;
 
@@ -2011,7 +2000,6 @@ int bridger::pick_bridge_path()
 			{
 				selected_paths.push_back(p);
 			}
-
 		}
 
 		//check if selected paths is zero
@@ -2206,7 +2194,7 @@ int bridger::pick_bridge_path()
 			}
 		}
 
-		/*if(strcmp(fr.h1->qname.c_str(),"simulate:73158") == 0 && ref_paths_map.size() > 0)
+		/*if(strcmp(fr.h1->qname.c_str(),"simulate:448707") == 0 && ref_paths_map.size() > 0)
 		{
 			best_path = ref_paths_map.begin()->second.first;
 		}*/
