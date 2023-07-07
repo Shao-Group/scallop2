@@ -1831,6 +1831,29 @@ int bridger::pick_bridge_path()
 				}
 				printf("\n");
 			}
+
+			if(strcmp(fr.h1->qname.c_str(),"simulate:695766") == 0)
+			{
+				printf("simulate:695766\n");
+				vector<int> path_v = decode_vlist(fr.paths[i].v);
+				printv(path_v);
+				printf("exon len: %d",len);
+
+				if(fr.paths[i].type == 1 || fr.paths[i].type == 2)
+				{
+					printf(" ref path\n");
+				}
+				else
+				{
+					printf(" read path\n");
+				}
+
+				for(int j=0;j<path_v.size();j++)
+				{
+					printf("%d-%d, ",bd->regions[path_v[j]].lpos, bd->regions[path_v[j]].rpos);
+				}
+				printf("\n");
+			}
 		
 			if(len < min_len)
 			{
@@ -1913,6 +1936,22 @@ int bridger::pick_bridge_path()
 			}
 
 			if(strcmp(fr.h1->qname.c_str(),"simulate:448707") == 0)
+			{
+				printv(p1_v);
+				printf("\n");
+				for(int i=0;i<p1->merged_regions.size();i++)
+				{
+					printf("%d-%d, ",p1->merged_regions[i].lpos, p1->merged_regions[i].rpos);
+				}
+				printf("\nfinding juncs\n");
+				for(int i=0;i<p1->junc_regions.size();i++)
+				{
+					printf("%d-%d, ",p1->junc_regions[i].first,p1->junc_regions[i].second);
+				}
+				printf("\n");
+			}
+
+			if(strcmp(fr.h1->qname.c_str(),"simulate:695766") == 0)
 			{
 				printv(p1_v);
 				printf("\n");
@@ -2118,6 +2157,20 @@ int bridger::pick_bridge_path()
 			}
 		}
 
+		if(strcmp(fr.h1->qname.c_str(),"simulate:695766") == 0)
+		{
+			printf("simulate:695766\n");
+			map<string, pair<path, int>>::iterator itn;
+			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
+			{
+				printf("ref_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
+			}
+			for(itn = read_paths_map.begin(); itn != read_paths_map.end(); itn++)
+			{
+				printf("read_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
+			}
+		}
+
 		vector<path> intersection;
 		map<string, pair<path, int>>::iterator itn1;
 		map<string, pair<path, int>>::iterator itn2;
@@ -2194,7 +2247,7 @@ int bridger::pick_bridge_path()
 			}
 		}
 
-		/*if(strcmp(fr.h1->qname.c_str(),"simulate:448707") == 0 && ref_paths_map.size() > 0)
+		/*if(strcmp(fr.h1->qname.c_str(),"simulate:695766") == 0 && ref_paths_map.size() > 0)
 		{
 			best_path = ref_paths_map.begin()->second.first;
 		}*/
