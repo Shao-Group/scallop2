@@ -1148,8 +1148,8 @@ int bundle_bridge::build_circ_fragments()
 	int32_t max_misalignment1 = 20;
 	int32_t max_misalignment2 = 10;
 
-	vector<fragment> circ_fragments;
-	circ_fragments.clear(); // unbridged second set of fragments, cannot use this for finding partner fragments
+	//vector<fragment> circ_fragments;
+	//circ_fragments.clear(); // unbridged second set of fragments, cannot use this for finding partner fragments
 
 	for(int k = 0; k < fragments.size(); k++)
 	{
@@ -1537,8 +1537,8 @@ int bundle_bridge::build_circ_fragments()
 			*/
 
 			frag.pi = k;
-			frag.fidx = fragments.size() + circ_fragments.size();
-			fr.pi = fragments.size() + circ_fragments.size(); //pi not set for all fragments, only those that have second frags, check pi before using if it is -1
+			frag.fidx = circ_fragments.size();
+			fr.pi = circ_fragments.size(); //pi not set for all fragments, only those that have second frags, check pi before using if it is -1
 			fr.fidx = k;
 
 			circ_fragments.push_back(frag);
@@ -1616,8 +1616,8 @@ int bundle_bridge::build_circ_fragments()
 			*/
 
 			frag.pi = k;
-			frag.fidx = fragments.size() + circ_fragments.size();
-			fr.pi = fragments.size() + circ_fragments.size(); //pi not set for all fragments, only those that have second frags, check pi before using if it is -1
+			frag.fidx = circ_fragments.size();
+			fr.pi = circ_fragments.size(); //pi not set for all fragments, only those that have second frags, check pi before using if it is -1
 			fr.fidx = k;
 
 			circ_fragments.push_back(frag);	
@@ -1630,16 +1630,16 @@ int bundle_bridge::build_circ_fragments()
 	//adding the second part fragments to fragments vector
 	if(circ_fragments.size() > 0)
 	{
-		printf("fragments vector size before = %zu\n",fragments.size());		
+		printf("fragments vector size = %zu\n",fragments.size());		
 	}
 	
 	//fragments.clear();
-	for(int i=0;i<circ_fragments.size();i++)
+	/*for(int i=0;i<circ_fragments.size();i++)
 	{
 		fragments.push_back(circ_fragments[i]); //pushing the circ fragments at the end of the main fragments list, 
 												//does this create any problem in the main scallop2 output??
 												//no as this is a separate module just for circRNA
-	}
+	}*/
 
 	if(circ_fragments.size() > 0)
 	{
@@ -1891,11 +1891,11 @@ int bundle_bridge::extract_circ_fragment_pairs()
 	}*/
 
 
-	vector<fragment> circ_fragments;
-	circ_fragments.clear();
+	//vector<fragment> circ_fragments;
+	//circ_fragments.clear();
 	circ_fragment_pairs.clear();
 
-	for(int k = 0; k < fragments.size(); k++)
+	/*for(int k = 0; k < fragments.size(); k++)
 	{
 		fragment &fr = fragments[k];
 
@@ -1903,7 +1903,7 @@ int bundle_bridge::extract_circ_fragment_pairs()
 		{
 			circ_fragments.push_back(fr); //bridging function called already
 		}
-	}
+	}*/
 
 	if(circ_fragments.size() > 0)
 	{

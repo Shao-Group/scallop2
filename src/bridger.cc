@@ -64,7 +64,7 @@ int bridger::bridge_normal_fragments()
 	int n3 = get_paired_fragments();
 
 	// 2nd round of briding hard fragments
-	bridge_hard_fragments();
+	bridge_hard_fragments(open_fclusters);
 	filter_paths();
 	int n4 = get_paired_fragments();
 
@@ -2087,7 +2087,7 @@ int bridger::pick_bridge_path()
 
 		if(read_paths.size() > 1)
 		{
-			printf("ref_paths size = %lu, read_paths size = %lu\n",ref_paths.size(),read_paths.size());
+			//printf("ref_paths size = %lu, read_paths size = %lu\n",ref_paths.size(),read_paths.size());
 		}
 		//printf("fragment paths size: %lu\n",fr.paths.size());
 
