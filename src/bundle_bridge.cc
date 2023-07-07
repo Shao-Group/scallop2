@@ -64,7 +64,8 @@ int bundle_bridge::build()
 	set_fragment_lengths();
 
 	bridger bdg(this);
-	bdg.bridge();
+	bdg.bridge_normal_fragments();
+	bdg.bridge_circ_fragments();
 
 	extract_circ_fragment_pairs();
 	//print_circ_fragment_pairs();

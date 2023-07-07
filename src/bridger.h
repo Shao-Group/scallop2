@@ -45,9 +45,9 @@ public:
 	int32_t length_low;	//DISTRBN OF FRGAMNET length 0
 	int32_t length_high; //DISTRBN OF FRGAMNET length 10000
 
-
 public:
-	int bridge();
+	int bridge_normal_fragments();
+	int bridge_circ_fragments();
 	int bridge_clip(int32_t p1, int32_t p2, circular_transcript &circ);
 	int pick_bridge_path();
 	int print();

@@ -34,7 +34,82 @@ bridger::bridger(bundle_bridge *b)
 	max_pnode_length = 50;
 }
 
-int bridger::bridge()
+int bridger::bridge_normal_fragments()
+{
+	/*
+	printf("before bridging ... \n");
+	for(int i = 0; i < bd->fragments.size(); i++)
+	{
+		bd->fragments[i].print(i);
+	}
+	printf("===\n");
+	*/
+
+	update_length();
+	int n = bd->fragments.size();
+
+	bridge_overlapped_fragments();
+
+	//filter_paths();
+	int n1 = get_paired_fragments();
+
+	vector<fcluster> open_fclusters;
+	cluster_open_fragments(open_fclusters);
+
+	bridge_hard_fragments(open_fclusters);
+
+	// should not call this function
+	// as it tries to keep only one
+	// bridging path
+	//filter_paths();
+	int n3 = get_paired_fragments();
+
+	// use reference to bridge
+	bridge_phased_fragments(open_fclusters);
+
+	// should not call this function
+	// as it tries to keep only one
+	// bridging path
+	//filter_paths();
+
+	int n2 = get_paired_fragments();
+
+	// first round of briding hard fragments
+	//remove_tiny_boundary();//remove false alignment
+
+
+	// skip the 2nd round of bridgin
+	//// 2nd round of briding hard fragments
+	//bridge_hard_fragments();
+	//filter_paths();
+	int n4 = get_paired_fragments();
+
+	pick_bridge_path();
+
+	double r1 = n1 * 100.0 / n;
+	double r2 = n2 * 100.0 / n;
+	double r3 = n3 * 100.0 / n;
+	double r4 = n4 * 100.0 / n;
+
+	vector<int> ct = get_bridged_fragments_type();	// ct<ct1, ct2, ct3> paired-end, UMI-linked, both
+	if(verbose >= 1)
+	{
+		printf("#fragments = %d, #fixed = %d -> %d -> %d -> %d, ratio = %.2lf -> %.2lf -> %.2lf -> %.2lf, #remain = %d, length = (%d, %d, %d), total paired-end = %d, UMI-linked only = %d, intersection: %d, bridged paired-end = %d, UMI-linked only = %d, intersection: %d\n", n, n1, n2, n3, n4, r1, r2, r3, r4, n - n4, length_low, length_median, length_high, ct[3], ct[4], ct[5], ct[0], ct[1], ct[2]);
+	}
+	/*
+	printf("after bridging ... \n");
+	for(int i = 0; i < bd->fragments.size(); i++)
+	{
+		bd->fragments[i].print(i);
+	}
+	printf("===\n");
+	*/
+
+	return 0;
+}
+
+
+int bridger::bridge_circ_fragments()
 {
 	/*
 	printf("before bridging ... \n");
