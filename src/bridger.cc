@@ -1756,7 +1756,6 @@ int bridger::pick_bridge_path()
 			continue;
 		}
 
-
 		//select set of paths with significantly shorter length than others
 
 		int32_t min_len = 1000000;
@@ -1764,10 +1763,11 @@ int bridger::pick_bridge_path()
 		for(int i=0;i<fr.paths.size();i++)
 		{
 			int32_t len = fr.paths[i].length;
-			if(strcmp(fr.h1->qname.c_str(),"simulate:523891") == 0)
+			if(strcmp(fr.h1->qname.c_str(),"simulate:73158") == 0)
 			{
-				printf("simulate:523891\n");
-				printv(fr.paths[i].v);
+				printf("simulate:73158\n");
+				vector<int> path_v = decode_vlist(fr.paths[i].v);
+				printv(path_v);
 				printf("exon len: %d",len);
 
 				if(fr.paths[i].type == 1 || fr.paths[i].type == 2)
@@ -1778,11 +1778,19 @@ int bridger::pick_bridge_path()
 				{
 					printf(" read path\n");
 				}
+
+				/*for(int j=0;j<path_v.size();j++)
+				{
+					printf("%d-%d, ",bd->regions[path_v[j]].lpos, bd->regions[path_v[j]].rpos);
+				}
+				printf("\n");*/
 			}
-			if(strcmp(fr.h1->qname.c_str(),"simulate:604083") == 0)
+
+			if(strcmp(fr.h1->qname.c_str(),"simulate:432500") == 0)
 			{
-				printf("simulate:604083\n");
-				printv(fr.paths[i].v);
+				printf("simulate:432500\n");
+				vector<int> path_v = decode_vlist(fr.paths[i].v);
+				printv(path_v);
 				printf("exon len: %d",len);
 
 				if(fr.paths[i].type == 1 || fr.paths[i].type == 2)
@@ -1793,11 +1801,19 @@ int bridger::pick_bridge_path()
 				{
 					printf(" read path\n");
 				}
+
+				/*for(int j=0;j<path_v.size();j++)
+				{
+					printf("%d-%d, ",bd->regions[path_v[j]].lpos, bd->regions[path_v[j]].rpos);
+				}
+				printf("\n");*/
 			}
-			if(strcmp(fr.h1->qname.c_str(),"simulate:602398") == 0)
+
+			if(strcmp(fr.h1->qname.c_str(),"simulate:448707") == 0)
 			{
-				printf("simulate:602398\n");
-				printv(fr.paths[i].v);
+				printf("simulate:448707\n");
+				vector<int> path_v = decode_vlist(fr.paths[i].v);
+				printv(path_v);
 				printf("exon len: %d",len);
 
 				if(fr.paths[i].type == 1 || fr.paths[i].type == 2)
@@ -1808,45 +1824,21 @@ int bridger::pick_bridge_path()
 				{
 					printf(" read path\n");
 				}
-			}
-			if(strcmp(fr.h1->qname.c_str(),"simulate:695766") == 0)
-			{
-				printf("simulate:695766\n");
-				printv(fr.paths[i].v);
-				printf("exon len: %d",len);
 
-				if(fr.paths[i].type == 1 || fr.paths[i].type == 2)
+				/*for(int j=0;j<path_v.size();j++)
 				{
-					printf(" ref path\n");
+					printf("%d-%d, ",bd->regions[path_v[j]].lpos, bd->regions[path_v[j]].rpos);
 				}
-				else
-				{
-					printf(" read path\n");
-				}
+				printf("\n");*/
 			}
-			if(strcmp(fr.h1->qname.c_str(),"simulate:842858") == 0)
-			{
-				printf("simulate:842858\n");
-				printv(fr.paths[i].v);
-				printf("exon len: %d",len);
-
-				if(fr.paths[i].type == 1 || fr.paths[i].type == 2)
-				{
-					printf(" ref path\n");
-				}
-				else
-				{
-					printf(" read path\n");
-				}
-			}
-
+		
 			if(len < min_len)
 			{
 				min_len = len;
 			}
 		}
 
-		for(int i=0;i<fr.paths.size();i++)
+		/*for(int i=0;i<fr.paths.size();i++)
 		{
 			int32_t len = fr.paths[i].length;
 			//printf("min_len = %d, len = %d\n",min_len, len);
@@ -1854,7 +1846,7 @@ int bridger::pick_bridge_path()
 			{
 				selected_paths.push_back(fr.paths[i]);
 			}
-		}
+		}*/
 
 		/*printf("fr paths size %lu\n",fr.paths.size());
 		if(selected_paths.size() == 0)
@@ -1864,6 +1856,169 @@ int bridger::pick_bridge_path()
 			printf("pick path frag:\n");
 			fr.print(k+1);
 		}*/
+
+		//remove exon retention path, compare all paths pairwise
+		vector<path> remove_list;
+
+		for(int i=0;i<fr.paths.size();i++)
+		{
+			path p1 = fr.paths[i];
+			//find juncs of p1
+
+			vector<int> p1_v = decode_vlist(p1.v);
+			
+			vector<pair<int,int>> p1_juncs;
+
+			for(int k=1;k<p1_v.size();k++)
+			{
+				if(p1_v[k] != p1_v[k-1] + 1)
+				{
+					p1_juncs.push_back(pair<int,int>(p1_v[k-1]+1, p1_v[k]-1));
+				}
+			}
+			if(strcmp(fr.h1->qname.c_str(),"simulate:73158") == 0)
+			{
+				printf("finding juncs\n");
+				printv(p1_v);
+				for(int k=0;k<p1_juncs.size();k++)
+				{
+					printf("%d-%d, ",p1_juncs[k].first,p1_juncs[k].second);
+				}
+			}
+
+			for(int k=0;k<p1_juncs.size();k++)
+			{
+				pair<int,int> junc = p1_juncs[k];
+				int j_len = junc.second-junc.first+1; 
+				vector<int> j_vec;
+				//printf("j_len = %d\n",j_len);
+				if(j_len == 1)
+				{
+					j_vec.push_back(junc.first);
+				}
+				else
+				{
+					for(int j=junc.first;j<=junc.second;j++)
+					{
+						j_vec.push_back(j);
+					}
+				}
+
+				/*for(int j=0;j<j_vec.size();j++)
+				{
+					printf("%d, ",j_vec[j]);
+				}*/
+
+				
+				for(int j=0;j<fr.paths.size();j++)
+				{
+					path p2 = fr.paths[j];
+					vector<int> p2_v = decode_vlist(p2.v);
+					int exist = 0;
+
+					for(int t=0;t<p2_v.size();t++)
+					{
+						if(junc.first == p2_v[t])
+						{
+							exist++;
+						}
+					}
+					for(int t=0;t<p2_v.size();t++)
+					{
+						if(junc.second == p2_v[t])
+						{
+							exist++;
+						}
+					}
+
+					if(exist == 2)
+					{
+						remove_list.push_back(p2);
+					}
+				}
+
+				/*for(int j=0;j<fr.paths.size();j++)
+				{
+					path p2 = fr.paths[j];
+					vector<int> p2_v = decode_vlist(p2.v);
+
+					if(p2_v.size() >= j_len)
+					{
+						for(int t=0;t<=p2_v.size()-j_len;t++)
+						{
+							int flag = 0;
+							for(int s=0;s<j_len;s++)
+							{
+								if(p2_v[t+s] != j_vec[s])
+								{
+									flag = 1;
+									break;
+								}
+							}
+
+							if(flag == 0)
+							{
+								remove_list.push_back(p2);
+								break;
+							}
+						}
+					}
+				}*/
+			}
+		}
+
+		/*printf("remove list:\n");
+		if(remove_list.size()  > 0)
+		{
+			for(int i=0;i<remove_list.size();i++)
+			{
+				printv(decode_vlist(remove_list[i].v));
+			}
+		}*/
+
+		map<string,int> remove_map;
+
+		for(int i=0;i<remove_list.size();i++)
+		{
+			path p = remove_list[i];
+			string hash = "";
+			
+			for(int j=0;j<p.v.size();j++)
+			{
+				hash = hash + tostring(p.v[j]) + "|";
+
+				if(remove_map.find(hash) != remove_map.end()) //path present already in map
+				{
+					remove_map[hash]++;
+				}
+				else //path not present in map
+				{
+					remove_map.insert(pair<string,int>(hash,1));
+				}
+			}
+		}
+
+		for(int i=0;i<fr.paths.size();i++)
+		{
+			path p = fr.paths[i];
+			string hash = "";
+			for(int j=0;j<p.v.size();j++)
+			{
+				hash = hash + tostring(p.v[j]) + "|";
+			}
+
+			if(remove_map.find(hash) == remove_map.end()) //path not present in remove map
+			{
+				selected_paths.push_back(p);
+			}
+
+		}
+
+		//check if selected paths is zero
+		if(selected_paths.size() == 0)
+		{
+			selected_paths = fr.paths;
+		}
 
 		// let A be the set of b-paths whose type is either 1 or 2 -- ref
 		// let B be the set of b-paths whose type is either 3 or 4 -- reads
@@ -1933,9 +2088,9 @@ int bridger::pick_bridge_path()
 			}
 		}
 
-		if(strcmp(fr.h1->qname.c_str(),"simulate:523891") == 0)
+		if(strcmp(fr.h1->qname.c_str(),"simulate:73158") == 0)
 		{
-			printf("simulate:523891\n");
+			printf("simulate:73158\n");
 			map<string, pair<path, int>>::iterator itn;
 			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
 			{
@@ -1947,9 +2102,9 @@ int bridger::pick_bridge_path()
 			}
 		}
 
-		if(strcmp(fr.h1->qname.c_str(),"simulate:604083") == 0)
+		if(strcmp(fr.h1->qname.c_str(),"simulate:432500") == 0)
 		{
-			printf("simulate:604083\n");
+			printf("simulate:432500\n");
 			map<string, pair<path, int>>::iterator itn;
 			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
 			{
@@ -1961,37 +2116,9 @@ int bridger::pick_bridge_path()
 			}
 		}
 
-		if(strcmp(fr.h1->qname.c_str(),"simulate:602398") == 0)
+		if(strcmp(fr.h1->qname.c_str(),"simulate:448707") == 0)
 		{
-			printf("simulate:602398\n");
-			map<string, pair<path, int>>::iterator itn;
-			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
-			{
-				printf("ref_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-			for(itn = read_paths_map.begin(); itn != read_paths_map.end(); itn++)
-			{
-				printf("read_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-		}
-
-		if(strcmp(fr.h1->qname.c_str(),"simulate:695766") == 0)
-		{
-			printf("simulate:695766\n");
-			map<string, pair<path, int>>::iterator itn;
-			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
-			{
-				printf("ref_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-			for(itn = read_paths_map.begin(); itn != read_paths_map.end(); itn++)
-			{
-				printf("read_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-		}
-
-		if(strcmp(fr.h1->qname.c_str(),"simulate:842858") == 0)
-		{
-			printf("simulate:842858\n");
+			printf("simulate:448707\n");
 			map<string, pair<path, int>>::iterator itn;
 			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
 			{
