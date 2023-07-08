@@ -2035,7 +2035,7 @@ int bridger::pick_bridge_path()
 				hash = hash + tostring(p.v[j]) + "|";
 			}
 
-			if(remove_map.find(hash) == remove_map.end()) //path not present in remove map
+			if(remove_map.find(hash) == remove_map.end() && p.length < 100000) //path not present in remove map
 			{
 				selected_paths.push_back(p);
 			}
