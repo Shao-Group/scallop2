@@ -606,6 +606,11 @@ int bundle_bridge::set_fragment_lengths()
 	{
 		set_fragment_length(fragments[k]);
 	}
+
+	for(int k = 0; k < circ_fragments.size(); k++)
+	{
+		set_fragment_length(circ_fragments[k]);
+	}
 	return 0;
 }
 
@@ -1932,6 +1937,8 @@ int bundle_bridge::extract_circ_fragment_pairs()
 		}
 	}
 
+	printf("Printing bridged fragment pairs: size = %zu\n\n",circ_fragment_pairs.size());
+
 	/*if(circ_fragment_pairs.size() > 0)
 	{
 		printf("Printing bridged fragment pairs: size = %zu\n\n",circ_fragment_pairs.size());
@@ -2070,6 +2077,8 @@ int bundle_bridge::print_circ_fragment_pairs()
 			if(fr1.paths.size() != 1 || fr2.paths.size() != 1) continue; //check both frags bridged
 			//if(fr1.paths[0].type != 1 || fr2.paths[0].type != 1) continue; // 1: within normal range of insertsize;
 
+			fr1.print(i+1);
+			fr2.print(i+1);
 			fr1.paths[0].print(i+1);
 			fr2.paths[0].print(i+1);
 		}

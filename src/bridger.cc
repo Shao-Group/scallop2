@@ -1780,7 +1780,6 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 				p1->merged_regions.push_back(r);
 			}
 			
-
 			for(int i=1;i<p1->merged_regions.size();i++)
 			{
 				if(p1->merged_regions[i].lpos != p1->merged_regions[i-1].rpos)
