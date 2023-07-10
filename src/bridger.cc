@@ -45,35 +45,38 @@ int bridger::bridge_normal_fragments()
 	printf("===\n");
 	*/
 
-	update_length();
+	set_normal_length();
 	int n = bd->fragments.size();
 
-	bridge_overlapped_fragments();
-	filter_paths();
-	int n1 = get_paired_fragments();
+	bridge_overlapped_fragments(bd->fragments);
+	filter_paths(bd->fragments);
+	int n1 = get_paired_fragments(bd->fragments);
 
 	vector<fcluster> open_fclusters;
-	cluster_open_fragments(open_fclusters);
+	cluster_open_fragments(open_fclusters, bd->fragments);
 
-	bridge_phased_fragments(open_fclusters);
-	filter_paths();
-	int n2 = get_paired_fragments();
-
+	// 1st round of briding hard fragments
+	build_junction_graph(bd->fragments);
 	bridge_hard_fragments(open_fclusters);
-	filter_paths();
-	int n3 = get_paired_fragments();
+	filter_paths(bd->fragments);
+	int n2 = get_paired_fragments(bd->fragments);
 
 	// 2nd round of briding hard fragments
+	build_junction_graph(bd->fragments);
 	bridge_hard_fragments(open_fclusters);
-	filter_paths();
-	int n4 = get_paired_fragments();
+	filter_paths(bd->fragments);
+	int n3 = get_paired_fragments(bd->fragments);
+
+	bridge_phased_fragments(open_fclusters);
+	filter_paths(bd->fragments);
+	int n4 = get_paired_fragments(bd->fragments);
 
 	double r1 = n1 * 100.0 / n;
 	double r2 = n2 * 100.0 / n;
 	double r3 = n3 * 100.0 / n;
 	double r4 = n4 * 100.0 / n;
 
-	vector<int> ct = get_bridged_fragments_type();	// ct<ct1, ct2, ct3> paired-end, UMI-linked, both
+	vector<int> ct = get_bridged_fragments_type(bd->fragments);	// ct<ct1, ct2, ct3> paired-end, UMI-linked, both
 	if(verbose >= 1)
 	{
 		printf("#normal fragments = %d, #fixed = %d -> %d -> %d -> %d, ratio = %.2lf -> %.2lf -> %.2lf -> %.2lf, #remain = %d, length = (%d, %d, %d), total paired-end = %d, UMI-linked only = %d, intersection: %d, bridged paired-end = %d, UMI-linked only = %d, intersection: %d\n", 
@@ -103,57 +106,35 @@ int bridger::bridge_circ_fragments()
 	printf("===\n");
 	*/
 
+	set_circ_length();
+	int n = bd->circ_fragments.size();
 
-	update_length();
-	int n = bd->fragments.size();
-
-	bridge_overlapped_fragments();
-
-	//filter_paths();
-	int n1 = get_paired_fragments();
+	bridge_overlapped_fragments(bd->circ_fragments);
+	int n1 = get_paired_fragments(bd->circ_fragments);
 
 	vector<fcluster> open_fclusters;
-	cluster_open_fragments(open_fclusters);
+	cluster_open_fragments(open_fclusters, bd->circ_fragments);
 
+	build_junction_graph(bd->fragments);
 	bridge_hard_fragments(open_fclusters);
 
-	// should not call this function
-	// as it tries to keep only one
-	// bridging path
-	//filter_paths();
-	int n3 = get_paired_fragments();
+	int n2 = get_paired_fragments(bd->circ_fragments);
 
-	// use reference to bridge
 	bridge_phased_fragments(open_fclusters);
+	int n3 = get_paired_fragments(bd->circ_fragments);
+	int n4 = n3;
 
-	// should not call this function
-	// as it tries to keep only one
-	// bridging path
-	//filter_paths();
-
-	int n2 = get_paired_fragments();
-
-	// first round of briding hard fragments
-	//remove_tiny_boundary();//remove false alignment
-
-
-	// skip the 2nd round of bridgin
-	//// 2nd round of briding hard fragments
-	//bridge_hard_fragments();
-	//filter_paths();
-	int n4 = get_paired_fragments();
-
-	pick_bridge_path();
+	pick_bridge_path(bd->circ_fragments);
 
 	double r1 = n1 * 100.0 / n;
 	double r2 = n2 * 100.0 / n;
 	double r3 = n3 * 100.0 / n;
 	double r4 = n4 * 100.0 / n;
 
-	vector<int> ct = get_bridged_fragments_type();	// ct<ct1, ct2, ct3> paired-end, UMI-linked, both
+	vector<int> ct = get_bridged_fragments_type(bd->circ_fragments);	// ct<ct1, ct2, ct3> paired-end, UMI-linked, both
 	if(verbose >= 1)
 	{
-		printf("#fragments = %d, #fixed = %d -> %d -> %d -> %d, ratio = %.2lf -> %.2lf -> %.2lf -> %.2lf, #remain = %d, length = (%d, %d, %d), total paired-end = %d, UMI-linked only = %d, intersection: %d, bridged paired-end = %d, UMI-linked only = %d, intersection: %d\n", n, n1, n2, n3, n4, r1, r2, r3, r4, n - n4, length_low, length_median, length_high, ct[3], ct[4], ct[5], ct[0], ct[1], ct[2]);
+		printf("#circ fragments = %d, #fixed = %d -> %d -> %d -> %d, ratio = %.2lf -> %.2lf -> %.2lf -> %.2lf, #remain = %d, length = (%d, %d, %d), total paired-end = %d, UMI-linked only = %d, intersection: %d, bridged paired-end = %d, UMI-linked only = %d, intersection: %d\n", n, n1, n2, n3, n4, r1, r2, r3, r4, n - n4, length_low, length_median, length_high, ct[3], ct[4], ct[5], ct[0], ct[1], ct[2]);
 	}
 	/*
 	printf("after bridging ... \n");
@@ -204,7 +185,7 @@ int bridger::bridge_clip(int32_t p1, int32_t p2, circular_transcript &circ)
 
 	if(x1 != -1 && x2 != -1 && x1 < x2)
 	{
-		build_junction_graph();
+		build_junction_graph(bd->fragments);
 
 		vector< vector<entry> > table;
 		table.resize(bd->regions.size());
@@ -253,11 +234,11 @@ int bridger::bridge_clip(int32_t p1, int32_t p2, circular_transcript &circ)
 	return 0;
 }
 
-int bridger::bridge_overlapped_fragments()
+int bridger::bridge_overlapped_fragments(vector<fragment> &frags)
 {
-	for(int i = 0; i < bd->fragments.size(); i++)
+	for(int i = 0; i < frags.size(); i++)
 	{
-		fragment &fr = bd->fragments[i];
+		fragment &fr = frags[i];
 		bridge_overlapped_fragment(fr, 0, 0);
 	}
 	return 0;
@@ -333,19 +314,19 @@ int bridger::bridge_phased_fragments(vector<fcluster> &fclusters)
 	return 0;
 }
 
-int bridger::cluster_open_fragments(vector<fcluster> &fclusters)
+int bridger::cluster_open_fragments(vector<fcluster> &fclusters, vector<fragment> &frags)
 {
 	vector<fragment*> open;
-	for(int i = 0; i < bd->fragments.size(); i++)
+	for(int i = 0; i < frags.size(); i++)
 	{
-		fragment &fr = bd->fragments[i];
+		fragment &fr = frags[i];
 		if(fr.paths.size() >= 1) continue;
 		//if(fr.paths.size() == 1 && fr.paths[0].type == 1) continue;
 		int last1 = fr.h1->vlist[fr.h1->vlist.size() - 2] + fr.h1->vlist.back() - 1;
 		int last2 = fr.h2->vlist[fr.h2->vlist.size() - 2] + fr.h2->vlist.back() - 1;
 		if(last1 >= last2) continue;
 		//if(fr.h1->vlist.back() >= fr.h2->vlist.front()) continue;
-		open.push_back(&(bd->fragments[i]));
+		open.push_back(&(frags[i]));
 	}
 
 	if(open.size() == 0) return 0;
@@ -388,10 +369,10 @@ int bridger::cluster_open_fragments(vector<fcluster> &fclusters)
 	return 0;
 }
 
-int bridger::build_junction_graph()
+int bridger::build_junction_graph(vector<fragment> &frags)
 {
 	pnodes.clear();
-	build_path_nodes(2);
+	build_path_nodes(2, frags);
 	add_consecutive_path_nodes();
 
 	int n = bd->regions.size();
@@ -448,29 +429,29 @@ int bridger::add_consecutive_path_nodes()
 	return 0;
 }
 
-int bridger::build_path_nodes(int low, int high)
+int bridger::build_path_nodes(int low, int high, vector<fragment> &frags)
 {
 	int m = (low + high) / 2;
-	build_path_nodes(m);
+	build_path_nodes(m, frags);
 
 	//printf("build path nodes: pnodes = %lu, low = %d, high = %d\n", pnodes.size(), low, high);
 
 	if(high - low <= 1) return 0;
-	if(pnodes.size() > max_num_path_nodes) return build_path_nodes(low, max_pnode_length);
-	if(pnodes.size() <= max_num_path_nodes) return build_path_nodes(max_pnode_length, high);
+	if(pnodes.size() > max_num_path_nodes) return build_path_nodes(low, max_pnode_length, frags);
+	if(pnodes.size() <= max_num_path_nodes) return build_path_nodes(max_pnode_length, high, frags);
 
 	return 0;
 }
 
-int bridger::build_path_nodes(int max_len)
+int bridger::build_path_nodes(int max_len, vector<fragment> &frags)
 {
 	max_pnode_length = max_len;
 	map<vector<int>, int> m;
 	set<int> hs;
-	for(int i = 0; i < bd->fragments.size(); i++)
+	for(int i = 0; i < frags.size(); i++)
 	{
 		// TODO, also check length
-		fragment &fr = bd->fragments[i];
+		fragment &fr = frags[i];
 		if(fr.paths.size() == 1 && fr.paths[0].type == 1)
 		{
 			vector<int> v = decode_vlist(fr.paths[0].v);
@@ -618,11 +599,11 @@ int bridger::bridge_phased_cluster(fcluster &fc)
 	return 0;
 }
 
-int bridger::remove_tiny_boundary()
+int bridger::remove_tiny_boundary(vector<fragment> &frags)
 {
-	for(int i = 0; i < bd->fragments.size(); i++)
+	for(int i = 0; i < frags.size(); i++)
 	{
-		fragment &fr = bd->fragments[i];
+		fragment &fr = frags[i];
 
 		if(fr.paths.size() == 1 && fr.paths[0].type == 1) continue;
 
@@ -666,15 +647,15 @@ int bridger::remove_tiny_boundary()
 	return 0;
 }
 
-int bridger::build_path_nodes()
+int bridger::build_path_nodes(vector<fragment> &frags)
 {
 	int low = 10;
 	int high = 50;
-	build_path_nodes(high);
+	build_path_nodes(high, frags);
 	if(pnodes.size() > max_num_path_nodes)
 	{
-		build_path_nodes(low);
-		if(pnodes.size() < max_num_path_nodes) build_path_nodes(low, high);
+		build_path_nodes(low, frags);
+		if(pnodes.size() < max_num_path_nodes) build_path_nodes(low, high, frags);
 	}
 	sort(pnodes.begin(), pnodes.end(), compare_path_vertices);
 	return 0;
@@ -682,13 +663,13 @@ int bridger::build_path_nodes()
 
 int bridger::bridge_hard_fragments(vector<fcluster> &open)
 {
-	build_junction_graph();
-
+	/*
 	if(use_overlap_scoring == true)
 	{
-		build_path_nodes();
+		build_path_nodes(frags);
 		build_overlap_index();
 	}
+	*/
 
 	//vector<fcluster> open;
 	//cluster_open_fragments(open);
@@ -898,134 +879,6 @@ int bridger::bridge_hard_fragments(vector<fcluster> &open)
 			}
 		}
 	}
-	return 0;
-}
-
-int bridger::bridge_tough_fragments()
-{
-	build_path_nodes();
-	build_overlap_index();
-
-	for(int k = 0; k < pnodes.size(); k++) pnodes[k].print_bridge(k);
-
-	//printf("max_pnode_length = %d, nodes = %lu\n", max_pnode_length, pnodes.size());
-
-	//build_path_clusters();
-
-	vector<fcluster> open;
-	cluster_open_fragments(open);
-	sort(open.begin(), open.end(), compare_fcluster_v1_v2);
-
-	if(verbose >= 1)
-	{
-		for(int k = 0; k < open.size(); k++)
-		{
-			open[k].print(k);
-		}
-	}
-
-	vector<PI> open_indices;
-	vector< set<int> > affected(pnodes.size());
-	for(int k = 0; k < open.size(); k++)
-	{
-		fcluster &fc = open[k];
-		path p1, p2;
-		p1.v = get_suffix(fc.v1);
-		p2.v = get_prefix(fc.v2);
-		vector<path>::const_iterator x1 = lower_bound(pnodes.begin(), pnodes.end(), p1, compare_path_vertices);
-		vector<path>::const_iterator x2 = lower_bound(pnodes.begin(), pnodes.end(), p2, compare_path_vertices);
-		assert(x1 != pnodes.end());
-		assert(x2 != pnodes.end());
-		int k1 = x1 - pnodes.begin();
-		int k2 = x2 - pnodes.begin();
-
-		open_indices.push_back(PI(k1, k2));
-		affected[k1].insert(k);
-	}
-
-	// print pexons
-	for(int k = 0; k < bd->regions.size(); k++)
-	{
-		printf("region %d: [%d, %d), length = %d\n", 
-				k, bd->regions[k].lpos, bd->regions[k].rpos, bd->regions[k].rpos - bd->regions[k].lpos);
-	}
-
-	vector<int> max_needed(pnodes.size(), -1);
-	for(int k = 0; k < open.size(); k++)
-	{
-		int k1 = open_indices[k].first;
-		int k2 = open_indices[k].second;
-		if(max_needed[k1] < k2) max_needed[k1] = k2;
-	}
-
-	// iteratively bridging open fragments
-	vector< vector<int> > table_cov;
-	vector<int32_t> table_len;
-	vector<int> trace;
-	table_cov.resize(pnodes.size());
-	table_len.resize(pnodes.size());
-	trace.resize(pnodes.size());
-
-	for(int i = 0; i < table_cov.size(); i++) table_cov[i].resize(dp_stack_size);
-
-	for(int k1 = 0; k1 < pnodes.size(); k1++)
-	{
-		/*
-		printf("RUN: k = %d, max_needed = %d, affected = (", k, max_needed[k]);
-		prints(affected[k]);
-		printf(")\n");
-		*/
-
-		if(max_needed[k1] < k1) continue;
-
-		dynamic_programming(k1, max_needed[k1], trace, table_cov, table_len);
-
-		for(set<int>::iterator si = affected[k1].begin(); si != affected[k1].end(); si++)
-		{
-			int i = *si;
-			fcluster &fc = open[i];
-
-			assert(open_indices[i].first == k1);
-			int k2 = open_indices[i].second;
-
-			double score = (double)(table_cov[k2][0]);
-			
-			//fc.print(i);
-			if(verbose >= 1)
-			{
-				printf("#fragments = %lu, score = %.1lf, k1 = %d, k2 = %d, max[k1] = %d, p1 = ( ", fc.fset.size(), score, k1, k2, max_needed[k1]);
-			}
-			printv(pnodes[k1].v);
-			printf("), p2 = ( ");
-			printv(pnodes[k2].v);
-			printf(")\n");
-
-			// TODO, setup minimum score
-			if(score <= min_bridging_score) continue;
-
-			vector<int> pn = trace_back(k1, k2, trace);
-			vector<int> pb = get_bridge(pn, fc.v1, fc.v2);
-
-			printf("pn = ( ");
-			printv(pn);
-			printf("), pb = ( ");
-			printv(pb);
-			printf(")\n");
-
-			for(int j = 0; j < fc.fset.size(); j++)
-			{
-				fragment *fr = fc.fset[j];
-				path p;
-				p.ex1 = p.ex2 = 0;
-				p.v = pb;
-				p.length = bd->compute_aligned_length(fr->k1l, fr->k2r, p.v);
-				p.v = encode_vlist(p.v);
-				fr->paths.push_back(p);
-				//printf(" fragment %d length = %d\n", j, p.length);
-			}
-		}
-	}
-
 	return 0;
 }
 
@@ -1707,7 +1560,7 @@ int bridger::set_thresholds()
 	return 0;
 }
 
-int bridger::update_length()
+int bridger::set_normal_length()
 {
 	length_median = insertsize_median;
 	length_high = length_median * 3.0;
@@ -1715,40 +1568,21 @@ int bridger::update_length()
 	if(length_low < insertsize_low) length_low = insertsize_low;
 	if(length_high > insertsize_high) length_high = insertsize_high;
 	return 0;
+}
 
-	// TODO
-	length_low = 100;
-	length_high = 500;
-	length_median = 200;
-	return 0;
-
-	vector<int32_t> v;
-	for(int k = 0; k < bd->fragments.size(); k++)
-	{
-		if(bd->fragments[k].paths.size() != 1) continue;
-		v.push_back(bd->fragments[k].paths[0].length);
-	}
-
-	length_median = length_low = length_high = -1;
-
-	if(v.size() <= 0) return 0;
-
-	sort(v.begin(), v.end());
-
-	length_median = v[size_t(v.size() * 0.5)];
-	length_low = v[size_t(v.size() * 0.01)];
-	length_high = v[size_t(v.size() * 0.95)];
-	if(length_high > length_median + 200) length_high = length_median + 200;
-
+int bridger::set_circ_length()
+{
+	length_median = insertsize_median;
+	length_high = 999999999;
+	length_low = 0;
 	return 0;
 }
 
-int bridger::filter_paths()
+int bridger::filter_paths(vector<fragment> &frags)
 {
-	for(int k = 0; k < bd->fragments.size(); k++)
+	for(int k = 0; k < frags.size(); k++)
 	{
-
-		fragment &fr = bd->fragments[k];
+		fragment &fr = frags[k];
 
 		// TODO: fliter based on fragments type
 
@@ -1802,11 +1636,11 @@ int bridger::filter_paths()
 	return 0;
 }
 
-int bridger::pick_bridge_path()
+int bridger::pick_bridge_path(vector<fragment> &frags)
 {
-	for(int k = 0; k < bd->fragments.size(); k++)
+	for(int k = 0; k < frags.size(); k++)
 	{
-		fragment &fr = bd->fragments[k];
+		fragment &fr = frags[k];
 
 		if(fr.paths.size() <= 0) 
 		{
@@ -2267,33 +2101,33 @@ int bridger::pick_bridge_path()
 	return 0;
 }
 
-int bridger::get_paired_fragments()
+int bridger::get_paired_fragments(vector<fragment> &frags)
 {
 	int n1 = 0;
 	int n2 = 0;
-	for(int k = 0; k < bd->fragments.size(); k++)
+	for(int k = 0; k < frags.size(); k++)
 	{
-		if(bd->fragments[k].paths.size() >= 1) n1++;
-		if(bd->fragments[k].paths.size() != 1) continue;
-		if(bd->fragments[k].paths[0].type != 1) continue;
+		if(frags[k].paths.size() >= 1) n1++;
+		if(frags[k].paths.size() != 1) continue;
+		if(frags[k].paths[0].type != 1) continue;
 		n2++;
 	}
 	return n1;
 }
 
-vector<int> bridger::get_bridged_fragments_type()
+vector<int> bridger::get_bridged_fragments_type(vector<fragment> &frags)
 {
 	vector<int> ct(6, 0);
 	
-	for(int k = 0; k < bd->fragments.size(); k++)
+	for(int k = 0; k < frags.size(); k++)
 	{
-		if(bd->fragments[k].type == 0) 
+		if(frags[k].type == 0) 
 		{
 			ct[3]++;
 			/*
-			printf("paired-end fragments #%d, range = [%d, %d], h1 = %d, h2 = %d\n", k, bd->fragments[k].lpos, bd->fragments[k].rpos, bd->fragments[k].h1->hid, bd->fragments[k].h2->hid);
-                        vector<int> v1 = decode_vlist(bd->fragments[k].h1->vlist);
-                        vector<int> v2 = decode_vlist(bd->fragments[k].h2->vlist);
+			printf("paired-end fragments #%d, range = [%d, %d], h1 = %d, h2 = %d\n", k, frags[k].lpos, frags[k].rpos, frags[k].h1->hid, frags[k].h2->hid);
+                        vector<int> v1 = decode_vlist(frags[k].h1->vlist);
+                        vector<int> v2 = decode_vlist(frags[k].h2->vlist);
                         printf("h1 vlist: ");
                         for(int id_v1 = 0; id_v1 < v1.size(); id_v1++)
                         {
@@ -2308,19 +2142,19 @@ vector<int> bridger::get_bridged_fragments_type()
 			*/
 
 
-			if(bd->fragments[k].paths.size() == 1) 
+			if(frags[k].paths.size() == 1) 
 			{
 				//printf("Success bridge paired-end fragments\n\n");
 				ct[0]++;
 			}
 			//else printf("Fail bridge paired-end fragments\n\n");
 		}
-		else if(bd->fragments[k].type == 1) 
+		else if(frags[k].type == 1) 
 		{
 			/*
-			printf("UMI-linked fragments #%d, umi = %s, range = [%d, %d], h1 = %d, h2 = %d\n", k, bd->fragments[k].h2->umi.c_str(), bd->fragments[k].lpos, bd->fragments[k].rpos, bd->fragments[k].h1->hid, bd->fragments[k].h2->hid);
-			vector<int> v1 = decode_vlist(bd->fragments[k].h1->vlist);
-			vector<int> v2 = decode_vlist(bd->fragments[k].h2->vlist);
+			printf("UMI-linked fragments #%d, umi = %s, range = [%d, %d], h1 = %d, h2 = %d\n", k, frags[k].h2->umi.c_str(), frags[k].lpos, frags[k].rpos, frags[k].h1->hid, frags[k].h2->hid);
+			vector<int> v1 = decode_vlist(frags[k].h1->vlist);
+			vector<int> v2 = decode_vlist(frags[k].h2->vlist);
 			printf("h1 vlist: ");
 			for(int id_v1 = 0; id_v1 < v1.size(); id_v1++)
 			{
@@ -2335,24 +2169,24 @@ vector<int> bridger::get_bridged_fragments_type()
 			*/
 
 			ct[4]++;
-			if(bd->fragments[k].paths.size() == 1)
+			if(frags[k].paths.size() == 1)
 			{
 				//printf("Success bridge UMI-linked fragments\n\n");
 				ct[1]++;
 			}
 			//else printf("Fail bridge UMI-linked fragments\n\n");
 		}
-		else if(bd->fragments[k].type == 2)
+		else if(frags[k].type == 2)
                 {
                         ct[5]++;
-                        if(bd->fragments[k].paths.size() == 1) ct[2]++;
+                        if(frags[k].paths.size() == 1) ct[2]++;
                 }
 
 	}
 	return ct;
 }
 
-int bridger::print()
+int bridger::print(vector<fragment> &frags)
 {
 	int n = 0;
 	/*
@@ -2360,15 +2194,15 @@ int bridger::print()
 	{
 		n += fclusters[k].fset.size();
 	}
-	printf("#fragments = %lu, #open-fragments = %d, #fclusters = %lu\n", bd->fragments.size(), n, fclusters.size());
+	printf("#fragments = %lu, #open-fragments = %d, #fclusters = %lu\n", frags.size(), n, fclusters.size());
 	*/
 
-	for(int k = 0; k < bd->fragments.size(); k++)
+	for(int k = 0; k < frags.size(); k++)
 	{
-		if(bd->fragments[k].paths.size() == 1) n++;
+		if(frags[k].paths.size() == 1) n++;
 	}
 
-	int total = bd->fragments.size();
+	int total = frags.size();
 	int remain = total - n;
 	double ratio = n * 100.0 / total;
 

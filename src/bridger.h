@@ -49,20 +49,20 @@ public:
 	int bridge_normal_fragments();
 	int bridge_circ_fragments();
 	int bridge_clip(int32_t p1, int32_t p2, circular_transcript &circ);
-	int pick_bridge_path();
-	int print();
+	int pick_bridge_path(vector<fragment> &frags);
+	int print(vector<fragment> &frags);
 
 public:
-	int bridge_overlapped_fragments();
+	int bridge_overlapped_fragments(vector<fragment> &frags);
 	int bridge_overlapped_fragment(fragment &fr, int ex1, int ex2);
 
 	int bridge_phased_fragments(vector<fcluster> &fclusters);
 	int phase_cluster(fcluster &fc);
 	int bridge_phased_cluster(fcluster &fc);
 
-	int remove_tiny_boundary();
+	int remove_tiny_boundary(vector<fragment> &frags);
 
-	int build_junction_graph();
+	int build_junction_graph(vector<fragment> &frags);
 	int bridge_hard_fragments(vector<fcluster> &open);
 	int dynamic_programming(int k1, int k2, vector< vector<entry> > &table);
 	vector< vector<int> > trace_back(int k, const vector< vector<entry> > &table);
@@ -72,7 +72,6 @@ public:
 	bool determine_identical(const vector<int> &vx, const vector<int> &vy, int x1, int x2, int y1, int y2);
 
 	int build_overlap_index();
-	int bridge_tough_fragments();
 	int dynamic_programming(int k1, int k2, vector<int> &trace, vector< vector<int> > &table_cov, vector<int32_t> &table_len);
 	int compare_stack(const vector<int> &x, const vector<int> &y);
 	vector<int> update_stack(const vector<int> &v, int s);
@@ -84,19 +83,20 @@ public:
 	vector<int> get_suffix(const vector<int> &v);
 	vector<int> get_prefix(const vector<int> &v);
 
-	int cluster_open_fragments(vector<fcluster> &fclusters);
-	int build_path_nodes();
-	int build_path_nodes(int max_len);
-	int build_path_nodes(int low, int high);
+	int cluster_open_fragments(vector<fcluster> &fclusters, vector<fragment> &frags);
+	int build_path_nodes(vector<fragment> &frags);
+	int build_path_nodes(int max_len, vector<fragment> &frags);
+	int build_path_nodes(int low, int high, vector<fragment> &fragments);
 	int build_path_nodes(map<vector<int>, int> &m, const vector<int> &v, int cnt);
 	int add_consecutive_path_nodes();
 	int adjust_path_score(path &p);
 
 	int set_thresholds();
-	int update_length();
-	int filter_paths();
-	int get_paired_fragments();
-	vector<int> get_bridged_fragments_type();
+	int set_normal_length();
+	int set_circ_length();
+	int filter_paths(vector<fragment> &frags);
+	int get_paired_fragments(vector<fragment> &frags);
+	vector<int> get_bridged_fragments_type(vector<fragment> &frags);
 };
 
 bool compare_fragment_v1(fragment *f1, fragment *f2);
