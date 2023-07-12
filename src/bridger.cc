@@ -68,12 +68,11 @@ int bridger::bridge_normal_fragments()
 	int n3 = get_paired_fragments(bd->fragments);
 
 	// recluster open fragments
+	open_fclusters.clear();
 	cluster_open_fragments(open_fclusters, bd->fragments);
-
 	bridge_phased_fragments(open_fclusters);
 	filter_paths(bd->fragments);
 	int n4 = get_paired_fragments(bd->fragments);
-
 
 	double r1 = n1 * 100.0 / n;
 	double r2 = n2 * 100.0 / n;
