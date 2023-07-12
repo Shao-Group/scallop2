@@ -1588,36 +1588,20 @@ int bridger::filter_paths(vector<fragment> &frags)
 	{
 		fragment &fr = frags[k];
 
-		// TODO: fliter based on fragments type
-
 		if(fr.paths.size() <= 0) continue;
 		
 		int minp = -1;
 		double mind = 9999999999999;
-		if(fr.type == 1)
+
+		for(int i = 0; i < fr.paths.size(); i++)
 		{
-			for(int i = 0; i < fr.paths.size(); i++)
-			{
-				if(fr.paths[i].length < 0.8 * length_low) continue;
-				if(fr.paths[i].length > 1.2 * length_high) continue;
-				double d = fabs(fr.paths[i].length - length_median);
-				if(d >= mind) continue;
-				mind = d;
-				minp = i;
-			}
-		}
-		else
-		{
-			for(int i = 0; i < fr.paths.size(); i++)
-			{
-				// now allowing paths of type 2 (beyond reasonable range)
-				//if(fr.paths[i].length < length_low) continue;
-				//if(fr.paths[i].length > length_high) continue;
-				double d = fabs(fr.paths[i].length - length_median);
-				if(d >= mind) continue;
-				mind = d;
-				minp = i;
-			}
+			//if(fr.paths[i].type != 1 && fr.paths[i].type != 3) continue;
+			if(fr.paths[i].length < length_low) continue;
+			if(fr.paths[i].length > length_high) continue;
+			double d = fabs(fr.paths[i].length - length_median);
+			if(d >= mind) continue;
+			mind = d;
+			minp = i;
 		}
 
 		if(minp == -1)
@@ -1636,6 +1620,8 @@ int bridger::filter_paths(vector<fragment> &frags)
 			//fr.h1->bridged = true;
 			//fr.h2->bridged = true;
 		}
+
+		fr.print(789);
 	}
 	return 0;
 }
