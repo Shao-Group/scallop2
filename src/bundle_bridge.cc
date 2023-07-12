@@ -65,7 +65,7 @@ int bundle_bridge::build()
 
 	bridger bdg(this);
 	bdg.bridge_normal_fragments();
-	bdg.bridge_circ_fragments();
+	//bdg.bridge_circ_fragments();
 
 	extract_circ_fragment_pairs();
 	//print_circ_fragment_pairs();
@@ -1541,12 +1541,11 @@ int bundle_bridge::build_circ_fragments()
 			}
 			*/
 
-			frag.pi = circ_fragments.size();
-			frag.fidx = circ_fragments.size()+1;
-			fr.pi = circ_fragments.size()+1; //pi not set for all fragments, only those that have second frags, check pi before using if it is -1
-			fr.fidx = circ_fragments.size();
+			frag.pi = k;
+			frag.fidx = fragments.size() + circ_fragments.size();
+			fr.pi = fragments.size() + circ_fragments.size(); //pi not set for all fragments, only those that have second frags, check pi before using if it is -1
+			fr.fidx = k;
 
-			circ_fragments.push_back(fr);
 			circ_fragments.push_back(frag);
 			
 			//fr.h2->paired = true;
@@ -1621,18 +1620,14 @@ int bundle_bridge::build_circ_fragments()
 			}
 			*/
 
-			frag.pi = circ_fragments.size();
-			frag.fidx = circ_fragments.size()+1;
-			fr.pi = circ_fragments.size()+1; //pi not set for all fragments, only those that have second frags, check pi before using if it is -1
-			fr.fidx = circ_fragments.size();
+			frag.pi = k;
+			frag.fidx = fragments.size() + circ_fragments.size();
+			fr.pi = fragments.size() + circ_fragments.size(); //pi not set for all fragments, only those that have second frags, check pi before using if it is -1
+			fr.fidx = k;
 
-			circ_fragments.push_back(fr);
 			circ_fragments.push_back(frag);	
-
 		}
 	}
-
-
 
 	//adding the second part fragments to fragments vector
 	if(circ_fragments.size() > 0)
@@ -1641,12 +1636,12 @@ int bundle_bridge::build_circ_fragments()
 	}
 	
 	//fragments.clear();
-	/*for(int i=0;i<circ_fragments.size();i++)
+	for(int i=0;i<circ_fragments.size();i++)
 	{
 		fragments.push_back(circ_fragments[i]); //pushing the circ fragments at the end of the main fragments list, 
 												//does this create any problem in the main scallop2 output??
 												//no as this is a separate module just for circRNA
-	}*/
+	}
 
 	if(circ_fragments.size() > 0)
 	{
@@ -1899,10 +1894,10 @@ int bundle_bridge::extract_circ_fragment_pairs()
 
 
 	//vector<fragment> circ_fragments;
-	//circ_fragments.clear();
+	circ_fragments.clear();
 	circ_fragment_pairs.clear();
 
-	/*for(int k = 0; k < fragments.size(); k++)
+	for(int k = 0; k < fragments.size(); k++)
 	{
 		fragment &fr = fragments[k];
 
@@ -1910,7 +1905,7 @@ int bundle_bridge::extract_circ_fragment_pairs()
 		{
 			circ_fragments.push_back(fr); //bridging function called already
 		}
-	}*/
+	}
 
 	if(circ_fragments.size() > 0)
 	{
@@ -1918,9 +1913,9 @@ int bundle_bridge::extract_circ_fragment_pairs()
 	}
 
 
-	for(int i = 0; i < circ_fragments.size(); i++)
+	for(int i = 0; i < fragments.size(); i++)
 	{
-		fragment &fr1 = circ_fragments[i]; 
+		fragment &fr1 = fragments[i]; 
 
 		if(fr1.frag_type == 2) continue; //filter and take original fragments of scallop2 
 
@@ -1928,7 +1923,6 @@ int bundle_bridge::extract_circ_fragment_pairs()
 		{
 			fragment &fr2 = circ_fragments[j];
 
-			if(fr2.frag_type == 1) continue;
 			if(strcmp(fr1.h1->qname.c_str(),fr2.h1->qname.c_str()) != 0) continue;
 			if(fr1.pi == -1 || fr2.pi == -1 || fr1.fidx == -1 || fr2.fidx == -1) continue;
 
