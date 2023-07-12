@@ -49,7 +49,7 @@ int bridger::bridge_normal_fragments()
 	int n = bd->fragments.size();
 
 	bridge_overlapped_fragments(bd->fragments);
-	//filter_paths(bd->fragments);
+	filter_paths(bd->fragments);
 	int n1 = get_paired_fragments(bd->fragments);
 
 	vector<fcluster> open_fclusters;
@@ -58,29 +58,26 @@ int bridger::bridge_normal_fragments()
 	// 1st round of briding hard fragments
 	build_junction_graph(bd->fragments);
 	bridge_hard_fragments(open_fclusters);
-	//filter_paths(bd->fragments);
+	filter_paths(bd->fragments);
 	int n2 = get_paired_fragments(bd->fragments);
 
 	// 2nd round of briding hard fragments
 	build_junction_graph(bd->fragments);
 	bridge_hard_fragments(open_fclusters);
-	//filter_paths(bd->fragments);
+	filter_paths(bd->fragments);
 	int n3 = get_paired_fragments(bd->fragments);
 
 	// recluster open fragments
-	//open_fclusters.clear();
-	//cluster_open_fragments(open_fclusters, bd->fragments);
+	open_fclusters.clear();
+	cluster_open_fragments(open_fclusters, bd->fragments);
 	bridge_phased_fragments(open_fclusters);
-	//filter_paths(bd->fragments);
+	filter_paths(bd->fragments);
 	int n4 = get_paired_fragments(bd->fragments);
 
 	double r1 = n1 * 100.0 / n;
 	double r2 = n2 * 100.0 / n;
 	double r3 = n3 * 100.0 / n;
 	double r4 = n4 * 100.0 / n;
-
-	enforce_insertsize(bd->fragments);
-	pick_bridge_path(bd->fragments);
 
 	vector<int> ct = get_bridged_fragments_type(bd->fragments);	// ct<ct1, ct2, ct3> paired-end, UMI-linked, both
 	//if(verbose >= 1)
@@ -1581,24 +1578,6 @@ int bridger::set_circ_length()
 	length_median = insertsize_median;
 	length_high = 999999999;
 	length_low = 0;
-	return 0;
-}
-
-int bridger::enforce_insertsize(vector<fragment> &frags)
-{
-	for(int k = 0; k < frags.size(); k++)
-	{
-		vector<path> v;
-		fragment &fr = frags[k];
-		for(int i = 0; i < fr.paths.size(); i++)
-		{
-			//if(fr.paths[i].type != 1 && fr.paths[i].type != 3) continue;
-			if(fr.paths[i].length < length_low) continue;
-			if(fr.paths[i].length > length_high) continue;
-			v.push_back(fr.paths[i]);
-		}
-		fr.paths = v;
-	}
 	return 0;
 }
 
