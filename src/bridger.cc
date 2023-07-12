@@ -1620,7 +1620,7 @@ int bridger::filter_paths(vector<fragment> &frags)
 			//fr.h2->bridged = true;
 		}
 
-		fr.print(789);
+		//fr.print(789);
 	}
 	return 0;
 }
