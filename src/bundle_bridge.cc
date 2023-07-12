@@ -1541,11 +1541,12 @@ int bundle_bridge::build_circ_fragments()
 			}
 			*/
 
-			frag.pi = k;
-			frag.fidx = circ_fragments.size();
-			fr.pi = circ_fragments.size(); //pi not set for all fragments, only those that have second frags, check pi before using if it is -1
-			fr.fidx = k;
+			frag.pi = circ_fragments.size();
+			frag.fidx = circ_fragments.size()+1;
+			fr.pi = circ_fragments.size()+1; //pi not set for all fragments, only those that have second frags, check pi before using if it is -1
+			fr.fidx = circ_fragments.size();
 
+			circ_fragments.push_back(fr);
 			circ_fragments.push_back(frag);
 			
 			//fr.h2->paired = true;
@@ -1620,11 +1621,12 @@ int bundle_bridge::build_circ_fragments()
 			}
 			*/
 
-			frag.pi = k;
-			frag.fidx = circ_fragments.size();
-			fr.pi = circ_fragments.size(); //pi not set for all fragments, only those that have second frags, check pi before using if it is -1
-			fr.fidx = k;
+			frag.pi = circ_fragments.size();
+			frag.fidx = circ_fragments.size()+1;
+			fr.pi = circ_fragments.size()+1; //pi not set for all fragments, only those that have second frags, check pi before using if it is -1
+			fr.fidx = circ_fragments.size();
 
+			circ_fragments.push_back(fr);
 			circ_fragments.push_back(frag);	
 
 		}
@@ -1916,9 +1918,9 @@ int bundle_bridge::extract_circ_fragment_pairs()
 	}
 
 
-	for(int i = 0; i < fragments.size(); i++)
+	for(int i = 0; i < circ_fragments.size(); i++)
 	{
-		fragment &fr1 = fragments[i]; 
+		fragment &fr1 = circ_fragments[i]; 
 
 		if(fr1.frag_type == 2) continue; //filter and take original fragments of scallop2 
 
@@ -1926,6 +1928,7 @@ int bundle_bridge::extract_circ_fragment_pairs()
 		{
 			fragment &fr2 = circ_fragments[j];
 
+			if(fr2.frag_type == 1) continue;
 			if(strcmp(fr1.h1->qname.c_str(),fr2.h1->qname.c_str()) != 0) continue;
 			if(fr1.pi == -1 || fr2.pi == -1 || fr1.fidx == -1 || fr2.fidx == -1) continue;
 
