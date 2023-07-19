@@ -380,6 +380,9 @@ int bridger::add_consecutive_path_nodes()
 		region &r2 = bd->regions[i + 1];
 		if(r1.rpos != r2.lpos) continue;
 
+		// 50: a parameter
+		if(r2.lpos - r1.rpos > 50) continue;
+
 		path p;
 		p.v.push_back(i + 0);
 		p.v.push_back(i + 1);
