@@ -1920,8 +1920,11 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 		//check if selected paths is zero
 		if(selected_paths.size() == 0)
 		{
-			printf("selected path size zero\n");
+			//printf("selected path size zero\n");
 			selected_paths = fr.paths;
+			fr.set_bridged(false);
+			fr.paths.resize(0);
+			continue;
 		}
 
 		// let A be the set of b-paths whose type is either 1 or 2 -- ref
