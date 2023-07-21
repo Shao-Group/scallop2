@@ -1231,7 +1231,7 @@ int bundle_bridge::build_circ_fragments()
 
 			//printf("len_HS = %d\n",len_HS);
 
-			if(abs(len_HS - 100) > 5) //here 100 is the estimated read length, replace this with any related exisiting parameter
+			if(abs(len_HS - 150) > 5) //here 100 is the estimated read length, replace this with any related exisiting parameter
 			{
 				printf("read length criteria unsatisfied h1s.\n");
 				continue;
@@ -1381,7 +1381,7 @@ int bundle_bridge::build_circ_fragments()
 
 			printf("len_HS = %d\n",len_HS);
 
-			if(abs(len_HS - 100) > 5) //here 100 is the estimated read length, replace this with any related exisiting parameter
+			if(abs(len_HS - 150) > 5) //here 100 is the estimated read length, replace this with any related exisiting parameter
 			{
 				printf("read length criteria unsatisfied h2s.\n");
 				continue;
