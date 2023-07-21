@@ -2163,7 +2163,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 			}
 
 			//checking if pexon matches left boundary
-			for(int p=0;p<pexons.size();p++)
+			/*for(int p=0;p<pexons.size();p++)
 			{
 				if(pexons[p].lpos <= fr1.lpos+pexon_range && pexons[p].lpos >= fr1.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
 				{
@@ -2174,7 +2174,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 					left_boundary_flag = 1;
 					break;
 				}
-			}
+			}*/
 
 			//checking if reads junction matches right boundary
 			for(int j=0;j<junctions.size();j++)
@@ -2242,7 +2242,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 
 		
 			//checking if pexon matches right boundary
-			for(int p=0;p<pexons.size();p++)
+			/*for(int p=0;p<pexons.size();p++)
 			{
 				if(pexons[p].rpos <= fr2.rpos+pexon_range && pexons[p].rpos >= fr2.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
 				{
@@ -2253,7 +2253,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 					right_boundary_flag = 1;
 					break;
 				}
-			}
+			}*/
 
 			if(left_boundary_flag == 1 && right_boundary_flag == 1)
 			{
@@ -2310,14 +2310,14 @@ int bundle_bridge::join_circ_fragment_pairs()
 			}
 
 			//checking if pexon matches left boundary
-			for(int p=0;p<pexons.size();p++)
+			/*for(int p=0;p<pexons.size();p++)
 			{
 				if(pexons[p].lpos <= fr2.lpos+pexon_range && pexons[p].lpos >= fr2.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
 				{
 					left_boundary_flag = 1;
 					break;
 				}
-			}
+			}*/
 
 			//checking if reads junction matches right boundary
 			for(int j=0;j<junctions.size();j++)
@@ -2375,14 +2375,14 @@ int bundle_bridge::join_circ_fragment_pairs()
 			}
 
 			//checking if pexon matches right boundary
-			for(int p=0;p<pexons.size();p++)
+			/*for(int p=0;p<pexons.size();p++)
 			{
 				if(pexons[p].rpos <= fr1.rpos+pexon_range && pexons[p].rpos >= fr1.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
 				{
 					right_boundary_flag = 1;
 					break;
 				}
-			}
+			}*/
 
 			if(left_boundary_flag == 1 && right_boundary_flag == 1)
 			{
