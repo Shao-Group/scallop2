@@ -3,11 +3,11 @@ Part of Scallop Transcript Assembler
 (c) 2017 by  Mingfu Shao, Carl Kingsford, and Carnegie Mellon University.
 Part of Coral package
 (c) 2019 by Mingfu Shao, The Pennsylvania State University
-Part of Scallop2
+Part of Scallop2                                               
 (c) 2021 by  Qimin Zhang, Mingfu Shao, and The Pennsylvania State University.
 See LICENSE for licensing.
 */
-
+                                   
 #ifndef __HIT_H__
 #define __HIT_H__
 

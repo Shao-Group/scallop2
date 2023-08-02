@@ -109,7 +109,7 @@ int bridger::bridge_circ_fragments()
 	printf("===\n");
 	*/
 
-	set_circ_length();
+	set_normal_length();
 	int n = bd->circ_fragments.size();
 
 	bridge_overlapped_fragments(bd->circ_fragments);
@@ -1578,13 +1578,13 @@ int bridger::set_normal_length()
 
 int bridger::set_circ_length()
 {
-	/*length_median = insertsize_median;
-	length_high = 999999999;
-	length_low = 0;*/
-
 	length_median = insertsize_median;
-	length_high = 500;
+	length_high = 999999999;
 	length_low = 0;
+
+	/*length_median = insertsize_median;
+	length_high = 500;
+	length_low = 0;*/
 	return 0;
 }
 
@@ -1634,7 +1634,7 @@ int bridger::filter_paths(vector<fragment> &frags)
 
 int bridger::pick_bridge_path(vector<fragment> &frags)
 {
-	printf("length_high = %d\n",length_high);
+	printf("1.5*length_high = %lf\n",1.5*length_high);
 	for(int k = 0; k < frags.size(); k++)
 	{
 		fragment &fr = frags[k];
@@ -1985,7 +1985,7 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 				hash = hash + tostring(p.v[j]) + "|";
 			}
 
-			if(remove_map.find(hash) == remove_map.end() && p.length < length_high) //path not present in remove map
+			if(remove_map.find(hash) == remove_map.end() && p.length < 1.5*length_high) //path not present in remove map
 			{
 				selected_paths.push_back(p);
 			}
