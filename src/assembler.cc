@@ -156,8 +156,13 @@ int assembler::process(int n)
 	{
 		bundle_base &bb = pool[i];
 
+		char buf[1024];
+		strcpy(buf, hdr->target_name[bb.tid]);
+		bb.chrm = string(buf);
+
 		// skip assemble a bundle if its chrm does not exist in the
 		// reference (given the ref_file is provide)
+
 		if(ref_file != "" && ref.isms0.find(bb.chrm) == ref.isms0.end() && ref.isms1.find(bb.chrm) == ref.isms1.end() && ref.isms2.find(bb.chrm) == ref.isms2.end()) continue;
 
 		/*
@@ -183,10 +188,6 @@ int assembler::process(int n)
 		if(cnt1 + cnt2 < min_num_hits_in_bundle) continue;
 		//if(cnt1 < 5 && cnt1 * 2 + cnt2 < min_num_hits_in_bundle) continue;
 		if(bb.tid < 0) continue;
-
-		char buf[1024];
-		strcpy(buf, hdr->target_name[bb.tid]);
-		bb.chrm = string(buf);
 
 		transcript_set ts1(bb.chrm, 0.9);		// full-length set
 		transcript_set ts2(bb.chrm, 0.9);		// non-full-length set
