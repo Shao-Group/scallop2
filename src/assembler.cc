@@ -156,6 +156,10 @@ int assembler::process(int n)
 	{
 		bundle_base &bb = pool[i];
 
+		// skip assemble a bundle if its chrm does not exist in the
+		// reference (given the ref_file is provide)
+		if(ref_file != "" && ref.isms0.find(bb.chrm) == ref.isms0.end() && ref.isms1.find(bb.chrm) == ref.isms1.end() && ref.isms2.find(bb.chrm) == ref.isms2.end()) continue;
+
 		/*
 		// calculate the number of hits with splices
 		int splices = 0;
