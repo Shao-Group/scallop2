@@ -33,6 +33,7 @@ assembler::assembler()
 	qcnt = 0;
 	circular_trsts.clear();
 	circ_trst_map.clear();
+	circ_trst_merged_map.clear();
 	circular_trsts_HS.clear();
 }
 
@@ -278,7 +279,78 @@ int assembler::remove_duplicate_circ_trsts()
 		printf("key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
 	}
 
+	//merge circRNAs that have different end boundaries but same intron chain into that with higher coverage
+	for(itn = circ_trst_map.begin(); itn != circ_trst_map.end(); itn++)
+	{
+		circular_transcript &circ = itn->second.first;
+		string hash = itn->first;
+		int coverage = itn->second.second;
+		
+		vector<string> split_coordinates = split_str(hash,"|");
+
+		/*printf("checking split: %s\n",hash.c_str());
+		for(int i=0;i<split_coordinates.size();i++)
+		{
+			printf("%s,",split_coordinates[i].c_str());
+		}*/
+
+		//creating new hash with middle cordinates except first and last coordinate
+		string new_hash = "";
+		for(int i=3;i<split_coordinates.size()-2;i++)
+		{
+			new_hash = new_hash + split_coordinates[i] + "|";
+		}
+
+		//printf("\nnew hash: %s\n",new_hash.c_str());
+		//break;
+
+		if(circ_trst_merged_map.find(new_hash) != circ_trst_merged_map.end())// already circRNA present in map
+		{
+			circular_transcript old_circ = circ_trst_merged_map[new_hash].first;
+			if(abs(circ.start-old_circ.start) < 5 && abs(circ.end-old_circ.end) < 5)
+			{
+				if(circ.coverage > old_circ.coverage)
+				{
+					circ_trst_merged_map[new_hash] = make_pair(circ,circ.coverage);
+				}
+			}
+			else
+			{
+				circ_trst_merged_map.insert(pair<string,pair<circular_transcript, int>>(circ.circRNA_id,pair<circular_transcript, int>(circ,circ.coverage)));
+			}
+		}
+		else //circRNA not present in map
+		{
+			circ_trst_merged_map.insert(pair<string,pair<circular_transcript, int>>(new_hash,pair<circular_transcript, int>(circ,circ.coverage)));
+		}
+	}
+
+
 	return 0;
+}
+
+vector<string> assembler::split_str(string str, string delimiter)
+{
+    vector<string> v;
+    if (!str.empty()) {
+        int start = 0;
+        do {
+            // Find the index of occurrence
+            int idx = str.find(delimiter, start);
+            if (idx == string::npos) {
+                break;
+            }
+ 
+            // If found add the substring till that
+            // occurrence in the vector
+            int length = idx - start;
+            v.push_back(str.substr(start, length));
+            start += (length + delimiter.size());
+        } while (true);
+        v.push_back(str.substr(start));
+    }
+ 
+    return v;
 }
 
 int assembler::print_circular_trsts()
@@ -466,7 +538,7 @@ int assembler::write_circular()
 	}
 
 	map<string, pair<circular_transcript, int>>::iterator itn;
-	for(itn = circ_trst_map.begin(); itn != circ_trst_map.end(); itn++)
+	for(itn = circ_trst_merged_map.begin(); itn != circ_trst_merged_map.end(); itn++)
 	{
 		circular_transcript &circ = itn->second.first;
 		circ.write(fcirc);

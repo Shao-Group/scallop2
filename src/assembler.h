@@ -47,6 +47,7 @@ private:
 
 	vector<circular_transcript> circular_trsts; //a vector of circular transcripts class objs from all bundles
 	map <string, pair<circular_transcript, int>> circ_trst_map; // a map of distinct circ trsts with circRNA_id as key and the corresponding circRNA object
+	map <string, pair<circular_transcript, int>> circ_trst_merged_map; // map with circRNAs having few bp diff ends but same intron chains merged
 
 	vector<circular_transcript> circular_trsts_HS;///a vector of circular transcripts class objs from all HS reads from all bundles
 public:
@@ -55,6 +56,7 @@ public:
 private:
 	int process(int n);
 	int remove_duplicate_circ_trsts();
+	vector<string> split_str(string str, string delimiter);
 	int print_circular_trsts();
 	int assemble(const splice_graph &gr, const hyper_set &hs, transcript_set &ts1, transcript_set &ts2);
 	int assign_RPKM();
