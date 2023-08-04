@@ -273,6 +273,8 @@ int assembler::remove_duplicate_circ_trsts()
 	map<string, pair<circular_transcript, int>>::iterator itn;
 	for(itn = circ_trst_map.begin(); itn != circ_trst_map.end(); itn++)
 	{
+		circular_transcript &circ = itn->second.first;
+		circ.coverage = itn->second.second;
 		printf("key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
 	}
 
@@ -288,8 +290,6 @@ int assembler::print_circular_trsts()
 	for(itn = circ_trst_map.begin(); itn != circ_trst_map.end(); itn++)
 	{
 		circular_transcript &circ = itn->second.first;
-		circ.coverage = itn->second.second;
-		//circ.transcript_id = "circular_transcript";
 		circ.print(cnt++);
 	}
 
