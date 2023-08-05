@@ -318,6 +318,8 @@ int assembler::remove_duplicate_circ_trsts()
 				{
 					circ_trst_merged_map.erase(itn1->first);
 					circ_trst_merged_map.insert(pair<string,pair<circular_transcript, int>>(circ.circRNA_id,pair<circular_transcript, int>(circ,circ.coverage)));
+					flag_collision = 1;
+					break;
 				}
 				flag_collision = 1;
 			}
