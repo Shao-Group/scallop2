@@ -276,53 +276,72 @@ int assembler::remove_duplicate_circ_trsts()
 	{
 		circular_transcript &circ = itn->second.first;
 		circ.coverage = itn->second.second;
-		printf("key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
+		//printf("key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
 	}
 
 	//merge circRNAs that have different end boundaries but same intron chain into that with higher coverage
 	for(itn = circ_trst_map.begin(); itn != circ_trst_map.end(); itn++)
 	{
+		printf("start of check\n");
 		circular_transcript &circ = itn->second.first;
 		string hash = itn->first;
-		int coverage = itn->second.second;
-		
+
 		vector<string> split_coordinates = split_str(hash,"|");
 
-		/*printf("checking split: %s\n",hash.c_str());
-		for(int i=0;i<split_coordinates.size();i++)
-		{
-			printf("%s,",split_coordinates[i].c_str());
-		}*/
-
 		//creating new hash with middle cordinates except first and last coordinate
-		string new_hash = "";
+		string intron_chain_hash = "";
 		for(int i=3;i<split_coordinates.size()-2;i++)
 		{
-			new_hash = new_hash + split_coordinates[i] + "|";
+			intron_chain_hash = intron_chain_hash + split_coordinates[i] + "|";
 		}
 
-		//printf("\nnew hash: %s\n",new_hash.c_str());
-		//break;
-
-		if(circ_trst_merged_map.find(new_hash) != circ_trst_merged_map.end())// already circRNA present in map
+		int flag_collision = 0;
+		map<string, pair<circular_transcript, int>>::iterator itn1;
+		for(itn1 = circ_trst_merged_map.begin(); itn1 != circ_trst_merged_map.end(); itn1++)
 		{
-			circular_transcript old_circ = circ_trst_merged_map[new_hash].first;
-			if(abs(circ.start-old_circ.start) < 5 && abs(circ.end-old_circ.end) < 5)
+			circular_transcript &old_circ = itn1->second.first;
+			string old_hash = itn1->first;
+			
+			vector<string> old_split_coordinates = split_str(old_hash,"|");
+			string old_intron_chain_hash = "";
+			for(int i=3;i<old_split_coordinates.size()-2;i++)
+			{
+				old_intron_chain_hash = old_intron_chain_hash + old_split_coordinates[i] + "|";
+			}
+
+			printf("%s & %s\n",circ.circRNA_id.c_str(),old_circ.circRNA_id.c_str());
+			printf("start diff %d. end diff %d, hash1 %s, hash2 %s\n",abs(circ.start-old_circ.start),abs(circ.end-old_circ.end),intron_chain_hash.c_str(),old_intron_chain_hash.c_str());
+
+			if(abs(circ.start-old_circ.start) < 50 && abs(circ.end-old_circ.end) < 50 && intron_chain_hash == old_intron_chain_hash)
 			{
 				if(circ.coverage > old_circ.coverage)
 				{
-					circ_trst_merged_map[new_hash] = make_pair(circ,circ.coverage);
+					circ_trst_merged_map.erase(itn1->first);
+					circ_trst_merged_map.insert(pair<string,pair<circular_transcript, int>>(circ.circRNA_id,pair<circular_transcript, int>(circ,circ.coverage)));
 				}
-			}
-			else
-			{
-				circ_trst_merged_map.insert(pair<string,pair<circular_transcript, int>>(circ.circRNA_id,pair<circular_transcript, int>(circ,circ.coverage)));
+				flag_collision = 1;
 			}
 		}
-		else //circRNA not present in map
+		if(flag_collision == 0) //end diiff and intron chain condition did not match for any entry in circ_trst_merged_map, so enter separately
 		{
-			circ_trst_merged_map.insert(pair<string,pair<circular_transcript, int>>(new_hash,pair<circular_transcript, int>(circ,circ.coverage)));
+			circ_trst_merged_map.insert(pair<string,pair<circular_transcript, int>>(circ.circRNA_id,pair<circular_transcript, int>(circ,circ.coverage)));
 		}
+		
+		printf("end of check\n");
+
+		if(circ_trst_merged_map.size() == 0)
+		{
+			circ_trst_merged_map.insert(pair<string,pair<circular_transcript, int>>(circ.circRNA_id,pair<circular_transcript, int>(circ,circ.coverage)));
+		}
+	}
+
+	printf("circ_trst_merged_map size = %lu\n",circ_trst_merged_map.size());
+
+	for(itn = circ_trst_merged_map.begin(); itn != circ_trst_merged_map.end(); itn++)
+	{
+		circular_transcript &circ = itn->second.first;
+		circ.coverage = itn->second.second;
+		printf("key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
 	}
 
 
@@ -359,23 +378,13 @@ int assembler::print_circular_trsts()
 
 	map<string, pair<circular_transcript, int>>::iterator itn;
 	int cnt = 1;
-	for(itn = circ_trst_map.begin(); itn != circ_trst_map.end(); itn++)
+	for(itn = circ_trst_merged_map.begin(); itn != circ_trst_merged_map.end(); itn++)
 	{
 		circular_transcript &circ = itn->second.first;
 		circ.print(cnt++);
 	}
 
 	printf("\n");
-
-	for(itn = circ_trst_map.begin(); itn != circ_trst_map.end(); itn++)
-	{
-		circular_transcript circ = itn->second.first;
-		if(circ.start == 40428472 && circ.end == 40430301)
-		{
-			printf("Printing duplicate circRNA:\n");
-			circ.print(0);
-		}
-	}
 	return 0;
 }
 
