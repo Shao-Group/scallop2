@@ -309,8 +309,8 @@ int assembler::remove_duplicate_circ_trsts()
 				old_intron_chain_hash = old_intron_chain_hash + old_split_coordinates[i] + "|";
 			}
 
-			printf("%s & %s\n",circ.circRNA_id.c_str(),old_circ.circRNA_id.c_str());
-			printf("start diff %d. end diff %d, hash1 %s, hash2 %s\n",abs(circ.start-old_circ.start),abs(circ.end-old_circ.end),intron_chain_hash.c_str(),old_intron_chain_hash.c_str());
+			//printf("%s & %s\n",circ.circRNA_id.c_str(),old_circ.circRNA_id.c_str());
+			//printf("start diff %d. end diff %d, hash1 %s, hash2 %s\n",abs(circ.start-old_circ.start),abs(circ.end-old_circ.end),intron_chain_hash.c_str(),old_intron_chain_hash.c_str());
 
 			if(abs(circ.start-old_circ.start) < 50 && abs(circ.end-old_circ.end) < 50 && intron_chain_hash == old_intron_chain_hash)
 			{
