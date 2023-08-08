@@ -313,7 +313,7 @@ int assembler::remove_duplicate_circ_trsts()
 			//printf("start diff %d. end diff %d, hash1 %s, hash2 %s\n",abs(circ.start-old_circ.start),abs(circ.end-old_circ.end),intron_chain_hash.c_str(),old_intron_chain_hash.c_str());
 
 			//abs(circ.start-old_circ.start) < 100 && abs(circ.end-old_circ.end) < 100 
-			if((intron_chain_hash != "" && intron_chain_hash == old_intron_chain_hash && abs(circ.start-old_circ.start) < 50 && abs(circ.end-old_circ.end) < 50) || (intron_chain_hash == "" && abs(circ.start-old_circ.start) < 50 && abs(circ.end-old_circ.end) < 50))
+			if((intron_chain_hash != "" && intron_chain_hash == old_intron_chain_hash && abs(circ.start-old_circ.start) < 50 && abs(circ.end-old_circ.end) < 50) || (intron_chain_hash == "" && intron_chain_hash == old_intron_chain_hash && abs(circ.start-old_circ.start) < 50 && abs(circ.end-old_circ.end) < 50))
 			{
 				if(circ.coverage > old_circ.coverage)
 				{
