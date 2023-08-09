@@ -314,7 +314,7 @@ int assembler::remove_duplicate_circ_trsts()
 
 			int end_diff = 50;
 			//&& abs(circ.start-old_circ.start) < end_diff && abs(circ.end-old_circ.end) < end_diff 
-			if((intron_chain_hash != "" && intron_chain_hash == old_intron_chain_hash) || (intron_chain_hash == "" && intron_chain_hash == old_intron_chain_hash && abs(circ.start-old_circ.start) < end_diff && abs(circ.end-old_circ.end) < end_diff))
+			if((intron_chain_hash != "" && intron_chain_hash == old_intron_chain_hash && abs(circ.start-old_circ.start) < end_diff && abs(circ.end-old_circ.end) < end_diff) || (intron_chain_hash == "" && intron_chain_hash == old_intron_chain_hash && abs(circ.start-old_circ.start) < end_diff && abs(circ.end-old_circ.end) < end_diff))
 			{
 				if(circ.coverage > old_circ.coverage)
 				{
