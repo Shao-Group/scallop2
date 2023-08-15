@@ -23,6 +23,10 @@ path::path()
 	fcindex = -1;
 	ex1 = 0;
 	ex2 = 0;
+	path_regions.clear();
+	merged_regions.clear();
+	junc_regions.clear();
+	exon_count = 0;
 }
 
 path::~path()

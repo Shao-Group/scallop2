@@ -44,6 +44,7 @@ public:
 	vector<region> path_regions;
 	vector<region> merged_regions;
 	vector<pair<int32_t,int32_t>> junc_regions;
+	int exon_count;
 
 public:
 	int clear();
