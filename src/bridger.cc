@@ -2074,7 +2074,7 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 				printf("exon_count %d, threshold len: %d\n",p.exon_count,p.exon_count*length_high);
 			}
 
-			if(remove_map.find(hash) == remove_map.end() && p.length < p.exon_count*200) //path not present in remove map
+			if(remove_map.find(hash) == remove_map.end() && p.length < p.exon_count*250) //path not present in remove map
 			{
 				selected_paths.push_back(p);
 			}
