@@ -2052,7 +2052,7 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 				{
 					printf(" read path\n");
 				}
-				printf("exon_count %d, threshold len: %d\n",p.exon_count,p.exon_count*length_high);
+				//printf("exon_count %d, threshold len: %d\n",p.exon_count,p.exon_count*length_high);
 			}
 
 			if(strcmp(fr.h1->qname.c_str(),"ST-E00299:245:HKTJJALXX:6:1105:12875:20032") == 0)
@@ -2071,10 +2071,10 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 				{
 					printf(" read path\n");
 				}
-				printf("exon_count %d, threshold len: %d\n",p.exon_count,p.exon_count*length_high);
+				//printf("exon_count %d, threshold len: %d\n",p.exon_count,p.exon_count*length_high);
 			}
 
-			if(remove_map.find(hash) == remove_map.end() && p.length < p.exon_count*350) //path not present in remove map
+			if(remove_map.find(hash) == remove_map.end() && p.length < 1.5*length_high) //path not present in remove map
 			{
 				selected_paths.push_back(p);
 			}
