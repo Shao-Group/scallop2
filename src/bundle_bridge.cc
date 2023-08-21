@@ -2255,7 +2255,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 				}
 			}
 
-			if(left_boundary_flag == 1 && right_boundary_flag == 1 || (fr1.lpos >= bb.lpos-bundle_range && fr1.lpos <= bb.lpos+bundle_range && fr2.rpos >= bb.rpos-bundle_range && fr2.rpos <= bb.rpos+bundle_range))
+			/*if(left_boundary_flag == 1 && right_boundary_flag == 1 || (fr1.lpos >= bb.lpos-bundle_range && fr1.lpos <= bb.lpos+bundle_range && fr2.rpos >= bb.rpos-bundle_range && fr2.rpos <= bb.rpos+bundle_range))
 			{
 				printf("Found a case with junc comp 1\n");
 				printf("valid: left_boundary_flag = %d, right_boundary_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",left_boundary_flag, right_boundary_flag, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
@@ -2264,7 +2264,8 @@ int bundle_bridge::join_circ_fragment_pairs()
 			else
 			{
 				printf("Not valid: left_boundary_flag = %d, right_boundary_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",left_boundary_flag, right_boundary_flag, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
-			}
+			}*/
+			join_circ_fragment_pair(circ_fragment_pairs[i],0,0);
 		}
 		else if(fr2.is_compatible == 2)
 		{
@@ -2384,7 +2385,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 				}
 			}
 
-			if(left_boundary_flag == 1 && right_boundary_flag == 1 || (fr2.lpos >= bb.lpos-bundle_range && fr2.lpos <= bb.lpos+bundle_range && fr1.rpos >= bb.rpos-bundle_range && fr1.rpos <= bb.rpos+bundle_range))
+			/*if(left_boundary_flag == 1 && right_boundary_flag == 1 || (fr2.lpos >= bb.lpos-bundle_range && fr2.lpos <= bb.lpos+bundle_range && fr1.rpos >= bb.rpos-bundle_range && fr1.rpos <= bb.rpos+bundle_range))
 			{
 				printf("Found a case with junc comp 2\n");
 				printf("valid: left_boundary_flag = %d, right_boundary_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",left_boundary_flag, right_boundary_flag, fr2.lpos, fr1.rpos, bb.lpos, bb.rpos);
@@ -2393,7 +2394,8 @@ int bundle_bridge::join_circ_fragment_pairs()
 			else
 			{
 				printf("Not valid: left_boundary_flag = %d, right_boundary_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",left_boundary_flag, right_boundary_flag, fr2.lpos, fr1.rpos, bb.lpos, bb.rpos);
-			}
+			}*/
+			join_circ_fragment_pair(circ_fragment_pairs[i],0,0);
 		}
 	}
 
