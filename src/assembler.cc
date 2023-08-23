@@ -35,6 +35,7 @@ assembler::assembler()
 	circ_trst_map.clear();
 	circ_trst_merged_map.clear();
 	circular_trsts_HS.clear();
+	HS_both_side_reads.clear();
 }
 
 assembler::~assembler()
@@ -142,6 +143,10 @@ int assembler::assemble()
 	//write_circular_boundaries();
 
 	printf("size of circular vector = %lu\n",circular_trsts.size());
+	printf("size of HS_both_side_reads = %lu, %s\n",HS_both_side_reads.size(),HS_both_side_reads[0].c_str());
+	printf("size of chimeric_reads = %lu, %s\n",chimeric_reads.size(),chimeric_reads[0].c_str());
+	write_RO_info();
+
 	remove_duplicate_circ_trsts();
 	print_circular_trsts();
 	write_circular();
@@ -201,6 +206,10 @@ int assembler::process(int n)
 		//}
 
 		circular_trsts_HS.insert(circular_trsts_HS.end(), bd.br.circ_trsts_HS.begin(), bd.br.circ_trsts_HS.end());
+
+		// RO statistics
+		HS_both_side_reads.insert(HS_both_side_reads.end(), bd.br.HS_both_side_reads.begin(), bd.br.HS_both_side_reads.end());
+		chimeric_reads.insert(chimeric_reads.end(), bd.br.chimeric_reads.begin(), bd.br.chimeric_reads.end());
 
 		bd.build(1, true);
 		if(verbose >= 1) bd.print(index++);	
@@ -282,7 +291,7 @@ int assembler::remove_duplicate_circ_trsts()
 	//merge circRNAs that have different end boundaries but same intron chain into that with higher coverage
 	for(itn = circ_trst_map.begin(); itn != circ_trst_map.end(); itn++)
 	{
-		printf("start of check\n");
+		//printf("start of check\n");
 		circular_transcript &circ = itn->second.first;
 		string hash = itn->first;
 
@@ -331,7 +340,7 @@ int assembler::remove_duplicate_circ_trsts()
 			circ_trst_merged_map.insert(pair<string,pair<circular_transcript, int>>(circ.circRNA_id,pair<circular_transcript, int>(circ,circ.coverage)));
 		}
 		
-		printf("end of check\n");
+		//printf("end of check\n");
 
 		if(circ_trst_merged_map.size() == 0)
 		{
@@ -482,6 +491,30 @@ int assembler::assign_RPKM() //level of expression of transcripts
 	{
 		trsts[i].assign_RPKM(factor);
 	}
+	return 0;
+}
+
+int assembler::write_RO_info()
+{
+	ofstream fout("HS_both_side_reads");
+	if(fout.fail()) return 0;
+
+	for(int i=0;i<HS_both_side_reads.size();i++)
+	{
+		fout << HS_both_side_reads[i].c_str() << endl;
+	}
+
+	fout.close();
+
+	ofstream fout1("chimeric_reads");
+	if(fout.fail()) return 0;
+
+	for(int i=0;i<chimeric_reads.size();i++)
+	{
+		fout1 << chimeric_reads[i].c_str() << endl;
+	}
+
+	fout1.close();
 	return 0;
 }
 

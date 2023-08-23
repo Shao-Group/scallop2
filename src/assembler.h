@@ -50,6 +50,9 @@ private:
 	map <string, pair<circular_transcript, int>> circ_trst_merged_map; // map with circRNAs having few bp diff ends but same intron chains merged
 
 	vector<circular_transcript> circular_trsts_HS;///a vector of circular transcripts class objs from all HS reads from all bundles
+	vector<string> HS_both_side_reads; //for statistics of RO reads from CIRI-full
+	vector<string> chimeric_reads; //for statistics of RO reads from CIRI-full
+
 public:
 	int assemble();
 
@@ -60,6 +63,7 @@ private:
 	int print_circular_trsts();
 	int assemble(const splice_graph &gr, const hyper_set &hs, transcript_set &ts1, transcript_set &ts2);
 	int assign_RPKM();
+	int write_RO_info();
 	int write();
 	int write_circular_boundaries();
 	int write_circular();

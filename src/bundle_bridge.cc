@@ -47,6 +47,9 @@ int bundle_bridge::build()
 	build_fragments(); //builds fragment from h1p to h2
 	//printf("\n");
 
+	//RO reads statistics
+	get_frags_with_HS_on_both_sides();
+
 	fix_alignment_boundaries();
 	build_circ_fragments(); //will build fragment from h2 to h1s, added by Tasfia
 
@@ -82,6 +85,36 @@ int bundle_bridge::build()
 			fragments[i].print(i+1);
 		}
 	}*/
+	return 0;
+}
+
+int bundle_bridge::get_frags_with_HS_on_both_sides()
+{
+	for(int k = 0; k < fragments.size(); k++)
+	{
+		fragment &fr = fragments[k];
+
+		if(fr.h1->pos <= fr.h2->pos && (fr.h1->cigar_vector[0].first == 'S' || fr.h1->cigar_vector[0].first == 'H') && (fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'S' || fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'H'))
+		{
+			string chrm_id = bb.chrm.c_str();
+			string name = bb.chrm+":"+fr.h1->qname;
+			HS_both_side_reads.push_back(name);
+		}
+		else if(fr.h1->pos > fr.h2->pos && (fr.h2->cigar_vector[0].first == 'S' || fr.h2->cigar_vector[0].first == 'H') && (fr.h1->cigar_vector[fr.h1->cigar_vector.size()-1].first == 'S' || fr.h1->cigar_vector[fr.h1->cigar_vector.size()-1].first == 'H'))
+		{
+			string chrm_id = bb.chrm.c_str();
+			string name = bb.chrm+":"+fr.h1->qname;
+			HS_both_side_reads.push_back(name);
+		}
+
+		if(fr.h1->suppl != NULL || fr.h2->suppl != NULL)
+		{
+			string chrm_id = bb.chrm.c_str();
+			string name = bb.chrm+":"+fr.h1->qname;
+			chimeric_reads.push_back(name);
+		}
+	}
+
 	return 0;
 }
 
@@ -2163,7 +2196,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 			}
 
 			//checking if pexon matches left boundary
-			for(int p=0;p<pexons.size();p++)
+			/*for(int p=0;p<pexons.size();p++)
 			{
 				if(pexons[p].lpos <= fr1.lpos+pexon_range && pexons[p].lpos >= fr1.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
 				{
@@ -2174,7 +2207,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 					left_boundary_flag = 1;
 					break;
 				}
-			}
+			}*/
 
 			//checking if reads junction matches right boundary
 			for(int j=0;j<junctions.size();j++)
@@ -2242,7 +2275,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 
 		
 			//checking if pexon matches right boundary
-			for(int p=0;p<pexons.size();p++)
+			/*for(int p=0;p<pexons.size();p++)
 			{
 				if(pexons[p].rpos <= fr2.rpos+pexon_range && pexons[p].rpos >= fr2.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
 				{
@@ -2253,9 +2286,9 @@ int bundle_bridge::join_circ_fragment_pairs()
 					right_boundary_flag = 1;
 					break;
 				}
-			}
+			}*/
 
-			/*if(left_boundary_flag == 1 && right_boundary_flag == 1 || (fr1.lpos >= bb.lpos-bundle_range && fr1.lpos <= bb.lpos+bundle_range && fr2.rpos >= bb.rpos-bundle_range && fr2.rpos <= bb.rpos+bundle_range))
+			if(left_boundary_flag == 1 && right_boundary_flag == 1)
 			{
 				printf("Found a case with junc comp 1\n");
 				printf("valid: left_boundary_flag = %d, right_boundary_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",left_boundary_flag, right_boundary_flag, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
@@ -2264,8 +2297,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 			else
 			{
 				printf("Not valid: left_boundary_flag = %d, right_boundary_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",left_boundary_flag, right_boundary_flag, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
-			}*/
-			join_circ_fragment_pair(circ_fragment_pairs[i],0,0);
+			}
 		}
 		else if(fr2.is_compatible == 2)
 		{
@@ -2311,14 +2343,14 @@ int bundle_bridge::join_circ_fragment_pairs()
 			}
 
 			//checking if pexon matches left boundary
-			for(int p=0;p<pexons.size();p++)
+			/*for(int p=0;p<pexons.size();p++)
 			{
 				if(pexons[p].lpos <= fr2.lpos+pexon_range && pexons[p].lpos >= fr2.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
 				{
 					left_boundary_flag = 1;
 					break;
 				}
-			}
+			}*/
 
 			//checking if reads junction matches right boundary
 			for(int j=0;j<junctions.size();j++)
@@ -2376,16 +2408,16 @@ int bundle_bridge::join_circ_fragment_pairs()
 			}
 
 			//checking if pexon matches right boundary
-			for(int p=0;p<pexons.size();p++)
+			/*for(int p=0;p<pexons.size();p++)
 			{
 				if(pexons[p].rpos <= fr1.rpos+pexon_range && pexons[p].rpos >= fr1.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
 				{
 					right_boundary_flag = 1;
 					break;
 				}
-			}
+			}*/
 
-			/*if(left_boundary_flag == 1 && right_boundary_flag == 1 || (fr2.lpos >= bb.lpos-bundle_range && fr2.lpos <= bb.lpos+bundle_range && fr1.rpos >= bb.rpos-bundle_range && fr1.rpos <= bb.rpos+bundle_range))
+			if(left_boundary_flag == 1 && right_boundary_flag == 1)
 			{
 				printf("Found a case with junc comp 2\n");
 				printf("valid: left_boundary_flag = %d, right_boundary_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",left_boundary_flag, right_boundary_flag, fr2.lpos, fr1.rpos, bb.lpos, bb.rpos);
@@ -2394,8 +2426,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 			else
 			{
 				printf("Not valid: left_boundary_flag = %d, right_boundary_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",left_boundary_flag, right_boundary_flag, fr2.lpos, fr1.rpos, bb.lpos, bb.rpos);
-			}*/
-			join_circ_fragment_pair(circ_fragment_pairs[i],0,0);
+			}
 		}
 	}
 

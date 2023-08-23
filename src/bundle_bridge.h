@@ -34,6 +34,9 @@ public:
 	vector<circular_transcript> circ_trsts; //a vector of circular transcripts class objs, with duplicates
 	vector<circular_transcript> circ_trsts_HS; ////a vector of circular transcripts from all possible H/S reads, with duplicates
 
+	vector<string> HS_both_side_reads; //for statistics of RO reads from CIRI-full
+	vector<string> chimeric_reads; //for statistics of RO reads from CIRI-full
+
 	vector<junction> junctions;			// splice junctions
 	map<int64_t, char> junc_map;		// map junction to strandness
 	vector<region> regions;				// pexons
@@ -60,6 +63,7 @@ public:
 	int build_regions();
 	int build_partial_exons();
 	int build_fragments();
+	int get_frags_with_HS_on_both_sides();
 	int fix_alignment_boundaries();
 
 	int build_circ_fragments();
