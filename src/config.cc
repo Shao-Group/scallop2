@@ -97,6 +97,7 @@ string ref_file2;
 string output_file;
 string output_file1;
 string output_circ_file;
+string cirifull_file;
 
 // for controling
 bool output_tex_files = false;
@@ -137,6 +138,11 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "-c")
 		{
 			output_circ_file = string(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "-ro")
+		{
+			cirifull_file = string(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--transcript_fragments")

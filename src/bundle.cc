@@ -19,7 +19,7 @@ See LICENSE for licensing.
 #include "util.h"
 #include "undirected_graph.h"
 
-bundle::bundle(bundle_base &b, reference &r)
+bundle::bundle(bundle_base &b, reference &r, map <string, int> RO_reads_map)
 	: bb(b), br(b), ref(r)
 {
 	compute_strand();
@@ -33,7 +33,7 @@ bundle::bundle(bundle_base &b, reference &r)
 	{
 		printf("ref_trsts size: %lu\n",br.ref_trsts.size());
 	}
-	br.build();
+	br.build(RO_reads_map);
 	prepare();
 }
 

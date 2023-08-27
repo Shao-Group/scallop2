@@ -50,6 +50,7 @@ hit& hit::operator=(const hit &h)
 	sa = h.sa;
 	supple_pos = h.supple_pos;
 	suppl = h.suppl;
+	is_reverse_overlap = h.is_reverse_overlap;
 	end = '.';
 
 	itvm = h.itvm;
@@ -92,6 +93,7 @@ hit::hit(const hit &h)
 	nm = h.nm;
 	sa = h.sa;
 	supple_pos = h.supple_pos;
+	is_reverse_overlap = h.is_reverse_overlap;
 	suppl = h.suppl;
 	end = h.end;
 
@@ -130,6 +132,8 @@ hit::hit(bam1_t *b, int id)
 	end = '.';
 
 	supple_pos = 0;
+	is_reverse_overlap = false;
+	
 	left_cigar = '.';					// S=soft clip, H=hard clip, M=match, .=default
 	right_cigar = '.';					// S=soft clip, H=hard clip, M=match, .=default
 	left_cigar_len = 0;

@@ -29,7 +29,7 @@ using namespace std;
 class bundle
 {
 public:
-	bundle(bundle_base &bb, reference &ref);
+	bundle(bundle_base &bb, reference &ref, map <string, int> RO_reads_map);
 	virtual ~bundle();
 
 public:

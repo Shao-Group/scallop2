@@ -36,6 +36,9 @@ assembler::assembler()
 	circ_trst_merged_map.clear();
 	circular_trsts_HS.clear();
 	HS_both_side_reads.clear();
+	RO_reads_map.clear();
+	RO_count = 0;
+	read_cirifull_file();
 }
 
 assembler::~assembler()
@@ -64,6 +67,7 @@ int assembler::assemble()
 
 		ht.set_tags(b1t);
 		ht.set_strand();
+
 		//ht.print();
 
 		//if(ht.nh >= 2 && p.qual < min_mapping_quality) continue;
@@ -145,6 +149,7 @@ int assembler::assemble()
 	printf("size of circular vector = %lu\n",circular_trsts.size());
 	printf("size of HS_both_side_reads = %lu, %s\n",HS_both_side_reads.size(),HS_both_side_reads[0].c_str());
 	printf("size of chimeric_reads = %lu, %s\n",chimeric_reads.size(),chimeric_reads[0].c_str());
+	printf("#RO_count hits = %d\n",RO_count);
 	write_RO_info();
 
 	remove_duplicate_circ_trsts();
@@ -198,8 +203,9 @@ int assembler::process(int n)
 		transcript_set ts1(bb.chrm, 0.9);		// full-length set
 		transcript_set ts2(bb.chrm, 0.9);		// non-full-length set
 
-		bundle bd(bb, ref);
+		bundle bd(bb, ref, RO_reads_map);
 
+		RO_count += bd.br.RO_count;
 		//if(bd.junctions.size() != 0)
 		//{
 		circular_trsts.insert(circular_trsts.end(), bd.br.circ_trsts.begin(), bd.br.circ_trsts.end());
@@ -383,6 +389,77 @@ vector<string> assembler::split_str(string str, string delimiter)
     }
  
     return v;
+}
+
+int assembler::split(const string &s, char delim, vector<std::string> &elems) {
+    stringstream ss;
+    ss.str(s);
+    string item;
+    while (getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+
+	return 0;
+}
+
+int assembler::read_cirifull_file()
+{
+	if(cirifull_file == "") return 0;
+
+	ifstream fin(cirifull_file.c_str());
+	if(fin.fail())
+	{
+		printf("open file %s error\n", cirifull_file.c_str());
+		return 0;
+	}
+
+	string line;
+
+	getline(fin, line); //discard header
+	while (getline(fin, line))
+    {
+        vector<string> row_values;
+
+        split(line, '\t', row_values);
+        //cout << row_values[0] << "," << row_values[1] << "," << row_values[2] << endl;
+
+		RO_read ro_read;
+		ro_read.read_name = row_values[0];
+		ro_read.chrm = row_values[1];
+
+		vector<string> colon_separate;
+		split(row_values[2], ':', colon_separate);
+
+		vector<string> positions;
+		split(colon_separate[1], '-', positions);
+
+		//printf("pos %s, rpos %s\n", positions[0].c_str(), positions[1].c_str());
+		ro_read.BSJ_pos = stoi(positions[0]);
+		ro_read.BSJ_rpos = stoi(positions[1]);
+		//printf("pos %d, rpos %d\n", ro_read.BSJ_pos, ro_read.BSJ_rpos);
+
+		RO_reads.push_back(ro_read);
+    }
+
+	for(int i=0;i<RO_reads.size();i++)
+	{
+		RO_read ro_read = RO_reads[i];
+		string hash = "";
+		hash = hash + ro_read.chrm + ":" + ro_read.read_name;
+
+		if(RO_reads_map.find(hash) != RO_reads_map.end())
+		{
+			RO_reads_map[hash]++;
+		}
+		else
+		{
+			RO_reads_map[hash] = 1;
+		}
+	}
+	
+	printf("RO_reads map size: %lu\n",RO_reads_map.size());
+	
+	return 0;
 }
 
 int assembler::print_circular_trsts()

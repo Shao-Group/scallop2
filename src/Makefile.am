@@ -42,4 +42,5 @@ scallop2_SOURCES = splice_graph.h splice_graph.cc \
 				   transcript_set.h transcript_set.cc \
 				   reference.h reference.cc \
 				   filter.h filter.cc \
+				   RO_read.h RO_read.cc \
 				   main.cc 

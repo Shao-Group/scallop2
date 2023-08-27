@@ -36,6 +36,7 @@ public:
 
 	vector<string> HS_both_side_reads; //for statistics of RO reads from CIRI-full
 	vector<string> chimeric_reads; //for statistics of RO reads from CIRI-full
+	int RO_count;
 
 	vector<junction> junctions;			// splice junctions
 	map<int64_t, char> junc_map;		// map junction to strandness
@@ -48,7 +49,7 @@ public:
 	vector< vector<int> > umiLink;		// umi linked list: fragments index
 
 public:
-	int build();
+	int build(map <string, int> RO_reads_map);
 	int print(int index);
 	int32_t compute_aligned_length(int32_t k1l, int32_t k2r, const vector<int>& v);
 	vector<int32_t> build_accumulate_length(const vector<int> &v);
@@ -56,6 +57,7 @@ public:
 	vector<int32_t> get_splices(fragment &fr);
 
 public:
+	int set_hits_RO_parameter(map <string, int> RO_reads_map);
 	int set_chimeric_cigar_positions();
 	int build_supplementaries();
 	int build_junctions();

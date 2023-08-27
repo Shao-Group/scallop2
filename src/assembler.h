@@ -19,6 +19,7 @@ See LICENSE for licensing.
 #include "reference.h"
 
 #include "circular_transcript.h"
+#include "RO_read.h"
 
 using namespace std;
 
@@ -52,6 +53,9 @@ private:
 	vector<circular_transcript> circular_trsts_HS;///a vector of circular transcripts class objs from all HS reads from all bundles
 	vector<string> HS_both_side_reads; //for statistics of RO reads from CIRI-full
 	vector<string> chimeric_reads; //for statistics of RO reads from CIRI-full
+	vector<RO_read> RO_reads; //list of RO reads from CIRI-full simu_ro2_info.list
+	map <string, int> RO_reads_map; //map of RO read name concatenated with chrm
+	int RO_count;
 
 public:
 	int assemble();
@@ -67,6 +71,8 @@ private:
 	int write();
 	int write_circular_boundaries();
 	int write_circular();
+	int read_cirifull_file();
+	int split(const std::string &s, char delim, std::vector<std::string> &elems);
 	int compare(splice_graph &gr, const string &ref, const string &tex = "");
 	bool determine_regional_graph(splice_graph &gr);
 };

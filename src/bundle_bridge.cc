@@ -24,14 +24,17 @@ bundle_bridge::bundle_bridge(bundle_base &b)
 {
 	circ_trsts.clear(); // emptying before storing circRNAs
 	circ_trsts_HS.clear();
+	RO_count = 0;
 	//compute_strand();
 }
 
 bundle_bridge::~bundle_bridge()
 {}
 
-int bundle_bridge::build()
+int bundle_bridge::build(map <string, int> RO_reads_map)
 {
+	set_hits_RO_parameter(RO_reads_map);
+
 	build_supplementaries();
 	set_chimeric_cigar_positions(); //setting h.first_pos/second_pos etc for getting back splice positions using cigars 
 	build_junctions();
@@ -85,6 +88,36 @@ int bundle_bridge::build()
 			fragments[i].print(i+1);
 		}
 	}*/
+	return 0;
+}
+
+int bundle_bridge::set_hits_RO_parameter(map <string, int> RO_reads_map)
+{
+	for(int i=0;i<bb.hits.size();i++)
+	{
+		hit *curr_hit = &bb.hits[i];
+		string hash = "";
+		hash = hash + bb.chrm + ":" + curr_hit->qname;
+
+
+		if(RO_reads_map.find(hash) != RO_reads_map.end())
+		{
+			//hit is a RO read
+			curr_hit->is_reverse_overlap = true;
+		}
+	}
+
+	int cnt = 0;
+	for(int i=0;i<bb.hits.size();i++)
+	{
+		if(bb.hits[i].is_reverse_overlap == true)
+		{
+			cnt++;
+		}
+	}
+	printf("# RO reads in bundle %d\n",cnt);
+	RO_count = cnt;
+
 	return 0;
 }
 
@@ -189,7 +222,6 @@ int bundle_bridge::build_supplementaries()
             //if(z.qhash != h.qhash) continue;
             if(z.qname != h.qname) continue;
 
-			
             // TODO check 0x40 and 0x80 are the same
             if(((z.flag & 0x40) != (h.flag & 0x40)) || ((z.flag & 0x80) != (h.flag & 0x80))) continue;
 

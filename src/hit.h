@@ -79,6 +79,7 @@ public:
 	int32_t nm;								// NM aux in sam
 	string sa;								// SA aux in sam
 	int32_t supple_pos;						// stores position of supple from SA tag
+	bool is_reverse_overlap;				// whether this is a RO read
 	size_t qhash;							// hash code for qname
 	hit *suppl;								// supplementary hit
 	char end;								// left end 'L', right end 'R'
