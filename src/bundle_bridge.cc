@@ -165,175 +165,187 @@ int bundle_bridge::get_RO_frags_with_HS()
 			continue;
 		}
 
+		if(fr.h1->is_reverse_overlap == false && fr.h2->is_reverse_overlap == false)
+		{
+			continue;
+		}
+
+		int left_boundary_flag = 0;
+		int right_boundary_flag = 0;
+
 		if(fr.h1->pos <= fr.h2->pos && (fr.h1->cigar_vector[0].first == 'S' || fr.h1->cigar_vector[0].first == 'H') && (fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'S' || fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'H'))
 		{
-			if(fr.h1->is_reverse_overlap == true || fr.h2->is_reverse_overlap == true)
+			printf("RO paired hit case 1: pos %d, rpos %d\n",fr.h1->pos,fr.h2->rpos);
+			printf("chrm %s\n",bb.chrm.c_str());
+			printf("Hit 1: ");
+			fr.h1->print();
+
+			//checking if reads junction matches left boundary
+			for(int j=0;j<junctions.size();j++)
 			{
-				printf("RO paired hit case 1: pos %d, rpos %d\n",fr.h1->pos,fr.h2->rpos);
-				printf("chrm %s\n",bb.chrm.c_str());
-				printf("Hit 1: ");
-				fr.h1->print();
+				junction jc = junctions[j];
 
-				//checking if reads junction matches left boundary
-				for(int j=0;j<junctions.size();j++)
+				if(jc.rpos <= fr.h1->pos+junc_range && jc.rpos >= fr.h1->pos-junc_range)
 				{
-					junction jc = junctions[j];
-
-					if(jc.rpos <= fr.h1->pos+junc_range && jc.rpos >= fr.h1->pos-junc_range)
-					{
-						printf("reads junction present left %d\n",jc.rpos);
-						break;
-					}
+					printf("reads junction present left %d\n",jc.rpos);
+					left_boundary_flag = 1;
+					break;
 				}
-
-				//checking if ref junction matches left boundary
-				int temp_flag = 0;
-				for(int t=0;t<ref_trsts.size();t++)
-				{
-					transcript trst = ref_trsts[t];
-					vector<PI32> chain = trst.get_intron_chain();
-
-					for(int k=0;k<chain.size();k++)
-					{
-						if(chain[k].second <= fr.h1->pos+junc_range && chain[k].second >= fr.h1->pos-junc_range)
-						{
-							printf("ref junction present left %d\n",chain[k].second);
-							temp_flag = 1;
-							break;
-						}
-					}
-
-					if(temp_flag == 1)
-					{
-						break;
-					}
-				}
-
-				printf("Hit 2: ");
-				fr.h2->print();
-
-				//checking if reads junction matches right boundary
-				for(int j=0;j<junctions.size();j++)
-				{
-					junction jc = junctions[j];
-
-					if(jc.lpos <= fr.h2->rpos+junc_range && jc.lpos >= fr.h2->rpos-junc_range)
-					{
-						printf("reads junction present right %d\n",jc.lpos);
-						break;
-					}
-				}
-
-				//checking if ref junction matches right boundary
-				temp_flag = 0;
-				for(int t=0;t<ref_trsts.size();t++)
-				{
-					transcript trst = ref_trsts[t];
-					vector<PI32> chain = trst.get_intron_chain();
-
-					for(int k=0;k<chain.size();k++)
-					{
-						if(chain[k].first <= fr.h2->rpos+junc_range && chain[k].first >= fr.h2->rpos-junc_range)
-						{
-							printf("ref junction present right %d\n",chain[k].first);
-							temp_flag = 1;
-							break;
-						}
-					}
-
-					if(temp_flag == 1)
-					{
-						break;
-					}
-				}
-
-				printf("\n");
 			}
+
+			//checking if ref junction matches left boundary
+			int temp_flag = 0;
+			for(int t=0;t<ref_trsts.size();t++)
+			{
+				transcript trst = ref_trsts[t];
+				vector<PI32> chain = trst.get_intron_chain();
+
+				for(int k=0;k<chain.size();k++)
+				{
+					if(chain[k].second <= fr.h1->pos+junc_range && chain[k].second >= fr.h1->pos-junc_range)
+					{
+						printf("ref junction present left %d\n",chain[k].second);
+						temp_flag = 1;
+						left_boundary_flag = 1;
+						break;
+					}
+				}
+
+				if(temp_flag == 1)
+				{
+					break;
+				}
+			}
+
+			printf("Hit 2: ");
+			fr.h2->print();
+
+			//checking if reads junction matches right boundary
+			for(int j=0;j<junctions.size();j++)
+			{
+				junction jc = junctions[j];
+
+				if(jc.lpos <= fr.h2->rpos+junc_range && jc.lpos >= fr.h2->rpos-junc_range)
+				{
+					printf("reads junction present right %d\n",jc.lpos);
+					right_boundary_flag = 1;
+					break;
+				}
+			}
+
+			//checking if ref junction matches right boundary
+			temp_flag = 0;
+			for(int t=0;t<ref_trsts.size();t++)
+			{
+				transcript trst = ref_trsts[t];
+				vector<PI32> chain = trst.get_intron_chain();
+
+				for(int k=0;k<chain.size();k++)
+				{
+					if(chain[k].first <= fr.h2->rpos+junc_range && chain[k].first >= fr.h2->rpos-junc_range)
+					{
+						printf("ref junction present right %d\n",chain[k].first);
+						right_boundary_flag = 1;
+						temp_flag = 1;
+						break;
+					}
+				}
+
+				if(temp_flag == 1)
+				{
+					break;
+				}
+			}
+
+			printf("RO frags: left_boundary_flag = %d, right_boundary_flag = %d\n\n",left_boundary_flag,right_boundary_flag);
+		
 		}
 		else if(fr.h1->pos > fr.h2->pos && (fr.h2->cigar_vector[0].first == 'S' || fr.h2->cigar_vector[0].first == 'H') && (fr.h1->cigar_vector[fr.h1->cigar_vector.size()-1].first == 'S' || fr.h1->cigar_vector[fr.h1->cigar_vector.size()-1].first == 'H'))
 		{
-			if(fr.h1->is_reverse_overlap == true || fr.h2->is_reverse_overlap == true)
+			printf("RO paired hit case 2: pos %d, rpos %d\n",fr.h2->pos,fr.h1->rpos);
+			printf("chrm %s\n",bb.chrm.c_str());
+			printf("Hit 1: ");
+			fr.h2->print();
+
+			//checking if reads junction matches left boundary
+			for(int j=0;j<junctions.size();j++)
 			{
-				printf("RO paired hit case 2: pos %d, rpos %d\n",fr.h2->pos,fr.h1->rpos);
-				printf("chrm %s\n",bb.chrm.c_str());
-				printf("Hit 1: ");
-				fr.h2->print();
+				junction jc = junctions[j];
 
-				//checking if reads junction matches left boundary
-				for(int j=0;j<junctions.size();j++)
+				if(jc.rpos <= fr.h2->pos+junc_range && jc.rpos >= fr.h2->pos-junc_range)
 				{
-					junction jc = junctions[j];
-
-					if(jc.rpos <= fr.h2->pos+junc_range && jc.rpos >= fr.h2->pos-junc_range)
-					{
-						printf("reads junction present left %d\n",jc.rpos);
-						break;
-					}
+					printf("reads junction present left %d\n",jc.rpos);
+					left_boundary_flag = 1;
+					break;
 				}
-
-				//checking if ref junction matches left boundary
-				int temp_flag = 0;
-				for(int t=0;t<ref_trsts.size();t++)
-				{
-					transcript trst = ref_trsts[t];
-					vector<PI32> chain = trst.get_intron_chain();
-
-					for(int k=0;k<chain.size();k++)
-					{
-						if(chain[k].second <= fr.h2->pos+junc_range && chain[k].second >= fr.h2->pos-junc_range)
-						{
-							printf("ref junction present left %d\n",chain[k].second);
-							temp_flag = 1;
-							break;
-						}
-					}
-
-					if(temp_flag == 1)
-					{
-						break;
-					}
-				}
-
-				printf("Hit 2: ");
-				fr.h1->print();
-
-				//checking if reads junction matches right boundary
-				for(int j=0;j<junctions.size();j++)
-				{
-					junction jc = junctions[j];
-
-					if(jc.lpos <= fr.h1->rpos+junc_range && jc.lpos >= fr.h1->rpos-junc_range)
-					{
-						printf("reads junction present right %d\n",jc.lpos);
-						break;
-					}
-				}
-
-				//checking if ref junction matches right boundary
-				temp_flag = 0;
-				for(int t=0;t<ref_trsts.size();t++)
-				{
-					transcript trst = ref_trsts[t];
-					vector<PI32> chain = trst.get_intron_chain();
-
-					for(int k=0;k<chain.size();k++)
-					{
-						if(chain[k].first <= fr.h1->rpos+junc_range && chain[k].first >= fr.h1->rpos-junc_range)
-						{
-							printf("ref junction present right %d\n",chain[k].first);
-							temp_flag = 1;
-							break;
-						}
-					}
-
-					if(temp_flag == 1)
-					{
-						break;
-					}
-				}
-
-				printf("\n");
 			}
+
+			//checking if ref junction matches left boundary
+			int temp_flag = 0;
+			for(int t=0;t<ref_trsts.size();t++)
+			{
+				transcript trst = ref_trsts[t];
+				vector<PI32> chain = trst.get_intron_chain();
+
+				for(int k=0;k<chain.size();k++)
+				{
+					if(chain[k].second <= fr.h2->pos+junc_range && chain[k].second >= fr.h2->pos-junc_range)
+					{
+						printf("ref junction present left %d\n",chain[k].second);
+						left_boundary_flag = 1;
+						temp_flag = 1;
+						break;
+					}
+				}
+
+				if(temp_flag == 1)
+				{
+					break;
+				}
+			}
+
+			printf("Hit 2: ");
+			fr.h1->print();
+
+			//checking if reads junction matches right boundary
+			for(int j=0;j<junctions.size();j++)
+			{
+				junction jc = junctions[j];
+
+				if(jc.lpos <= fr.h1->rpos+junc_range && jc.lpos >= fr.h1->rpos-junc_range)
+				{
+					printf("reads junction present right %d\n",jc.lpos);
+					right_boundary_flag = 1;
+					break;
+				}
+			}
+
+			//checking if ref junction matches right boundary
+			temp_flag = 0;
+			for(int t=0;t<ref_trsts.size();t++)
+			{
+				transcript trst = ref_trsts[t];
+				vector<PI32> chain = trst.get_intron_chain();
+
+				for(int k=0;k<chain.size();k++)
+				{
+					if(chain[k].first <= fr.h1->rpos+junc_range && chain[k].first >= fr.h1->rpos-junc_range)
+					{
+						printf("ref junction present right %d\n",chain[k].first);
+						right_boundary_flag = 1;
+						temp_flag = 1;
+						break;
+					}
+				}
+
+				if(temp_flag == 1)
+				{
+					break;
+				}
+			}
+
+			printf("RO frags: left_boundary_flag = %d, right_boundary_flag = %d\n\n",left_boundary_flag,right_boundary_flag);
+			
 		}
 	}
 
