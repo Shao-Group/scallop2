@@ -115,12 +115,12 @@ int assembler::assemble()
 
 	process(0);
 
-	printf("h1_supp_count = %d, h2_supp_count = %d\n\n",h1_supp_count, h2_supp_count);
+	//printf("h1_supp_count = %d, h2_supp_count = %d\n\n",h1_supp_count, h2_supp_count);
 
 	map<string, int>::iterator itn1;
 	for(itn1 = frag2graph_freq.begin(); itn1 != frag2graph_freq.end(); itn1++)
 	{
-		printf("Fragment configuration = %s, count = %d\n",itn1->first.c_str(),itn1->second);
+		//printf("Fragment configuration = %s, count = %d\n",itn1->first.c_str(),itn1->second);
 	}
 
 	printf("\n");
@@ -128,7 +128,7 @@ int assembler::assemble()
 	map<string, int>::iterator itn2;
 	for(itn2 = circ_frag_bridged_freq.begin(); itn2 != circ_frag_bridged_freq.end(); itn2++)
 	{
-		printf("Bridging configuration = %s, count = %d\n",itn2->first.c_str(),itn2->second);
+		//printf("Bridging configuration = %s, count = %d\n",itn2->first.c_str(),itn2->second);
 	}
 	
 	assign_RPKM();
@@ -153,7 +153,7 @@ int assembler::assemble()
 	write_RO_info();
 
 	remove_duplicate_circ_trsts();
-	print_circular_trsts();
+	//print_circular_trsts();
 	write_circular();
 	
 	return 0;
@@ -360,7 +360,7 @@ int assembler::remove_duplicate_circ_trsts()
 	{
 		circular_transcript &circ = itn->second.first;
 		circ.coverage = itn->second.second;
-		printf("key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
+		//printf("key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
 	}
 
 

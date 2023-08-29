@@ -52,6 +52,7 @@ int bundle_bridge::build(map <string, int> RO_reads_map)
 
 	//RO reads statistics
 	get_frags_with_HS_on_both_sides();
+	get_RO_frags_with_HS();
 
 	fix_alignment_boundaries();
 	build_circ_fragments(); //will build fragment from h2 to h1s, added by Tasfia
@@ -76,7 +77,7 @@ int bundle_bridge::build(map <string, int> RO_reads_map)
 	extract_circ_fragment_pairs();
 	//print_circ_fragment_pairs();
 	join_circ_fragment_pairs();
-	print_circRNAs();
+	//print_circRNAs();
 
 	//printf("fragments vector size after = %zu\n",fragments.size());
 
@@ -115,7 +116,7 @@ int bundle_bridge::set_hits_RO_parameter(map <string, int> RO_reads_map)
 			cnt++;
 		}
 	}
-	printf("# RO reads in bundle %d\n",cnt);
+	//printf("# RO reads in bundle %d\n",cnt);
 	RO_count = cnt;
 
 	return 0;
@@ -145,6 +146,194 @@ int bundle_bridge::get_frags_with_HS_on_both_sides()
 			string chrm_id = bb.chrm.c_str();
 			string name = bb.chrm+":"+fr.h1->qname;
 			chimeric_reads.push_back(name);
+		}
+	}
+
+	return 0;
+}
+
+int bundle_bridge::get_RO_frags_with_HS()
+{
+	int junc_range = 10;
+
+	for(int k = 0; k < fragments.size(); k++)
+	{
+		fragment &fr = fragments[k];
+
+		if(fr.h1->suppl != NULL || fr.h2->suppl != NULL)
+		{
+			continue;
+		}
+
+		if(fr.h1->pos <= fr.h2->pos && (fr.h1->cigar_vector[0].first == 'S' || fr.h1->cigar_vector[0].first == 'H') && (fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'S' || fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'H'))
+		{
+			if(fr.h1->is_reverse_overlap == true || fr.h2->is_reverse_overlap == true)
+			{
+				printf("RO paired hit case 1: pos %d, rpos %d\n",fr.h1->pos,fr.h2->rpos);
+				printf("chrm %s\n",bb.chrm.c_str());
+				printf("Hit 1: ");
+				fr.h1->print();
+
+				//checking if reads junction matches left boundary
+				for(int j=0;j<junctions.size();j++)
+				{
+					junction jc = junctions[j];
+
+					if(jc.rpos <= fr.h1->pos+junc_range && jc.rpos >= fr.h1->pos-junc_range)
+					{
+						printf("reads junction present left %d\n",jc.rpos);
+						break;
+					}
+				}
+
+				//checking if ref junction matches left boundary
+				int temp_flag = 0;
+				for(int t=0;t<ref_trsts.size();t++)
+				{
+					transcript trst = ref_trsts[t];
+					vector<PI32> chain = trst.get_intron_chain();
+
+					for(int k=0;k<chain.size();k++)
+					{
+						if(chain[k].second <= fr.h1->pos+junc_range && chain[k].second >= fr.h1->pos-junc_range)
+						{
+							printf("ref junction present left %d\n",chain[k].second);
+							temp_flag = 1;
+							break;
+						}
+					}
+
+					if(temp_flag == 1)
+					{
+						break;
+					}
+				}
+
+				printf("Hit 2: ");
+				fr.h2->print();
+
+				//checking if reads junction matches right boundary
+				for(int j=0;j<junctions.size();j++)
+				{
+					junction jc = junctions[j];
+
+					if(jc.lpos <= fr.h2->rpos+junc_range && jc.lpos >= fr.h2->rpos-junc_range)
+					{
+						printf("reads junction present right %d\n",jc.lpos);
+						break;
+					}
+				}
+
+				//checking if ref junction matches right boundary
+				temp_flag = 0;
+				for(int t=0;t<ref_trsts.size();t++)
+				{
+					transcript trst = ref_trsts[t];
+					vector<PI32> chain = trst.get_intron_chain();
+
+					for(int k=0;k<chain.size();k++)
+					{
+						if(chain[k].first <= fr.h2->rpos+junc_range && chain[k].first >= fr.h2->rpos-junc_range)
+						{
+							printf("ref junction present right %d\n",chain[k].first);
+							temp_flag = 1;
+							break;
+						}
+					}
+
+					if(temp_flag == 1)
+					{
+						break;
+					}
+				}
+
+				printf("\n");
+			}
+		}
+		else if(fr.h1->pos > fr.h2->pos && (fr.h2->cigar_vector[0].first == 'S' || fr.h2->cigar_vector[0].first == 'H') && (fr.h1->cigar_vector[fr.h1->cigar_vector.size()-1].first == 'S' || fr.h1->cigar_vector[fr.h1->cigar_vector.size()-1].first == 'H'))
+		{
+			if(fr.h1->is_reverse_overlap == true || fr.h2->is_reverse_overlap == true)
+			{
+				printf("RO paired hit case 2: pos %d, rpos %d\n",fr.h2->pos,fr.h1->rpos);
+				printf("chrm %s\n",bb.chrm.c_str());
+				printf("Hit 1: ");
+				fr.h2->print();
+
+				//checking if reads junction matches left boundary
+				for(int j=0;j<junctions.size();j++)
+				{
+					junction jc = junctions[j];
+
+					if(jc.rpos <= fr.h2->pos+junc_range && jc.rpos >= fr.h2->pos-junc_range)
+					{
+						printf("reads junction present left %d\n",jc.rpos);
+						break;
+					}
+				}
+
+				//checking if ref junction matches left boundary
+				int temp_flag = 0;
+				for(int t=0;t<ref_trsts.size();t++)
+				{
+					transcript trst = ref_trsts[t];
+					vector<PI32> chain = trst.get_intron_chain();
+
+					for(int k=0;k<chain.size();k++)
+					{
+						if(chain[k].second <= fr.h2->pos+junc_range && chain[k].second >= fr.h2->pos-junc_range)
+						{
+							printf("ref junction present left %d\n",chain[k].second);
+							temp_flag = 1;
+							break;
+						}
+					}
+
+					if(temp_flag == 1)
+					{
+						break;
+					}
+				}
+
+				printf("Hit 2: ");
+				fr.h1->print();
+
+				//checking if reads junction matches right boundary
+				for(int j=0;j<junctions.size();j++)
+				{
+					junction jc = junctions[j];
+
+					if(jc.lpos <= fr.h1->rpos+junc_range && jc.lpos >= fr.h1->rpos-junc_range)
+					{
+						printf("reads junction present right %d\n",jc.lpos);
+						break;
+					}
+				}
+
+				//checking if ref junction matches right boundary
+				temp_flag = 0;
+				for(int t=0;t<ref_trsts.size();t++)
+				{
+					transcript trst = ref_trsts[t];
+					vector<PI32> chain = trst.get_intron_chain();
+
+					for(int k=0;k<chain.size();k++)
+					{
+						if(chain[k].first <= fr.h1->rpos+junc_range && chain[k].first >= fr.h1->rpos-junc_range)
+						{
+							printf("ref junction present right %d\n",chain[k].first);
+							temp_flag = 1;
+							break;
+						}
+					}
+
+					if(temp_flag == 1)
+					{
+						break;
+					}
+				}
+
+				printf("\n");
+			}
 		}
 	}
 
@@ -1239,7 +1428,7 @@ int bundle_bridge::build_circ_fragments()
 			h1_supp_count++;
 			hit *h1_supple = fr.h1->suppl;
 
-			printf("\nchrm = %s\n",bb.chrm.c_str());
+			/*printf("\nchrm = %s\n",bb.chrm.c_str());
 			printf("fr.h1 has a supple hit.\n");
 			printf("Primary: ");
 			fr.h1->print();
@@ -1263,7 +1452,7 @@ int bundle_bridge::build_circ_fragments()
 			printf("\n");
 
 			printf("set_cigar p:%d-%d-%d\n",fr.h1->first_pos,fr.h1->second_pos,fr.h1->third_pos);
-			printf("set_cigar s:%d-%d-%d\n",fr.h1->suppl->first_pos,fr.h1->suppl->second_pos,fr.h1->suppl->third_pos);
+			printf("set_cigar s:%d-%d-%d\n",fr.h1->suppl->first_pos,fr.h1->suppl->second_pos,fr.h1->suppl->third_pos);*/
 
 			if(fr.h1->first_pos == 0 || fr.h1->suppl->first_pos == 0)
 			{
@@ -1387,7 +1576,7 @@ int bundle_bridge::build_circ_fragments()
 			h2_supp_count++;
 			hit *h2_supple = fr.h2->suppl;
 			
-			printf("\nchrm = %s\n",bb.chrm.c_str());
+			/*printf("\nchrm = %s\n",bb.chrm.c_str());
 			printf("fr.h2 has a supple hit.\n");
 			printf("h1: ");
 			fr.h1->print();
@@ -1411,7 +1600,7 @@ int bundle_bridge::build_circ_fragments()
 			printf("\n");
 
 			printf("set_cigar p:%d-%d-%d\n",fr.h2->first_pos,fr.h2->second_pos,fr.h2->third_pos);
-			printf("set_cigar s:%d-%d-%d\n",fr.h2->suppl->first_pos,fr.h2->suppl->second_pos,fr.h2->suppl->third_pos);
+			printf("set_cigar s:%d-%d-%d\n",fr.h2->suppl->first_pos,fr.h2->suppl->second_pos,fr.h2->suppl->third_pos);*/
 
 
 			if(fr.h2->first_pos == 0 || fr.h2->suppl->first_pos == 0)
@@ -1444,7 +1633,7 @@ int bundle_bridge::build_circ_fragments()
 				len_HS += fr.h2->suppl->right_cigar_len;
 			}
 
-			printf("len_HS = %d\n",len_HS);
+			//printf("len_HS = %d\n",len_HS);
 
 			if(abs(len_HS - 100) > 5) //here 100 is the estimated read length, replace this with any related exisiting parameter
 			{
@@ -1797,11 +1986,6 @@ int bundle_bridge::extract_nonsupple_HS_hits()
 		for(int j=0;j<junctions.size();j++)
 		{
 			junction jc = junctions[j];
-
-			/*if(jc.rpos == 108235235)
-			{
-				printf("108235235 present in junctions\n");
-			}*/
 		
 			if(h.cigar_vector[0].first == 'S' || h.cigar_vector[0].first == 'H')
 			{
@@ -2002,7 +2186,7 @@ int bundle_bridge::extract_circ_fragment_pairs()
 		}
 	}
 
-	printf("Printing bridged fragment pairs: size = %zu\n\n",circ_fragment_pairs.size());
+	//printf("Printing bridged fragment pairs: size = %zu\n\n",circ_fragment_pairs.size());
 
 	/*if(circ_fragment_pairs.size() > 0)
 	{
@@ -2162,7 +2346,6 @@ int bundle_bridge::join_circ_fragment_pairs()
 		//if(fr1.paths[0].type != 1 || fr2.paths[0].type != 1) continue; //insert size not normal
 
 		printf("\nPrinting separate fragments:");
-
 		printf("\nchrm = %s\n",bb.chrm.c_str());
 
 		fr1.print(i+1);
@@ -2192,7 +2375,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 
 				if(jc.rpos <= fr1.lpos+junc_range && jc.rpos >= fr1.lpos-junc_range)
 				{
-					printf("jc.rpos = %d\n",jc.rpos);
+					//printf("jc.rpos = %d\n",jc.rpos);
 					left_boundary_flag = 1;
 					junc_match = 'L';
 					break;
@@ -2247,7 +2430,7 @@ int bundle_bridge::join_circ_fragment_pairs()
 				junction jc = junctions[j];
 				if(jc.lpos <= fr2.rpos+junc_range && jc.lpos >= fr2.rpos-junc_range)
 				{
-					printf("jc.lpos = %d\n",jc.lpos);
+					//printf("jc.lpos = %d\n",jc.lpos);
 					right_boundary_flag = 1;
 					junc_match = 'R';
 					break;
@@ -2295,16 +2478,6 @@ int bundle_bridge::join_circ_fragment_pairs()
 					break;
 				}
 			}
-
-			if(strcmp(fr1.h1->qname.c_str(),"simulate:268744") == 0)
-			{
-				printf("simulate:268744 pexons:\n");
-				for(int p=0;p<pexons.size();p++)
-				{
-					pexons[p].print(p+1);
-				}
-			}
-
 		
 			//checking if pexon matches right boundary
 			/*for(int p=0;p<pexons.size();p++)
@@ -2339,9 +2512,9 @@ int bundle_bridge::join_circ_fragment_pairs()
 				junction jc = junctions[j];
 				if(jc.rpos <= fr2.lpos+junc_range && jc.rpos >= fr2.lpos-junc_range)
 				{
-					printf("jc.rpos = %d\n",jc.rpos);
-					junc_match = 'L';
+					//printf("jc.rpos = %d\n",jc.rpos);
 					left_boundary_flag = 1;
+					junc_match = 'L';
 					break;
 				}
 			}
@@ -2390,9 +2563,9 @@ int bundle_bridge::join_circ_fragment_pairs()
 				junction jc = junctions[j];
 				if(jc.lpos <= fr1.rpos+junc_range && jc.lpos >= fr1.rpos-junc_range)
 				{
-					printf("jc.lpos = %d\n",jc.lpos);
-					junc_match = 'R';
+					//printf("jc.lpos = %d\n",jc.lpos);
 					right_boundary_flag = 1;
+					junc_match = 'R';
 					break;
 				}
 			}

@@ -23,16 +23,15 @@ bundle::bundle(bundle_base &b, reference &r, map <string, int> RO_reads_map)
 	: bb(b), br(b), ref(r)
 {
 	compute_strand();
-	//if(bb.strand != '.')
-	{
-		printf("input strand = %c\n",bb.strand);
-	}
+
+	//printf("input strand = %c\n",bb.strand);
 	br.ref_trsts = ref.get_overlapped_transcripts(bb.chrm, bb.strand, bb.lpos, bb.rpos);
-	printf("range = %d-%d, strand = %c, #ref-trsts = %lu\n", bb.lpos, bb.rpos, bb.strand, br.ref_trsts.size());
-	if(br.ref_trsts.size() > 0)
+
+	//printf("range = %d-%d, strand = %c, #ref-trsts = %lu\n", bb.lpos, bb.rpos, bb.strand, br.ref_trsts.size());
+	/*if(br.ref_trsts.size() > 0)
 	{
 		printf("ref_trsts size: %lu\n",br.ref_trsts.size());
-	}
+	}*/
 	br.build(RO_reads_map);
 	prepare();
 }
@@ -416,14 +415,14 @@ int bundle::extract_backsplicing_junctions()
     if(back_spos.size() > 0)
     {
 
-	    printf("back_spos size = %zu\n", back_spos.size());
-	    printf("back_spos hits size = %zu\n", back_spos_hits.size());
+	    //printf("back_spos size = %zu\n", back_spos.size());
+	    //printf("back_spos hits size = %zu\n", back_spos_hits.size());
 
 	    //add nearby positions of p1 p2 in count map
 
 	    if(back_spos_support.size() > 0)
 	    {
-	    	printf("Back spos support map: %zu\n", back_spos_support.size());
+	    	//printf("Back spos support map: %zu\n", back_spos_support.size());
 	    }
 
 	    map< int32_t, int >::iterator it;
@@ -433,7 +432,7 @@ int bundle::extract_backsplicing_junctions()
 			int32_t p = it->first;
 			int support_count = it->second;
 
-			printf("p value=%d, count=%d\n",p,support_count);
+			//printf("p value=%d, count=%d\n",p,support_count);
 
 		}
 
@@ -480,15 +479,15 @@ int bundle::refine_backsplicing_junctions()
 		int32_t p2 = high32(back_spos[i]);
 		int32_t p1 = low32(back_spos[i]);
 
-		printf("\nStart of back spos\n");
-		printf("p1=%d,p2=%d\n\n",p1,p2);
+		//printf("\nStart of back spos\n");
+		//printf("p1=%d,p2=%d\n\n",p1,p2);
 
-		printf("Primary:\n");
-		back_spos_hits[i].print();
-		printf("Supple:\n");
-		back_spos_hits[i].suppl->print();
+		//printf("Primary:\n");
+		//back_spos_hits[i].print();
+		//printf("Supple:\n");
+		//back_spos_hits[i].suppl->print();
 
-		printf("\n");
+		//printf("\n");
 
 		int32_t x1 = 0; //initialized to 0 if not such corrected back splice position exist, assert later
 		int32_t x2 = 0;
@@ -503,12 +502,12 @@ int bundle::refine_backsplicing_junctions()
 			if(junc.lpos >= p1-BSJ_threshold && junc.lpos <= p1+BSJ_threshold && x1 == 0)
 			{ 
 				x1 = junc.lpos;
-				printf("lpos of junction close to p1(%d): %d-%d\n",p1,x1,junc.rpos);
+				//printf("lpos of junction close to p1(%d): %d-%d\n",p1,x1,junc.rpos);
 			}
 			else if(junc.rpos >= p1-BSJ_threshold && junc.rpos <= p1+BSJ_threshold & x1 == 0)
 			{
 				x1 = junc.rpos;
-				printf("rpos of junction close to p1(%d): %d-%d\n",p1,junc.lpos,x1);
+				//printf("rpos of junction close to p1(%d): %d-%d\n",p1,junc.lpos,x1);
 			}
 
 
@@ -516,19 +515,19 @@ int bundle::refine_backsplicing_junctions()
 			{
 				//there exists a junction that is close to p2: if yes, call it x2 
 				x2 = junc.lpos;
-				printf("lpos of junction close to p2(%d): %d-%d\n",p2,x2,junc.rpos);
+				//printf("lpos of junction close to p2(%d): %d-%d\n",p2,x2,junc.rpos);
 			}
 			else if(junc.rpos >= p2-BSJ_threshold && junc.rpos <= p2+BSJ_threshold && x2 == 0)
 			{
 				x2 = junc.rpos;
-				printf("rpos of junction close to p2(%d): %d-%d\n",p2,junc.lpos,x2);
+				//printf("rpos of junction close to p2(%d): %d-%d\n",p2,junc.lpos,x2);
 			}	
 
 			//printf("End of junction\n");
 
 			if(x1 !=0 && x2 != 0)
 			{
-				printf("Found both x1 and x2 for current p1 and p2\n");
+				//printf("Found both x1 and x2 for current p1 and p2\n");
 				break;
 			}
 
@@ -539,47 +538,47 @@ int bundle::refine_backsplicing_junctions()
 		//If x1 or x2 is zero, check hits supporting p1 or p2 respectively. If support low, false positive.
 		if((x1 == 0 && back_spos_support[p1] < 3) || (x2 == 0 && back_spos_support[p2] < 3)) 
 		{
-			printf("There is a false positive\n");
-			printf("x1=%d, p1=%d p1 count=%d\n",x1,p1,back_spos_support[p1]);
-			printf("x2=%d, p2=%d p2 count=%d\n",x2,p2,back_spos_support[p2]);
-			printf("End of back pos\n\n");
+			//printf("There is a false positive\n");
+			//printf("x1=%d, p1=%d p1 count=%d\n",x1,p1,back_spos_support[p1]);
+			//printf("x2=%d, p2=%d p2 count=%d\n",x2,p2,back_spos_support[p2]);
+			//printf("End of back pos\n\n");
 			continue; //discarding both p1 and p2 for false positive p1
 		}
 
 		if(x1 == 0) //if not nearby junc but support high, keep p1 
 		{
 			x1 = p1;
-			printf("x1 0, so x1=%d, p1 count=%d\n",x1,back_spos_support[p1]);
+			//printf("x1 0, so x1=%d, p1 count=%d\n",x1,back_spos_support[p1]);
 			//continue; //keeping only those p1 p2 that have junctions for debugging
 		}
 		if(x2 == 0) //if not nearby junc but support high, keep p2
 		{
 			x2 = p2;
-			printf("x2 0, so x2=%d, p2 count=%d\n",x2,back_spos_support[p2]);
+			//printf("x2 0, so x2=%d, p2 count=%d\n",x2,back_spos_support[p2]);
 			//continue; //keeping only those p1 p2 that have junctions for debugging
 		}
 
 		//printf("p1 count:%d, p2 count:%d\n",back_spos_support[p1],back_spos_support[p2]);
-		printf("x1 = %d, x2 = %d\n\n",x1,x2);
+		//printf("x1 = %d, x2 = %d\n\n",x1,x2);
 		corrected_back_spos.push_back(pack(x2,x1));
 		corrected_back_spos_hits.push_back(back_spos_hits[i]);
 		
-		printf("End of back pos\n\n");
+		//printf("End of back pos\n\n");
 	}
 
 	if(corrected_back_spos.size() > 0)
 	{
 
-		printf("Size of corrected back_spos: %zu\n",corrected_back_spos.size());
+		//printf("Size of corrected back_spos: %zu\n",corrected_back_spos.size());
 
 		for(int i=0;i<corrected_back_spos.size();i++)
 		{
 			int32_t x1 = high32(corrected_back_spos[i]);
 			int32_t x2 = low32(corrected_back_spos[i]);
-			printf("x1 = %d, x2 = %d\n",x1,x2);
+			//printf("x1 = %d, x2 = %d\n",x1,x2);
 		}
 
-		printf("Size of corrected back_spos_hits: %zu\n",corrected_back_spos_hits.size());
+		//printf("Size of corrected back_spos_hits: %zu\n",corrected_back_spos_hits.size());
 	}
 
 	//printf("End of bundle\n\n");

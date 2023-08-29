@@ -66,6 +66,7 @@ public:
 	int build_partial_exons();
 	int build_fragments();
 	int get_frags_with_HS_on_both_sides();
+	int get_RO_frags_with_HS();
 	int fix_alignment_boundaries();
 
 	int build_circ_fragments();

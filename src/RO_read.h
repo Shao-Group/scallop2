@@ -1,9 +1,7 @@
 #ifndef __RO_READ_H__
 #define __RO_READ_H__
 
-#include <fstream>
 #include <string>
-#include <vector>
 
 using namespace std;
 
