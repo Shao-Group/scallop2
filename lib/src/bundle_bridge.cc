@@ -100,6 +100,7 @@ int bundle_bridge::set_hits_RO_parameter(map <string, int> RO_reads_map)
 		string hash = "";
 		hash = hash + bb.chrm + ":" + curr_hit->qname;
 
+
 		if(RO_reads_map.find(hash) != RO_reads_map.end())
 		{
 			//hit is a RO read

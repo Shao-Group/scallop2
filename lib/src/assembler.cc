@@ -430,18 +430,13 @@ int assembler::read_cirifull_file()
 		vector<string> colon_separate;
 		split(row_values[2], ':', colon_separate);
 
-		//printf("size of colon_separate: %lu\n",colon_separate.size());
-		
-		if(colon_separate.size() > 1)
-		{
-			vector<string> positions;
-			split(colon_separate[1], '-', positions);
+		vector<string> positions;
+		split(colon_separate[1], '-', positions);
 
-			//printf("pos %s, rpos %s\n", positions[0].c_str(), positions[1].c_str());
-			ro_read.BSJ_pos = stoi(positions[0]);
-			ro_read.BSJ_rpos = stoi(positions[1]);
-			//printf("pos %d, rpos %d\n", ro_read.BSJ_pos, ro_read.BSJ_rpos);
-		}
+		//printf("pos %s, rpos %s\n", positions[0].c_str(), positions[1].c_str());
+		ro_read.BSJ_pos = stoi(positions[0]);
+		ro_read.BSJ_rpos = stoi(positions[1]);
+		//printf("pos %d, rpos %d\n", ro_read.BSJ_pos, ro_read.BSJ_rpos);
 
 		RO_reads.push_back(ro_read);
     }

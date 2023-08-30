@@ -2,10 +2,7 @@
 
 RO_read::RO_read()
 {
-    read_name = "";
-    chrm = "";
-    BSJ_pos = 0;
-    BSJ_rpos = 0;
+
 }
 
 RO_read::~RO_read()
