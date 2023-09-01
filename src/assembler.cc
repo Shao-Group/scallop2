@@ -147,8 +147,8 @@ int assembler::assemble()
 	//write_circular_boundaries();
 
 	printf("size of circular vector = %lu\n",circular_trsts.size());
-	printf("size of HS_both_side_reads = %lu, %s\n",HS_both_side_reads.size(),HS_both_side_reads[0].c_str());
-	printf("size of chimeric_reads = %lu, %s\n",chimeric_reads.size(),chimeric_reads[0].c_str());
+	printf("size of HS_both_side_reads = %lu\n",HS_both_side_reads.size());
+	printf("size of chimeric_reads = %lu\n",chimeric_reads.size());
 	printf("#RO_count hits = %d\n",RO_count);
 	write_RO_info();
 
