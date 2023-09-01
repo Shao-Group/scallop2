@@ -153,7 +153,7 @@ int assembler::assemble()
 	write_RO_info();
 
 	remove_duplicate_circ_trsts();
-	//print_circular_trsts();
+	print_circular_trsts();
 	write_circular();
 	
 	return 0;
@@ -314,8 +314,17 @@ int assembler::remove_duplicate_circ_trsts()
 		map<string, pair<circular_transcript, int>>::iterator itn1;
 		for(itn1 = circ_trst_merged_map.begin(); itn1 != circ_trst_merged_map.end(); itn1++)
 		{
+			//don't merge RO circRNAs for now
+			/*if(circ.source == "scallop2_RO")
+			{	
+				break;
+			}*/
+
 			circular_transcript &old_circ = itn1->second.first;
 			string old_hash = itn1->first;
+
+			//don't check with already existing RO circRNAs
+			//if(old_circ.source == "scallop2_RO") continue;
 			
 			vector<string> old_split_coordinates = split_str(old_hash,"|");
 			string old_intron_chain_hash = "";
@@ -341,14 +350,8 @@ int assembler::remove_duplicate_circ_trsts()
 				flag_collision = 1;
 			}
 		}
-		if(flag_collision == 0) //end diiff and intron chain condition did not match for any entry in circ_trst_merged_map, so enter separately
-		{
-			circ_trst_merged_map.insert(pair<string,pair<circular_transcript, int>>(circ.circRNA_id,pair<circular_transcript, int>(circ,circ.coverage)));
-		}
-		
-		//printf("end of check\n");
 
-		if(circ_trst_merged_map.size() == 0)
+		if(flag_collision == 0) //end diff and intron chain condition did not match for any entry in circ_trst_merged_map, so enter separately
 		{
 			circ_trst_merged_map.insert(pair<string,pair<circular_transcript, int>>(circ.circRNA_id,pair<circular_transcript, int>(circ,circ.coverage)));
 		}

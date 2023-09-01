@@ -72,6 +72,7 @@ public:
 	int build_circ_fragments();
 	int extract_all_non_supple_HS_hits();
 	int extract_nonsupple_HS_hits();
+	int extract_RO_circRNA();
 	int extract_circ_fragment_pairs();
 	int print_circ_fragment_pairs();
 	int join_circ_fragment_pairs();

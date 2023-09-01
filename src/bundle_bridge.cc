@@ -24,6 +24,7 @@ bundle_bridge::bundle_bridge(bundle_base &b)
 {
 	circ_trsts.clear(); // emptying before storing circRNAs
 	circ_trsts_HS.clear();
+	circ_fragments.clear();
 	RO_count = 0;
 	//compute_strand();
 }
@@ -50,34 +51,31 @@ int bundle_bridge::build(map <string, int> RO_reads_map)
 	build_fragments(); //builds fragment from h1p to h2
 	//printf("\n");
 
-	//RO reads statistics
-	get_frags_with_HS_on_both_sides();
-	get_RO_frags_with_HS();
-
 	fix_alignment_boundaries();
 	build_circ_fragments(); //will build fragment from h2 to h1s, added by Tasfia
 
 	//group_fragments();
 
-
 	//extract_all_non_supple_HS_hits();
 	//extract_nonsupple_HS_hits();
-	/*if(circ_trsts.size() > 1)
-	{
-		printf("extra circRNAs = %zu",circ_trsts.size());
-	}*/
 
 	remove_tiny_boundaries();
 	set_fragment_lengths();
+
+	//RO reads statistics
+	get_frags_with_HS_on_both_sides();
+	get_RO_frags_with_HS();
 
 	bridger bdg(this);
 	bdg.bridge_normal_fragments();
 	bdg.bridge_circ_fragments();
 
+	extract_RO_circRNA();
+
 	extract_circ_fragment_pairs();
 	//print_circ_fragment_pairs();
 	join_circ_fragment_pairs();
-	//print_circRNAs();
+	print_circRNAs();
 
 	//printf("fragments vector size after = %zu\n",fragments.size());
 
@@ -123,6 +121,9 @@ int bundle_bridge::set_hits_RO_parameter(map <string, int> RO_reads_map)
 
 int bundle_bridge::get_frags_with_HS_on_both_sides()
 {
+	HS_both_side_reads.clear();
+	chimeric_reads.clear();
+
 	for(int k = 0; k < fragments.size(); k++)
 	{
 		fragment &fr = fragments[k];
@@ -157,7 +158,7 @@ int bundle_bridge::get_RO_frags_with_HS()
 
 	for(int k = 0; k < fragments.size(); k++)
 	{
-		fragment &fr = fragments[k];
+		fragment fr = fragments[k];
 
 		if(fr.h1->suppl != NULL || fr.h2->suppl != NULL)
 		{
@@ -174,7 +175,7 @@ int bundle_bridge::get_RO_frags_with_HS()
 
 		if(fr.h1->pos <= fr.h2->pos && (fr.h1->cigar_vector[0].first == 'S' || fr.h1->cigar_vector[0].first == 'H') && (fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'S' || fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'H'))
 		{
-			printf("RO paired hit case 1: pos %d, rpos %d\n",fr.h1->pos,fr.h2->rpos);
+			printf("RO paired hit case 1: pos %d, rpos %d\n",fr.lpos,fr.rpos);
 			printf("chrm %s\n",bb.chrm.c_str());
 			printf("Hit 1: ");
 			fr.h1->print();
@@ -261,7 +262,7 @@ int bundle_bridge::get_RO_frags_with_HS()
 		}
 		else if(fr.h1->pos > fr.h2->pos && (fr.h2->cigar_vector[0].first == 'S' || fr.h2->cigar_vector[0].first == 'H') && (fr.h1->cigar_vector[fr.h1->cigar_vector.size()-1].first == 'S' || fr.h1->cigar_vector[fr.h1->cigar_vector.size()-1].first == 'H'))
 		{
-			printf("RO paired hit case 2: pos %d, rpos %d\n",fr.h2->pos,fr.h1->rpos);
+			printf("RO paired hit case 2: pos %d, rpos %d\n",fr.lpos,fr.rpos);
 			printf("chrm %s\n",bb.chrm.c_str());
 			printf("Hit 1: ");
 			fr.h2->print();
@@ -345,6 +346,11 @@ int bundle_bridge::get_RO_frags_with_HS()
 
 			printf("RO frags: left_boundary_flag = %d, right_boundary_flag = %d\n\n",left_boundary_flag,right_boundary_flag);
 			
+		}
+
+		if(left_boundary_flag == 1 && right_boundary_flag == 1)
+		{
+			circ_fragments.push_back(fr);
 		}
 	}
 
@@ -2142,6 +2148,82 @@ int bundle_bridge::extract_nonsupple_HS_hits()
 		}
 	}
 
+	return 0;
+}
+
+int bundle_bridge::extract_RO_circRNA()
+{
+	for(int j=0;j<circ_fragments.size();j++)
+	{
+		fragment &fr = circ_fragments[j];
+
+		if(fr.h1->is_reverse_overlap == false && fr.h2->is_reverse_overlap == false)
+		{
+			continue;
+		}
+
+		vector<int> v = decode_vlist(fr.paths[0].v);
+
+		string chrm_id = bb.chrm.c_str();
+		string circRNA_id = "chrm" + chrm_id + ":" + tostring(fr.lpos) + "|" + tostring(fr.rpos) + "|";
+		//printf("circularRNA = %s\n",circRNA_id.c_str());
+		
+		char strand = bb.strand;
+		int32_t start = fr.lpos;
+		int32_t end = fr.rpos;
+    	vector<int> circ_path;
+		circ_path.insert(circ_path.begin(), v.begin(), v.end());
+
+		circular_transcript circ;
+		circ.circRNA_id = circRNA_id;
+		circ.seqname = chrm_id;
+		circ.source = "scallop2_RO";
+		circ.feature = "circRNA";
+		circ.gene_id = "gene"; //later change this to bundle id
+		circ.transcript_id = fr.h1->qname; //use hit qname, same for all hits in fragments
+		circ.start = start;
+		circ.end = end;
+		circ.circ_path.insert(circ.circ_path.begin(),circ_path.begin(),circ_path.end());
+		circ.strand = infer_circ_strand(circ.circ_path);
+		
+		for(int i=0;i<circ.circ_path.size();i++)
+		{
+			circ.circ_path_regions.push_back(regions[circ.circ_path[i]]);
+		}
+
+		join_interval_map jmap;
+		for(int k = 0; k < circ.circ_path_regions.size(); k++)
+		{
+			int32_t p1 = circ.circ_path_regions[k].lpos;
+			int32_t p2 = circ.circ_path_regions[k].rpos;
+			jmap += make_pair(ROI(p1, p2), 1);
+		}
+
+		for(JIMI it = jmap.begin(); it != jmap.end(); it++)
+		{
+			region r(lower(it->first), upper(it->first), '.', '.');
+			circ.merged_regions.push_back(r);
+		}
+
+		if(circ.merged_regions.size() == 1)
+		{
+			circ.merged_regions[0].lpos = circ.start;
+			circ.merged_regions[0].rpos = circ.end; 
+		}
+		else if(circ.merged_regions.size() > 1)
+		{
+			circ.merged_regions[0].lpos = circ.start;
+			circ.merged_regions[circ.merged_regions.size()-1].rpos = circ.end; 			
+		}
+
+		for(int i=0;i<circ.merged_regions.size();i++)
+    	{
+			region r = circ.merged_regions[i];
+			circ.circRNA_id = circ.circRNA_id + tostring(r.lpos) + "|" + tostring(r.rpos) + "|";
+		}
+
+		circ_trsts.push_back(circ); 
+	}
 	return 0;
 }
 
