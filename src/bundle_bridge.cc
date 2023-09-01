@@ -2162,6 +2162,8 @@ int bundle_bridge::extract_RO_circRNA()
 			continue;
 		}
 
+		if(fr.paths.size != 1) continue;
+
 		vector<int> v = decode_vlist(fr.paths[0].v);
 
 		string chrm_id = bb.chrm.c_str();
