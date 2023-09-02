@@ -25,6 +25,7 @@ assembler::assembler()
 {
     sfn = sam_open(input_file.c_str(), "r");
 
+	fai = NULL;
 	if(fasta_file != "")
 	{
 		fai = fai_load(fasta_file.c_str());
