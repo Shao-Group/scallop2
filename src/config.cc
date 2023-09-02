@@ -89,15 +89,17 @@ int simulation_num_edges = 0;
 int simulation_max_edge_weight = 0;
 
 // input and output
+//sinitializing as empty string for verifying absence
 string algo = "scallop2";
-string input_file;
-string ref_file;
-string ref_file1;
-string ref_file2;
-string output_file;
-string output_file1;
-string output_circ_file;
-string cirifull_file;
+string input_file = "";
+string fasta_file = "";
+string ref_file = "";
+string ref_file1 = "";
+string ref_file2 = "";
+string output_file = "";
+string output_file1 = "";
+string output_circ_file = "";
+string cirifull_file = "";
 
 // for controling
 bool output_tex_files = false;
@@ -143,6 +145,11 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "-ro")
 		{
 			cirifull_file = string(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "-fa")
+		{
+			fasta_file = string(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--transcript_fragments")

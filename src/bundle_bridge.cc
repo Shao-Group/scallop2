@@ -160,11 +160,16 @@ int bundle_bridge::get_RO_frags_with_HS()
 	{
 		fragment fr = fragments[k];
 
+		//has a supple
 		if(fr.h1->suppl != NULL || fr.h2->suppl != NULL)
 		{
 			continue;
 		}
 
+		//is a supple
+		if((fr.h1->flag & 0x800) >= 1 || (fr.h2->flag & 0x800) >= 1) continue;
+
+		//not a RO frag
 		if(fr.h1->is_reverse_overlap == false && fr.h2->is_reverse_overlap == false)
 		{
 			continue;
@@ -2157,6 +2162,16 @@ int bundle_bridge::extract_RO_circRNA()
 	{
 		fragment &fr = circ_fragments[j];
 
+		//has a supple
+		if(fr.h1->suppl != NULL || fr.h2->suppl != NULL)
+		{
+			continue;
+		}
+
+		//is a supple
+		if((fr.h1->flag & 0x800) >= 1 || (fr.h2->flag & 0x800) >= 1) continue;
+
+		//not RO frag
 		if(fr.h1->is_reverse_overlap == false && fr.h2->is_reverse_overlap == false)
 		{
 			continue;

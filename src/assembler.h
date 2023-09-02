@@ -20,6 +20,7 @@ See LICENSE for licensing.
 
 #include "circular_transcript.h"
 #include "RO_read.h"
+#include "htslib/faidx.h"
 
 using namespace std;
 
@@ -31,6 +32,7 @@ public:
 
 private:
 	samFile *sfn;
+	faidx_t *fai;
 	bam_hdr_t *hdr;
 	bam1_t *b1t;
 	reference ref;

@@ -24,6 +24,12 @@ assembler::assembler()
 	: ref(ref_file)
 {
     sfn = sam_open(input_file.c_str(), "r");
+
+	if(fasta_file != "")
+	{
+		fai = fai_load(fasta_file.c_str());
+	}
+	
     hdr = sam_hdr_read(sfn);
     b1t = bam_init1();
 	hid = 0;
@@ -39,6 +45,17 @@ assembler::assembler()
 	RO_reads_map.clear();
 	RO_count = 0;
 	read_cirifull_file();
+
+	if(fai != NULL)
+	{
+		printf("extracting fasta seq from region:\n");
+		int32_t seqlen;
+		char* seq = faidx_fetch_seq(fai, "1", 39511735, 39511804, &seqlen);
+		if(seq != NULL && seqlen > 0)
+		{
+			printf("seqlen = %d, seq = %s\n",seqlen,seq);
+		}
+	}
 }
 
 assembler::~assembler()
