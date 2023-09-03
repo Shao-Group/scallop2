@@ -190,7 +190,8 @@ int bundle_bridge::get_RO_frags_with_HS()
 			{
 				junction jc = junctions[j];
 
-				if(jc.rpos <= fr.h1->pos+junc_range && jc.rpos >= fr.h1->pos-junc_range)
+				//if(jc.rpos <= fr.h1->pos+junc_range && jc.rpos >= fr.h1->pos-junc_range)
+				if(jc.rpos == fr.h1->pos)
 				{
 					printf("reads junction present left %d\n",jc.rpos);
 					left_boundary_flag = 1;
@@ -207,7 +208,8 @@ int bundle_bridge::get_RO_frags_with_HS()
 
 				for(int k=0;k<chain.size();k++)
 				{
-					if(chain[k].second <= fr.h1->pos+junc_range && chain[k].second >= fr.h1->pos-junc_range)
+					//if(chain[k].second <= fr.h1->pos+junc_range && chain[k].second >= fr.h1->pos-junc_range)
+					if(chain[k].second == fr.h1->pos)
 					{
 						printf("ref junction present left %d\n",chain[k].second);
 						temp_flag = 1;
@@ -230,7 +232,8 @@ int bundle_bridge::get_RO_frags_with_HS()
 			{
 				junction jc = junctions[j];
 
-				if(jc.lpos <= fr.h2->rpos+junc_range && jc.lpos >= fr.h2->rpos-junc_range)
+				//if(jc.lpos <= fr.h2->rpos+junc_range && jc.lpos >= fr.h2->rpos-junc_range)
+				if(jc.lpos == fr.h2->rpos)
 				{
 					printf("reads junction present right %d\n",jc.lpos);
 					right_boundary_flag = 1;
@@ -247,7 +250,7 @@ int bundle_bridge::get_RO_frags_with_HS()
 
 				for(int k=0;k<chain.size();k++)
 				{
-					if(chain[k].first <= fr.h2->rpos+junc_range && chain[k].first >= fr.h2->rpos-junc_range)
+					if(chain[k].first == fr.h2->rpos)
 					{
 						printf("ref junction present right %d\n",chain[k].first);
 						right_boundary_flag = 1;
@@ -277,7 +280,8 @@ int bundle_bridge::get_RO_frags_with_HS()
 			{
 				junction jc = junctions[j];
 
-				if(jc.rpos <= fr.h2->pos+junc_range && jc.rpos >= fr.h2->pos-junc_range)
+				//if(jc.rpos <= fr.h2->pos+junc_range && jc.rpos >= fr.h2->pos-junc_range)
+				if(jc.rpos == fr.h2->pos)
 				{
 					printf("reads junction present left %d\n",jc.rpos);
 					left_boundary_flag = 1;
@@ -294,7 +298,8 @@ int bundle_bridge::get_RO_frags_with_HS()
 
 				for(int k=0;k<chain.size();k++)
 				{
-					if(chain[k].second <= fr.h2->pos+junc_range && chain[k].second >= fr.h2->pos-junc_range)
+					//if(chain[k].second <= fr.h2->pos+junc_range && chain[k].second >= fr.h2->pos-junc_range)
+					if(chain[k].second == fr.h2->pos)
 					{
 						printf("ref junction present left %d\n",chain[k].second);
 						left_boundary_flag = 1;
@@ -317,7 +322,8 @@ int bundle_bridge::get_RO_frags_with_HS()
 			{
 				junction jc = junctions[j];
 
-				if(jc.lpos <= fr.h1->rpos+junc_range && jc.lpos >= fr.h1->rpos-junc_range)
+				//if(jc.lpos <= fr.h1->rpos+junc_range && jc.lpos >= fr.h1->rpos-junc_range)
+				if(jc.lpos == fr.h1->rpos)
 				{
 					printf("reads junction present right %d\n",jc.lpos);
 					right_boundary_flag = 1;
@@ -334,7 +340,8 @@ int bundle_bridge::get_RO_frags_with_HS()
 
 				for(int k=0;k<chain.size();k++)
 				{
-					if(chain[k].first <= fr.h1->rpos+junc_range && chain[k].first >= fr.h1->rpos-junc_range)
+					//if(chain[k].first <= fr.h1->rpos+junc_range && chain[k].first >= fr.h1->rpos-junc_range)
+					if(chain[k].first == fr.h1->rpos)
 					{
 						printf("ref junction present right %d\n",chain[k].first);
 						right_boundary_flag = 1;
