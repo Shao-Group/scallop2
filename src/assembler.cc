@@ -312,7 +312,7 @@ int assembler::remove_duplicate_circ_trsts()
 		//printf("key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
 	}
 
-	//merge circRNAs that have different end boundaries but same intron chain into that with higher coverage (chimeric)
+	//merge circRNAs that have different end boundaries but same intron chain into that with higher coverage (chimeric ones)
 	for(itn = circ_trst_map.begin(); itn != circ_trst_map.end(); itn++)
 	{
 		//printf("start of check\n");
@@ -377,7 +377,7 @@ int assembler::remove_duplicate_circ_trsts()
 		}
 	}
 
-	//merge circRNAs that have different end boundaries but same intron chain into that with higher coverage (reverse overlap)
+	//merge circRNAs that have different end boundaries but same intron chain into that with higher coverage (reverse overlap ones)
 	for(itn = circ_trst_map.begin(); itn != circ_trst_map.end(); itn++)
 	{
 		//printf("start of check\n");
