@@ -96,6 +96,8 @@ public:
 	char xs;								// XS aux in sam
 	char ts;								// ts tag used in minimap2
 	string qname;							// query name
+	string seq;								// sequence information of the read except H clip
+ 
 	hit *next;								// next hit that is equivalent with current one
 
 	// UMI
@@ -105,6 +107,8 @@ public:
 
 public:
  	static string get_qname(bam1_t *b);
+	string convert_to_IUPAC(vector<int> code);
+	int set_seq(bam1_t *b);
 	int set_tags(bam1_t *b);
 	int set_strand();
 	int set_concordance();

@@ -250,6 +250,7 @@ int bundle_bridge::get_RO_frags_with_HS()
 
 				for(int k=0;k<chain.size();k++)
 				{
+					//if(chain[k].first <= fr.h2->rpos+junc_range && chain[k].first >= fr.h2->rpos-junc_range)
 					if(chain[k].first == fr.h2->rpos)
 					{
 						printf("ref junction present right %d\n",chain[k].first);
@@ -1457,7 +1458,7 @@ int bundle_bridge::build_circ_fragments()
 			h1_supp_count++;
 			hit *h1_supple = fr.h1->suppl;
 
-			/*printf("\nchrm = %s\n",bb.chrm.c_str());
+			printf("\nchrm = %s\n",bb.chrm.c_str());
 			printf("fr.h1 has a supple hit.\n");
 			printf("Primary: ");
 			fr.h1->print();
@@ -1481,7 +1482,7 @@ int bundle_bridge::build_circ_fragments()
 			printf("\n");
 
 			printf("set_cigar p:%d-%d-%d\n",fr.h1->first_pos,fr.h1->second_pos,fr.h1->third_pos);
-			printf("set_cigar s:%d-%d-%d\n",fr.h1->suppl->first_pos,fr.h1->suppl->second_pos,fr.h1->suppl->third_pos);*/
+			printf("set_cigar s:%d-%d-%d\n",fr.h1->suppl->first_pos,fr.h1->suppl->second_pos,fr.h1->suppl->third_pos);
 
 			if(fr.h1->first_pos == 0 || fr.h1->suppl->first_pos == 0)
 			{
@@ -1605,7 +1606,7 @@ int bundle_bridge::build_circ_fragments()
 			h2_supp_count++;
 			hit *h2_supple = fr.h2->suppl;
 			
-			/*printf("\nchrm = %s\n",bb.chrm.c_str());
+			printf("\nchrm = %s\n",bb.chrm.c_str());
 			printf("fr.h2 has a supple hit.\n");
 			printf("h1: ");
 			fr.h1->print();
@@ -1629,7 +1630,7 @@ int bundle_bridge::build_circ_fragments()
 			printf("\n");
 
 			printf("set_cigar p:%d-%d-%d\n",fr.h2->first_pos,fr.h2->second_pos,fr.h2->third_pos);
-			printf("set_cigar s:%d-%d-%d\n",fr.h2->suppl->first_pos,fr.h2->suppl->second_pos,fr.h2->suppl->third_pos);*/
+			printf("set_cigar s:%d-%d-%d\n",fr.h2->suppl->first_pos,fr.h2->suppl->second_pos,fr.h2->suppl->third_pos);
 
 
 			if(fr.h2->first_pos == 0 || fr.h2->suppl->first_pos == 0)
@@ -2459,8 +2460,14 @@ int bundle_bridge::join_circ_fragment_pairs()
 		fragment &fr1 = circ_fragment_pairs[i].first;
 		fragment &fr2 = circ_fragment_pairs[i].second;
 
+
 		if(fr1.paths.size() != 1 || fr2.paths.size() != 1) continue; //not bridged
 		//if(fr1.paths[0].type != 1 || fr2.paths[0].type != 1) continue; //insert size not normal
+
+		if(strcmp(fr1.h1->qname.c_str(),"ST-E00299:245:HKTJJALXX:6:2205:11647:15936") == 0)
+		{
+			printf("ST-E00299:245:HKTJJALXX:6:2205:11647:15936 is in circ_fragment_pairs\n");
+		}
 
 		printf("\nPrinting separate fragments:");
 		printf("\nchrm = %s\n",bb.chrm.c_str());

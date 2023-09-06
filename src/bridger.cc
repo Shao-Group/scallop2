@@ -1634,7 +1634,7 @@ int bridger::filter_paths(vector<fragment> &frags)
 
 int bridger::pick_bridge_path(vector<fragment> &frags)
 {
-	//printf("1.5*length_high = %lf\n",1.5*length_high);
+	printf("1.5*length_high = %lf\n",1.5*length_high);
 	for(int k = 0; k < frags.size(); k++)
 	{
 		fragment &fr = frags[k];
@@ -1645,154 +1645,14 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 			continue;
 		}
 
-		//select set of paths with significantly shorter length than others
-
-		//int32_t min_len = 1000000;
 		vector<path> selected_paths;
 		for(int i=0;i<fr.paths.size();i++)
 		{
 			int32_t len = fr.paths[i].length;
-			if(strcmp(fr.h1->qname.c_str(),"E00511:127:HJN5NALXX:5:2123:9952:18520") == 0)
+			
+			if(strcmp(fr.h1->qname.c_str(),"ST-E00299:245:HKTJJALXX:6:2205:11647:15936") == 0)
 			{
-				printf("E00511:127:HJN5NALXX:5:2123:9952:18520\n");
-				vector<int> path_v = decode_vlist(fr.paths[i].v);
-				printv(path_v);
-				printf("score = %lf\n",fr.paths[i].score);
-				printf("exon len: %d",len);
-
-				if(fr.paths[i].type == 1 || fr.paths[i].type == 2)
-				{
-					printf(" ref path\n");
-				}
-				else
-				{
-					printf(" read path\n");
-				}
-
-				for(int j=0;j<path_v.size();j++)
-				{
-					printf("%d-%d, ",bd->regions[path_v[j]].lpos, bd->regions[path_v[j]].rpos);
-				}
-				printf("\n");
-			}
-			if(strcmp(fr.h1->qname.c_str(),"E00511:127:HJN5NALXX:5:1102:13403:52344") == 0)
-			{
-				printf("E00511:127:HJN5NALXX:5:1102:13403:52344\n");
-				vector<int> path_v = decode_vlist(fr.paths[i].v);
-				printv(path_v);
-				printf("score = %lf\n",fr.paths[i].score);
-				printf("exon len: %d",len);
-
-				if(fr.paths[i].type == 1 || fr.paths[i].type == 2)
-				{
-					printf(" ref path\n");
-				}
-				else
-				{
-					printf(" read path\n");
-				}
-
-				for(int j=0;j<path_v.size();j++)
-				{
-					printf("%d-%d, ",bd->regions[path_v[j]].lpos, bd->regions[path_v[j]].rpos);
-				}
-				printf("\n");
-			}
-			if(strcmp(fr.h1->qname.c_str(),"E00511:127:HJN5NALXX:5:1105:12672:71260") == 0)
-			{
-				printf("E00511:127:HJN5NALXX:5:1105:12672:71260\n");
-				vector<int> path_v = decode_vlist(fr.paths[i].v);
-				printv(path_v);
-				printf("score = %lf\n",fr.paths[i].score);
-				printf("exon len: %d",len);
-
-				if(fr.paths[i].type == 1 || fr.paths[i].type == 2)
-				{
-					printf(" ref path\n");
-				}
-				else
-				{
-					printf(" read path\n");
-				}
-
-				for(int j=0;j<path_v.size();j++)
-				{
-					printf("%d-%d, ",bd->regions[path_v[j]].lpos, bd->regions[path_v[j]].rpos);
-				}
-				printf("\n");
-			}
-			if(strcmp(fr.h1->qname.c_str(),"E00511:127:HJN5NALXX:5:1103:11850:8236") == 0)
-			{
-				printf("E00511:127:HJN5NALXX:5:1103:11850:8236\n");
-				vector<int> path_v = decode_vlist(fr.paths[i].v);
-				printv(path_v);
-				printf("score = %lf\n",fr.paths[i].score);
-				printf("exon len: %d",len);
-
-				if(fr.paths[i].type == 1 || fr.paths[i].type == 2)
-				{
-					printf(" ref path\n");
-				}
-				else
-				{
-					printf(" read path\n");
-				}
-
-				for(int j=0;j<path_v.size();j++)
-				{
-					printf("%d-%d, ",bd->regions[path_v[j]].lpos, bd->regions[path_v[j]].rpos);
-				}
-				printf("\n");
-			}
-			if(strcmp(fr.h1->qname.c_str(),"E00511:127:HJN5NALXX:5:1102:22262:22932") == 0)
-			{
-				printf("E00511:127:HJN5NALXX:5:1102:22262:22932\n");
-				vector<int> path_v = decode_vlist(fr.paths[i].v);
-				printv(path_v);
-				printf("score = %lf\n",fr.paths[i].score);
-				printf("exon len: %d",len);
-
-				if(fr.paths[i].type == 1 || fr.paths[i].type == 2)
-				{
-					printf(" ref path\n");
-				}
-				else
-				{
-					printf(" read path\n");
-				}
-
-				for(int j=0;j<path_v.size();j++)
-				{
-					printf("%d-%d, ",bd->regions[path_v[j]].lpos, bd->regions[path_v[j]].rpos);
-				}
-				printf("\n");
-			}
-			if(strcmp(fr.h1->qname.c_str(),"E00511:127:HJN5NALXX:5:1104:28300:67427") == 0)
-			{
-				printf("E00511:127:HJN5NALXX:5:1104:28300:67427\n");
-				vector<int> path_v = decode_vlist(fr.paths[i].v);
-				printv(path_v);
-				printf("score = %lf\n",fr.paths[i].score);
-				printf("exon len: %d",len);
-
-				if(fr.paths[i].type == 1 || fr.paths[i].type == 2)
-				{
-					printf(" ref path\n");
-				}
-				else
-				{
-					printf(" read path\n");
-				}
-
-				for(int j=0;j<path_v.size();j++)
-				{
-					printf("%d-%d, ",bd->regions[path_v[j]].lpos, bd->regions[path_v[j]].rpos);
-				}
-				printf("\n");
-			}
-			if(strcmp(fr.h1->qname.c_str(),"E00511:127:HJN5NALXX:5:1214:28432:70152") == 0)
-			{
-				printf("E00511:127:HJN5NALXX:5:1214:28432:70152\n");
+				printf("ST-E00299:245:HKTJJALXX:6:2205:11647:15936\n");
 				vector<int> path_v = decode_vlist(fr.paths[i].v);
 				printv(path_v);
 				printf("score = %lf\n",fr.paths[i].score);
@@ -1814,9 +1674,9 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 				printf("\n");
 			}
 
-			if(strcmp(fr.h1->qname.c_str(),"E00511:127:HJN5NALXX:5:1102:25022:45892") == 0)
+			if(strcmp(fr.h1->qname.c_str(),"ST-E00299:245:HKTJJALXX:6:2107:25256:70486") == 0)
 			{
-				printf("E00511:127:HJN5NALXX:5:1102:25022:45892\n");
+				printf("ST-E00299:245:HKTJJALXX:6:2107:25256:70486\n");
 				vector<int> path_v = decode_vlist(fr.paths[i].v);
 				printv(path_v);
 				printf("score = %lf\n",fr.paths[i].score);
@@ -1837,58 +1697,6 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 				}
 				printf("\n");
 			}
-			if(strcmp(fr.h1->qname.c_str(),"ST-E00299:245:HKTJJALXX:6:1110:28239:41690") == 0)
-			{
-				printf("ST-E00299:245:HKTJJALXX:6:1110:28239:41690\n");
-				vector<int> path_v = decode_vlist(fr.paths[i].v);
-				printv(path_v);
-				printf("score = %lf\n",fr.paths[i].score);
-				printf("exon len: %d",len);
-
-				if(fr.paths[i].type == 1 || fr.paths[i].type == 2)
-				{
-					printf(" ref path\n");
-				}
-				else
-				{
-					printf(" read path\n");
-				}
-
-				for(int j=0;j<path_v.size();j++)
-				{
-					printf("%d-%d, ",bd->regions[path_v[j]].lpos, bd->regions[path_v[j]].rpos);
-				}
-				printf("\n");
-			}
-
-			if(strcmp(fr.h1->qname.c_str(),"ST-E00299:245:HKTJJALXX:6:1105:12875:20032") == 0)
-			{
-				printf("ST-E00299:245:HKTJJALXX:6:1105:12875:20032\n");
-				vector<int> path_v = decode_vlist(fr.paths[i].v);
-				printv(path_v);
-				printf("score = %lf\n",fr.paths[i].score);
-				printf("exon len: %d",len);
-
-				if(fr.paths[i].type == 1 || fr.paths[i].type == 2)
-				{
-					printf(" ref path\n");
-				}
-				else
-				{
-					printf(" read path\n");
-				}
-
-				for(int j=0;j<path_v.size();j++)
-				{
-					printf("%d-%d, ",bd->regions[path_v[j]].lpos, bd->regions[path_v[j]].rpos);
-				}
-				printf("\n");
-			}
-		
-			/*if(len < min_len)
-			{
-				min_len = len;
-			}*/
 		}
 
 		/*for(int i=0;i<fr.paths.size();i++)
@@ -2036,44 +1844,6 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 				hash = hash + tostring(p.v[j]) + "|";
 			}
 
-			if(strcmp(fr.h1->qname.c_str(),"ST-E00299:245:HKTJJALXX:6:1110:28239:41690") == 0)
-			{
-				printf("ST-E00299:245:HKTJJALXX:6:1110:28239:41690\n");
-				vector<int> path_v = decode_vlist(fr.paths[i].v);
-				printv(path_v);
-				printf("score = %lf\n",fr.paths[i].score);
-				printf("exon len: %d",p.length);
-
-				if(fr.paths[i].type == 1 || fr.paths[i].type == 2)
-				{
-					printf(" ref path\n");
-				}
-				else
-				{
-					printf(" read path\n");
-				}
-				//printf("exon_count %d, threshold len: %d\n",p.exon_count,p.exon_count*length_high);
-			}
-
-			if(strcmp(fr.h1->qname.c_str(),"ST-E00299:245:HKTJJALXX:6:1105:12875:20032") == 0)
-			{
-				printf("ST-E00299:245:HKTJJALXX:6:1105:12875:20032\n");
-				vector<int> path_v = decode_vlist(fr.paths[i].v);
-				printv(path_v);
-				printf("score = %lf\n",fr.paths[i].score);
-				printf("exon len: %d",p.length);
-
-				if(fr.paths[i].type == 1 || fr.paths[i].type == 2)
-				{
-					printf(" ref path\n");
-				}
-				else
-				{
-					printf(" read path\n");
-				}
-				//printf("exon_count %d, threshold len: %d\n",p.exon_count,p.exon_count*length_high);
-			}
-
 			if(remove_map.find(hash) == remove_map.end() && p.length < 1.5*length_high) //path not present in remove map
 			{
 				selected_paths.push_back(p);
@@ -2158,9 +1928,9 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 			}
 		}
 
-		if(strcmp(fr.h1->qname.c_str(),"E00511:127:HJN5NALXX:5:2123:9952:18520") == 0)
+		if(strcmp(fr.h1->qname.c_str(),"ST-E00299:245:HKTJJALXX:6:2205:11647:15936") == 0)
 		{
-			printf("E00511:127:HJN5NALXX:5:2123:9952:18520\n");
+			printf("ST-E00299:245:HKTJJALXX:6:2205:11647:15936\n");
 			map<string, pair<path, int>>::iterator itn;
 			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
 			{
@@ -2172,122 +1942,9 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 			}
 		}
 
-		if(strcmp(fr.h1->qname.c_str(),"E00511:127:HJN5NALXX:5:1102:13403:52344") == 0)
+		if(strcmp(fr.h1->qname.c_str(),"ST-E00299:245:HKTJJALXX:6:2107:25256:70486") == 0)
 		{
-			printf("E00511:127:HJN5NALXX:5:1102:13403:52344\n");
-			map<string, pair<path, int>>::iterator itn;
-			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
-			{
-				printf("ref_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-			for(itn = read_paths_map.begin(); itn != read_paths_map.end(); itn++)
-			{
-				printf("read_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-		}
-
-
-		if(strcmp(fr.h1->qname.c_str(),"E00511:127:HJN5NALXX:5:1105:12672:71260") == 0)
-		{
-			printf("E00511:127:HJN5NALXX:5:1105:12672:71260\n");
-			map<string, pair<path, int>>::iterator itn;
-			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
-			{
-				printf("ref_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-			for(itn = read_paths_map.begin(); itn != read_paths_map.end(); itn++)
-			{
-				printf("read_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-		}
-
-		if(strcmp(fr.h1->qname.c_str(),"E00511:127:HJN5NALXX:5:1103:11850:8236") == 0)
-		{
-			printf("E00511:127:HJN5NALXX:5:1103:11850:8236\n");
-			map<string, pair<path, int>>::iterator itn;
-			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
-			{
-				printf("ref_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-			for(itn = read_paths_map.begin(); itn != read_paths_map.end(); itn++)
-			{
-				printf("read_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-		}
-
-		if(strcmp(fr.h1->qname.c_str(),"E00511:127:HJN5NALXX:5:1102:22262:22932") == 0)
-		{
-			printf("E00511:127:HJN5NALXX:5:1102:22262:22932\n");
-			map<string, pair<path, int>>::iterator itn;
-			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
-			{
-				printf("ref_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-			for(itn = read_paths_map.begin(); itn != read_paths_map.end(); itn++)
-			{
-				printf("read_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-		}
-
-		if(strcmp(fr.h1->qname.c_str(),"E00511:127:HJN5NALXX:5:1104:28300:67427") == 0)
-		{
-			printf("E00511:127:HJN5NALXX:5:1104:28300:67427\n");
-			map<string, pair<path, int>>::iterator itn;
-			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
-			{
-				printf("ref_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-			for(itn = read_paths_map.begin(); itn != read_paths_map.end(); itn++)
-			{
-				printf("read_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-		}
-
-		if(strcmp(fr.h1->qname.c_str(),"E00511:127:HJN5NALXX:5:1214:28432:70152") == 0)
-		{
-			printf("E00511:127:HJN5NALXX:5:1214:28432:70152\n");
-			map<string, pair<path, int>>::iterator itn;
-			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
-			{
-				printf("ref_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-			for(itn = read_paths_map.begin(); itn != read_paths_map.end(); itn++)
-			{
-				printf("read_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-		}
-
-		if(strcmp(fr.h1->qname.c_str(),"E00511:127:HJN5NALXX:5:1102:25022:45892") == 0)
-		{
-			printf("E00511:127:HJN5NALXX:5:1102:25022:45892\n");
-			map<string, pair<path, int>>::iterator itn;
-			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
-			{
-				printf("ref_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-			for(itn = read_paths_map.begin(); itn != read_paths_map.end(); itn++)
-			{
-				printf("read_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-		}
-
-		if(strcmp(fr.h1->qname.c_str(),"ST-E00299:245:HKTJJALXX:6:1110:28239:41690") == 0)
-		{
-			printf("ST-E00299:245:HKTJJALXX:6:1110:28239:41690\n");
-			map<string, pair<path, int>>::iterator itn;
-			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
-			{
-				printf("ref_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-			for(itn = read_paths_map.begin(); itn != read_paths_map.end(); itn++)
-			{
-				printf("read_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-		}
-
-		if(strcmp(fr.h1->qname.c_str(),"ST-E00299:245:HKTJJALXX:6:1105:12875:20032") == 0)
-		{
-			printf("ST-E00299:245:HKTJJALXX:6:1105:12875:20032\n");
+			printf("ST-E00299:245:HKTJJALXX:6:2107:25256:70486\n");
 			map<string, pair<path, int>>::iterator itn;
 			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
 			{

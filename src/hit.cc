@@ -74,6 +74,8 @@ hit& hit::operator=(const hit &h)
 	second_pos = h.second_pos;
 	third_pos = h.third_pos;
 
+	seq = h.seq;
+
 	return *this;
 }
 
@@ -117,6 +119,8 @@ hit::hit(const hit &h)
 	first_pos = h.first_pos;						//.H.M. the three dots are the 1st, 2nd, and 3rd pos respectively
 	second_pos = h.second_pos;
 	third_pos = h.third_pos;
+
+	seq = h.seq;
 }
 
 hit::hit(bam1_t *b, int id) 
@@ -141,6 +145,8 @@ hit::hit(bam1_t *b, int id)
 	first_pos = 0;						//.H.M. the three dots are the 1st, 2nd, and 3rd pos respectively
 	second_pos = 0;
 	third_pos = 0;
+
+	seq = "";
 
 	// compute rpos
 	rpos = pos + (int32_t)bam_cigar2rlen(n_cigar, bam_get_cigar(b));
@@ -341,6 +347,68 @@ string hit::get_qname(bam1_t *b)
 	memcpy(buf, q, l);
 	buf[l] = '\0';
 	return string(buf);
+}
+
+string hit::convert_to_IUPAC(vector<int> code)
+{
+	string seq = "";
+	for(int i=0;i<code.size();i++)
+	{
+		if(code[i] == 1)
+		{
+			seq = seq + 'A';
+		}
+		else if(code[i] == 2)
+		{
+			seq = seq + 'C';
+		}
+		else if(code[i] == 4)
+		{
+			seq = seq + 'G';
+		}
+		else if(code[i] == 8)
+		{
+			seq = seq + 'T';
+		}
+		else if(code[i] == 15)
+		{
+			seq = seq + 'N';
+		}
+	}
+
+	return seq;
+}
+
+int hit::set_seq(bam1_t *b)
+{
+	uint32_t seq_len = b->core.l_qseq;
+	uint8_t *q = bam_get_seq(b); 
+
+	vector<int> code;
+
+	for(int i=0;i<seq_len;i++)
+	{
+		code.push_back(bam_seqi(q,i)); //gets nucleotide id
+	}
+
+	string hit_seq = convert_to_IUPAC(code);
+	seq = hit_seq;
+
+	printf("%s test print seq:\n",qname.c_str());
+	printf("%s cigar:",qname.c_str());
+	for(int j=0;j<cigar_vector.size();j++)
+	{
+		printf("%d%c",cigar_vector[j].second,cigar_vector[j].first);
+	}
+
+	/*for(int i=0;i<code.size();i++)
+	{
+		printf("%d ",code[i]);
+	}*/
+	printf("\n");
+	printf("seq: %s\n",seq.c_str());
+
+	return 0;
 }
 
 int hit::set_tags(bam1_t *b)

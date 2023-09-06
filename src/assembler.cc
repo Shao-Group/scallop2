@@ -86,6 +86,11 @@ int assembler::assemble()
 		ht.set_tags(b1t);
 		ht.set_strand();
 
+		if(ht.cigar_vector[0].first == 'S' || ht.cigar_vector[ht.cigar_vector.size()-1].first == 'S')
+		{
+			ht.set_seq(b1t);
+		}
+
 		//ht.print();
 
 		//if(ht.nh >= 2 && p.qual < min_mapping_quality) continue;
