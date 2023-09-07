@@ -79,6 +79,9 @@ int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 	get_frags_with_HS_on_both_sides();
 	get_RO_frags_with_HS();
 
+	//find more chimeric reads from soft clip reads
+	get_more_chimeric();
+
 	bridger bdg(this);
 	bdg.bridge_normal_fragments();
 	bdg.bridge_circ_fragments();
@@ -282,7 +285,8 @@ int bundle_bridge::get_RO_frags_with_HS()
 			printf("RO frags: left_boundary_flag = %d, right_boundary_flag = %d\n\n",left_boundary_flag,right_boundary_flag);
 		
 		}
-		else if(fr.h1->pos > fr.h2->pos && (fr.h2->cigar_vector[0].first == 'S' || fr.h2->cigar_vector[0].first == 'H') && (fr.h1->cigar_vector[fr.h1->cigar_vector.size()-1].first == 'S' || fr.h1->cigar_vector[fr.h1->cigar_vector.size()-1].first == 'H'))
+
+		/*else if(fr.h1->pos > fr.h2->pos && (fr.h2->cigar_vector[0].first == 'S' || fr.h2->cigar_vector[0].first == 'H') && (fr.h1->cigar_vector[fr.h1->cigar_vector.size()-1].first == 'S' || fr.h1->cigar_vector[fr.h1->cigar_vector.size()-1].first == 'H'))
 		{
 			printf("RO paired hit case 2: pos %d, rpos %d\n",fr.lpos,fr.rpos);
 			printf("chrm %s\n",bb.chrm.c_str());
@@ -372,7 +376,7 @@ int bundle_bridge::get_RO_frags_with_HS()
 
 			printf("RO frags: left_boundary_flag = %d, right_boundary_flag = %d\n\n",left_boundary_flag,right_boundary_flag);
 			
-		}
+		}*/
 
 		if(left_boundary_flag == 1 && right_boundary_flag == 1)
 		{
@@ -380,6 +384,222 @@ int bundle_bridge::get_RO_frags_with_HS()
 		}
 	}
 
+	return 0;
+}
+
+string bundle_bridge::get_fasta_seq(int32_t pos1, int32_t pos2)
+{
+	string out = "";
+	if(fai != NULL)
+	{
+		//printf("extracting fasta seq from region:\n");
+		int32_t seqlen;
+		char* seq = faidx_fetch_seq(fai, bb.chrm.c_str(), pos1, pos2, &seqlen);
+		if(seq != NULL && seqlen > 0)
+		{
+			//printf("seqlen = %d, seq = %s\n",seqlen,seq);
+			for(int i=0;i<seqlen;i++)
+			{
+				out = out + seq[i];
+			}
+		}
+	}
+	return out;
+}
+
+int bundle_bridge::min(int x, int y, int z) { return std::min(std::min(x, y), z); }
+
+int bundle_bridge::get_edit_distance(string s, string t)
+{
+	int n = s.size();
+	int m =t.size();
+	int** dp = new int*[n+1];
+	for(int i =0;i<=n;i++)
+	{
+		dp[i] = new int[m+1];
+		for(int j=0;j<=m;j++)
+		{
+			dp[i][j]=0;
+			if(i==0)dp[i][j]=j;
+			else if(j==0)dp[i][j] = i;
+		}
+	}
+	s = " " + s;
+	t = " " + t;
+	for(int i =1;i<=n;i++)
+	{
+		for(int j = 1;j<=m;j++)
+		{
+			if(s[i] !=t[j])
+			{
+				dp[i][j] = 1+min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+			}
+			else
+			{
+				dp[i][j] = dp[i-1][j-1];
+			}
+		}
+	}
+
+	int res = dp[n][m];
+	for(int i=1;i<=n;i++)
+	{
+		free(dp[i]);
+	}
+	free(dp);
+
+	return res;
+}
+
+int bundle_bridge::get_more_chimeric()
+{
+	for(int k = 0; k < fragments.size(); k++)
+	{
+		fragment fr = fragments[k];
+
+		//has a supple
+		if(fr.h1->suppl != NULL || fr.h2->suppl != NULL)
+		{
+			continue;
+		}
+
+		//is a supple
+		if((fr.h1->flag & 0x800) >= 1 || (fr.h2->flag & 0x800) >= 1) continue;
+
+		//is a RO frag
+		if(fr.h1->is_reverse_overlap == true || fr.h2->is_reverse_overlap == true)
+		{
+			continue;
+		}
+		
+		printf("more chimeric instances:\n");
+		if(fr.h1->pos <= fr.h2->pos && (fr.h1->cigar_vector[0].first == 'S' && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first != 'S'))
+		{
+			int32_t soft_len = fr.h1->cigar_vector[0].second;
+			for(int j=0;j<junctions.size();j++)
+			{
+				junction jc = junctions[j];
+				int32_t pos1 = jc.lpos-soft_len+1;
+				int32_t pos2 = jc.lpos;
+
+				string junc_seq = get_fasta_seq(pos1,pos2);
+
+				for(int i=0;i<fr.h1->soft_clip_seqs.size();i++)
+				{
+					int edit = get_edit_distance(junc_seq,fr.h1->soft_clip_seqs[i]);
+					if(edit == 0)
+					{
+						printf("soft left clip: chrm=%s, read=%s\n",bb.chrm.c_str(),fr.h1->qname.c_str());
+						if((fr.h1->flag & 0x10) >= 1)
+						{
+							printf("rev comp 0x10 = on\n");
+						}
+						else
+						{
+							printf("rev comp 0x10 = off\n");
+						}
+						if((fr.h1->flag & 0x4) >= 1)
+						{
+							printf("seg unmapped 0x4 = on\n");
+						}
+						else
+						{
+							printf("seg unmapped 0x4 = off\n");
+						}
+						printf("combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h1->soft_clip_seqs[i].c_str(),edit);
+						printf("pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
+					}
+				}
+
+				/*printf("soft left clip: chrm=%s, read=%s\n",bb.chrm.c_str(),fr.h1->qname.c_str());
+				if((fr.h1->flag & 0x10) >= 1)
+				{
+					printf("rev comp = on\n");
+				}
+				else
+				{
+					printf("rev comp = off\n");
+				}
+				if(fr.h1->soft_clip_seqs.size() == 4)
+				{
+					printf("read start:%s\n",fr.h1->soft_clip_seqs[0].c_str());
+					printf("read start RC:%s\n",fr.h1->soft_clip_seqs[1].c_str());
+					printf("read end:%s\n",fr.h1->soft_clip_seqs[2].c_str());
+					printf("read end RC:%s\n",fr.h1->soft_clip_seqs[3].c_str());
+				}
+				printf("pos1=%d, pos2=%d, junc_seq=%s\n",pos1,pos2,junc_seq.c_str());*/
+			}
+			printf("\n");
+		}
+		else if(fr.h1->pos <= fr.h2->pos && (fr.h1->cigar_vector[0].first != 'S' && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'S'))
+		{
+			int32_t soft_len = fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second;
+			if(strcmp(fr.h1->qname.c_str(),"simulate:1734666")==0)
+			{
+				printf("check junction size = %lu\n",junctions.size());
+			}
+			for(int j=0;j<junctions.size();j++)
+			{
+				junction jc = junctions[j];
+				int32_t pos1 = jc.rpos;
+				int32_t pos2 = jc.rpos+soft_len-1;
+
+				if(strcmp(fr.h1->qname.c_str(),"simulate:1734666")==0)
+				{
+					printf("pos1 = %d, pos2 = %d\n",pos1,pos2);
+				}
+				
+				string junc_seq = get_fasta_seq(pos1,pos2);
+
+				for(int i=0;i<fr.h2->soft_clip_seqs.size();i++)
+				{
+					int edit = get_edit_distance(junc_seq,fr.h2->soft_clip_seqs[i]);
+					if(edit == 0)
+					{
+						printf("soft right clip: chrm=%s, read=%s\n",bb.chrm.c_str(),fr.h2->qname.c_str());
+						if((fr.h2->flag & 0x10) >= 1)
+						{
+							printf("rev comp 0x10 = on\n");
+						}
+						else
+						{
+							printf("rev comp 0x10 = off\n");
+						}
+						if((fr.h2->flag & 0x4) >= 1)
+						{
+							printf("seg unmapped 0x4 = on\n");
+						}
+						else
+						{
+							printf("seg unmapped 0x4 = off\n");
+						}
+						printf("combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h2->soft_clip_seqs[i].c_str(),edit);
+						printf("pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
+					}
+				}
+
+				/*printf("soft right clip: chrm=%s, read=%s\n",bb.chrm.c_str(),fr.h2->qname.c_str());
+				if((fr.h2->flag & 0x10) >= 1)
+				{
+					printf("rev comp = on\n");
+				}
+				else
+				{
+					printf("rev comp = off\n");
+				}
+				if(fr.h2->soft_clip_seqs.size() == 4)
+				{
+					printf("read start:%s\n",fr.h2->soft_clip_seqs[0].c_str());
+					printf("read start RC:%s\n",fr.h2->soft_clip_seqs[1].c_str());
+					printf("read end:%s\n",fr.h2->soft_clip_seqs[2].c_str());
+					printf("read end RC:%s\n",fr.h2->soft_clip_seqs[3].c_str());
+				}
+				printf("pos1=%d, pos2=%d, junc_seq=%s\n",pos1,pos2,junc_seq.c_str());*/
+			}
+			printf("\n");
+		}
+
+	}
 	return 0;
 }
 

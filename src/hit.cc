@@ -243,7 +243,12 @@ hit::hit(bam1_t *b, int id)
 			cigar_vector.push_back(pair<char, int32_t>('.',0));
 		}
 	}
-
+	
+	//putting a placeholder to avoid core dumped when cigar_vector[0] is accessed
+	if(cigar_vector.size() == 0)
+	{
+		cigar_vector.push_back(pair<char, int32_t>('.',0));
+	}
 
 	//assign booleans to see if left splice position H/S and right M or vie versa and stor their lengths
 	/*if(n_cigar == 2)
@@ -400,17 +405,14 @@ int hit::set_seq(bam1_t *b)
 	string hit_seq = convert_to_IUPAC(code);
 	seq = hit_seq;
 
-	printf("%s test print seq:\n",qname.c_str());
+	/*printf("%s test print seq:\n",qname.c_str());
 	print_cigar();
-	/*for(int i=0;i<code.size();i++)
-	{
-		printf("%d ",code[i]);
-	}*/
+
 	if((flag & 0x10) >= 1)
 	{
 		printf("rev comp\n");
 	}
-	printf("seq: %s\n",seq.c_str());
+	printf("seq: %s\n",seq.c_str());*/
 
 	set_soft_clip_seq_combo();
 
@@ -429,7 +431,7 @@ int hit::set_soft_clip_seq_combo()
 		len = cigar_vector[cigar_vector.size()-1].second;
 	}
 
-	printf("len=%d\n",len);
+	//printf("len=%d\n",len);
 	//index 0, extract start len bp
 	string str0 = "";
 	for(int i=0;i<len;i++)
@@ -452,13 +454,13 @@ int hit::set_soft_clip_seq_combo()
 	//index 3,extract end len bp rev comp
 	soft_clip_seqs.push_back(get_reverse_complement(soft_clip_seqs[2]));
 
-	printf("size of soft_clip_seqs = %lu\n",soft_clip_seqs.size());
+	/*printf("size of soft_clip_seqs = %lu\n",soft_clip_seqs.size());
 
 	printf("Printing four combos:\n");
 	printf("start: %s\n",soft_clip_seqs[0].c_str());
 	printf("start RC: %s\n",soft_clip_seqs[1].c_str());
 	printf("end: %s\n",soft_clip_seqs[2].c_str());
-	printf("end RC: %s\n",soft_clip_seqs[3].c_str());
+	printf("end RC: %s\n",soft_clip_seqs[3].c_str());*/
 
 	return 0;
 }
