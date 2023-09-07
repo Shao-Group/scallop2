@@ -15,6 +15,7 @@ See LICENSE for licensing.
 #include "fragment.h"
 #include "transcript.h"
 #include "circular_transcript.h"
+#include "htslib/faidx.h"
 
 using namespace std;
 
@@ -29,6 +30,7 @@ public:
 	set<string> breads;					// bridged reads
 	vector<fragment> fragments;			// to-be-filled fragments
 	vector<fragment> circ_fragments;	// to-be-filled fragments
+	faidx_t *fai;						//pointer to fetch fasta seq from region
 
 	vector<pair<fragment,fragment>> circ_fragment_pairs;	//bridged fragment pairs for circular RNA
 	vector<circular_transcript> circ_trsts; //a vector of circular transcripts class objs, with duplicates
@@ -49,7 +51,7 @@ public:
 	vector< vector<int> > umiLink;		// umi linked list: fragments index
 
 public:
-	int build(map <string, int> RO_reads_map);
+	int build(map <string, int> RO_reads_map, faidx_t *_fai);
 	int print(int index);
 	int32_t compute_aligned_length(int32_t k1l, int32_t k2r, const vector<int>& v);
 	vector<int32_t> build_accumulate_length(const vector<int> &v);

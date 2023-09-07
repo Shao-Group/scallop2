@@ -96,8 +96,9 @@ public:
 	char xs;								// XS aux in sam
 	char ts;								// ts tag used in minimap2
 	string qname;							// query name
+	uint32_t l_qseq;						// length of sequence information of the read except H clip
 	string seq;								// sequence information of the read except H clip
- 
+	vector<string> soft_clip_seqs;			// index 0:start seq,1:start seq rev comp,2:ending seq,3:ending seq rev comp
 	hit *next;								// next hit that is equivalent with current one
 
 	// UMI
@@ -107,13 +108,16 @@ public:
 
 public:
  	static string get_qname(bam1_t *b);
+	string get_reverse_complement(string str);
 	string convert_to_IUPAC(vector<int> code);
+	int set_soft_clip_seq_combo();
 	int set_seq(bam1_t *b);
 	int set_tags(bam1_t *b);
 	int set_strand();
 	int set_concordance();
 	int get_aligned_intervals(vector<int64_t> &v) const;
 	int print() const;
+	int print_cigar();
 };
 
 vector<int> encode_vlist(const vector<int> &v);

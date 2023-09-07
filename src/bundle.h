@@ -23,13 +23,14 @@ See LICENSE for licensing.
 #include "transcript.h"
 
 #include "circular_transcript.h"
+#include "htslib/faidx.h"
 
 using namespace std;
 
 class bundle
 {
 public:
-	bundle(bundle_base &bb, reference &ref, map <string, int> RO_reads_map);
+	bundle(bundle_base &bb, reference &ref, map <string, int> RO_reads_map, faidx_t *fai);
 	virtual ~bundle();
 
 public:

@@ -32,8 +32,21 @@ bundle_bridge::bundle_bridge(bundle_base &b)
 bundle_bridge::~bundle_bridge()
 {}
 
-int bundle_bridge::build(map <string, int> RO_reads_map)
+int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 {
+	fai = _fai;
+
+	/*if(fai != NULL)
+	{
+		printf("extracting fasta seq from region:\n");
+		int32_t seqlen;
+		char* seq = faidx_fetch_seq(fai, "1", 39511735, 39511804, &seqlen);
+		if(seq != NULL && seqlen > 0)
+		{
+			printf("seqlen = %d, seq = %s\n",seqlen,seq);
+		}
+	}*/
+
 	set_hits_RO_parameter(RO_reads_map);
 
 	build_supplementaries();

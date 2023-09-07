@@ -47,7 +47,7 @@ assembler::assembler()
 	RO_count = 0;
 	read_cirifull_file();
 
-	if(fai != NULL)
+	/*if(fai != NULL)
 	{
 		printf("extracting fasta seq from region:\n");
 		int32_t seqlen;
@@ -56,7 +56,7 @@ assembler::assembler()
 		{
 			printf("seqlen = %d, seq = %s\n",seqlen,seq);
 		}
-	}
+	}*/
 }
 
 assembler::~assembler()
@@ -226,7 +226,7 @@ int assembler::process(int n)
 		transcript_set ts1(bb.chrm, 0.9);		// full-length set
 		transcript_set ts2(bb.chrm, 0.9);		// non-full-length set
 
-		bundle bd(bb, ref, RO_reads_map);
+		bundle bd(bb, ref, RO_reads_map, fai);
 
 		RO_count += bd.br.RO_count;
 		//if(bd.junctions.size() != 0)

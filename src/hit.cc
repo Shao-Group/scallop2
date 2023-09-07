@@ -74,7 +74,9 @@ hit& hit::operator=(const hit &h)
 	second_pos = h.second_pos;
 	third_pos = h.third_pos;
 
+	l_qseq = h.l_qseq;
 	seq = h.seq;
+	soft_clip_seqs = h.soft_clip_seqs;
 
 	return *this;
 }
@@ -120,7 +122,9 @@ hit::hit(const hit &h)
 	second_pos = h.second_pos;
 	third_pos = h.third_pos;
 
+	l_qseq = h.l_qseq;
 	seq = h.seq;
+	soft_clip_seqs = h.soft_clip_seqs;
 }
 
 hit::hit(bam1_t *b, int id) 
@@ -146,7 +150,9 @@ hit::hit(bam1_t *b, int id)
 	second_pos = 0;
 	third_pos = 0;
 
+	l_qseq = 0;
 	seq = "";
+	soft_clip_seqs.clear();
 
 	// compute rpos
 	rpos = pos + (int32_t)bam_cigar2rlen(n_cigar, bam_get_cigar(b));
@@ -382,8 +388,8 @@ string hit::convert_to_IUPAC(vector<int> code)
 int hit::set_seq(bam1_t *b)
 {
 	uint32_t seq_len = b->core.l_qseq;
+	l_qseq = seq_len;
 	uint8_t *q = bam_get_seq(b); 
-
 	vector<int> code;
 
 	for(int i=0;i<seq_len;i++)
@@ -395,20 +401,95 @@ int hit::set_seq(bam1_t *b)
 	seq = hit_seq;
 
 	printf("%s test print seq:\n",qname.c_str());
-	printf("%s cigar:",qname.c_str());
-	for(int j=0;j<cigar_vector.size();j++)
-	{
-		printf("%d%c",cigar_vector[j].second,cigar_vector[j].first);
-	}
-
+	print_cigar();
 	/*for(int i=0;i<code.size();i++)
 	{
 		printf("%d ",code[i]);
 	}*/
-	printf("\n");
+	if((flag & 0x10) >= 1)
+	{
+		printf("rev comp\n");
+	}
 	printf("seq: %s\n",seq.c_str());
 
+	set_soft_clip_seq_combo();
+
 	return 0;
+}
+
+int hit::set_soft_clip_seq_combo()
+{
+	int32_t len = 0;
+	if(cigar_vector[0].first == 'S')
+	{
+		len = cigar_vector[0].second;
+	}
+	else if(cigar_vector[cigar_vector.size()-1].first == 'S')
+	{
+		len = cigar_vector[cigar_vector.size()-1].second;
+	}
+
+	printf("len=%d\n",len);
+	//index 0, extract start len bp
+	string str0 = "";
+	for(int i=0;i<len;i++)
+	{
+		str0 = str0 + seq[i];
+	}
+	soft_clip_seqs.push_back(str0);
+
+	//index 1, extract start len bp rev comp
+	soft_clip_seqs.push_back(get_reverse_complement(soft_clip_seqs[0]));
+
+	//index 2, extract end len bp
+	string str2 = "";
+	for(int i=seq.size()-len;i<seq.size();i++)
+	{
+		str2 = str2 + seq[i];
+	}
+	soft_clip_seqs.push_back(str2);
+
+	//index 3,extract end len bp rev comp
+	soft_clip_seqs.push_back(get_reverse_complement(soft_clip_seqs[2]));
+
+	printf("size of soft_clip_seqs = %lu\n",soft_clip_seqs.size());
+
+	printf("Printing four combos:\n");
+	printf("start: %s\n",soft_clip_seqs[0].c_str());
+	printf("start RC: %s\n",soft_clip_seqs[1].c_str());
+	printf("end: %s\n",soft_clip_seqs[2].c_str());
+	printf("end RC: %s\n",soft_clip_seqs[3].c_str());
+
+	return 0;
+}
+
+string hit::get_reverse_complement(string str)
+{
+	string out = "";
+	for(int i=str.size()-1;i>=0;i--)
+	{
+		if(str[i] == 'A')
+		{
+			out = out + 'T';
+		}
+		else if(str[i] == 'T')
+		{
+			out = out + 'A';
+		}
+		else if(str[i] == 'C')
+		{
+			out = out + 'G';
+		}
+		else if(str[i] == 'G')
+		{
+			out = out + 'C';
+		}
+		else if(str[i] == 'N')
+		{
+			out = out + str[i];
+		}
+	}
+	return out;
 }
 
 int hit::set_tags(bam1_t *b)
@@ -579,6 +660,17 @@ int hit::print() const
 	printf(" end position (%d - )\n", rpos);
 	*/
 
+	return 0;
+}
+
+int hit::print_cigar()
+{
+	printf("%s cigar:",qname.c_str());
+	for(int j=0;j<cigar_vector.size();j++)
+	{
+		printf("%d%c",cigar_vector[j].second,cigar_vector[j].first);
+	}
+	printf("\n");
 	return 0;
 }
 
