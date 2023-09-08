@@ -489,7 +489,7 @@ int bundle_bridge::get_more_chimeric()
 					int edit = get_edit_distance(junc_seq,fr.h1->soft_clip_seqs[i]);
 					if(edit == 0)
 					{
-						printf("soft left clip: chrm=%s, read=%s\n",bb.chrm.c_str(),fr.h1->qname.c_str());
+						printf("soft left clip: chrm=%s, read=%s, read_pos=%d\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos);
 						if((fr.h1->flag & 0x10) >= 1)
 						{
 							printf("rev comp 0x10 = on\n");
@@ -556,7 +556,7 @@ int bundle_bridge::get_more_chimeric()
 					int edit = get_edit_distance(junc_seq,fr.h2->soft_clip_seqs[i]);
 					if(edit == 0)
 					{
-						printf("soft right clip: chrm=%s, read=%s\n",bb.chrm.c_str(),fr.h2->qname.c_str());
+						printf("soft right clip: chrm=%s, read=%s, read_pos=%d\n",bb.chrm.c_str(),fr.h2->qname.c_str(),fr.h2->pos);
 						if((fr.h2->flag & 0x10) >= 1)
 						{
 							printf("rev comp 0x10 = on\n");
@@ -2697,8 +2697,8 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 		if(fr1.paths.size() != 1 || fr2.paths.size() != 1) continue; //not bridged
 		//if(fr1.paths[0].type != 1 || fr2.paths[0].type != 1) continue; //insert size not normal
 
-		printf("1.5*length_high = %lf\n",1.5*length_high);
-		if(fr1.paths[0].length >= 1.5*length_high && fr2.paths[0].length >= 1.5*length_high) continue;
+		//printf("1.5*length_high = %lf\n",1.5*length_high);
+		//if(fr1.paths[0].length >= 1.5*length_high && fr2.paths[0].length >= 1.5*length_high) continue;
 
 		printf("\nPrinting separate fragments:");
 		printf("\nchrm = %s\n",bb.chrm.c_str());
