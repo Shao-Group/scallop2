@@ -81,7 +81,7 @@ public:
 	int extract_RO_circRNA();
 	int extract_circ_fragment_pairs();
 	int print_circ_fragment_pairs();
-	int join_circ_fragment_pairs();
+	int join_circ_fragment_pairs(int32_t length_high);
 	int join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int ex1, int ex2);
 	int print_circRNAs();
 	char infer_circ_strand(const vector<int> &p);

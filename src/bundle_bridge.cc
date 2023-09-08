@@ -80,7 +80,7 @@ int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 	get_RO_frags_with_HS();
 
 	//find more chimeric reads from soft clip reads
-	get_more_chimeric();
+	//get_more_chimeric();
 
 	bridger bdg(this);
 	bdg.bridge_normal_fragments();
@@ -90,7 +90,7 @@ int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 
 	extract_circ_fragment_pairs();
 	//print_circ_fragment_pairs();
-	join_circ_fragment_pairs();
+	join_circ_fragment_pairs(bdg.length_high);
 	print_circRNAs();
 
 	//printf("fragments vector size after = %zu\n",fragments.size());
@@ -2686,7 +2686,7 @@ int bundle_bridge::print_circ_fragment_pairs()
 	return 0;
 }
 
-int bundle_bridge::join_circ_fragment_pairs()
+int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 {
 	for(int i=0;i<circ_fragment_pairs.size();i++)
 	{
@@ -2697,10 +2697,8 @@ int bundle_bridge::join_circ_fragment_pairs()
 		if(fr1.paths.size() != 1 || fr2.paths.size() != 1) continue; //not bridged
 		//if(fr1.paths[0].type != 1 || fr2.paths[0].type != 1) continue; //insert size not normal
 
-		if(strcmp(fr1.h1->qname.c_str(),"ST-E00299:245:HKTJJALXX:6:2205:11647:15936") == 0)
-		{
-			printf("ST-E00299:245:HKTJJALXX:6:2205:11647:15936 is in circ_fragment_pairs\n");
-		}
+		printf("1.5*length_high = %lf\n",1.5*length_high);
+		if(fr1.paths[0].length >= 1.5*length_high && fr2.paths[0].length >= 1.5*length_high) continue;
 
 		printf("\nPrinting separate fragments:");
 		printf("\nchrm = %s\n",bb.chrm.c_str());
