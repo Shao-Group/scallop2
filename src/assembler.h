@@ -18,6 +18,7 @@ See LICENSE for licensing.
 #include "transcript_set.h"
 #include "reference.h"
 
+#include "region.h"
 #include "circular_transcript.h"
 #include "RO_read.h"
 #include "htslib/faidx.h"
@@ -49,6 +50,7 @@ private:
 	vector<transcript> non_full_trsts;
 
 	vector<circular_transcript> circular_trsts; //a vector of circular transcripts class objs from all bundles
+	vector<circular_transcript> circular_trsts_long_removed; //a vector of circular transcripts class objs from all bundles, with long exon circs removed
 	map <string, pair<circular_transcript, int>> circ_trst_map; // a map of distinct circ trsts with circRNA_id as key and the corresponding circRNA object
 	map <string, pair<circular_transcript, int>> circ_trst_merged_map; // map with circRNAs having few bp diff ends but same intron chains merged
 
@@ -65,6 +67,7 @@ public:
 private:
 	int process(int n);
 	int remove_duplicate_circ_trsts();
+	int remove_long_exon_circ_trsts();
 	vector<string> split_str(string str, string delimiter);
 	int print_circular_trsts();
 	int assemble(const splice_graph &gr, const hyper_set &hs, transcript_set &ts1, transcript_set &ts2);
