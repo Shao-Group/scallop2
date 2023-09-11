@@ -80,7 +80,7 @@ int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 	get_RO_frags_with_HS();
 
 	//find more chimeric reads from soft clip reads
-	//get_more_chimeric();
+	get_more_chimeric();
 
 	bridger bdg(this);
 	bdg.bridge_normal_fragments();
