@@ -80,7 +80,7 @@ int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 	get_RO_frags_with_HS();
 
 	//find more chimeric reads from soft clip reads
-	//get_more_chimeric();
+	get_more_chimeric();
 
 	bridger bdg(this);
 	bdg.bridge_normal_fragments();
@@ -476,18 +476,30 @@ int bundle_bridge::get_more_chimeric()
 		if(fr.h1->pos <= fr.h2->pos && (fr.h1->cigar_vector[0].first == 'S' && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first != 'S'))
 		{
 			int32_t soft_len = fr.h1->cigar_vector[0].second;
+			if(soft_len < 20) continue;
+
+			/*if(strcmp(fr.h1->qname.c_str(),"simulate:150344")==0)
+			{
+				printf("check junction size = %lu\n",junctions.size());
+			}*/
+
 			for(int j=0;j<junctions.size();j++)
 			{
 				junction jc = junctions[j];
 				int32_t pos1 = jc.lpos-soft_len+1;
 				int32_t pos2 = jc.lpos;
 
+				/*if(strcmp(fr.h1->qname.c_str(),"simulate:150344")==0)
+				{
+					printf("jc lpos = %d, jc rpos = %d\n",jc.lpos,jc.rpos);
+				}*/
+
 				string junc_seq = get_fasta_seq(pos1,pos2);
 
 				for(int i=0;i<fr.h1->soft_clip_seqs.size();i++)
 				{
 					int edit = get_edit_distance(junc_seq,fr.h1->soft_clip_seqs[i]);
-					if(edit == 0)
+					if(edit == 0 || edit == 1)
 					{
 						printf("soft left clip: chrm=%s, read=%s, read_pos=%d\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos);
 						if((fr.h1->flag & 0x10) >= 1)
@@ -506,8 +518,9 @@ int bundle_bridge::get_more_chimeric()
 						{
 							printf("seg unmapped 0x4 = off\n");
 						}
-						printf("combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h1->soft_clip_seqs[i].c_str(),edit);
-						printf("pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
+						printf("read seq combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h1->soft_clip_seqs[i].c_str(),edit);
+						printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
+						printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
 					}
 				}
 
@@ -534,27 +547,29 @@ int bundle_bridge::get_more_chimeric()
 		else if(fr.h1->pos <= fr.h2->pos && (fr.h1->cigar_vector[0].first != 'S' && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'S'))
 		{
 			int32_t soft_len = fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second;
-			if(strcmp(fr.h1->qname.c_str(),"simulate:1734666")==0)
+			if(soft_len < 20) continue;
+
+			/*if(strcmp(fr.h1->qname.c_str(),"simulate:1734666")==0)
 			{
 				printf("check junction size = %lu\n",junctions.size());
-			}
+			}*/
 			for(int j=0;j<junctions.size();j++)
 			{
 				junction jc = junctions[j];
 				int32_t pos1 = jc.rpos;
 				int32_t pos2 = jc.rpos+soft_len-1;
 
-				if(strcmp(fr.h1->qname.c_str(),"simulate:1734666")==0)
+				/*if(strcmp(fr.h1->qname.c_str(),"simulate:1734666")==0)
 				{
-					printf("pos1 = %d, pos2 = %d\n",pos1,pos2);
-				}
+					printf("jc lpos = %d, jc rpos = %d\n",jc.lpos,jc.rpos);
+				}*/
 				
 				string junc_seq = get_fasta_seq(pos1,pos2);
 
 				for(int i=0;i<fr.h2->soft_clip_seqs.size();i++)
 				{
 					int edit = get_edit_distance(junc_seq,fr.h2->soft_clip_seqs[i]);
-					if(edit == 0)
+					if(edit == 0 || edit == 1)
 					{
 						printf("soft right clip: chrm=%s, read=%s, read_pos=%d\n",bb.chrm.c_str(),fr.h2->qname.c_str(),fr.h2->pos);
 						if((fr.h2->flag & 0x10) >= 1)
@@ -573,8 +588,9 @@ int bundle_bridge::get_more_chimeric()
 						{
 							printf("seg unmapped 0x4 = off\n");
 						}
-						printf("combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h2->soft_clip_seqs[i].c_str(),edit);
-						printf("pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
+						printf("read seq combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h2->soft_clip_seqs[i].c_str(),edit);
+						printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
+						printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
 					}
 				}
 
