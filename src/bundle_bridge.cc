@@ -80,7 +80,7 @@ int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 	get_RO_frags_with_HS();
 
 	//find more chimeric reads from soft clip reads
-	get_more_chimeric();
+	//get_more_chimeric();
 
 	bridger bdg(this);
 	bdg.bridge_normal_fragments();
@@ -472,7 +472,7 @@ int bundle_bridge::get_more_chimeric()
 			continue;
 		}
 		
-		printf("more chimeric instances:\n");
+		//printf("more chimeric instances:\n");
 		if(fr.h1->pos <= fr.h2->pos && (fr.h1->cigar_vector[0].first == 'S' && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first != 'S'))
 		{
 			int32_t soft_len = fr.h1->cigar_vector[0].second;
@@ -2698,7 +2698,7 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 		//if(fr1.paths[0].type != 1 || fr2.paths[0].type != 1) continue; //insert size not normal
 
 		//printf("1.5*length_high = %lf\n",1.5*length_high);
-		//if(fr1.paths[0].length >= 1.5*length_high && fr2.paths[0].length >= 1.5*length_high) continue;
+		if(fr1.paths[0].length > length_high && fr2.paths[0].length > length_high) continue;
 
 		printf("\nPrinting separate fragments:");
 		printf("\nchrm = %s\n",bb.chrm.c_str());

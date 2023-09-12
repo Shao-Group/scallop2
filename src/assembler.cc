@@ -299,18 +299,18 @@ int assembler::remove_long_exon_circ_trsts()
 	{
 		circular_transcript circ = circular_trsts[i];
 		int long_flag = 0;
+		
+		//if(circ.merged_regions.size() > 1) //check only for multi exons
+
 		for(int j=0;j<circ.merged_regions.size();j++)
 		{
 			if(circ.merged_regions[j].rpos-circ.merged_regions[j].lpos > 2000)
 			{
-				if(circ.start == 53391429)
-				{
-					printf("long j = %d, region = %d-%d, position=%d, read=%s\n",j,circ.merged_regions[j].lpos,circ.merged_regions[j].rpos,i,circ.transcript_id.c_str());
-				}
 				long_flag = 1;
 				break;
 			}
 		}
+
 		if(long_flag == 0)
 		{
 			circular_trsts_long_removed.push_back(circ);
