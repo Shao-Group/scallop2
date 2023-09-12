@@ -65,6 +65,7 @@ assembler::~assembler()
     bam_destroy1(b1t);
     bam_hdr_destroy(hdr);
     sam_close(sfn);
+	fai_destroy(fai);
 }
 
 int assembler::assemble()

@@ -444,9 +444,9 @@ int bundle_bridge::get_edit_distance(string s, string t)
 	int res = dp[n][m];
 	for(int i=1;i<=n;i++)
 	{
-		free(dp[i]);
+		delete(dp[i]);
 	}
-	free(dp);
+	delete(dp);
 
 	return res;
 }
