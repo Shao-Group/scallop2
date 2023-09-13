@@ -47,8 +47,8 @@ int bundle::prepare()
 
 	// add the 3 new functions
 
-	extract_backsplicing_junctions();
-	refine_backsplicing_junctions();
+	//extract_backsplicing_junctions();
+	//refine_backsplicing_junctions();
 	//build_backsplicing_junctions();
 
 	build_regions();

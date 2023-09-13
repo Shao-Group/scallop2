@@ -489,6 +489,8 @@ int bundle_bridge::get_more_chimeric()
 				int32_t pos1 = jc.lpos-soft_len+1;
 				int32_t pos2 = jc.lpos;
 
+				if(jc.lpos <= fr.h2->rpos || jc.lpos <= fr.h1->rpos) continue;
+
 				/*if(strcmp(fr.h1->qname.c_str(),"simulate:150344")==0)
 				{
 					printf("jc lpos = %d, jc rpos = %d\n",jc.lpos,jc.rpos);
@@ -558,6 +560,8 @@ int bundle_bridge::get_more_chimeric()
 				junction jc = junctions[j];
 				int32_t pos1 = jc.rpos;
 				int32_t pos2 = jc.rpos+soft_len-1;
+
+				if(jc.rpos >= fr.h2->pos || jc.rpos >= fr.h1->pos) continue;
 
 				/*if(strcmp(fr.h1->qname.c_str(),"simulate:1734666")==0)
 				{
