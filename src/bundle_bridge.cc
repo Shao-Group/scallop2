@@ -414,7 +414,7 @@ int bundle_bridge::get_edit_distance(string s, string t)
 	int n = s.size();
 	int m =t.size();
 	int** dp = new int*[n+1];
-	for(int i =0;i<=n;i++)
+	for(int i=0;i<=n;i++)
 	{
 		dp[i] = new int[m+1];
 		for(int j=0;j<=m;j++)
@@ -428,7 +428,7 @@ int bundle_bridge::get_edit_distance(string s, string t)
 	t = " " + t;
 	for(int i =1;i<=n;i++)
 	{
-		for(int j = 1;j<=m;j++)
+		for(int j=1;j<=m;j++)
 		{
 			if(s[i] !=t[j])
 			{
@@ -442,11 +442,11 @@ int bundle_bridge::get_edit_distance(string s, string t)
 	}
 
 	int res = dp[n][m];
-	for(int i=1;i<=n;i++)
+	for(int i=0;i<=n;i++)
 	{
-		delete(dp[i]);
+		delete [] dp[i];
 	}
-	delete(dp);
+	delete [] dp;
 
 	return res;
 }
