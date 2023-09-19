@@ -593,6 +593,8 @@ int assembler::read_cirifull_file()
 {
 	if(cirifull_file == "") return 0;
 
+	printf("in read ciri-full file\n");
+
 	ifstream fin(cirifull_file.c_str());
 	if(fin.fail())
 	{
@@ -609,6 +611,7 @@ int assembler::read_cirifull_file()
 
         split(line, '\t', row_values);
         //cout << row_values[0] << "," << row_values[1] << "," << row_values[2] << endl;
+		if(row_values.size() == 0) printf("row values zero\n");
 
 		RO_read ro_read;
 		ro_read.read_name = row_values[0];
@@ -622,7 +625,7 @@ int assembler::read_cirifull_file()
 		if(colon_separate.size() > 1)
 		{
 			vector<string> positions;
-			split(colon_separate[1], '-', positions);
+			split(colon_separate[1], '|', positions);
 
 			//printf("pos %s, rpos %s\n", positions[0].c_str(), positions[1].c_str());
 			ro_read.BSJ_pos = stoi(positions[0]);
