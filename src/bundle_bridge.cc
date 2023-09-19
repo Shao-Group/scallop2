@@ -565,9 +565,9 @@ int bundle_bridge::get_more_chimeric()
 			int32_t soft_len = fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second;
 			if(soft_len < 20) continue;
 
-			/*if(strcmp(fr.h1->qname.c_str(),"simulate:1734666")==0)
+			/*if(strcmp(fr.h1->qname.c_str(),"simulate:689702")==0)
 			{
-				printf("check junction size = %lu\n",junctions.size());
+				printf("simulate:689702 jc size = %lu\n",junctions.size());
 			}*/
 
 			int jc_flag = 0;
@@ -580,7 +580,7 @@ int bundle_bridge::get_more_chimeric()
 
 				if(jc.rpos >= fr.h2->pos || jc.rpos >= fr.h1->pos) continue;
 
-				/*if(strcmp(fr.h1->qname.c_str(),"simulate:1734666")==0)
+				/*if(strcmp(fr.h1->qname.c_str(),"simulate:689702")==0)
 				{
 					printf("jc lpos = %d, jc rpos = %d\n",jc.lpos,jc.rpos);
 				}*/
@@ -606,6 +606,11 @@ int bundle_bridge::get_more_chimeric()
 				{
 					//printf("str1 %s str2 %s\n",junc_seq.c_str(),fr.h2->soft_clip_seqs[i].c_str());
 					int edit = get_edit_distance(junc_seq,fr.h2->soft_clip_seqs[i]);
+					/*if(strcmp(fr.h1->qname.c_str(),"simulate:689702")==0)
+					{
+						printf("str1 %s str2 %s\n",junc_seq.c_str(),fr.h2->soft_clip_seqs[i].c_str());
+						printf("simulate:689702: edit = %d\n",edit);
+					}*/
 
 					if(edit == 0 || edit == 1)
 					{
