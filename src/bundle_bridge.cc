@@ -76,11 +76,18 @@ int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 	set_fragment_lengths();
 
 	//RO reads statistics
-	get_frags_with_HS_on_both_sides();
+	//get_frags_with_HS_on_both_sides();
+
+	//create circ fragments from RO reads with H/S on both sides
 	get_RO_frags_with_HS();
 
 	//find more chimeric reads from soft clip reads
 	get_more_chimeric();
+	//create vlist of fake hits
+	align_fake_hits();
+	create_fake_fragments();
+
+	set_circ_fragment_lengths();
 
 	bridger bdg(this);
 	bdg.bridge_normal_fragments();
@@ -455,7 +462,7 @@ int bundle_bridge::get_more_chimeric()
 {
 	for(int k = 0; k < fragments.size(); k++)
 	{
-		fragment fr = fragments[k];
+		fragment &fr = fragments[k];
 
 		//has a supple
 		if(fr.h1->suppl != NULL || fr.h2->suppl != NULL)
@@ -483,6 +490,7 @@ int bundle_bridge::get_more_chimeric()
 				printf("check junction size = %lu\n",junctions.size());
 			}*/
 
+			int jc_flag = 0;
 			for(int j=0;j<junctions.size();j++)
 			{
 				junction jc = junctions[j];
@@ -501,6 +509,7 @@ int bundle_bridge::get_more_chimeric()
 				for(int i=0;i<fr.h1->soft_clip_seqs.size();i++)
 				{
 					int edit = get_edit_distance(junc_seq,fr.h1->soft_clip_seqs[i]);
+
 					if(edit == 0 || edit == 1)
 					{
 						printf("soft left clip: chrm=%s, read=%s, read_pos=%d\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos);
@@ -523,8 +532,13 @@ int bundle_bridge::get_more_chimeric()
 						printf("read seq combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h1->soft_clip_seqs[i].c_str(),edit);
 						printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
 						printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
+						create_fake_supple(k,fr,soft_len,pos1,pos2);
+						jc_flag = 1;
+						break;
 					}
 				}
+
+				if(jc_flag == 1) break;
 
 				/*printf("soft left clip: chrm=%s, read=%s\n",bb.chrm.c_str(),fr.h1->qname.c_str());
 				if((fr.h1->flag & 0x10) >= 1)
@@ -555,11 +569,14 @@ int bundle_bridge::get_more_chimeric()
 			{
 				printf("check junction size = %lu\n",junctions.size());
 			}*/
+
+			int jc_flag = 0;
 			for(int j=0;j<junctions.size();j++)
 			{
 				junction jc = junctions[j];
 				int32_t pos1 = jc.rpos;
 				int32_t pos2 = jc.rpos+soft_len-1;
+
 
 				if(jc.rpos >= fr.h2->pos || jc.rpos >= fr.h1->pos) continue;
 
@@ -567,12 +584,29 @@ int bundle_bridge::get_more_chimeric()
 				{
 					printf("jc lpos = %d, jc rpos = %d\n",jc.lpos,jc.rpos);
 				}*/
-				
+
 				string junc_seq = get_fasta_seq(pos1,pos2);
+
+				//printf("soft clips size %lu\n",fr.h2->soft_clip_seqs.size());
+				/*if(strcmp(fr.h2->qname.c_str(),"simulate:12715") == 0)
+				{
+					printf("error read\n");
+					fr.h2->print();
+				}*/
+				/*if(fr.h2->soft_clip_seqs.size() == 4)
+				{
+					printf("full seq = %s\n",fr.h2->seq.c_str());
+					printf("read start:%s\n",fr.h2->soft_clip_seqs[0].c_str());
+					printf("read start RC:%s\n",fr.h2->soft_clip_seqs[1].c_str());
+					printf("read end:%s\n",fr.h2->soft_clip_seqs[2].c_str());
+					printf("read end RC:%s\n",fr.h2->soft_clip_seqs[3].c_str());
+				}*/
 
 				for(int i=0;i<fr.h2->soft_clip_seqs.size();i++)
 				{
+					//printf("str1 %s str2 %s\n",junc_seq.c_str(),fr.h2->soft_clip_seqs[i].c_str());
 					int edit = get_edit_distance(junc_seq,fr.h2->soft_clip_seqs[i]);
+
 					if(edit == 0 || edit == 1)
 					{
 						printf("soft right clip: chrm=%s, read=%s, read_pos=%d\n",bb.chrm.c_str(),fr.h2->qname.c_str(),fr.h2->pos);
@@ -595,9 +629,15 @@ int bundle_bridge::get_more_chimeric()
 						printf("read seq combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h2->soft_clip_seqs[i].c_str(),edit);
 						printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
 						printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
+						create_fake_supple(k,fr,soft_len,pos1,pos2);
+						jc_flag = 1;
+						break;
 					}
 				}
 
+				if(jc_flag == 1) break;
+
+				//printf("out of soft_clips loop\n");
 				/*printf("soft right clip: chrm=%s, read=%s\n",bb.chrm.c_str(),fr.h2->qname.c_str());
 				if((fr.h2->flag & 0x10) >= 1)
 				{
@@ -620,6 +660,57 @@ int bundle_bridge::get_more_chimeric()
 		}
 
 	}
+	return 0;
+}
+
+int bundle_bridge::create_fake_supple(int fr_index, fragment &fr, int32_t soft_len, int32_t pos1, int32_t pos2)
+{
+	hit new_hit;
+
+	//hit id
+
+	new_hit.is_fake = true;
+	new_hit.tid = fr.h1->tid;
+	new_hit.qname = fr.h1->qname;
+	new_hit.qhash = fr.h1->qhash;
+
+	new_hit.pos = pos1;
+	new_hit.rpos = pos2;
+	new_hit.n_cigar = 1;
+	new_hit.qlen = soft_len;
+
+	new_hit.cigar_vector.push_back(pair<char, int32_t>('M',soft_len)); //100M
+	new_hit.itvm.push_back(pack(pos1, pos2)); //check
+
+	//check vlist 
+
+	//printf("Printing fake hit:\n");
+	//new_hit.print();
+
+	if(fr.h1->cigar_vector[0].first == 'S')
+	{
+		//printf("cond1\n");
+		new_hit.mpos = fr.h1->mpos;
+		new_hit.mtid = fr.h1->mtid;
+		new_hit.isize = -(pos2-fr.h1->pos+1); //isize includes soft clip?
+		new_hit.strand = fr.h1->strand;
+	}
+	else if(fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'S')
+	{
+		//printf("cond2\n");
+		new_hit.mpos = fr.h2->mpos;
+		new_hit.mtid = fr.h2->mtid;
+		new_hit.isize = (fr.h2->rpos-pos1+1); //isize includes soft clip?
+		new_hit.strand = fr.h2->strand;
+	}
+
+	//set fake_hit_index for fr and new_hit
+	fr.fake_hit_index = bb.fake_hits.size();
+	new_hit.fake_hit_index = fr_index;
+
+	//push to bb.fake_hits
+	bb.fake_hits.push_back(new_hit);
+
 	return 0;
 }
 
@@ -1128,6 +1219,84 @@ int bundle_bridge::align_hits_transcripts()
 	return 0;
 }
 
+int bundle_bridge::align_fake_hits()
+{
+	map<int32_t, int> m;
+	for(int k = 0; k < regions.size(); k++)
+	{
+		if(k >= 1) assert(regions[k - 1].rpos == regions[k].lpos);
+		m.insert(pair<int32_t, int>(regions[k].lpos, k));
+	}
+
+	for(int i = 0; i < bb.fake_hits.size(); i++)
+	{
+		align_hit(m, bb.fake_hits[i], bb.fake_hits[i].vlist);
+		bb.fake_hits[i].vlist = encode_vlist(bb.fake_hits[i].vlist);
+	}
+
+	if(bb.fake_hits.size() > 0)
+	{
+		printf("Fake hits print\n");
+		for(int i = 0; i < bb.fake_hits.size(); i++)
+		{
+			bb.fake_hits[i].print();
+		}
+	}
+
+	return 0;
+}
+
+int bundle_bridge::create_fake_fragments()
+{
+	for(int k=0; k<fragments.size(); k++)
+	{
+		fragment &fr = fragments[k];
+
+		if(fr.fake_hit_index == -1) continue;
+
+		for(int i=0;i<bb.fake_hits.size();i++)
+		{
+			hit &z = bb.fake_hits[i];
+			if(z.fake_hit_index == -1) continue;
+
+			if(fr.fake_hit_index == i && z.fake_hit_index == k)
+			{
+				if(fr.h1->cigar_vector[0].first == 'S')
+				{
+					fr.h1->suppl = &z;
+					fr.h1->supple_pos = z.pos;
+					fr.h1->suppl->paired = true;
+					fragment frag(fr.h2, fr.h1->suppl);
+					frag.frag_type = 2;
+					frag.is_compatible = 1;
+					frag.type = 0;
+					frag.pi = k;
+					frag.fidx = circ_fragments.size();
+					fr.pi = circ_fragments.size(); //pi not set for all fragments, only those that have second frags, check pi before using if it is -1
+					fr.fidx = k;
+					circ_fragments.push_back(frag);
+				}
+				else if(fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'S')
+				{
+					fr.h2->suppl = &z;
+					fr.h2->supple_pos = z.pos;
+					fr.h2->suppl->paired = true;
+					fragment frag(fr.h2->suppl, fr.h1);
+					frag.frag_type = 2;
+					frag.is_compatible = 2;
+					frag.type = 0;
+					frag.pi = k;
+					frag.fidx = circ_fragments.size();
+					fr.pi = circ_fragments.size(); //pi not set for all fragments, only those that have second frags, check pi before using if it is -1
+					fr.fidx = k;
+					circ_fragments.push_back(frag);	
+				}
+			}
+		}
+	}
+	return 0;
+}
+
 int bundle_bridge::remove_tiny_boundaries()
 {
 	for(int i = 0; i < bb.hits.size(); i++)
@@ -1143,7 +1312,11 @@ int bundle_bridge::set_fragment_lengths()
 	{
 		set_fragment_length(fragments[k]);
 	}
+	return 0;
+}
 
+int bundle_bridge::set_circ_fragment_lengths()
+{
 	for(int k = 0; k < circ_fragments.size(); k++)
 	{
 		set_fragment_length(circ_fragments[k]);
@@ -1159,6 +1332,19 @@ int bundle_bridge::set_fragment_length(fragment &fr)
 
 	fr.lpos = fr.h1->pos;
 	fr.rpos = fr.h2->rpos;
+	
+	if(fr.h1->vlist.size() % 2 != 0)
+	{
+		printf("debug vlist\n");
+		printf("size %lu\n",fr.h1->vlist.size());	
+		return 0;
+	}
+	if(fr.h2->vlist.size() % 2 != 0)
+	{
+		printf("debug vlist\n");
+		printf("size %lu\n",fr.h2->vlist.size());
+		return 0;
+	}
 
 	vector<int> v1 = decode_vlist(fr.h1->vlist);
 	vector<int> v2 = decode_vlist(fr.h2->vlist);
@@ -3074,6 +3260,7 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		circ.circRNA_id = circRNA_id;
 		circ.seqname = chrm_id;
 		circ.source = "scallop2";
+		if(fr2.h1->is_fake == true || fr2.h2->is_fake == true) circ.source = "scallop2_MC";
 		circ.feature = "circRNA";
 		circ.gene_id = "gene"; //later change this to bundle id
 		circ.transcript_id = fr1.h1->qname; //use hit qname, same for all hits in fragments
@@ -3164,6 +3351,7 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		circ.circRNA_id = circRNA_id;
 		circ.seqname = chrm_id;
 		circ.source = "scallop2";
+		if(fr2.h1->is_fake == true || fr2.h2->is_fake == true) circ.source = "scallop2_MC";
 		circ.feature = "circRNA";
 		circ.gene_id = "gene"; //later change this to bundle id
 		circ.transcript_id = fr1.h1->qname; //use hit qname, same for all hits in fragments

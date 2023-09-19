@@ -18,6 +18,7 @@ fragment::fragment(hit *x1, hit *x2)
 	is_compatible = 0;
 	pi = -1;
 	fidx = -1;
+	fake_hit_index = -1;
 	b1 = false;
 	b2 = false;
 	k1l = 0;
@@ -27,12 +28,13 @@ fragment::fragment(hit *x1, hit *x2)
 	lpos = -1;
 	rpos = -1;
 	cnt = 1;
+	paths.clear();
 }
 
 int fragment::print(int index)
 {
-	printf("fragment %d: name = %s, cnt = %d, lpos = %d, rpos = %d, len = %d, k1l = %d, k1r = %d, k2l = %d, k2r = %d, b1 = %c, b2 = %c, v1 = %lu, v2 = %lu, #paths = %lu, frag_type = %d, pi = %d, fidx = %d,type = %d, is_compatible = %d\n",
-			index, h1->qname.c_str(), cnt, lpos, rpos, rpos - lpos, k1l, k1r, k2l, k2r, b1 ? 'T' : 'F', b2 ? 'T' : 'F', h1->vlist.size(), h2->vlist.size(), paths.size(), frag_type, pi, fidx, type, is_compatible);
+	printf("fragment %d: name = %s, cnt = %d, lpos = %d, rpos = %d, len = %d, k1l = %d, k1r = %d, k2l = %d, k2r = %d, b1 = %c, b2 = %c, v1 = %lu, v2 = %lu, #paths = %lu, frag_type = %d, pi = %d, fidx = %d,type = %d, is_compatible = %d, fake_hit_index = %d\n",
+			index, h1->qname.c_str(), cnt, lpos, rpos, rpos - lpos, k1l, k1r, k2l, k2r, b1 ? 'T' : 'F', b2 ? 'T' : 'F', h1->vlist.size(), h2->vlist.size(), paths.size(), frag_type, pi, fidx, type, is_compatible, fake_hit_index);
 	h1->print();
 	h2->print();
 

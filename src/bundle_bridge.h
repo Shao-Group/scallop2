@@ -73,6 +73,8 @@ public:
 	int min(int x, int y, int z);
 	int get_edit_distance(string s, string t);
 	int get_more_chimeric();
+	int create_fake_fragments();
+	int create_fake_supple(int fr_index, fragment &fr, int32_t soft_len, int32_t pos1, int32_t pos2);
 	int fix_alignment_boundaries();
 
 	int build_circ_fragments();
@@ -91,9 +93,11 @@ public:
 	int align_hits_transcripts();
 	int align_hit(const map<int32_t, int> &m, const hit &h, vector<int> &v);
 	int align_transcript(const map<int32_t, int> &m, const transcript &t, vector<int> &v);
+	int align_fake_hits();
 	int remove_tiny_boundaries();
 	int remove_tiny_boundary(hit &h);
 	int set_fragment_lengths();
+	int set_circ_fragment_lengths();
 	int set_fragment_length(fragment &fr);
 	int index_references();
 	int locate_region(int32_t x);

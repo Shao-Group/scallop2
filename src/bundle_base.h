@@ -30,6 +30,7 @@ public:
 	int32_t rpos;					// the rightmost boundary on reference
 	char strand;					// strandness
 	vector<hit> hits;				// hits
+	vector<hit>fake_hits;			// fake hits for circRNA
 	split_interval_map mmap;		// matched interval map
 	split_interval_map imap;		// indel interval map
 

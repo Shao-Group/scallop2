@@ -18,6 +18,7 @@ bundle_base::bundle_base()
 	lpos = 1 << 30;
 	rpos = 0;
 	strand = '.';
+	fake_hits.clear();
 }
 
 bundle_base::~bundle_base()

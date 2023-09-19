@@ -33,6 +33,68 @@ hit::hit(int32_t p)
 }
 */
 
+hit::hit()
+{
+	flag = 0;
+	bin = 0;
+	qual = 0;
+	l_extranul = 0;
+
+	hid = 0;
+	qname = "";
+	qhash = 0;
+	paired = false;
+	bridged = false;
+	next = NULL;
+	suppl = NULL;
+
+	supple_pos = 0;
+	is_reverse_overlap = false;
+	is_fake = false;
+	fake_hit_index = -1;
+	
+	left_cigar = '.';					// S=soft clip, H=hard clip, M=match, .=default
+	right_cigar = '.';					// S=soft clip, H=hard clip, M=match, .=default
+	left_cigar_len = 0;
+	right_cigar_len = 0;
+	first_pos = 0;						//.H.M. the three dots are the 1st, 2nd, and 3rd pos respectively
+	second_pos = 0;
+	third_pos = 0;
+
+	l_qseq = 0;
+	seq = "";
+	soft_clip_seqs.clear();
+
+	rpos = 0;
+	qlen = 0;
+	nh = 0;
+	hi = 0;
+	nm = 0;
+	sa = "";
+
+	cigar_vector.clear();
+	spos.clear();
+	vlist.clear();
+	itvm.clear();
+
+	itvi.clear();
+	itvd.clear();
+	
+	concordant = true;
+	paired = false;
+	bridged = false;
+	strand = '.';
+	xs = '.';
+	ts = '.';
+	l_qseq = 0;
+	seq = "";
+	soft_clip_seqs.clear();
+
+	umi = "";
+	pi = 0;
+	fidx = 0;
+}
+
 hit& hit::operator=(const hit &h)
 {	
 	bam1_core_t::operator=(h);
@@ -51,19 +113,23 @@ hit& hit::operator=(const hit &h)
 	supple_pos = h.supple_pos;
 	suppl = h.suppl;
 	is_reverse_overlap = h.is_reverse_overlap;
-	end = '.';
+	is_fake = h.is_fake;
+	fake_hit_index = h.fake_hit_index;
 
 	itvm = h.itvm;
 	itvi = h.itvi;
 	itvd = h.itvd;
 
 	vlist = h.vlist;
+	concordant = h.concordant;
 	paired = h.paired;
 	bridged = h.bridged;
 	qhash = h.qhash;
 	next = h.next;
 
 	umi = h.umi;
+	pi = h.pi;
+	fidx = h.fidx;
 
 	cigar_vector = h.cigar_vector;
 	left_cigar = h.left_cigar;					// S=soft clip, H=hard clip, M=match, .=default
@@ -98,20 +164,24 @@ hit::hit(const hit &h)
 	sa = h.sa;
 	supple_pos = h.supple_pos;
 	is_reverse_overlap = h.is_reverse_overlap;
+	is_fake = h.is_fake;
+	fake_hit_index = h.fake_hit_index;
 	suppl = h.suppl;
-	end = h.end;
 
 	itvm = h.itvm;
 	itvi = h.itvi;
 	itvd = h.itvd;
 
 	vlist = h.vlist;
+	concordant = h.concordant;
 	paired = h.paired;
 	bridged = h.bridged;
 	qhash = h.qhash;
 	next = h.next;
 
 	umi = h.umi;
+	pi = h.pi;
+	fidx = h.fidx;
 
 	cigar_vector = h.cigar_vector;
 	left_cigar = h.left_cigar;					// S=soft clip, H=hard clip, M=match, .=default
@@ -137,10 +207,11 @@ hit::hit(bam1_t *b, int id)
 	bridged = false;
 	next = NULL;
 	suppl = NULL;
-	end = '.';
 
 	supple_pos = 0;
 	is_reverse_overlap = false;
+	is_fake = false;
+	fake_hit_index = -1;
 	
 	left_cigar = '.';					// S=soft clip, H=hard clip, M=match, .=default
 	right_cigar = '.';					// S=soft clip, H=hard clip, M=match, .=default
@@ -648,8 +719,12 @@ bool hit::operator<(const hit &h) const
 int hit::print() const
 {
 	// print basic information
-	printf("Hit %s: hid = %d, [%d-%d), mpos = %d, flag = %d, quality = %d, strand = %c, xs = %c, ts = %c, isize = %d, qlen = %d, hi = %d, nh = %d, umi = %s, sa = %s, supple_pos = %d, bridged = %c, paired = %c, spos_size = %zu\n", qname.c_str(), hid, pos, rpos, mpos, flag, qual, strand, xs, ts, isize, qlen, hi, nh, umi.c_str(), sa.c_str(), supple_pos, bridged ? 'T' : 'F',paired ? 'T' : 'F', spos.size());
-
+	printf("Hit %s: hid = %d, [%d-%d), mpos = %d, flag = %d, quality = %d, strand = %c, xs = %c, ts = %c, isize = %d, qlen = %d, hi = %d, nh = %d, umi = %s, sa = %s, supple_pos = %d, bridged = %c, paired = %c, is_fake = %c, fake_hit_index = %d, spos_size = %zu\n", qname.c_str(), hid, pos, rpos, mpos, flag, qual, strand, xs, ts, isize, qlen, hi, nh, umi.c_str(), sa.c_str(), supple_pos, bridged ? 'T' : 'F',paired ? 'T' : 'F', is_fake ? 'T' : 'F', fake_hit_index, spos.size());
+	//printf("vlist size %lu\n",vlist.size());
+	for(int i=0;i<vlist.size();i++)
+	{
+		printf("%d,",vlist[i]);
+	}
 	/*
 	printf(" start position (%d - )\n", pos);
 	for(int i = 0; i < spos.size(); i++)
@@ -714,6 +789,7 @@ vector<int> encode_vlist(const vector<int> &v)
 vector<int> decode_vlist(const vector<int> &v)
 {
 	vector<int> vv;
+	vv.clear();
 	assert(v.size() % 2 == 0);
 	if(v.size() <= 0) return vv;
 

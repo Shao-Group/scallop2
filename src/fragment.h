@@ -30,6 +30,7 @@ public:
 	int is_compatible; //1: comaptible 3 segments case h1 has a supple, 2: compatible 3 segments case h2 has a supple
 	int pi; 			//partner fragment index for circ RNA building
 	int fidx;			//own fragments index
+	int fake_hit_index; //used to keep track of fragment for which fake hit is created, stores index of fake_hit
 
 	int cnt;			// count of the equal hits
 	int32_t lpos;		// equals to hits[k1].pos

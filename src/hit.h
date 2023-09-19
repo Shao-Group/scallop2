@@ -49,6 +49,7 @@ struct hit : public bam1_core_t
 {
 public:
 	//hit(int32_t p);
+	hit();
 	hit(bam1_t *b, int id);
 	hit(const hit &h);
 	bool operator<(const hit &h) const;
@@ -82,7 +83,8 @@ public:
 	bool is_reverse_overlap;				// whether this is a RO read
 	size_t qhash;							// hash code for qname
 	hit *suppl;								// supplementary hit
-	char end;								// left end 'L', right end 'R'
+	bool is_fake;							// whether this is a fake hit
+	int fake_hit_index; 					//used to keep track of fragment for which fake hit is created, stores index of partner fragment
 
 	// scallop+coral
 	vector<int64_t> itvm;					// matched interval

@@ -175,7 +175,7 @@ int assembler::assemble()
 	printf("size of HS_both_side_reads = %lu\n",HS_both_side_reads.size());
 	printf("size of chimeric_reads = %lu\n",chimeric_reads.size());
 	printf("#RO_count hits = %d\n",RO_count);
-	write_RO_info();
+	//write_RO_info();
 
 	remove_long_exon_circ_trsts();
 	remove_duplicate_circ_trsts();
@@ -353,7 +353,7 @@ int assembler::remove_duplicate_circ_trsts()
 		circular_transcript &circ = itn->second.first;
 		string hash = itn->first;
 
-		if(circ.source == "scallop2_RO") continue;
+		if(circ.source != "scallop2") continue;
 
 		vector<string> split_coordinates = split_str(hash,"|");
 
@@ -419,6 +419,71 @@ int assembler::remove_duplicate_circ_trsts()
 		string hash = itn->first;
 
 		if(circ.source != "scallop2_RO") continue;
+
+		vector<string> split_coordinates = split_str(hash,"|");
+
+		//creating new hash with middle cordinates except first and last coordinate
+		string intron_chain_hash = "";
+		for(int i=3;i<split_coordinates.size()-2;i++)
+		{
+			intron_chain_hash = intron_chain_hash + split_coordinates[i] + "|";
+		}
+
+		int flag_collision = 0;
+		map<string, pair<circular_transcript, int>>::iterator itn1;
+		for(itn1 = circ_trst_merged_map.begin(); itn1 != circ_trst_merged_map.end(); itn1++)
+		{
+			//don't merge RO circRNAs for now
+			/*if(circ.source == "scallop2_RO")
+			{	
+				break;
+			}*/
+
+			circular_transcript &old_circ = itn1->second.first;
+			string old_hash = itn1->first;
+
+			//don't check with already existing RO circRNAs
+			//if(old_circ.source == "scallop2_RO") continue;
+			
+			vector<string> old_split_coordinates = split_str(old_hash,"|");
+			string old_intron_chain_hash = "";
+			for(int i=3;i<old_split_coordinates.size()-2;i++)
+			{
+				old_intron_chain_hash = old_intron_chain_hash + old_split_coordinates[i] + "|";
+			}
+
+			//printf("%s & %s\n",circ.circRNA_id.c_str(),old_circ.circRNA_id.c_str());
+			//printf("start diff %d. end diff %d, hash1 %s, hash2 %s\n",abs(circ.start-old_circ.start),abs(circ.end-old_circ.end),intron_chain_hash.c_str(),old_intron_chain_hash.c_str());
+
+			int end_diff = 50;
+			//&& abs(circ.start-old_circ.start) < end_diff && abs(circ.end-old_circ.end) < end_diff 
+			if((intron_chain_hash != "" && intron_chain_hash == old_intron_chain_hash && abs(circ.start-old_circ.start) < end_diff && abs(circ.end-old_circ.end) < end_diff) || (intron_chain_hash == "" && intron_chain_hash == old_intron_chain_hash && abs(circ.start-old_circ.start) < end_diff && abs(circ.end-old_circ.end) < end_diff))
+			{
+				if(circ.coverage > old_circ.coverage)
+				{
+					circ_trst_merged_map.erase(itn1->first);
+					circ_trst_merged_map.insert(pair<string,pair<circular_transcript, int>>(circ.circRNA_id,pair<circular_transcript, int>(circ,circ.coverage)));
+					flag_collision = 1;
+					break;
+				}
+				flag_collision = 1;
+			}
+		}
+
+		if(flag_collision == 0) //end diff and intron chain condition did not match for any entry in circ_trst_merged_map, so enter separately
+		{
+			circ_trst_merged_map.insert(pair<string,pair<circular_transcript, int>>(circ.circRNA_id,pair<circular_transcript, int>(circ,circ.coverage)));
+		}
+	}
+
+	//merge circRNAs that have different end boundaries but same intron chain into that with higher coverage (more chimeric)
+	for(itn = circ_trst_map.begin(); itn != circ_trst_map.end(); itn++)
+	{
+		//printf("start of check\n");
+		circular_transcript &circ = itn->second.first;
+		string hash = itn->first;
+
+		if(circ.source != "scallop2_MC") continue;
 
 		vector<string> split_coordinates = split_str(hash,"|");
 
@@ -791,6 +856,7 @@ int assembler::write_circular()
 	for(itn = circ_trst_merged_map.begin(); itn != circ_trst_merged_map.end(); itn++)
 	{
 		circular_transcript &circ = itn->second.first;
+		//if(circ.source != "scallop2_MC") continue;
 		circ.write(fcirc);
 	}
 
