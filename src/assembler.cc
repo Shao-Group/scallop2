@@ -232,10 +232,8 @@ int assembler::process(int n)
 		bundle bd(bb, ref, RO_reads_map, fai);
 
 		RO_count += bd.br.RO_count;
-		//if(bd.junctions.size() != 0)
-		//{
+
 		circular_trsts.insert(circular_trsts.end(), bd.br.circ_trsts.begin(), bd.br.circ_trsts.end());
-		//}
 
 		circular_trsts_HS.insert(circular_trsts_HS.end(), bd.br.circ_trsts_HS.begin(), bd.br.circ_trsts_HS.end());
 
@@ -611,7 +609,7 @@ int assembler::read_cirifull_file()
 
         split(line, '\t', row_values);
         //cout << row_values[0] << "," << row_values[1] << "," << row_values[2] << endl;
-		if(row_values.size() == 0) printf("row values zero\n");
+		//if(row_values.size() == 0) printf("row values zero\n");
 
 		RO_read ro_read;
 		ro_read.read_name = row_values[0];
@@ -627,10 +625,13 @@ int assembler::read_cirifull_file()
 			vector<string> positions;
 			split(colon_separate[1], '|', positions);
 
-			//printf("pos %s, rpos %s\n", positions[0].c_str(), positions[1].c_str());
-			ro_read.BSJ_pos = stoi(positions[0]);
-			ro_read.BSJ_rpos = stoi(positions[1]);
-			//printf("pos %d, rpos %d\n", ro_read.BSJ_pos, ro_read.BSJ_rpos);
+			if(positions.size() > 1)
+			{
+				//printf("pos %s, rpos %s\n", positions[0].c_str(), positions[1].c_str());
+				ro_read.BSJ_pos = stoi(positions[0]);
+				ro_read.BSJ_rpos = stoi(positions[1]);
+				//printf("pos %d, rpos %d\n", ro_read.BSJ_pos, ro_read.BSJ_rpos);
+			}
 		}
 
 		RO_reads.push_back(ro_read);

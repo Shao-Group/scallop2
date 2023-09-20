@@ -483,7 +483,7 @@ int bundle_bridge::get_more_chimeric()
 		if(fr.h1->pos <= fr.h2->pos && (fr.h1->cigar_vector[0].first == 'S' && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first != 'S'))
 		{
 			int32_t soft_len = fr.h1->cigar_vector[0].second;
-			if(soft_len < 20) continue;
+			if(soft_len < 10) continue;
 
 			/*if(strcmp(fr.h1->qname.c_str(),"simulate:150344")==0)
 			{
@@ -498,6 +498,7 @@ int bundle_bridge::get_more_chimeric()
 				int32_t pos2 = jc.lpos;
 
 				if(jc.lpos <= fr.h2->rpos || jc.lpos <= fr.h1->rpos) continue;
+				//if(abs(jc.lpos-fr.h2->rpos) > 100000) continue;
 
 				/*if(strcmp(fr.h1->qname.c_str(),"simulate:150344")==0)
 				{
@@ -563,12 +564,7 @@ int bundle_bridge::get_more_chimeric()
 		else if(fr.h1->pos <= fr.h2->pos && (fr.h1->cigar_vector[0].first != 'S' && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'S'))
 		{
 			int32_t soft_len = fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second;
-			if(soft_len < 20) continue;
-
-			/*if(strcmp(fr.h1->qname.c_str(),"simulate:689702")==0)
-			{
-				printf("simulate:689702 jc size = %lu\n",junctions.size());
-			}*/
+			if(soft_len < 10) continue;
 
 			int jc_flag = 0;
 			for(int j=0;j<junctions.size();j++)
@@ -577,40 +573,15 @@ int bundle_bridge::get_more_chimeric()
 				int32_t pos1 = jc.rpos;
 				int32_t pos2 = jc.rpos+soft_len-1;
 
-
 				if(jc.rpos >= fr.h2->pos || jc.rpos >= fr.h1->pos) continue;
-
-				/*if(strcmp(fr.h1->qname.c_str(),"simulate:689702")==0)
-				{
-					printf("jc lpos = %d, jc rpos = %d\n",jc.lpos,jc.rpos);
-				}*/
+				//if(abs(fr.h1->pos-jc.rpos) > 100000) continue;
 
 				string junc_seq = get_fasta_seq(pos1,pos2);
-
-				//printf("soft clips size %lu\n",fr.h2->soft_clip_seqs.size());
-				/*if(strcmp(fr.h2->qname.c_str(),"simulate:12715") == 0)
-				{
-					printf("error read\n");
-					fr.h2->print();
-				}*/
-				/*if(fr.h2->soft_clip_seqs.size() == 4)
-				{
-					printf("full seq = %s\n",fr.h2->seq.c_str());
-					printf("read start:%s\n",fr.h2->soft_clip_seqs[0].c_str());
-					printf("read start RC:%s\n",fr.h2->soft_clip_seqs[1].c_str());
-					printf("read end:%s\n",fr.h2->soft_clip_seqs[2].c_str());
-					printf("read end RC:%s\n",fr.h2->soft_clip_seqs[3].c_str());
-				}*/
 
 				for(int i=0;i<fr.h2->soft_clip_seqs.size();i++)
 				{
 					//printf("str1 %s str2 %s\n",junc_seq.c_str(),fr.h2->soft_clip_seqs[i].c_str());
 					int edit = get_edit_distance(junc_seq,fr.h2->soft_clip_seqs[i]);
-					/*if(strcmp(fr.h1->qname.c_str(),"simulate:689702")==0)
-					{
-						printf("str1 %s str2 %s\n",junc_seq.c_str(),fr.h2->soft_clip_seqs[i].c_str());
-						printf("simulate:689702: edit = %d\n",edit);
-					}*/
 
 					if(edit == 0 || edit == 1)
 					{
