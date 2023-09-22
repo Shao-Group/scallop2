@@ -93,6 +93,9 @@ int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 	//create fragments from fake hits
 	create_fake_fragments();
 
+	// call remove_tiny_boundary for the newly 
+	// created (fake) hits here
+
 	set_circ_fragment_lengths();
 
 	bridger bdg(this);
@@ -1175,6 +1178,12 @@ int bundle_bridge::build_junctions()
 		else junc_map.insert(make_pair(it->first, jc.strand));
 	}
 	//printf("Junctions size: %d\n", junctions.size());
+
+	// do some filtering here?
+	// let M be the maximum count among all junctions
+	// keep a junction J if: 
+	// either J.count >= ratio * M, say ratio = 0.01, 
+	// or J.count >= a fixed threshold, say 10 
 	return 0;
 }
 
