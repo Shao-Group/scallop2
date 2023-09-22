@@ -82,7 +82,7 @@ int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 	get_RO_frags_with_HS();
 
 	//create circ fragments from frags with H/S on both sides using our data
-	get_frags_with_HS_from_data();
+	//get_frags_with_HS_from_data();
 
 	//find more chimeric reads from soft clip reads
 	get_more_chimeric();
@@ -613,7 +613,91 @@ int bundle_bridge::get_more_chimeric()
 		{
 			continue;
 		}
+
+		//if h2 pos is to the left of h1 pos
+		if(fr.h1->pos > fr.h2->pos) continue;
+
+		int boundary_match = 0;
 		
+		if(fr.h1->pos <= fr.h2->pos && (fr.h1->cigar_vector[0].first == 'S' && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first != 'S'))
+		{
+			//check if soft clip end matches a read junction
+			for(int j=0;j<junctions.size();j++)
+			{
+				junction jc = junctions[j];
+
+				if(jc.rpos == fr.h1->pos)
+				{
+					//printf("jc.rpos = %d\n",jc.rpos);
+					boundary_match = 1;
+					break;
+				}
+			}
+
+			//check if soft clip end matches a ref junction
+			int temp_flag = 0;
+			for(int t=0;t<ref_trsts.size();t++)
+			{
+				transcript trst = ref_trsts[t];
+				vector<PI32> chain = trst.get_intron_chain();
+
+				for(int p=0;p<chain.size();p++)
+				{
+					if(chain[p].second == fr.h1->pos)
+					{
+						boundary_match = 1;
+						temp_flag = 1;
+						break;
+					}
+				}
+
+				if(temp_flag == 1)
+				{
+					break;
+				}
+			}
+		}
+		else if(fr.h1->pos <= fr.h2->pos && (fr.h1->cigar_vector[0].first != 'S' && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'S'))
+		{
+			//check if soft clip end matches a read junction
+			for(int j=0;j<junctions.size();j++)
+			{
+				junction jc = junctions[j];
+
+				if(jc.lpos == fr.h2->rpos)
+				{
+					//printf("jc.rpos = %d\n",jc.rpos);
+					boundary_match = 1;
+					break;
+				}
+			}
+
+			//check if soft clip end matches a ref junction
+			int temp_flag = 0;
+			for(int t=0;t<ref_trsts.size();t++)
+			{
+				transcript trst = ref_trsts[t];
+				vector<PI32> chain = trst.get_intron_chain();
+
+				for(int p=0;p<chain.size();p++)
+				{
+					if(chain[p].first == fr.h2->rpos)
+					{
+						boundary_match = 1;
+						temp_flag = 1;
+						break;
+					}
+				}
+
+				if(temp_flag == 1)
+				{
+					break;
+				}
+			}
+		}
+
+		if(boundary_match == 0) continue;
+
 		//printf("more chimeric instances:\n");
 		if(fr.h1->pos <= fr.h2->pos && (fr.h1->cigar_vector[0].first == 'S' && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first != 'S'))
 		{
@@ -1419,6 +1503,15 @@ int bundle_bridge::create_fake_fragments()
 				}
 			}
 		}
+	}
+	return 0;
+}
+
+int bundle_bridge::remove_tiny_boundaries_fake_hits()
+{
+	for(int i = 0; i < bb.fake_hits.size(); i++)
+	{
+		remove_tiny_boundary(bb.fake_hits[i]);
 	}
 	return 0;
 }

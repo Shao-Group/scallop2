@@ -97,6 +97,7 @@ public:
 	int align_transcript(const map<int32_t, int> &m, const transcript &t, vector<int> &v);
 	int align_fake_hits();
 	int remove_tiny_boundaries();
+	int remove_tiny_boundaries_fake_hits();
 	int remove_tiny_boundary(hit &h);
 	int set_fragment_lengths();
 	int set_circ_fragment_lengths();
