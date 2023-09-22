@@ -19,6 +19,7 @@ fragment::fragment(hit *x1, hit *x2)
 	pi = -1;
 	fidx = -1;
 	fake_hit_index = -1;
+	HS_frag = false;
 	b1 = false;
 	b2 = false;
 	k1l = 0;

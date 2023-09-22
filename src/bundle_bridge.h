@@ -69,6 +69,7 @@ public:
 	int build_fragments();
 	int get_frags_with_HS_on_both_sides();
 	int get_RO_frags_with_HS();
+	int get_frags_with_HS_from_data();
 	string get_fasta_seq(int32_t pos1, int32_t pos2);
 	int min(int x, int y, int z);
 	int get_edit_distance(string s, string t);
@@ -81,6 +82,7 @@ public:
 	int extract_all_non_supple_HS_hits();
 	int extract_nonsupple_HS_hits();
 	int extract_RO_circRNA();
+	int extract_HS_frags_circRNA();
 	int extract_circ_fragment_pairs();
 	int print_circ_fragment_pairs();
 	int join_circ_fragment_pairs(int32_t length_high);

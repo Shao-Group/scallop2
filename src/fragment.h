@@ -31,6 +31,7 @@ public:
 	int pi; 			//partner fragment index for circ RNA building
 	int fidx;			//own fragments index
 	int fake_hit_index; //used to keep track of fragment for which fake hit is created, stores index of fake_hit
+	bool HS_frag;        //used to keep track whether this is a non chimeric frag with HS on both sides
 
 	int cnt;			// count of the equal hits
 	int32_t lpos;		// equals to hits[k1].pos

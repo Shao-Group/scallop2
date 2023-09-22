@@ -78,13 +78,19 @@ int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 	//RO reads statistics
 	//get_frags_with_HS_on_both_sides();
 
-	//create circ fragments from RO reads with H/S on both sides
+	//create circ fragments from RO reads with H/S on both sides uisng ciri-full
 	get_RO_frags_with_HS();
+
+	//create circ fragments from frags with H/S on both sides using our data
+	get_frags_with_HS_from_data();
 
 	//find more chimeric reads from soft clip reads
 	get_more_chimeric();
+
 	//create vlist of fake hits
 	align_fake_hits();
+
+	//create fragments from fake hits
 	create_fake_fragments();
 
 	set_circ_fragment_lengths();
@@ -94,6 +100,7 @@ int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 	bdg.bridge_circ_fragments();
 
 	extract_RO_circRNA();
+	extract_HS_frags_circRNA();
 
 	extract_circ_fragment_pairs();
 	//print_circ_fragment_pairs();
@@ -169,6 +176,131 @@ int bundle_bridge::get_frags_with_HS_on_both_sides()
 			string chrm_id = bb.chrm.c_str();
 			string name = bb.chrm+":"+fr.h1->qname;
 			chimeric_reads.push_back(name);
+		}
+	}
+
+	return 0;
+}
+
+int bundle_bridge::get_frags_with_HS_from_data()
+{
+	int junc_range = 10;
+
+	for(int k = 0; k < fragments.size(); k++)
+	{
+		fragment fr = fragments[k];
+
+		//has a supple
+		if(fr.h1->suppl != NULL || fr.h2->suppl != NULL)
+		{
+			continue;
+		}
+
+		//is a supple
+		if((fr.h1->flag & 0x800) >= 1 || (fr.h2->flag & 0x800) >= 1) continue;
+
+		int left_boundary_flag = 0;
+		int right_boundary_flag = 0;
+
+		//if(fr.h1->pos <= fr.h2->pos && (fr.h1->cigar_vector[0].first == 'S' || fr.h1->cigar_vector[0].first == 'H') && (fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'S' || fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'H'))
+		if(fr.h1->pos <= fr.h2->pos && (fr.h1->cigar_vector[0].first == 'S') && (fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'S'))
+		{
+			if(fr.h1->cigar_vector[0].second < 5 && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second < 5) continue;
+
+			printf("HS paired hit case 1: pos %d, rpos %d\n",fr.lpos,fr.rpos);
+			printf("chrm %s\n",bb.chrm.c_str());
+			printf("Hit 1: ");
+			fr.h1->print();
+
+			//checking if reads junction matches left boundary
+			for(int j=0;j<junctions.size();j++)
+			{
+				junction jc = junctions[j];
+
+				//if(jc.rpos <= fr.h1->pos+junc_range && jc.rpos >= fr.h1->pos-junc_range)
+				if(jc.rpos == fr.h1->pos)
+				{
+					printf("reads junction present left %d\n",jc.rpos);
+					left_boundary_flag = 1;
+					break;
+				}
+			}
+
+			//checking if ref junction matches left boundary
+			int temp_flag = 0;
+			for(int t=0;t<ref_trsts.size();t++)
+			{
+				transcript trst = ref_trsts[t];
+				vector<PI32> chain = trst.get_intron_chain();
+
+				for(int k=0;k<chain.size();k++)
+				{
+					//if(chain[k].second <= fr.h1->pos+junc_range && chain[k].second >= fr.h1->pos-junc_range)
+					if(chain[k].second == fr.h1->pos)
+					{
+						printf("ref junction present left %d\n",chain[k].second);
+						temp_flag = 1;
+						left_boundary_flag = 1;
+						break;
+					}
+				}
+
+				if(temp_flag == 1)
+				{
+					break;
+				}
+			}
+
+			printf("Hit 2: ");
+			fr.h2->print();
+
+			//checking if reads junction matches right boundary
+			for(int j=0;j<junctions.size();j++)
+			{
+				junction jc = junctions[j];
+
+				//if(jc.lpos <= fr.h2->rpos+junc_range && jc.lpos >= fr.h2->rpos-junc_range)
+				if(jc.lpos == fr.h2->rpos)
+				{
+					printf("reads junction present right %d\n",jc.lpos);
+					right_boundary_flag = 1;
+					break;
+				}
+			}
+
+			//checking if ref junction matches right boundary
+			temp_flag = 0;
+			for(int t=0;t<ref_trsts.size();t++)
+			{
+				transcript trst = ref_trsts[t];
+				vector<PI32> chain = trst.get_intron_chain();
+
+				for(int k=0;k<chain.size();k++)
+				{
+					//if(chain[k].first <= fr.h2->rpos+junc_range && chain[k].first >= fr.h2->rpos-junc_range)
+					if(chain[k].first == fr.h2->rpos)
+					{
+						printf("ref junction present right %d\n",chain[k].first);
+						right_boundary_flag = 1;
+						temp_flag = 1;
+						break;
+					}
+				}
+
+				if(temp_flag == 1)
+				{
+					break;
+				}
+			}
+
+			printf("HS frags: left_boundary_flag = %d, right_boundary_flag = %d\n\n",left_boundary_flag,right_boundary_flag);
+		
+		}
+
+		if(left_boundary_flag == 1 && right_boundary_flag == 1)
+		{
+			fr.HS_frag = true;
+			circ_fragments.push_back(fr);
 		}
 	}
 
@@ -642,6 +774,15 @@ int bundle_bridge::get_more_chimeric()
 int bundle_bridge::create_fake_supple(int fr_index, fragment &fr, int32_t soft_len, int32_t pos1, int32_t pos2)
 {
 	hit new_hit;
+
+	if(bb.fake_hits.size() == 0 && bb.hits.size() > 0)
+	{
+		new_hit.hid = bb.hits[bb.hits.size()-1].hid + 1;
+	}
+	else if(bb.fake_hits.size() > 0)
+	{
+		new_hit.hid = bb.fake_hits[bb.fake_hits.size()-1].hid + 1;
+	}
 
 	//hit id
 
@@ -2574,6 +2715,93 @@ int bundle_bridge::extract_nonsupple_HS_hits()
 			//circ.print(0);
 			circ_trsts.push_back(circ);
 		}
+	}
+
+	return 0;
+}
+
+int bundle_bridge::extract_HS_frags_circRNA()
+{
+	for(int j=0;j<circ_fragments.size();j++)
+	{
+		fragment &fr = circ_fragments[j];
+
+		//has a supple
+		if(fr.h1->suppl != NULL || fr.h2->suppl != NULL)
+		{
+			continue;
+		}
+
+		//is a supple
+		if((fr.h1->flag & 0x800) >= 1 || (fr.h2->flag & 0x800) >= 1) continue;
+
+		if(fr.HS_frag == false) continue;
+
+		if(fr.paths.size() != 1) continue;
+
+		//printf("Some HS circRNA\n");
+
+		vector<int> v = decode_vlist(fr.paths[0].v);
+
+		string chrm_id = bb.chrm.c_str();
+		string circRNA_id = "chrm" + chrm_id + ":" + tostring(fr.lpos) + "|" + tostring(fr.rpos) + "|";
+		//printf("circularRNA = %s\n",circRNA_id.c_str());
+		
+		char strand = bb.strand;
+		int32_t start = fr.lpos;
+		int32_t end = fr.rpos;
+    	vector<int> circ_path;
+		circ_path.insert(circ_path.begin(), v.begin(), v.end());
+
+		circular_transcript circ;
+		circ.circRNA_id = circRNA_id;
+		circ.seqname = chrm_id;
+		circ.source = "scallop2_HS";
+		circ.feature = "circRNA";
+		circ.gene_id = "gene"; //later change this to bundle id
+		circ.transcript_id = fr.h1->qname; //use hit qname, same for all hits in fragments
+		circ.start = start;
+		circ.end = end;
+		circ.circ_path.insert(circ.circ_path.begin(),circ_path.begin(),circ_path.end());
+		circ.strand = infer_circ_strand(circ.circ_path);
+		
+		for(int i=0;i<circ.circ_path.size();i++)
+		{
+			circ.circ_path_regions.push_back(regions[circ.circ_path[i]]);
+		}
+
+		join_interval_map jmap;
+		for(int k = 0; k < circ.circ_path_regions.size(); k++)
+		{
+			int32_t p1 = circ.circ_path_regions[k].lpos;
+			int32_t p2 = circ.circ_path_regions[k].rpos;
+			jmap += make_pair(ROI(p1, p2), 1);
+		}
+
+		for(JIMI it = jmap.begin(); it != jmap.end(); it++)
+		{
+			region r(lower(it->first), upper(it->first), '.', '.');
+			circ.merged_regions.push_back(r);
+		}
+
+		if(circ.merged_regions.size() == 1)
+		{
+			circ.merged_regions[0].lpos = circ.start;
+			circ.merged_regions[0].rpos = circ.end; 
+		}
+		else if(circ.merged_regions.size() > 1)
+		{
+			circ.merged_regions[0].lpos = circ.start;
+			circ.merged_regions[circ.merged_regions.size()-1].rpos = circ.end; 			
+		}
+
+		for(int i=0;i<circ.merged_regions.size();i++)
+    	{
+			region r = circ.merged_regions[i];
+			circ.circRNA_id = circ.circRNA_id + tostring(r.lpos) + "|" + tostring(r.rpos) + "|";
+		}
+
+		circ_trsts.push_back(circ); 
 	}
 
 	return 0;
