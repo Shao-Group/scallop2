@@ -87,6 +87,9 @@ int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 	align_fake_hits();
 	create_fake_fragments();
 
+	// call remove_tiny_boundary for the newly 
+	// created (fake) hits here
+
 	set_circ_fragment_lengths();
 
 	bridger bdg(this);
