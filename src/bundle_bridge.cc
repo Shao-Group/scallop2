@@ -1037,6 +1037,12 @@ int bundle_bridge::build_junctions()
 		else junc_map.insert(make_pair(it->first, jc.strand));
 	}
 	//printf("Junctions size: %d\n", junctions.size());
+
+	// do some filtering here?
+	// let M be the maximum count among all junctions
+	// keep a junction J if: 
+	// either J.count >= ratio * M, say ratio = 0.01, 
+	// or J.count >= a fixed threshold, say 10 
 	return 0;
 }
 
