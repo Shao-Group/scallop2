@@ -95,6 +95,7 @@ int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 
 	// call remove_tiny_boundary for the newly 
 	// created (fake) hits here
+	remove_tiny_boundaries_fake_hits();
 
 	set_circ_fragment_lengths();
 
@@ -1198,7 +1199,7 @@ int bundle_bridge:: set_chimeric_cigar_positions()
 int bundle_bridge::build_junctions()
 {
 	int min_max_boundary_quality = min_mapping_quality; //building a list of all splice pos and the hit index that includes the splice pos
-	map< int64_t, vector<int> > m; // map of spos against vector of bundle base indices
+	map< int64_t, vector<int> > m; // map of spos against vector of hits indices
 	for(int i = 0; i < bb.hits.size(); i++)
 	{
 		vector<int64_t> v = bb.hits[i].spos;
@@ -1261,13 +1262,51 @@ int bundle_bridge::build_junctions()
 		if(junc_map.find(it->first) != junc_map.end()) continue;
 		else junc_map.insert(make_pair(it->first, jc.strand));
 	}
-	//printf("Junctions size: %d\n", junctions.size());
+
+	//printf("old Junctions size: %lu\n", junctions.size());
 
 	// do some filtering here?
 	// let M be the maximum count among all junctions
+
+	int max_count = 0;
+	for(int j=0;j<junctions.size();j++)
+	{
+		junction jc = junctions[j];
+		if(jc.count > max_count)
+		{
+			max_count = junctions[j].count;
+		}
+	}
+
+	printf("junction max_count = %d\n",max_count);
+
 	// keep a junction J if: 
 	// either J.count >= ratio * M, say ratio = 0.01, 
 	// or J.count >= a fixed threshold, say 10 
+
+	double ratio = 0.01;
+	vector<junction> filtered_junctions;
+	filtered_junctions.clear();
+
+	for(int j=0;j<junctions.size();j++)
+	{
+		junction jc = junctions[j];
+		//if(jc.count >= ratio*max_count)
+		if(jc.count >= 10)
+		{
+			filtered_junctions.push_back(jc);
+		}
+	}
+
+	junctions.clear();
+	for(int j=0;j<filtered_junctions.size();j++)
+	{
+		junction jc = filtered_junctions[j];
+		junctions.push_back(jc);
+	}
+
+	//printf("new Junctions size: %lu\n", junctions.size());
+
 	return 0;
 }
 
@@ -1623,7 +1662,8 @@ int bundle_bridge::align_hit(const map<int32_t, int> &m, const hit &h, vector<in
 
 		map<int32_t, int>::const_iterator it = m.find(p1);
 
-		assert(it != m.end());
+		//assert(it != m.end());
+		if(it == m.end()) return 0;
 		sp[k].first = it->second;
 	}
 
@@ -1632,7 +1672,8 @@ int bundle_bridge::align_hit(const map<int32_t, int> &m, const hit &h, vector<in
 	{
 		p2 = low32(v[k]);
 		map<int32_t, int>::const_iterator it = m.find(p2);
-		assert(it != m.end());
+		//assert(it != m.end());
+		if(it == m.end()) return 0;
 		sp[k].second = it->second - 1; 
 	}
 
