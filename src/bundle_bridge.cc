@@ -1291,8 +1291,9 @@ int bundle_bridge::build_junctions()
 	for(int j=0;j<junctions.size();j++)
 	{
 		junction jc = junctions[j];
-		//if(jc.count >= ratio*max_count)
-		if(jc.count >= 10)
+		
+		//if(jc.count >= 10)
+		if(jc.count >= ratio*max_count)
 		{
 			filtered_junctions.push_back(jc);
 		}
