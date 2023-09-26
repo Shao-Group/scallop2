@@ -221,6 +221,13 @@ hit::hit(bam1_t *b, int id)
 	second_pos = 0;
 	third_pos = 0;
 
+	cigar_vector.clear();
+	spos.clear();
+	vlist.clear();
+	itvm.clear();
+	itvi.clear();
+	itvd.clear();
+
 	l_qseq = 0;
 	seq = "";
 	soft_clip_seqs.clear();

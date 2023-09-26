@@ -731,7 +731,8 @@ int bundle_bridge::get_more_chimeric()
 				{
 					int edit = get_edit_distance(junc_seq,fr.h1->soft_clip_seqs[i]);
 
-					if(edit == 0 || edit == 1)
+					//if(edit == 0 || edit == 1)
+					if(edit <= floor(soft_len/10))
 					{
 						printf("soft left clip: chrm=%s, read=%s, read_pos=%d\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos);
 						if((fr.h1->flag & 0x10) >= 1)
@@ -803,7 +804,8 @@ int bundle_bridge::get_more_chimeric()
 					//printf("str1 %s str2 %s\n",junc_seq.c_str(),fr.h2->soft_clip_seqs[i].c_str());
 					int edit = get_edit_distance(junc_seq,fr.h2->soft_clip_seqs[i]);
 
-					if(edit == 0 || edit == 1)
+					//if(edit == 0 || edit == 1)
+					if(edit <= floor(soft_len/10))
 					{
 						printf("soft right clip: chrm=%s, read=%s, read_pos=%d\n",bb.chrm.c_str(),fr.h2->qname.c_str(),fr.h2->pos);
 						if((fr.h2->flag & 0x10) >= 1)
@@ -1268,7 +1270,7 @@ int bundle_bridge::build_junctions()
 	// do some filtering here?
 	// let M be the maximum count among all junctions
 
-	int max_count = 0;
+	/*int max_count = 0;
 	for(int j=0;j<junctions.size();j++)
 	{
 		junction jc = junctions[j];
@@ -1278,7 +1280,7 @@ int bundle_bridge::build_junctions()
 		}
 	}
 
-	printf("junction max_count = %d\n",max_count);
+	//printf("junction max_count = %d\n",max_count);
 
 	// keep a junction J if: 
 	// either J.count >= ratio * M, say ratio = 0.01, 
@@ -1292,8 +1294,8 @@ int bundle_bridge::build_junctions()
 	{
 		junction jc = junctions[j];
 		
-		//if(jc.count >= 10)
-		if(jc.count >= ratio*max_count)
+		//if(jc.count >= ratio*max_count)
+		if(jc.count >= 10)
 		{
 			filtered_junctions.push_back(jc);
 		}
@@ -1304,7 +1306,7 @@ int bundle_bridge::build_junctions()
 	{
 		junction jc = filtered_junctions[j];
 		junctions.push_back(jc);
-	}
+	}*/
 
 	//printf("new Junctions size: %lu\n", junctions.size());
 
@@ -1507,6 +1509,8 @@ int bundle_bridge::create_fake_fragments()
 		for(int i=0;i<bb.fake_hits.size();i++)
 		{
 			hit &z = bb.fake_hits[i];
+
+			if(z.vlist.size() == 0) continue;
 			if(z.fake_hit_index == -1) continue;
 
 			if(fr.fake_hit_index == i && z.fake_hit_index == k)
@@ -2465,6 +2469,7 @@ int bundle_bridge::build_circ_fragments()
 
 			//fr.h2 and fr.h1 needs to be paired by build_fragments()
 			if(fr.h2->paired != true || fr.h1->paired != true) continue; //first set of fragment needs to be paired
+			if(fr.h1->suppl->vlist.size() == 0) continue;
 
 			fr.h1->suppl->paired = true; //setting supple paired true to avoid assertion later in build hyper set
 			fragment frag(fr.h2, fr.h1->suppl);
@@ -2545,7 +2550,9 @@ int bundle_bridge::build_circ_fragments()
 				printf("fr.h2 in first set not paired\n");
 				fr.h2->print();
 				continue;
-			}							
+			}
+			if(fr.h2->suppl->vlist.size() == 0) continue;
+
 			fr.h2->suppl->paired = true; //setting supple paired true to avoid assertion later in build hyper set
 			fragment frag(fr.h2->suppl, fr.h1);
 			frag.frag_type = 2;
