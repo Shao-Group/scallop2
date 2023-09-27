@@ -111,6 +111,7 @@ public:
 public:
  	static string get_qname(bam1_t *b);
 	string get_reverse_complement(string str);
+	string get_complement(string str);
 	string convert_to_IUPAC(vector<int> code);
 	int set_soft_clip_seq_combo();
 	int set_seq(bam1_t *b);

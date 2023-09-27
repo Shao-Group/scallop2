@@ -532,6 +532,28 @@ int hit::set_soft_clip_seq_combo()
 	//index 3,extract end len bp rev comp
 	soft_clip_seqs.push_back(get_reverse_complement(soft_clip_seqs[2]));
 
+	//index 4,extract start len bp reverse only
+	/*string str4 = "";
+	for(int i=len-1;i>=0;i--)
+	{
+		str4 = str4 + seq[i];
+	}
+	soft_clip_seqs.push_back(str4);
+
+	//index 5,extract start len bp complement only
+	soft_clip_seqs.push_back(get_complement(soft_clip_seqs[0]));
+
+	//index 6,extract end len bp reverse only
+	string str6 = "";
+	for(int i=seq.size()-1;i>=seq.size()-len;i--)
+	{
+		str6 = str6 + seq[i];
+	}
+	soft_clip_seqs.push_back(str6);
+
+	//index 7,extract end len bp complement only
+	soft_clip_seqs.push_back(get_complement(soft_clip_seqs[2]));*/
+
 	/*printf("size of soft_clip_seqs = %lu\n",soft_clip_seqs.size());
 
 	printf("Printing four combos:\n");
@@ -547,6 +569,36 @@ string hit::get_reverse_complement(string str)
 {
 	string out = "";
 	for(int i=str.size()-1;i>=0;i--)
+	{
+		if(str[i] == 'A')
+		{
+			out = out + 'T';
+		}
+		else if(str[i] == 'T')
+		{
+			out = out + 'A';
+		}
+		else if(str[i] == 'C')
+		{
+			out = out + 'G';
+		}
+		else if(str[i] == 'G')
+		{
+			out = out + 'C';
+		}
+		else if(str[i] == 'N')
+		{
+			out = out + str[i];
+		}
+	}
+	return out;
+}
+
+
+string hit::get_complement(string str)
+{
+	string out = "";
+	for(int i=0;i<str.size();i++)
 	{
 		if(str[i] == 'A')
 		{

@@ -81,7 +81,7 @@ int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 	//create circ fragments from RO reads with H/S on both sides uisng ciri-full
 	get_RO_frags_with_HS();
 
-	//create circ fragments from frags with H/S on both sides using our data
+	//create circ fragments from frags with H/S on both sides using our data instead of ciri-full
 	//get_frags_with_HS_from_data();
 
 	//find more chimeric reads from soft clip reads
@@ -710,14 +710,67 @@ int bundle_bridge::get_more_chimeric()
 				printf("check junction size = %lu\n",junctions.size());
 			}*/
 
+			//discard if seq match with multiple junction
+
+			int32_t prev_pos2 = 0;
+			int jc_multiple = 0;
+
+			for(int j=0;j<junctions.size();j++)
+			{
+				junction jc = junctions[j];
+
+				if(jc.lpos <= fr.h2->rpos || jc.lpos <= fr.h1->rpos) continue;
+
+				int32_t pos1 = jc.lpos-soft_len+1;
+				int32_t pos2 = jc.lpos;
+
+				string junc_seq = get_fasta_seq(pos1,pos2);
+
+				int edit_match = 0;
+				for(int i=0;i<fr.h1->soft_clip_seqs.size();i++)
+				{
+					int edit = get_edit_distance(junc_seq,fr.h1->soft_clip_seqs[i]);
+					
+					//if(edit == 0 || edit == 1)
+					if(edit <= floor(soft_len/10))
+					{
+						edit_match = 1;
+						printf("editmatch case 1: junc seq pos1=%d, pos2=%d, junc_seqlen = %lu\n",pos1,pos2,junc_seq.size());
+						break;
+					}
+				}
+
+				if(edit_match == 1)
+				{
+					if(prev_pos2 != 0 && pos2 != prev_pos2)
+					{
+						printf("pos2 = %d, prev_pos2 = %d\n",pos2,prev_pos2);
+						jc_multiple = 1;
+						break;
+					}
+
+					prev_pos2 = pos2;
+				}
+
+			}
+
+			if(jc_multiple == 1) 
+			{
+				printf("jc_multiple = %d\n",jc_multiple);
+				continue;
+			}
+
+
 			int jc_flag = 0;
 			for(int j=0;j<junctions.size();j++)
 			{
 				junction jc = junctions[j];
+
+				if(jc.lpos <= fr.h2->rpos || jc.lpos <= fr.h1->rpos) continue;
+
 				int32_t pos1 = jc.lpos-soft_len+1;
 				int32_t pos2 = jc.lpos;
 
-				if(jc.lpos <= fr.h2->rpos || jc.lpos <= fr.h1->rpos) continue;
 				//if(abs(jc.lpos-fr.h2->rpos) > 100000) continue;
 
 				/*if(strcmp(fr.h1->qname.c_str(),"simulate:150344")==0)
@@ -730,7 +783,7 @@ int bundle_bridge::get_more_chimeric()
 				for(int i=0;i<fr.h1->soft_clip_seqs.size();i++)
 				{
 					int edit = get_edit_distance(junc_seq,fr.h1->soft_clip_seqs[i]);
-
+					
 					//if(edit == 0 || edit == 1)
 					if(edit <= floor(soft_len/10))
 					{
@@ -787,15 +840,64 @@ int bundle_bridge::get_more_chimeric()
 			int32_t soft_len = fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second;
 			if(soft_len < 10) continue;
 
+			//discard if seq match with multiple junction
+
+			int32_t prev_pos1 = 0;
+			int jc_multiple = 0;
+
+			for(int j=0;j<junctions.size();j++)
+			{
+				junction jc = junctions[j];
+
+				if(jc.rpos >= fr.h2->pos || jc.rpos >= fr.h1->pos) continue;
+
+				int32_t pos1 = jc.rpos;
+				int32_t pos2 = jc.rpos+soft_len-1;
+
+				string junc_seq = get_fasta_seq(pos1,pos2);
+
+				int edit_match = 0;
+				for(int i=0;i<fr.h2->soft_clip_seqs.size();i++)
+				{
+					int edit = get_edit_distance(junc_seq,fr.h2->soft_clip_seqs[i]);
+
+					//if(edit == 0 || edit == 1)
+					if(edit <= floor(soft_len/10))
+					{
+						edit_match = 1;
+						printf("editmatch case 2: junc seq pos1=%d, pos2=%d, junc_seqlen = %lu\n",pos1,pos2,junc_seq.size());
+						break;
+					}
+				}
+
+				if(edit_match == 1)
+				{
+					if(prev_pos1 != 0 && pos1 != prev_pos1)
+					{
+						printf("pos1 = %d, prev_pos1 = %d\n",pos1,prev_pos1);
+						jc_multiple = 1;
+						break;
+					}
+
+					prev_pos1 = pos1;
+				}
+			}
+
+			if(jc_multiple == 1) 
+			{
+				printf("jc_multiple = %d\n",jc_multiple);
+				continue;
+			}
+
 			int jc_flag = 0;
 			for(int j=0;j<junctions.size();j++)
 			{
 				junction jc = junctions[j];
-				int32_t pos1 = jc.rpos;
-				int32_t pos2 = jc.rpos+soft_len-1;
 
 				if(jc.rpos >= fr.h2->pos || jc.rpos >= fr.h1->pos) continue;
-				//if(abs(fr.h1->pos-jc.rpos) > 100000) continue;
+
+				int32_t pos1 = jc.rpos;
+				int32_t pos2 = jc.rpos+soft_len-1;
 
 				string junc_seq = get_fasta_seq(pos1,pos2);
 
@@ -1294,8 +1396,9 @@ int bundle_bridge::build_junctions()
 	{
 		junction jc = junctions[j];
 		
-		//if(jc.count >= ratio*max_count)
-		if(jc.count >= 10)
+		
+		//if(jc.count >= 10)
+		if(jc.count >= ratio*max_count)
 		{
 			filtered_junctions.push_back(jc);
 		}
