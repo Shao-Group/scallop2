@@ -82,7 +82,7 @@ int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 	get_RO_frags_with_HS();
 
 	//create circ fragments from frags with H/S on both sides using our data instead of ciri-full
-	get_frags_with_HS_from_data();
+	//get_frags_with_HS_from_data();
 
 	//find more chimeric reads from soft clip reads
 	get_more_chimeric();
