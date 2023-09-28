@@ -533,7 +533,7 @@ int hit::set_soft_clip_seq_combo()
 	soft_clip_seqs.push_back(get_reverse_complement(soft_clip_seqs[2]));
 
 	//index 4,extract start len bp reverse only
-	string str4 = "";
+	/*string str4 = "";
 	for(int i=len-1;i>=0;i--)
 	{
 		str4 = str4 + seq[i];
@@ -552,7 +552,7 @@ int hit::set_soft_clip_seq_combo()
 	soft_clip_seqs.push_back(str6);
 
 	//index 7,extract end len bp complement only
-	soft_clip_seqs.push_back(get_complement(soft_clip_seqs[2]));
+	soft_clip_seqs.push_back(get_complement(soft_clip_seqs[2]));*/
 
 	/*printf("size of soft_clip_seqs = %lu\n",soft_clip_seqs.size());
 
