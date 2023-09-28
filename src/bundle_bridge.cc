@@ -82,7 +82,7 @@ int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 	get_RO_frags_with_HS();
 
 	//create circ fragments from frags with H/S on both sides using our data instead of ciri-full
-	//get_frags_with_HS_from_data();
+	get_frags_with_HS_from_data();
 
 	//find more chimeric reads from soft clip reads
 	get_more_chimeric();
@@ -206,106 +206,215 @@ int bundle_bridge::get_frags_with_HS_from_data()
 		int left_boundary_flag = 0;
 		int right_boundary_flag = 0;
 
-		//if(fr.h1->pos <= fr.h2->pos && (fr.h1->cigar_vector[0].first == 'S' || fr.h1->cigar_vector[0].first == 'H') && (fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'S' || fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'H'))
-		if(fr.h1->pos <= fr.h2->pos && (fr.h1->cigar_vector[0].first == 'S') && (fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'S'))
+		if(fr.h1->pos > fr.h2->pos) continue;
+		if(fr.h1->cigar_vector[0].first != 'S' || fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first != 'S') continue;
+		if(fr.h1->cigar_vector[0].second < 5 && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second < 5) continue;
+
+		printf("HS paired hit case 1: pos %d, rpos %d\n",fr.lpos,fr.rpos);
+		printf("chrm %s\n",bb.chrm.c_str());
+		printf("Hit 1: ");
+		fr.h1->print();
+
+		//checking if reads junction matches left boundary
+		for(int j=0;j<junctions.size();j++)
 		{
-			if(fr.h1->cigar_vector[0].second < 5 && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second < 5) continue;
+			junction jc = junctions[j];
 
-			printf("HS paired hit case 1: pos %d, rpos %d\n",fr.lpos,fr.rpos);
-			printf("chrm %s\n",bb.chrm.c_str());
-			printf("Hit 1: ");
-			fr.h1->print();
-
-			//checking if reads junction matches left boundary
-			for(int j=0;j<junctions.size();j++)
+			//if(jc.rpos <= fr.h1->pos+junc_range && jc.rpos >= fr.h1->pos-junc_range)
+			if(jc.rpos == fr.h1->pos)
 			{
-				junction jc = junctions[j];
+				printf("reads junction present left %d\n",jc.rpos);
+				left_boundary_flag = 1;
+				break;
+			}
+		}
 
-				//if(jc.rpos <= fr.h1->pos+junc_range && jc.rpos >= fr.h1->pos-junc_range)
-				if(jc.rpos == fr.h1->pos)
+		//checking if ref junction matches left boundary
+		int temp_flag = 0;
+		for(int t=0;t<ref_trsts.size();t++)
+		{
+			transcript trst = ref_trsts[t];
+			vector<PI32> chain = trst.get_intron_chain();
+
+			for(int k=0;k<chain.size();k++)
+			{
+				//if(chain[k].second <= fr.h1->pos+junc_range && chain[k].second >= fr.h1->pos-junc_range)
+				if(chain[k].second == fr.h1->pos)
 				{
-					printf("reads junction present left %d\n",jc.rpos);
+					printf("ref junction present left %d\n",chain[k].second);
+					temp_flag = 1;
 					left_boundary_flag = 1;
 					break;
 				}
 			}
 
-			//checking if ref junction matches left boundary
-			int temp_flag = 0;
-			for(int t=0;t<ref_trsts.size();t++)
+			if(temp_flag == 1)
 			{
-				transcript trst = ref_trsts[t];
-				vector<PI32> chain = trst.get_intron_chain();
-
-				for(int k=0;k<chain.size();k++)
-				{
-					//if(chain[k].second <= fr.h1->pos+junc_range && chain[k].second >= fr.h1->pos-junc_range)
-					if(chain[k].second == fr.h1->pos)
-					{
-						printf("ref junction present left %d\n",chain[k].second);
-						temp_flag = 1;
-						left_boundary_flag = 1;
-						break;
-					}
-				}
-
-				if(temp_flag == 1)
-				{
-					break;
-				}
+				break;
 			}
-
-			printf("Hit 2: ");
-			fr.h2->print();
-
-			//checking if reads junction matches right boundary
-			for(int j=0;j<junctions.size();j++)
-			{
-				junction jc = junctions[j];
-
-				//if(jc.lpos <= fr.h2->rpos+junc_range && jc.lpos >= fr.h2->rpos-junc_range)
-				if(jc.lpos == fr.h2->rpos)
-				{
-					printf("reads junction present right %d\n",jc.lpos);
-					right_boundary_flag = 1;
-					break;
-				}
-			}
-
-			//checking if ref junction matches right boundary
-			temp_flag = 0;
-			for(int t=0;t<ref_trsts.size();t++)
-			{
-				transcript trst = ref_trsts[t];
-				vector<PI32> chain = trst.get_intron_chain();
-
-				for(int k=0;k<chain.size();k++)
-				{
-					//if(chain[k].first <= fr.h2->rpos+junc_range && chain[k].first >= fr.h2->rpos-junc_range)
-					if(chain[k].first == fr.h2->rpos)
-					{
-						printf("ref junction present right %d\n",chain[k].first);
-						right_boundary_flag = 1;
-						temp_flag = 1;
-						break;
-					}
-				}
-
-				if(temp_flag == 1)
-				{
-					break;
-				}
-			}
-
-			printf("HS frags: left_boundary_flag = %d, right_boundary_flag = %d\n\n",left_boundary_flag,right_boundary_flag);
-		
 		}
+
+		printf("Hit 2: ");
+		fr.h2->print();
+
+		//checking if reads junction matches right boundary
+		for(int j=0;j<junctions.size();j++)
+		{
+			junction jc = junctions[j];
+
+			//if(jc.lpos <= fr.h2->rpos+junc_range && jc.lpos >= fr.h2->rpos-junc_range)
+			if(jc.lpos == fr.h2->rpos)
+			{
+				printf("reads junction present right %d\n",jc.lpos);
+				right_boundary_flag = 1;
+				break;
+			}
+		}
+
+		//checking if ref junction matches right boundary
+		temp_flag = 0;
+		for(int t=0;t<ref_trsts.size();t++)
+		{
+			transcript trst = ref_trsts[t];
+			vector<PI32> chain = trst.get_intron_chain();
+
+			for(int k=0;k<chain.size();k++)
+			{
+				//if(chain[k].first <= fr.h2->rpos+junc_range && chain[k].first >= fr.h2->rpos-junc_range)
+				if(chain[k].first == fr.h2->rpos)
+				{
+					printf("ref junction present right %d\n",chain[k].first);
+					right_boundary_flag = 1;
+					temp_flag = 1;
+					break;
+				}
+			}
+
+			if(temp_flag == 1)
+			{
+				break;
+			}
+		}
+
+		printf("HS frags: left_boundary_flag = %d, right_boundary_flag = %d\n\n",left_boundary_flag,right_boundary_flag);
 
 		if(left_boundary_flag == 1 && right_boundary_flag == 1)
 		{
 			fr.HS_frag = true;
 			circ_fragments.push_back(fr);
 		}
+		
+		/*if(left_boundary_flag != 1 || right_boundary_flag != 1) continue;
+
+		int seq_match_left_hit = 0;
+		int seq_match_right_hit = 0;
+
+		int32_t soft_len = fr.h1->cigar_vector[0].second;
+		if(soft_len < 5) continue;
+
+		//match left hit soft seq with junctions seq
+		for(int j=0;j<junctions.size();j++)
+		{
+			junction jc = junctions[j];
+			if(jc.lpos <= fr.h2->rpos || jc.lpos <= fr.h1->rpos) continue;
+
+			int32_t pos1 = jc.lpos-soft_len+1;
+			int32_t pos2 = jc.lpos;
+
+			string junc_seq = get_fasta_seq(pos1,pos2);
+
+			for(int i=0;i<fr.h1->soft_clip_seqs.size();i++)
+			{
+				int edit = get_edit_distance(junc_seq,fr.h1->soft_clip_seqs[i]);
+				
+				//if(edit == 0 || edit == 1)
+				if(edit <= floor(soft_len/10))
+				{
+					printf("both sides S clip left: chrm=%s, read=%s, read_pos=%d\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos);
+					if((fr.h1->flag & 0x10) >= 1)
+					{
+						//printf("rev comp 0x10 = on\n");
+					}
+					else
+					{
+						//printf("rev comp 0x10 = off\n");
+					}
+					if((fr.h1->flag & 0x4) >= 1)
+					{
+						//printf("seg unmapped 0x4 = on\n");
+					}
+					else
+					{
+						//printf("seg unmapped 0x4 = off\n");
+					}
+					printf("read seq combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h1->soft_clip_seqs[i].c_str(),edit);
+					printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
+					printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
+
+					seq_match_left_hit = 1;
+					break;
+				}
+			}
+
+			if(seq_match_left_hit == 1) break;
+		}
+
+		soft_len = fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second;
+		if(soft_len < 5) continue;
+
+		//match right hit soft seq with junctions seq
+		for(int j=0;j<junctions.size();j++)
+		{
+			junction jc = junctions[j];
+
+			if(jc.rpos >= fr.h2->pos || jc.rpos >= fr.h1->pos) continue;
+
+			int32_t pos1 = jc.rpos;
+			int32_t pos2 = jc.rpos+soft_len-1;
+
+			string junc_seq = get_fasta_seq(pos1,pos2);
+
+			for(int i=0;i<fr.h2->soft_clip_seqs.size();i++)
+			{
+				int edit = get_edit_distance(junc_seq,fr.h2->soft_clip_seqs[i]);
+				
+				//if(edit == 0 || edit == 1)
+				if(edit <= floor(soft_len/10))
+				{
+					printf("both sides S clip right: chrm=%s, read=%s, read_pos=%d\n",bb.chrm.c_str(),fr.h2->qname.c_str(),fr.h2->pos);
+					if((fr.h2->flag & 0x10) >= 1)
+					{
+						//printf("rev comp 0x10 = on\n");
+					}
+					else
+					{
+						//printf("rev comp 0x10 = off\n");
+					}
+					if((fr.h2->flag & 0x4) >= 1)
+					{
+						//printf("seg unmapped 0x4 = on\n");
+					}
+					else
+					{
+						//printf("seg unmapped 0x4 = off\n");
+					}
+					printf("read seq combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h2->soft_clip_seqs[i].c_str(),edit);
+					printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
+					printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
+
+					seq_match_right_hit = 1;
+					break;
+				}
+			}
+
+			if(seq_match_right_hit == 1) break;
+		}
+
+		if(seq_match_left_hit == 1 && seq_match_right_hit == 1)
+		{
+			fr.HS_frag = true;
+			circ_fragments.push_back(fr);
+		}*/
 	}
 
 	return 0;
