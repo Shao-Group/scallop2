@@ -82,7 +82,7 @@ int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 	get_RO_frags_with_HS();
 
 	//create circ fragments from frags with H/S on both sides using our data instead of ciri-full
-	get_frags_with_HS_from_data();
+	//get_frags_with_HS_from_data();
 
 	//find more chimeric reads from soft clip reads
 	get_more_chimeric();
@@ -409,7 +409,7 @@ int bundle_bridge::get_frags_with_HS_from_data()
 			if(seq_match_right_hit == 1) break;
 		}
 
-		if(seq_match_left_hit == 1 || seq_match_right_hit == 1)
+		if(seq_match_left_hit == 1 && seq_match_right_hit == 1)
 		{
 			fr.HS_frag = true;
 			circ_fragments.push_back(fr);
@@ -1480,7 +1480,7 @@ int bundle_bridge::build_junctions()
 	// do some filtering here?
 	// let M be the maximum count among all junctions
 
-	/*int max_count = 0;
+	int max_count = 0;
 	for(int j=0;j<junctions.size();j++)
 	{
 		junction jc = junctions[j];
@@ -1504,9 +1504,7 @@ int bundle_bridge::build_junctions()
 	{
 		junction jc = junctions[j];
 		
-		
-		//if(jc.count >= 10)
-		if(jc.count >= ratio*max_count)
+		if(jc.count >= ratio*max_count || jc.count >= 10) //discard if both < 10 and < 0.01*max_count
 		{
 			filtered_junctions.push_back(jc);
 		}
@@ -1517,7 +1515,7 @@ int bundle_bridge::build_junctions()
 	{
 		junction jc = filtered_junctions[j];
 		junctions.push_back(jc);
-	}*/
+	}
 
 	//printf("new Junctions size: %lu\n", junctions.size());
 
@@ -1888,6 +1886,7 @@ int bundle_bridge::align_hit(const map<int32_t, int> &m, const hit &h, vector<in
 	{
 		p2 = low32(v[k]);
 		map<int32_t, int>::const_iterator it = m.find(p2);
+		
 		//assert(it != m.end());
 		if(it == m.end()) return 0;
 		sp[k].second = it->second - 1; 
