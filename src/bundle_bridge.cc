@@ -298,13 +298,13 @@ int bundle_bridge::get_frags_with_HS_from_data()
 
 		printf("HS frags: left_boundary_flag = %d, right_boundary_flag = %d\n\n",left_boundary_flag,right_boundary_flag);
 
-		if(left_boundary_flag == 1 && right_boundary_flag == 1)
+		/*if(left_boundary_flag == 1 && right_boundary_flag == 1)
 		{
 			fr.HS_frag = true;
 			circ_fragments.push_back(fr);
-		}
+		}*/
 		
-		/*if(left_boundary_flag != 1 || right_boundary_flag != 1) continue;
+		if(left_boundary_flag != 1 || right_boundary_flag != 1) continue;
 
 		int seq_match_left_hit = 0;
 		int seq_match_right_hit = 0;
@@ -414,7 +414,7 @@ int bundle_bridge::get_frags_with_HS_from_data()
 		{
 			fr.HS_frag = true;
 			circ_fragments.push_back(fr);
-		}*/
+		}
 	}
 
 	return 0;
