@@ -927,6 +927,8 @@ int assembler::write_circular()
 	{
 		circular_transcript &circ = itn->second.first;
 		//if(circ.source != "scallop2_MC") continue;
+		//try to remove FP by discarding circRNAs with lots of vertices from many small junctions
+		if(circ.circ_path.size() > 20) continue;
 		circ.write(fcirc);
 	}
 
