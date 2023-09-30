@@ -41,6 +41,7 @@ public:
 	int RO_count;
 
 	vector<junction> junctions;			// splice junctions
+	vector<junction> filtered_junctions; // junctions with higher support count
 	map<int64_t, char> junc_map;		// map junction to strandness
 	vector<region> regions;				// pexons
 	vector<partial_exon> pexons;		// partial exons

@@ -895,7 +895,7 @@ int bundle_bridge::get_more_chimeric()
 					//if(edit == 0 || edit == 1)
 					if(edit <= floor(soft_len/10))
 					{
-						printf("soft left clip: chrm=%s, read=%s, read_pos=%d\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos);
+						//printf("soft left clip: chrm=%s, read=%s, read_pos=%d\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos);
 						if((fr.h1->flag & 0x10) >= 1)
 						{
 							printf("rev comp 0x10 = on\n");
@@ -912,7 +912,7 @@ int bundle_bridge::get_more_chimeric()
 						{
 							printf("seg unmapped 0x4 = off\n");
 						}
-						printf("read seq combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h1->soft_clip_seqs[i].c_str(),edit);
+						printf("soft left clip: chrm=%s, combo index=%d, read=%s, read_pos=%d, combo_seq=%s, edit=%d\n",bb.chrm.c_str(),i,fr.h1->qname.c_str(),fr.h1->pos,fr.h1->soft_clip_seqs[i].c_str(),edit);
 						printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
 						printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
 						create_fake_supple(k,fr,soft_len,pos1,pos2);
@@ -1017,7 +1017,7 @@ int bundle_bridge::get_more_chimeric()
 					//if(edit == 0 || edit == 1)
 					if(edit <= floor(soft_len/10))
 					{
-						printf("soft right clip: chrm=%s, read=%s, read_pos=%d\n",bb.chrm.c_str(),fr.h2->qname.c_str(),fr.h2->pos);
+						//printf("soft right clip: chrm=%s, read=%s, read_pos=%d\n",bb.chrm.c_str(),fr.h2->qname.c_str(),fr.h2->pos);
 						if((fr.h2->flag & 0x10) >= 1)
 						{
 							printf("rev comp 0x10 = on\n");
@@ -1035,6 +1035,7 @@ int bundle_bridge::get_more_chimeric()
 							printf("seg unmapped 0x4 = off\n");
 						}
 						printf("read seq combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h2->soft_clip_seqs[i].c_str(),edit);
+						printf("soft right clip: chrm=%s, combo index=%d, read=%s, read_pos=%d, combo_seq=%s, edit=%d\n",bb.chrm.c_str(),i,fr.h2->qname.c_str(),fr.h2->pos,fr.h2->soft_clip_seqs[i].c_str(),edit);
 						printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
 						printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
 						create_fake_supple(k,fr,soft_len,pos1,pos2);
@@ -1497,7 +1498,6 @@ int bundle_bridge::build_junctions()
 	// or J.count >= a fixed threshold, say 10 
 
 	double ratio = 0.01;
-	vector<junction> filtered_junctions;
 	filtered_junctions.clear();
 
 	for(int j=0;j<junctions.size();j++)
