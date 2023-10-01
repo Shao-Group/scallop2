@@ -823,9 +823,9 @@ int bundle_bridge::get_more_chimeric()
 			int32_t prev_pos2 = 0;
 			int jc_multiple = 0;
 
-			for(int j=0;j<filtered_junctions.size();j++)
+			for(int j=0;j<junctions.size();j++)
 			{
-				junction jc = filtered_junctions[j];
+				junction jc = junctions[j];
 
 				if(jc.lpos <= fr.h2->rpos || jc.lpos <= fr.h1->rpos) continue;
 
@@ -870,9 +870,9 @@ int bundle_bridge::get_more_chimeric()
 
 
 			int jc_flag = 0;
-			for(int j=0;j<filtered_junctions.size();j++)
+			for(int j=0;j<junctions.size();j++)
 			{
-				junction jc = filtered_junctions[j];
+				junction jc = junctions[j];
 
 				if(jc.lpos <= fr.h2->rpos || jc.lpos <= fr.h1->rpos) continue;
 
@@ -912,7 +912,7 @@ int bundle_bridge::get_more_chimeric()
 						{
 							printf("seg unmapped 0x4 = off\n");
 						}
-						printf("soft left clip: chrm=%s, combo index=%d, read=%s, read_pos=%d, combo_seq=%s, edit=%d\n",bb.chrm.c_str(),i,fr.h1->qname.c_str(),fr.h1->pos,fr.h1->soft_clip_seqs[i].c_str(),edit);
+						printf("soft left clip: combo index=%d, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, edit=%d\n",i,bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos,fr.h1->soft_clip_seqs[i].c_str(),edit);
 						printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
 						printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
 						create_fake_supple(k,fr,soft_len,pos1,pos2);
@@ -953,9 +953,9 @@ int bundle_bridge::get_more_chimeric()
 			int32_t prev_pos1 = 0;
 			int jc_multiple = 0;
 
-			for(int j=0;j<filtered_junctions.size();j++)
+			for(int j=0;j<junctions.size();j++)
 			{
-				junction jc = filtered_junctions[j];
+				junction jc = junctions[j];
 
 				if(jc.rpos >= fr.h2->pos || jc.rpos >= fr.h1->pos) continue;
 
@@ -998,9 +998,9 @@ int bundle_bridge::get_more_chimeric()
 			}
 
 			int jc_flag = 0;
-			for(int j=0;j<filtered_junctions.size();j++)
+			for(int j=0;j<junctions.size();j++)
 			{
-				junction jc = filtered_junctions[j];
+				junction jc = junctions[j];
 
 				if(jc.rpos >= fr.h2->pos || jc.rpos >= fr.h1->pos) continue;
 
@@ -1035,7 +1035,7 @@ int bundle_bridge::get_more_chimeric()
 							printf("seg unmapped 0x4 = off\n");
 						}
 						printf("read seq combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h2->soft_clip_seqs[i].c_str(),edit);
-						printf("soft right clip: chrm=%s, combo index=%d, read=%s, read_pos=%d, combo_seq=%s, edit=%d\n",bb.chrm.c_str(),i,fr.h2->qname.c_str(),fr.h2->pos,fr.h2->soft_clip_seqs[i].c_str(),edit);
+						printf("soft right clip: combo index=%d, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, edit=%d\n",i,bb.chrm.c_str(),fr.h2->qname.c_str(),fr.h2->pos,fr.h2->soft_clip_seqs[i].c_str(),edit);
 						printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
 						printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
 						create_fake_supple(k,fr,soft_len,pos1,pos2);
@@ -1510,12 +1510,12 @@ int bundle_bridge::build_junctions()
 		}
 	}
 
-	/*junctions.clear();
+	junctions.clear();
 	for(int j=0;j<filtered_junctions.size();j++)
 	{
 		junction jc = filtered_junctions[j];
 		junctions.push_back(jc);
-	}*/
+	}
 
 	if(junctions.size() != filtered_junctions.size())
 	{
