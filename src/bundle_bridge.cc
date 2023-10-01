@@ -823,9 +823,9 @@ int bundle_bridge::get_more_chimeric()
 			int32_t prev_pos2 = 0;
 			int jc_multiple = 0;
 
-			for(int j=0;j<junctions.size();j++)
+			for(int j=0;j<filtered_junctions.size();j++)
 			{
-				junction jc = junctions[j];
+				junction jc = filtered_junctions[j];
 
 				if(jc.lpos <= fr.h2->rpos || jc.lpos <= fr.h1->rpos) continue;
 
@@ -870,9 +870,9 @@ int bundle_bridge::get_more_chimeric()
 
 
 			int jc_flag = 0;
-			for(int j=0;j<junctions.size();j++)
+			for(int j=0;j<filtered_junctions.size();j++)
 			{
-				junction jc = junctions[j];
+				junction jc = filtered_junctions[j];
 
 				if(jc.lpos <= fr.h2->rpos || jc.lpos <= fr.h1->rpos) continue;
 
@@ -953,9 +953,9 @@ int bundle_bridge::get_more_chimeric()
 			int32_t prev_pos1 = 0;
 			int jc_multiple = 0;
 
-			for(int j=0;j<junctions.size();j++)
+			for(int j=0;j<filtered_junctions.size();j++)
 			{
-				junction jc = junctions[j];
+				junction jc = filtered_junctions[j];
 
 				if(jc.rpos >= fr.h2->pos || jc.rpos >= fr.h1->pos) continue;
 
@@ -998,9 +998,9 @@ int bundle_bridge::get_more_chimeric()
 			}
 
 			int jc_flag = 0;
-			for(int j=0;j<junctions.size();j++)
+			for(int j=0;j<filtered_junctions.size();j++)
 			{
-				junction jc = junctions[j];
+				junction jc = filtered_junctions[j];
 
 				if(jc.rpos >= fr.h2->pos || jc.rpos >= fr.h1->pos) continue;
 
@@ -1510,11 +1510,17 @@ int bundle_bridge::build_junctions()
 		}
 	}
 
-	junctions.clear();
+	/*junctions.clear();
 	for(int j=0;j<filtered_junctions.size();j++)
 	{
 		junction jc = filtered_junctions[j];
 		junctions.push_back(jc);
+	}*/
+
+	if(junctions.size() != filtered_junctions.size())
+	{
+		printf("junctions size: %lu\n",junctions.size());
+		printf("filtered junctions size: %lu\n",filtered_junctions.size());
 	}
 
 	//printf("new Junctions size: %lu\n", junctions.size());
@@ -1572,6 +1578,7 @@ int bundle_bridge::extend_junctions()
 		else if(s1 > s2) jc.strand = '+';
 		else jc.strand = '-';
 		junctions.push_back(jc);
+		filtered_junctions.push_back(jc);
 	}
 
 	//for(int i=0;i<junctions.size();i++)
