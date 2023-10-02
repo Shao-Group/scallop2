@@ -835,7 +835,8 @@ int bundle_bridge::get_more_chimeric()
 				string junc_seq = get_fasta_seq(pos1,pos2);
 
 				int edit_match = 0;
-				for(int i=0;i<fr.h1->soft_clip_seqs.size();i++)
+				//for(int i=0;i<fr.h1->soft_clip_seqs.size();i++)
+				for(int i=0;i<1;i++)
 				{
 					int edit = get_edit_distance(junc_seq,fr.h1->soft_clip_seqs[i]);
 					
@@ -888,7 +889,8 @@ int bundle_bridge::get_more_chimeric()
 
 				string junc_seq = get_fasta_seq(pos1,pos2);
 
-				for(int i=0;i<fr.h1->soft_clip_seqs.size();i++)
+				//for(int i=0;i<fr.h1->soft_clip_seqs.size();i++)
+				for(int i=0;i<1;i++)
 				{
 					int edit = get_edit_distance(junc_seq,fr.h1->soft_clip_seqs[i]);
 					
@@ -965,7 +967,8 @@ int bundle_bridge::get_more_chimeric()
 				string junc_seq = get_fasta_seq(pos1,pos2);
 
 				int edit_match = 0;
-				for(int i=0;i<fr.h2->soft_clip_seqs.size();i++)
+				//for(int i=0;i<fr.h2->soft_clip_seqs.size();i++)
+				for(int i=2;i<3;i++)
 				{
 					int edit = get_edit_distance(junc_seq,fr.h2->soft_clip_seqs[i]);
 
@@ -1009,7 +1012,8 @@ int bundle_bridge::get_more_chimeric()
 
 				string junc_seq = get_fasta_seq(pos1,pos2);
 
-				for(int i=0;i<fr.h2->soft_clip_seqs.size();i++)
+				//for(int i=0;i<fr.h2->soft_clip_seqs.size();i++)
+				for(int i=2;i<3;i++)
 				{
 					//printf("str1 %s str2 %s\n",junc_seq.c_str(),fr.h2->soft_clip_seqs[i].c_str());
 					int edit = get_edit_distance(junc_seq,fr.h2->soft_clip_seqs[i]);
