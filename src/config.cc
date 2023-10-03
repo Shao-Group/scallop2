@@ -19,6 +19,9 @@ See LICENSE for licensing.
 using namespace std;
 
 //// parameters
+
+int read_length = 100;
+
 // for bam file and reads
 int min_flank_length = 3;
 int max_num_cigar = 1000;
@@ -201,6 +204,11 @@ int parse_arguments(int argc, const char ** argv)
 			print_help();
 			printf("\n");
 			exit(0);
+		}
+		else if(string(argv[i]) == "--read_length")
+		{
+			read_length = atoi(argv[i + 1]);
+			i++;
 		}
 		else if(string(argv[i]) == "--min_flank_length")
 		{

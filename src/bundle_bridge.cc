@@ -1501,7 +1501,7 @@ int bundle_bridge::build_junctions()
 	// either J.count >= ratio * M, say ratio = 0.01, 
 	// or J.count >= a fixed threshold, say 10 
 
-	double ratio = 0.01;
+	double ratio = 0.05;
 	filtered_junctions.clear();
 
 	for(int j=0;j<junctions.size();j++)
@@ -1521,11 +1521,11 @@ int bundle_bridge::build_junctions()
 		junctions.push_back(jc);
 	}
 
-	if(junctions.size() != filtered_junctions.size())
+	/*if(junctions.size() != filtered_junctions.size())
 	{
 		printf("junctions size: %lu\n",junctions.size());
 		printf("filtered junctions size: %lu\n",filtered_junctions.size());
-	}
+	}*/
 
 	//printf("new Junctions size: %lu\n", junctions.size());
 
@@ -2440,7 +2440,7 @@ int bundle_bridge::build_circ_fragments()
 
 			//printf("len_HS = %d\n",len_HS);
 
-			if(abs(len_HS - 100) > 5) //here 100 is the estimated read length, replace this with any related exisiting parameter
+			if(abs(len_HS - read_length) > 5) //here 100 is the estimated read length, replace this with any related exisiting parameter
 			{
 				printf("read length criteria unsatisfied h1s.\n");
 				continue;
@@ -2590,7 +2590,7 @@ int bundle_bridge::build_circ_fragments()
 
 			//printf("len_HS = %d\n",len_HS);
 
-			if(abs(len_HS - 100) > 5) //here 100 is the estimated read length, replace this with any related exisiting parameter
+			if(abs(len_HS - read_length) > 5) //here 100 is the estimated read length, replace this with any related exisiting parameter
 			{
 				printf("read length criteria unsatisfied h2s.\n");
 				continue;

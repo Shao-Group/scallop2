@@ -51,6 +51,10 @@ using namespace std;
 #define TRANSCRIPT_COUNT_ADD_COVERAGE_MIN 4
 
 //// parameters
+
+//for circRNA
+extern int read_length;
+
 // for bam file and reads
 extern int min_flank_length;
 extern int max_num_cigar;
