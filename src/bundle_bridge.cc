@@ -835,6 +835,7 @@ int bundle_bridge::get_more_chimeric()
 				string junc_seq = get_fasta_seq(pos1,pos2);
 
 				int edit_match = 0;
+
 				//for(int i=0;i<fr.h1->soft_clip_seqs.size();i++)
 				for(int i=0;i<1;i++)
 				{
@@ -868,7 +869,6 @@ int bundle_bridge::get_more_chimeric()
 				printf("jc_multiple = %d\n",jc_multiple);
 				continue;
 			}
-
 
 			int jc_flag = 0;
 			for(int j=0;j<junctions.size();j++)
@@ -1038,7 +1038,7 @@ int bundle_bridge::get_more_chimeric()
 						{
 							printf("seg unmapped 0x4 = off\n");
 						}
-						printf("read seq combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h2->soft_clip_seqs[i].c_str(),edit);
+						//printf("read seq combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h2->soft_clip_seqs[i].c_str(),edit);
 						printf("soft right clip: combo index=%d, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, edit=%d\n",i,bb.chrm.c_str(),fr.h2->qname.c_str(),fr.h2->pos,fr.h2->soft_clip_seqs[i].c_str(),edit);
 						printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
 						printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
