@@ -28,6 +28,7 @@ public:
 	int32_t rpos;					// the rightmost boundary on reference
 	int ltype;						// type of the left boundary
 	int rtype;						// type of the right boundary
+	bool gapped;					// whether there exists zero-coverage interval > min_subregion_gap
 	double ave;						// coverage mean
 	double dev;						// coverage deviation
 	double max;						// coverage max

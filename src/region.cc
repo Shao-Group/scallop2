@@ -119,6 +119,7 @@ int region::smooth_join_interval_map()
 	int32_t gap = min_subregion_gap;
 	vector<PI32> v;
 	int32_t p = lpos;
+	gapped = false;
 	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
 	{
 		int32_t p1 = lower(it->first);
@@ -126,10 +127,12 @@ int region::smooth_join_interval_map()
 		assert(p1 >= p);
 		assert(p2 > p1);
 		if(p1 - p <= gap) v.push_back(PI32(p, p1));
+		else gapped = true;
 		p = p2;
 	}
 
 	if(p < rpos && rpos - p <= gap) v.push_back(PI32(p, rpos));
+	if(p < rpos && rpos - p > gap) gapped = true;
 
 	for(int i = 0; i < v.size(); i++)
 	{
