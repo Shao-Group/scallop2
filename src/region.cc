@@ -129,10 +129,13 @@ int region::smooth_join_interval_map()
 		if(p1 - p <= gap) v.push_back(PI32(p, p1));
 		else gapped = true;
 		p = p2;
+		printf("GAP = %c, p = %d, p1 = %d, p2 = %d\n", gapped ? 'T' : 'F', p, p1, p2);
 	}
 
 	if(p < rpos && rpos - p <= gap) v.push_back(PI32(p, rpos));
 	if(p < rpos && rpos - p > gap) gapped = true;
+
+	printf("GAP = %c, p = %d, rpos = %d\n", gapped ? 'T' : 'F', p, rpos);
 
 	for(int i = 0; i < v.size(); i++)
 	{
