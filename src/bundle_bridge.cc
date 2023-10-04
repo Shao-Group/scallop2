@@ -702,6 +702,63 @@ int bundle_bridge::get_edit_distance(string s, string t)
 	return res;
 }
 
+int bundle_bridge::are_strings_similar(string s, string t)
+{
+	int kmer_length = 10;
+	map<int,int> kmer_map;
+	kmer_map.clear();
+
+	for(int i=0;i<=s.size()-kmer_length;i++)
+	{
+		string kmer = s.substr(i,kmer_length);
+
+		//get hash for the kmer
+		int hash = 0;
+
+		if(kmer_map.find(hash) == kmer_map.end())
+		{
+			kmer_map.insert(pair<int,int>(hash,1));
+		}
+
+	}
+
+	for(int i=0;i<=t.size()-kmer_length;i++)
+	{
+		string kmer = t.substr(i,kmer_length);
+
+		//get hash for the kmer
+		int hash = 0;
+
+		if(kmer_map.find(hash) == kmer_map.end())
+		{
+			kmer_map.insert(pair<int,int>(hash,1));
+		}
+		else
+		{
+			if(kmer_map[hash] < 2)
+			{
+				kmer_map[hash]++;
+			}
+		}
+	}
+
+	//see if number of kmer matches > certain threshold
+	int match_count = 0;
+	map<int,int>::iterator itn;
+	for(itn = kmer_map.begin(); itn != kmer_map.end(); itn++)
+	{
+		if(itn->second == 2)
+		{
+			match_count++;
+		}
+	}
+
+	//match 80% of distinct kmers
+	if(match_count > 80/100*kmer_map.size()) return true;
+
+	return false;
+}
+
 int bundle_bridge::get_more_chimeric()
 {
 	for(int k = 0; k < fragments.size(); k++)
@@ -839,6 +896,7 @@ int bundle_bridge::get_more_chimeric()
 				//for(int i=0;i<fr.h1->soft_clip_seqs.size();i++)
 				for(int i=0;i<1;i++)
 				{
+					//bool is_similar = are_strings_similar(junc_seq,fr.h1->soft_clip_seqs[i]);
 					int edit = get_edit_distance(junc_seq,fr.h1->soft_clip_seqs[i]);
 					
 					//if(edit == 0 || edit == 1)

@@ -1723,28 +1723,9 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 			}
 		}
 
-		/*for(int i=0;i<fr.paths.size();i++)
-		{
-			int32_t len = fr.paths[i].length;
-			//printf("min_len = %d, len = %d\n",min_len, len);
-			if(abs(min_len-len) < 170)
-			{
-				selected_paths.push_back(fr.paths[i]);
-			}
-		}*/
-
-		/*printf("fr paths size %lu\n",fr.paths.size());
-		if(selected_paths.size() == 0)
-		{
-			printf("selected paths size 0\n");
-			printf("pick path chrm: %s\n",bd->bb.chrm.c_str());
-			printf("pick path frag:\n");
-			fr.print(k+1);
-		}*/
-
-		//remove exon retention path, compare all paths pairwise
 		vector<path> remove_list;
 
+		//set regions, merged regions and junctions for paths
 		for(int i=0;i<fr.paths.size();i++)
 		{
 			path *p1 = &fr.paths[i];
@@ -1784,7 +1765,7 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 			}
 			p1->exon_count = intron_cnt + 1;
 
-			if(strcmp(fr.h1->qname.c_str(),"E00511:127:HJN5NALXX:5:1105:12672:71260") == 0)
+			/*if(strcmp(fr.h1->qname.c_str(),"E00511:127:HJN5NALXX:5:1105:12672:71260") == 0)
 			{
 				printv(p1_v);
 				printf("\n");
@@ -1798,9 +1779,54 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 					printf("%d-%d, ",p1->junc_regions[i].first,p1->junc_regions[i].second);
 				}
 				printf("\n");
+			}*/
+		}
+
+		//for read paths, discard path if middle region has gap
+		for(int i=0;i<fr.paths.size();i++)
+		{
+			path p1 = fr.paths[i];
+
+			if(p1.type == 1 || p1.type == 2) continue; //exclude ref paths
+
+			printf("fragment read = %s\n",fr.h1->qname.c_str());
+			vector<int> path_v = decode_vlist(p1.v);
+			printv(path_v);
+			printf("score = %lf\n",p1.score);
+
+			if(p1.type == 1 || p1.type == 2)
+			{
+				printf(" ref path\n");
+			}
+			else
+			{
+				printf(" read path\n");
+			}
+
+			for(int j=0;j<p1.path_regions.size();j++)
+			{
+				printf("%d-%d, ",p1.path_regions[j].lpos, p1.path_regions[j].rpos);
+				if(p1.path_regions[j].gapped == true)
+				{
+					printf("gapped true\n");
+				}
+			}
+
+			if(p1.path_regions.size() > 1)
+			{
+				for(int j=1;j<p1.path_regions.size()-1;j++) //exclude first and last exon for gapped checking
+				{
+					region r = p1.path_regions[j];
+					if(r.gapped == true)
+					{
+						//remove_list.push_back(p1);
+						break;
+					}
+				}
 			}
 		}
 
+		//remove exon retention path, compare all paths pairwise
 		for(int i=0;i<fr.paths.size();i++)
 		{
 			path p1 = fr.paths[i];

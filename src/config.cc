@@ -20,6 +20,7 @@ using namespace std;
 
 //// parameters
 
+//for circRNA
 int read_length = 100;
 
 // for bam file and reads
