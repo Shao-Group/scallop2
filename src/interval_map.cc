@@ -424,3 +424,12 @@ int print_interval_set_map(const interval_set_map &ism)
 	}
 	return 0;
 }
+
+int print_split_interval_map(const split_interval_map &ism)
+{
+	for(SIMI it = ism.begin(); it != ism.end(); it++)
+	{
+		printf("[%d, %d) -> %d\n", lower(it->first), upper(it->first), it->second);
+	}
+	return 0;
+}

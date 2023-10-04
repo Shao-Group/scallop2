@@ -71,6 +71,7 @@ int evaluate_triangle(const split_interval_map &imap, int ll, int rr, double &av
 
 // print
 int print_interval_set_map(const interval_set_map &ism);
+int print_split_interval_map(const split_interval_map &ism);
 
 // testing
 int test_split_interval_map();
