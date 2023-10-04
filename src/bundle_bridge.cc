@@ -1586,8 +1586,8 @@ int bundle_bridge::extend_junctions()
 
 		// triggle to split intervals
 		printf("EXTEND junction: %d-%d\n", low32(it->first), high32(it->first));
-		bb.mmap += make_pair(ROI(high32(it->first) - 1, high32(it->first)), 99);
-		bb.mmap += make_pair(ROI(low32(it->first), low32(it->first) + 1), 99);
+		bb.mmap += make_pair(ROI(high32(it->first) - 2, high32(it->first)), 99);
+		bb.mmap += make_pair(ROI(low32(it->first), low32(it->first) + 2), 99);
 	}
 
 	//for(int i=0;i<junctions.size();i++)
