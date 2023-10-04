@@ -43,7 +43,7 @@ int region::build_join_interval_map()
 
 	if(lit == mmap->end() || rit == mmap->end()) return 0;
 
-	if(lpos == 119019188) print_split_interval_map(*mmap);
+	//if(lpos == 119019188) print_split_interval_map(*mmap);
 
 	SIMI it = lit;
 	while(true)
