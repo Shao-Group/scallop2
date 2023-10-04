@@ -1819,7 +1819,7 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 					region r = p1.path_regions[j];
 					if(r.gapped == true)
 					{
-						//remove_list.push_back(p1);
+						remove_list.push_back(p1);
 						break;
 					}
 				}
