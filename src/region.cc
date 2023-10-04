@@ -43,10 +43,13 @@ int region::build_join_interval_map()
 
 	if(lit == mmap->end() || rit == mmap->end()) return 0;
 
+	//if(lpos == 119019188) print_split_interval_map(*mmap);
+
 	SIMI it = lit;
 	while(true)
 	{
 		//if(it->second >= 2) 
+		//printf("add to REGION = %d-%d\n", lower(it->first), upper(it->first));
 		jmap += make_pair(it->first, 1);
 		if(it == rit) break;
 		it++;
@@ -120,6 +123,8 @@ int region::smooth_join_interval_map()
 	vector<PI32> v;
 	int32_t p = lpos;
 	gapped = false;
+
+	//printf("REGION = %d-%d\n", lpos, rpos);
 	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
 	{
 		int32_t p1 = lower(it->first);
@@ -129,10 +134,13 @@ int region::smooth_join_interval_map()
 		if(p1 - p <= gap) v.push_back(PI32(p, p1));
 		else gapped = true;
 		p = p2;
+		//printf("GAP = %c, p = %d, p1 = %d, p2 = %d\n", gapped ? 'T' : 'F', p, p1, p2);
 	}
 
 	if(p < rpos && rpos - p <= gap) v.push_back(PI32(p, rpos));
 	if(p < rpos && rpos - p > gap) gapped = true;
+
+	//printf("GAP = %c, p = %d, rpos = %d\n\n", gapped ? 'T' : 'F', p, rpos);
 
 	for(int i = 0; i < v.size(); i++)
 	{
