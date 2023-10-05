@@ -1785,28 +1785,29 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 		//print path information of fragments
 		for(int i=0;i<fr.paths.size();i++)
 		{
-			printf("Printing path info:\n");
+			printf("\nPrinting path info:\n");
 
 			path p1 = fr.paths[i];
 
+			printf("chrm = %s\n",bd->bb.chrm.c_str());
 			printf("fragment read = %s, h1 pos = %d, h2 pos = %d\n",fr.h1->qname.c_str(),fr.h1->pos,fr.h2->pos);
 			if((fr.h1->flag & 0x800) >= 1) printf("fr.h1 is supplementary\n");
 			if((fr.h2->flag & 0x800) >= 1) printf("fr.h2 is supplementary\n");
 			if(fr.h1->is_fake == true) printf("fr.h1 is fake\n");
 			if(fr.h2->is_fake == true) printf("fr.h2 is fake\n");
 
-			printf("path vertices decoded: ");
+			printf("path vertices encoded: ");
 			//vector<int> path_v = decode_vlist(p1.v);
 			printv(p1.v);
 			printf("\nscore = %lf,",p1.score);
 			printf("type = ");
 			if(p1.type == 1 || p1.type == 2)
 			{
-				printf(" ref path\n");
+				printf("ref path\n");
 			}
 			else
 			{
-				printf(" read path\n");
+				printf("read path\n");
 			}
 			
 			printf("path regions: \n");
@@ -1879,8 +1880,10 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 			printf("remove list:\n");
 			for(int i=0;i<remove_list.size();i++)
 			{
-				printv(decode_vlist(remove_list[i].v));
+				printv(remove_list[i].v);
+				printf(";");
 			}
+			printf("\n");
 		}
 
 		map<string,int> remove_map;

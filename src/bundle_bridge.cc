@@ -705,7 +705,8 @@ int bundle_bridge::get_edit_distance(string s, string t)
 int bundle_bridge::are_strings_similar(int kmer_length, map<string,int> kmer_map, string t)
 {
 	int match_count = 0;
-	printf("t size = %lu\n",t.size());
+	//printf("t size = %lu\n",t.size());
+
 	for(int i=0;i<=t.size()-kmer_length;i++)
 	{
 		string kmer = t.substr(i,kmer_length);
@@ -715,7 +716,7 @@ int bundle_bridge::are_strings_similar(int kmer_length, map<string,int> kmer_map
 			match_count++;
 		}
 	}
-	printf("end of similar\n");
+	//printf("end of similar\n");
 
 	if(match_count >= floor(t.size()/15)) return true;
 
@@ -870,9 +871,11 @@ int bundle_bridge::get_more_chimeric()
 				//for(int i=0;i<fr.h1->soft_left_clip_seqs.size();i++)
 				for(int i=0;i<1;i++)
 				{
+					assert(junc_seq.size() == fr.h1->soft_left_clip_seqs[i].size());
+
 					//bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
 					//if(is_similar == false) break;
-					assert(junc_seq.size() == fr.h1->soft_left_clip_seqs[i].size());
+
 					int edit = get_edit_distance(junc_seq,fr.h1->soft_left_clip_seqs[i]);
 					
 					//if(edit == 0 || edit == 1)
@@ -918,9 +921,11 @@ int bundle_bridge::get_more_chimeric()
 				//for(int i=0;i<fr.h1->soft_left_clip_seqs.size();i++)
 				for(int i=0;i<1;i++)
 				{
+					assert(junc_seq.size() == fr.h1->soft_left_clip_seqs[i].size());
+
 					//bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
 					//if(is_similar == false) break;
-					assert(junc_seq.size() == fr.h1->soft_left_clip_seqs[i].size());
+
 					int edit = get_edit_distance(junc_seq,fr.h1->soft_left_clip_seqs[i]);
 					
 					//if(edit == 0 || edit == 1)
@@ -997,9 +1002,11 @@ int bundle_bridge::get_more_chimeric()
 				//for(int i=0;i<fr.h2->soft_right_clip_seqs.size();i++)
 				for(int i=0;i<1;i++)
 				{
+					assert(junc_seq.size() == fr.h2->soft_right_clip_seqs[i].size());
+
 					//bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
 					//if(is_similar == false) break;
-					assert(junc_seq.size() == fr.h2->soft_right_clip_seqs[i].size());
+					
 					int edit = get_edit_distance(junc_seq,fr.h2->soft_right_clip_seqs[i]);
 
 					//if(edit == 0 || edit == 1)
@@ -1045,9 +1052,11 @@ int bundle_bridge::get_more_chimeric()
 				//for(int i=0;i<fr.h2->soft_right_clip_seqs.size();i++)
 				for(int i=0;i<1;i++)
 				{
+					assert(junc_seq.size() == fr.h2->soft_right_clip_seqs[i].size());
+
 					//bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
 					//if(is_similar == false) break;
-					assert(junc_seq.size() == fr.h2->soft_right_clip_seqs[i].size());
+					
 					int edit = get_edit_distance(junc_seq,fr.h2->soft_right_clip_seqs[i]);
 
 					//if(edit == 0 || edit == 1)
