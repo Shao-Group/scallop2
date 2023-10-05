@@ -1783,19 +1783,19 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 		}
 
 		//print path information of fragments
+		printf("\nPrinting path info:\n");
+		printf("chrm = %s\n",bd->bb.chrm.c_str());
+		printf("fragment read = %s, h1 pos = %d, h2 pos = %d\n",fr.h1->qname.c_str(),fr.h1->pos,fr.h2->pos);
+		if((fr.h1->flag & 0x800) >= 1) printf("fr.h1 is supplementary\n");
+		if((fr.h2->flag & 0x800) >= 1) printf("fr.h2 is supplementary\n");
+		if(fr.h1->is_fake == true) printf("fr.h1 is fake\n");
+		if(fr.h2->is_fake == true) printf("fr.h2 is fake\n");
+
 		for(int i=0;i<fr.paths.size();i++)
 		{
-			printf("\nPrinting path info:\n");
-
 			path p1 = fr.paths[i];
 
-			printf("chrm = %s\n",bd->bb.chrm.c_str());
-			printf("fragment read = %s, h1 pos = %d, h2 pos = %d\n",fr.h1->qname.c_str(),fr.h1->pos,fr.h2->pos);
-			if((fr.h1->flag & 0x800) >= 1) printf("fr.h1 is supplementary\n");
-			if((fr.h2->flag & 0x800) >= 1) printf("fr.h2 is supplementary\n");
-			if(fr.h1->is_fake == true) printf("fr.h1 is fake\n");
-			if(fr.h2->is_fake == true) printf("fr.h2 is fake\n");
-
+			printf("path %d\n",i+1);
 			printf("path vertices encoded: ");
 			//vector<int> path_v = decode_vlist(p1.v);
 			printv(p1.v);
@@ -1823,8 +1823,8 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 					printf("gapped false\n");
 				}
 			}
-			printf("\n");
 		}
+		printf("\n");
 
 		//for read paths, discard path if middle region has gap
 		for(int i=0;i<fr.paths.size();i++)
@@ -2001,46 +2001,14 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 			}
 		}
 
-		if(strcmp(fr.h1->qname.c_str(),"ST-E00299:245:HKTJJALXX:6:2205:11647:15936") == 0)
+		map<string, pair<path, int>>::iterator itn;
+		for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
 		{
-			printf("ST-E00299:245:HKTJJALXX:6:2205:11647:15936\n");
-			map<string, pair<path, int>>::iterator itn;
-			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
-			{
-				printf("ref_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-			for(itn = read_paths_map.begin(); itn != read_paths_map.end(); itn++)
-			{
-				printf("read_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
+			printf("ref_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
 		}
-
-		if(strcmp(fr.h1->qname.c_str(),"ST-E00299:245:HKTJJALXX:6:2107:25256:70486") == 0)
+		for(itn = read_paths_map.begin(); itn != read_paths_map.end(); itn++)
 		{
-			printf("ST-E00299:245:HKTJJALXX:6:2107:25256:70486\n");
-			map<string, pair<path, int>>::iterator itn;
-			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
-			{
-				printf("ref_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-			for(itn = read_paths_map.begin(); itn != read_paths_map.end(); itn++)
-			{
-				printf("read_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-		}
-
-		if(strcmp(fr.h1->qname.c_str(),"simulate:689721") == 0)
-		{
-			printf("simulate:689721\n");
-			map<string, pair<path, int>>::iterator itn;
-			for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
-			{
-				printf("ref_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
-			for(itn = read_paths_map.begin(); itn != read_paths_map.end(); itn++)
-			{
-				printf("read_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
-			}
+			printf("read_path_key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
 		}
 
 		vector<path> intersection;
@@ -2124,8 +2092,9 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 			best_path = ref_paths_map.begin()->second.first;
 		}*/
 
-		//printf("best path:\n");
-		//printv(best_path.v);
+		printf("best path:\n");
+		printv(best_path.v);
+		printf("\n");
 		fr.paths[0] = best_path;
 		fr.paths.resize(1);
 		assert(fr.paths.size() == 1);
