@@ -100,7 +100,8 @@ public:
 	string qname;							// query name
 	uint32_t l_qseq;						// length of sequence information of the read except H clip
 	string seq;								// sequence information of the read except H clip
-	vector<string> soft_clip_seqs;			// index 0:start seq,1:start seq rev comp,2:ending seq,3:ending seq rev comp
+	vector<string> soft_left_clip_seqs;		// index 0:start seq,1:start seq rev comp
+	vector<string> soft_right_clip_seqs;	// index 0:ending seq,1:ending seq rev comp
 	hit *next;								// next hit that is equivalent with current one
 
 	// UMI

@@ -1782,17 +1782,23 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 			}*/
 		}
 
-		//for read paths, discard path if middle region has gap
+		//print path information of fragments
 		for(int i=0;i<fr.paths.size();i++)
 		{
+			printf("Printing path info:\n");
+
 			path p1 = fr.paths[i];
 
-			if(p1.type == 1 || p1.type == 2) continue; //exclude ref paths
+			printf("fragment read = %s, h1 pos = %d, h2 pos = %d\n",fr.h1->qname.c_str(),fr.h1->pos,fr.h2->pos);
+			if((fr.h1->flag & 0x800) >= 1) printf("fr.h1 is supplementary\n");
+			if((fr.h2->flag & 0x800) >= 1) printf("fr.h2 is supplementary\n");
+			if(fr.h1->is_fake == true) printf("fr.h1 is fake\n");
+			if(fr.h2->is_fake == true) printf("fr.h2 is fake\n");
 
-			printf("fragment read = %s\n",fr.h1->qname.c_str());
+			printf("path vertices decoded: ");
 			vector<int> path_v = decode_vlist(p1.v);
 			printv(path_v);
-			printf("score = %lf\n",p1.score);
+			printf("\nscore = %lf,",p1.score);
 
 			if(p1.type == 1 || p1.type == 2)
 			{
@@ -1802,15 +1808,29 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 			{
 				printf(" read path\n");
 			}
-
+			
+			printf("path regions: ");
 			for(int j=0;j<p1.path_regions.size();j++)
 			{
-				printf("%d-%d, ",p1.path_regions[j].lpos, p1.path_regions[j].rpos);
+				printf("%d-%d ",p1.path_regions[j].lpos, p1.path_regions[j].rpos);
 				if(p1.path_regions[j].gapped == true)
 				{
 					printf("gapped true\n");
 				}
+				else
+				{
+					printf("gapped false\n");
+				}
 			}
+			printf("\n");
+		}
+
+		//for read paths, discard path if middle region has gap
+		for(int i=0;i<fr.paths.size();i++)
+		{
+			path p1 = fr.paths[i];
+
+			if(p1.type == 1 || p1.type == 2) continue; //exclude ref paths
 
 			if(p1.path_regions.size() > 1)
 			{
@@ -1819,7 +1839,7 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 					region r = p1.path_regions[j];
 					if(r.gapped == true)
 					{
-						remove_list.push_back(p1);
+						//remove_list.push_back(p1);
 						break;
 					}
 				}

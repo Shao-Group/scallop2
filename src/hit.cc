@@ -63,7 +63,8 @@ hit::hit()
 
 	l_qseq = 0;
 	seq = "";
-	soft_clip_seqs.clear();
+	soft_left_clip_seqs.clear();
+	soft_right_clip_seqs.clear();
 
 	rpos = 0;
 	qlen = 0;
@@ -86,9 +87,6 @@ hit::hit()
 	strand = '.';
 	xs = '.';
 	ts = '.';
-	l_qseq = 0;
-	seq = "";
-	soft_clip_seqs.clear();
 
 	umi = "";
 	pi = 0;
@@ -142,7 +140,8 @@ hit& hit::operator=(const hit &h)
 
 	l_qseq = h.l_qseq;
 	seq = h.seq;
-	soft_clip_seqs = h.soft_clip_seqs;
+	soft_left_clip_seqs = h.soft_left_clip_seqs;
+	soft_right_clip_seqs = h.soft_right_clip_seqs;
 
 	return *this;
 }
@@ -194,7 +193,8 @@ hit::hit(const hit &h)
 
 	l_qseq = h.l_qseq;
 	seq = h.seq;
-	soft_clip_seqs = h.soft_clip_seqs;
+	soft_left_clip_seqs = h.soft_left_clip_seqs;
+	soft_right_clip_seqs = h.soft_right_clip_seqs;
 }
 
 hit::hit(bam1_t *b, int id) 
@@ -230,7 +230,8 @@ hit::hit(bam1_t *b, int id)
 
 	l_qseq = 0;
 	seq = "";
-	soft_clip_seqs.clear();
+	soft_left_clip_seqs.clear();
+	soft_right_clip_seqs.clear();
 
 	// compute rpos
 	rpos = pos + (int32_t)bam_cigar2rlen(n_cigar, bam_get_cigar(b));
@@ -499,64 +500,46 @@ int hit::set_seq(bam1_t *b)
 
 int hit::set_soft_clip_seq_combo()
 {
-	int32_t len = 0;
 	if(cigar_vector[0].first == 'S')
 	{
-		len = cigar_vector[0].second;
+		int32_t len = cigar_vector[0].second;
+		//index 0, extract start len bp
+		string str0 = "";
+		for(int i=0;i<len;i++)
+		{
+			str0 = str0 + seq[i];
+		}
+		soft_left_clip_seqs.push_back(str0);
+
+		//index 1, extract start len bp rev comp
+		soft_left_clip_seqs.push_back(get_reverse_complement(soft_left_clip_seqs[0]));
 	}
-	else if(cigar_vector[cigar_vector.size()-1].first == 'S')
+	if(cigar_vector[cigar_vector.size()-1].first == 'S')
 	{
-		len = cigar_vector[cigar_vector.size()-1].second;
+		int32_t len = cigar_vector[cigar_vector.size()-1].second;
+
+		//index 0, extract end len bp
+		string str2 = "";
+		for(int i=seq.size()-len;i<seq.size();i++)
+		{
+			str2 = str2 + seq[i];
+		}
+		soft_right_clip_seqs.push_back(str2);
+
+		//index 1,extract end len bp rev comp
+		soft_right_clip_seqs.push_back(get_reverse_complement(soft_right_clip_seqs[0]));
 	}
 
-	//printf("len=%d\n",len);
-	//index 0, extract start len bp
-	string str0 = "";
-	for(int i=0;i<len;i++)
+	/*if(strcmp(qname.c_str(),"simulate:122")== 0)
 	{
-		str0 = str0 + seq[i];
-	}
-	soft_clip_seqs.push_back(str0);
+		printf("cigar of simulate:122:\n");
+		for(int i=0;i<cigar_vector.size();i++)
+		{
+			printf("%d%c",cigar_vector[i].second,cigar_vector[i].first);
+		}
+	}*/
 
-	//index 1, extract start len bp rev comp
-	soft_clip_seqs.push_back(get_reverse_complement(soft_clip_seqs[0]));
-
-	//index 2, extract end len bp
-	string str2 = "";
-	for(int i=seq.size()-len;i<seq.size();i++)
-	{
-		str2 = str2 + seq[i];
-	}
-	soft_clip_seqs.push_back(str2);
-
-	//index 3,extract end len bp rev comp
-	soft_clip_seqs.push_back(get_reverse_complement(soft_clip_seqs[2]));
-
-	//index 4,extract start len bp reverse only
-	/*string str4 = "";
-	for(int i=len-1;i>=0;i--)
-	{
-		str4 = str4 + seq[i];
-	}
-	soft_clip_seqs.push_back(str4);
-
-	//index 5,extract start len bp complement only
-	soft_clip_seqs.push_back(get_complement(soft_clip_seqs[0]));
-
-	//index 6,extract end len bp reverse only
-	string str6 = "";
-	for(int i=seq.size()-1;i>=seq.size()-len;i--)
-	{
-		str6 = str6 + seq[i];
-	}
-	soft_clip_seqs.push_back(str6);
-
-	//index 7,extract end len bp complement only
-	soft_clip_seqs.push_back(get_complement(soft_clip_seqs[2]));*/
-
-	/*printf("size of soft_clip_seqs = %lu\n",soft_clip_seqs.size());
-
-	printf("Printing four combos:\n");
+	/*printf("Printing four combos:\n");
 	printf("start: %s\n",soft_clip_seqs[0].c_str());
 	printf("start RC: %s\n",soft_clip_seqs[1].c_str());
 	printf("end: %s\n",soft_clip_seqs[2].c_str());
