@@ -1921,7 +1921,9 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 			//vector<int> path_v = decode_vlist(p1.v);
 			printv(p1.v);
 			printf("\nscore = %lf,",p1.score);
-			printf("type = ");
+			printf("length = %d,",p1.length);
+			printf("type = %d,",p1.type);
+			printf("kind = ");
 			if(p1.type == 1 || p1.type == 2)
 			{
 				printf("ref path\n");

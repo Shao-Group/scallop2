@@ -238,12 +238,12 @@ int assembler::process(int n)
 		circular_trsts_HS.insert(circular_trsts_HS.end(), bd.br.circ_trsts_HS.begin(), bd.br.circ_trsts_HS.end());
 
 		// RO statistics
-		HS_both_side_reads.insert(HS_both_side_reads.end(), bd.br.HS_both_side_reads.begin(), bd.br.HS_both_side_reads.end());
-		chimeric_reads.insert(chimeric_reads.end(), bd.br.chimeric_reads.begin(), bd.br.chimeric_reads.end());
+		//HS_both_side_reads.insert(HS_both_side_reads.end(), bd.br.HS_both_side_reads.begin(), bd.br.HS_both_side_reads.end());
+		//chimeric_reads.insert(chimeric_reads.end(), bd.br.chimeric_reads.begin(), bd.br.chimeric_reads.end());
 
-		bd.build(1, true);
+		/*bd.build(1, true);
 		if(verbose >= 1) bd.print(index++);	
-		assemble(bd.gr, bd.hs, ts1, ts2);
+		assemble(bd.gr, bd.hs, ts1, ts2);*/ //commented to make efficient
 
 		//bd.build(2, true); // commented out by Tasfia for as this creates repeats in count of cases
 		//if(verbose >= 1) bd.print(index++);
@@ -261,7 +261,7 @@ int assembler::process(int n)
 		assemble(bd.gr, bd.hs, ts1, ts2);
 		*/
 
-		int sdup = assemble_duplicates / 1 + 1;
+		/*int sdup = assemble_duplicates / 1 + 1;
 		int mdup = assemble_duplicates / 2 + 0;
 
 		vector<transcript> gv1 = ts1.get_transcripts(sdup, mdup);
@@ -284,7 +284,7 @@ int assembler::process(int n)
 		filter ft2(gv2);
 		ft2.filter_length_coverage();
 		ft2.remove_nested_transcripts();
-		if(ft2.trs.size() >= 1) non_full_trsts.insert(non_full_trsts.end(), ft2.trs.begin(), ft2.trs.end());
+		if(ft2.trs.size() >= 1) non_full_trsts.insert(non_full_trsts.end(), ft2.trs.begin(), ft2.trs.end());*/ //commented to make efficient
 
 	}
 	pool.clear();
