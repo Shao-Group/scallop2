@@ -57,13 +57,13 @@ int bridger::bridge_normal_fragments()
 
 	// 1st round of briding hard fragments
 	build_junction_graph(bd->fragments);
-	bridge_hard_fragments(open_fclusters);
+	bridge_hard_fragments_normal(open_fclusters);
 	filter_paths(bd->fragments);
 	int n2 = get_paired_fragments(bd->fragments);
 
 	// 2nd round of briding hard fragments
 	build_junction_graph(bd->fragments);
-	bridge_hard_fragments(open_fclusters);
+	bridge_hard_fragments_normal(open_fclusters);
 	filter_paths(bd->fragments);
 	int n3 = get_paired_fragments(bd->fragments);
 
@@ -119,7 +119,7 @@ int bridger::bridge_circ_fragments()
 	cluster_open_fragments(open_fclusters, bd->circ_fragments);
 
 	build_junction_graph(bd->fragments);
-	bridge_hard_fragments(open_fclusters);
+	bridge_hard_fragments_circ(open_fclusters);
 
 	int n2 = get_paired_fragments(bd->circ_fragments);
 
@@ -664,7 +664,7 @@ int bridger::build_path_nodes(vector<fragment> &frags)
 	return 0;
 }
 
-int bridger::bridge_hard_fragments(vector<fcluster> &open)
+int bridger::bridge_hard_fragments_normal(vector<fcluster> &open)
 {
 	/*
 	if(use_overlap_scoring == true)
@@ -879,6 +879,127 @@ int bridger::bridge_hard_fragments(vector<fcluster> &open)
 
 				fr->paths.push_back(p);
 				//printf(" fragment %d length = %d using path %d, p.type = %d\n", i, p.length, be, p.type);
+			}
+		}
+	}
+	return 0;
+}
+
+int bridger::bridge_hard_fragments_circ(vector<fcluster> &open)
+{
+	/*
+	if(use_overlap_scoring == true)
+	{
+		build_path_nodes(frags);
+		build_overlap_index();
+	}
+	*/
+
+	//vector<fcluster> open;
+	//cluster_open_fragments(open);
+	sort(open.begin(), open.end(), compare_fcluster_v1_v2);
+
+	//print open clusters
+	if(verbose >= 1)
+	{
+		for(int k = 0; k < open.size(); k++)
+		{
+			open[k].print(k);
+		}
+	}
+
+	/*
+	printf("print pnode bridge...\n");
+	for(int k = 0; k < bd->regions.size(); k++) bd->regions[k].print(k);
+	for(int k = 0; k < pnodes.size(); k++) pnodes[k].print_bridge(k);
+	*/
+
+	vector< set<int> > affected(bd->regions.size());
+	vector<int> max_needed(bd->regions.size(), -1);
+	for(int k = 0; k < open.size(); k++)
+	{
+		fcluster &fc = open[k];
+		int x1 = fc.v1.back();
+		int x2 = fc.v2.front();
+		assert(x1 >= 0 && x1 < bd->regions.size());
+		assert(x2 >= 0 && x2 < bd->regions.size());
+		affected[x1].insert(k);
+		if(max_needed[x1] < x2) max_needed[x1] = x2;
+	}
+
+	vector< vector<entry> > table;
+	table.resize(bd->regions.size());
+	for(int k = 0; k < bd->regions.size(); k++)
+	{
+		if(affected[k].size() <= 0) continue;
+		if(max_needed[k] < k) continue;
+
+		dynamic_programming(k, max_needed[k], table);
+
+		// print table
+		/*
+		   printf("table from vertex %d to %d\n", k, max_needed);
+		   for(int j = k; j <= max_needed; j++)
+		   {
+		   for(int i = 0; i < table[j].size(); i++)
+		   {
+		   entry &e = table[j][i];
+		   printf("vertex %d, solution %d: ", j, i);
+		   e.print();
+		   }
+		   }
+		 */
+
+		for(set<int>::iterator it = affected[k].begin(); it != affected[k].end(); it++)
+		{
+			fcluster &fc = open[*it];
+
+			int j = fc.v2.front();
+			assert(k == fc.v1.back());
+			assert(j <= max_needed[k]);
+
+			if(j < k) continue;
+			if(table[j].size() == 0) continue;
+
+			vector< vector<int> > pb = trace_back(j, table);
+			vector< vector<int> > pn;
+			vector<int> ps;
+
+			for(int e = 0; e < pb.size(); e++)
+			{
+				vector<int> px = fc.v1;
+				if(pb[e].size() >= 2) px.insert(px.end(), pb[e].begin() + 1, pb[e].end() - 1);
+				px.insert(px.end(), fc.v2.begin(), fc.v2.end());
+				//int s = (int)(min_bridging_score) + 2;
+				int s = table[j][e].stack.front();
+				if(use_overlap_scoring) s = evaluate_bridging_path(px);
+				pn.push_back(px);
+				ps.push_back(s);
+			}
+
+			for(int i = 0; i < fc.fset.size(); i++)
+			{
+				fragment *fr = fc.fset[i];
+
+				for(int e = 0; e < pb.size(); e++)
+				{
+					path p;
+					p.ex1 = p.ex2 = 0;
+					p.v = pn[e];
+					p.length = bd->compute_aligned_length(fr->k1l, fr->k2r, p.v);
+					p.v = encode_vlist(p.v);
+					p.score = ps[e];
+
+					if(p.length >= length_low && p.length <= length_high)
+					{
+						//bd->breads.insert(fr->h1->qname);
+						p.type = 3;
+					}
+					else p.type = 4;
+
+					fr->paths.push_back(p);
+					//printf(" fragment %d length = %d using path %d, p.type = %d\n", i, p.length, be, p.type);
+				}
 			}
 		}
 	}

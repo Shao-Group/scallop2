@@ -63,7 +63,8 @@ public:
 	int remove_tiny_boundary(vector<fragment> &frags);
 
 	int build_junction_graph(vector<fragment> &frags);
-	int bridge_hard_fragments(vector<fcluster> &open);
+	int bridge_hard_fragments_normal(vector<fcluster> &open);
+	int bridge_hard_fragments_circ(vector<fcluster> &open);
 	int dynamic_programming(int k1, int k2, vector< vector<entry> > &table);
 	vector< vector<int> > trace_back(int k, const vector< vector<entry> > &table);
 	int evaluate_bridging_path(const vector<int> &pb);
