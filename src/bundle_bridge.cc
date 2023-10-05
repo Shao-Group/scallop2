@@ -873,8 +873,8 @@ int bundle_bridge::get_more_chimeric()
 				{
 					assert(junc_seq.size() == fr.h1->soft_left_clip_seqs[i].size());
 
-					//bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
-					//if(is_similar == false) break;
+					bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
+					if(is_similar == false) break;
 
 					int edit = get_edit_distance(junc_seq,fr.h1->soft_left_clip_seqs[i]);
 					
@@ -923,8 +923,8 @@ int bundle_bridge::get_more_chimeric()
 				{
 					assert(junc_seq.size() == fr.h1->soft_left_clip_seqs[i].size());
 
-					//bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
-					//if(is_similar == false) break;
+					bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
+					if(is_similar == false) break;
 
 					int edit = get_edit_distance(junc_seq,fr.h1->soft_left_clip_seqs[i]);
 					
@@ -1004,8 +1004,8 @@ int bundle_bridge::get_more_chimeric()
 				{
 					assert(junc_seq.size() == fr.h2->soft_right_clip_seqs[i].size());
 
-					//bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
-					//if(is_similar == false) break;
+					bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
+					if(is_similar == false) break;
 					
 					int edit = get_edit_distance(junc_seq,fr.h2->soft_right_clip_seqs[i]);
 
@@ -1054,8 +1054,8 @@ int bundle_bridge::get_more_chimeric()
 				{
 					assert(junc_seq.size() == fr.h2->soft_right_clip_seqs[i].size());
 
-					//bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
-					//if(is_similar == false) break;
+					bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
+					if(is_similar == false) break;
 					
 					int edit = get_edit_distance(junc_seq,fr.h2->soft_right_clip_seqs[i]);
 

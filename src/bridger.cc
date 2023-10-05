@@ -2001,6 +2001,7 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 			}
 		}
 
+		//printing selected read/ref paths
 		map<string, pair<path, int>>::iterator itn;
 		for(itn = ref_paths_map.begin(); itn != ref_paths_map.end(); itn++)
 		{
