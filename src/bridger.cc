@@ -1796,10 +1796,10 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 			if(fr.h2->is_fake == true) printf("fr.h2 is fake\n");
 
 			printf("path vertices decoded: ");
-			vector<int> path_v = decode_vlist(p1.v);
-			printv(path_v);
+			//vector<int> path_v = decode_vlist(p1.v);
+			printv(p1.v);
 			printf("\nscore = %lf,",p1.score);
-
+			printf("type = ");
 			if(p1.type == 1 || p1.type == 2)
 			{
 				printf(" ref path\n");
@@ -1809,7 +1809,7 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 				printf(" read path\n");
 			}
 			
-			printf("path regions: ");
+			printf("path regions: \n");
 			for(int j=0;j<p1.path_regions.size();j++)
 			{
 				printf("%d-%d ",p1.path_regions[j].lpos, p1.path_regions[j].rpos);
@@ -1839,7 +1839,7 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 					region r = p1.path_regions[j];
 					if(r.gapped == true)
 					{
-						//remove_list.push_back(p1);
+						remove_list.push_back(p1);
 						break;
 					}
 				}
