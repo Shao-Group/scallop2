@@ -1766,7 +1766,6 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 			continue;
 		}
 
-		vector<path> selected_paths;
 		for(int i=0;i<fr.paths.size();i++)
 		{
 			int32_t len = fr.paths[i].length;
@@ -1843,8 +1842,6 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 				printf("\n");
 			}
 		}
-
-		vector<path> remove_list;
 
 		//set regions, merged regions and junctions for paths
 		for(int i=0;i<fr.paths.size();i++)
@@ -1949,6 +1946,11 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 		}
 		printf("\n");
 
+		vector<path> primary_selected_paths;
+		vector<path> remove_list;
+		remove_list.clear();
+		primary_selected_paths.clear();
+
 		//for read paths, discard path if middle region has gap
 		for(int i=0;i<fr.paths.size();i++)
 		{
@@ -2010,6 +2012,7 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 		}
 
 		map<string,int> remove_map;
+		remove_map.clear();
 
 		for(int i=0;i<remove_list.size();i++)
 		{
@@ -2031,9 +2034,70 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 			}
 		}
 
+		//vector<path> selected_paths;
+		//selected_paths.clear();
+
 		for(int i=0;i<fr.paths.size();i++)
 		{
 			path p = fr.paths[i];
+			string hash = "";
+			for(int j=0;j<p.v.size();j++)
+			{
+				hash = hash + tostring(p.v[j]) + "|";
+			}
+
+			if(remove_map.find(hash) == remove_map.end()) //path not present in remove map
+			{
+				primary_selected_paths.push_back(p);
+			}
+		}
+
+		//remove paths with score <= 1 if there exists higher score paths
+		vector<path> selected_paths;
+		selected_paths.clear();
+		remove_list.clear();
+		remove_map.clear();
+		bool has_higher_score = false;
+
+		for(int i=0;i<primary_selected_paths.size();i++)
+		{
+			path p = primary_selected_paths[i];
+			if((p.type == 3 || p.type == 4) && p.score > 1) has_higher_score = true;
+			break;
+		}
+
+		if(has_higher_score == true)
+		{
+			for(int i=0;i<primary_selected_paths.size();i++)
+			{
+				path p = primary_selected_paths[i];
+				if((p.type == 3 || p.type == 4) && p.score <= 1) remove_list.push_back(p);
+			}
+		}
+
+		for(int i=0;i<remove_list.size();i++)
+		{
+			path p = remove_list[i];
+			string hash = "";
+			
+			for(int j=0;j<p.v.size();j++)
+			{
+				hash = hash + tostring(p.v[j]) + "|";
+
+				if(remove_map.find(hash) != remove_map.end()) //path present already in map
+				{
+					remove_map[hash]++;
+				}
+				else //path not present in map
+				{
+					remove_map.insert(pair<string,int>(hash,1));
+				}
+			}
+		}
+
+		for(int i=0;i<primary_selected_paths.size();i++)
+		{
+			path p = primary_selected_paths[i];
 			string hash = "";
 			for(int j=0;j<p.v.size();j++)
 			{
@@ -2153,19 +2217,6 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 		}
 
 		// find overlap betwen A and B
-		if(intersection.size() > 0)
-		{
-			//printf("intersection size: %lu\n",intersection.size());
-
-			for(int i=0;i<intersection.size();i++)
-			{
-				path p = intersection[i];
-				//printf("score: %lf\n",p.score);
-				//printv(p.v);
-			}
-			//printf("\n");
-		}
-
 		int max_score = -1000000;
 		path best_path;
 
