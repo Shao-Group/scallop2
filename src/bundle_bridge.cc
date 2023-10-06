@@ -725,6 +725,8 @@ int bundle_bridge::are_strings_similar(int kmer_length, map<string,int> kmer_map
 
 int bundle_bridge::get_more_chimeric()
 {
+	int max_read_to_junction_gap = 100000;
+	
 	for(int k = 0; k < fragments.size(); k++)
 	{
 		fragment &fr = fragments[k];
@@ -860,6 +862,7 @@ int bundle_bridge::get_more_chimeric()
 				junction jc = junctions[j];
 
 				if(jc.lpos <= fr.h2->rpos || jc.lpos <= fr.h1->rpos) continue;
+				if(abs(jc.lpos-fr.h2->rpos) > max_read_to_junction_gap) continue;
 
 				int32_t pos1 = jc.lpos-soft_len+1;
 				int32_t pos2 = jc.lpos;
@@ -912,6 +915,7 @@ int bundle_bridge::get_more_chimeric()
 				junction jc = junctions[j];
 
 				if(jc.lpos <= fr.h2->rpos || jc.lpos <= fr.h1->rpos) continue;
+				if(abs(jc.lpos-fr.h2->rpos) > max_read_to_junction_gap) continue;
 
 				int32_t pos1 = jc.lpos-soft_len+1;
 				int32_t pos2 = jc.lpos;
@@ -992,6 +996,7 @@ int bundle_bridge::get_more_chimeric()
 				junction jc = junctions[j];
 
 				if(jc.rpos >= fr.h2->pos || jc.rpos >= fr.h1->pos) continue;
+				if(abs(fr.h1->pos-jc.rpos) > max_read_to_junction_gap) continue;
 
 				int32_t pos1 = jc.rpos;
 				int32_t pos2 = jc.rpos+soft_len-1;
@@ -1043,6 +1048,7 @@ int bundle_bridge::get_more_chimeric()
 				junction jc = junctions[j];
 
 				if(jc.rpos >= fr.h2->pos || jc.rpos >= fr.h1->pos) continue;
+				if(abs(fr.h1->pos-jc.rpos) > max_read_to_junction_gap) continue;
 
 				int32_t pos1 = jc.rpos;
 				int32_t pos2 = jc.rpos+soft_len-1;
