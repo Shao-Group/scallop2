@@ -2014,17 +2014,6 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 				}
 			}
 		}
-		
-		if(remove_list.size()  > 0)
-		{
-			printf("remove list:\n");
-			for(int i=0;i<remove_list.size();i++)
-			{
-				printv(remove_list[i].v);
-				printf(";");
-			}
-			printf("\n");
-		}
 
 		map<string,int> remove_map;
 		remove_map.clear();
@@ -2037,16 +2026,28 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 			for(int j=0;j<p.v.size();j++)
 			{
 				hash = hash + tostring(p.v[j]) + "|";
-
-				if(remove_map.find(hash) != remove_map.end()) //path present already in map
-				{
-					remove_map[hash]++;
-				}
-				else //path not present in map
-				{
-					remove_map.insert(pair<string,int>(hash,1));
-				}
 			}
+			hash = hash + tostring(p.score) + "|" + tostring(p.length) + "|" + tostring(p.type);
+
+			if(remove_map.find(hash) != remove_map.end()) //path present already in map
+			{
+				remove_map[hash]++;
+			}
+			else //path not present in map
+			{
+				remove_map.insert(pair<string,int>(hash,1));
+			}
+		}
+
+		if(remove_map.size() > 0)
+		{
+			printf("initial remove map:\n");
+			map<string,int>::iterator itn;
+			for(itn = remove_map.begin(); itn != remove_map.end(); itn++)
+			{
+				printf("%s,",itn->first.c_str());
+			}
+			printf("\n");
 		}
 
 		//vector<path> selected_paths;
@@ -2060,6 +2061,7 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 			{
 				hash = hash + tostring(p.v[j]) + "|";
 			}
+			hash = hash + tostring(p.score) + "|" + tostring(p.length) + "|" + tostring(p.type);
 
 			if(remove_map.find(hash) == remove_map.end()) //path not present in remove map
 			{
@@ -2098,16 +2100,28 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 			for(int j=0;j<p.v.size();j++)
 			{
 				hash = hash + tostring(p.v[j]) + "|";
-
-				if(remove_map.find(hash) != remove_map.end()) //path present already in map
-				{
-					remove_map[hash]++;
-				}
-				else //path not present in map
-				{
-					remove_map.insert(pair<string,int>(hash,1));
-				}
 			}
+			hash = hash + tostring(p.score) + "|" + tostring(p.length) + "|" + tostring(p.type);
+
+			if(remove_map.find(hash) != remove_map.end()) //path present already in map
+			{
+				remove_map[hash]++;
+			}
+			else //path not present in map
+			{
+				remove_map.insert(pair<string,int>(hash,1));
+			}
+		}
+
+		if(remove_map.size() > 0)
+		{
+			printf("final remove map:\n");
+			map<string,int>::iterator itn;
+			for(itn = remove_map.begin(); itn != remove_map.end(); itn++)
+			{
+				printf("%s,",itn->first.c_str());
+			}
+			printf("\n");
 		}
 
 		for(int i=0;i<primary_selected_paths.size();i++)
@@ -2118,6 +2132,7 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 			{
 				hash = hash + tostring(p.v[j]) + "|";
 			}
+			hash = hash + tostring(p.score) + "|" + tostring(p.length) + "|" + tostring(p.type);
 
 			if(remove_map.find(hash) == remove_map.end()) //path not present in remove map
 			{
@@ -2128,7 +2143,7 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 		//check if selected paths is zero
 		if(selected_paths.size() == 0)
 		{
-			//printf("selected path size zero\n");
+			printf("selected path size zero\n");
 			//selected_paths = fr.paths;
 			fr.set_bridged(false);
 			fr.paths.resize(0);

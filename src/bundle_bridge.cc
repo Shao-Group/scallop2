@@ -3520,8 +3520,16 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 
 		if(fr1.paths.size() != 1 || fr2.paths.size() != 1)//not bridged
 		{
-			printf("Not valid: fragment path size not 1\n");
-			printf("fr1.paths size = %lu, fr2.paths size = %lu\n",fr1.paths.size(),fr2.paths.size());
+			if((fr2.h1->flag & 0x800) >= 1 || (fr2.h2->flag & 0x800) >= 1)// print only not valid chimeric frags
+			{
+				printf("Not valid chimeric: fragment path size not 1\n");
+				printf("fr1.paths size = %lu, fr2.paths size = %lu\n",fr1.paths.size(),fr2.paths.size());
+			}
+			if(fr2.h1->is_fake == true || fr2.h1->is_fake == true)// print only not valid fake frags
+			{
+				printf("Not valid fake: fragment path size not 1\n");
+				printf("fr1.paths size = %lu, fr2.paths size = %lu\n",fr1.paths.size(),fr2.paths.size());
+			}
 			continue; 
 		}
 		
