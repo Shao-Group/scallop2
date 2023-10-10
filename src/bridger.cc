@@ -1999,6 +1999,21 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 				}
 			}
 		}
+
+		//remove long exon paths
+		for(int i=0;i<fr.paths.size();i++)
+		{
+			path p1 = fr.paths[i];
+
+			for(int j=0;j<p1.merged_regions.size();j++)
+			{
+				if(p1.merged_regions[j].rpos - p1.merged_regions[j].lpos > 2000)
+				{
+					remove_list.push_back(p1);
+					break;
+				}
+			}
+		}
 		
 		if(remove_list.size()  > 0)
 		{

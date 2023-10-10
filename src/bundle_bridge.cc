@@ -3511,21 +3511,27 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 		fragment &fr2 = circ_fragment_pairs[i].second;
 
 
-		if(fr1.paths.size() != 1 || fr2.paths.size() != 1) continue; //not bridged
-		//if(fr1.paths[0].type != 1 || fr2.paths[0].type != 1) continue; //insert size not normal
-
-		//printf("1.5*length_high = %lf\n",1.5*length_high);
-		if(fr1.paths[0].length > length_high && fr2.paths[0].length > length_high) continue;
-
 		printf("\nPrinting separate fragments:");
 		printf("\nchrm = %s\n",bb.chrm.c_str());
 
 		fr1.print(i+1);
 		fr2.print(i+1);
 
-		//join_circ_fragment_pair(circ_fragment_pairs[i],0,0);
 
+		if(fr1.paths.size() != 1 || fr2.paths.size() != 1)//not bridged
+		{
+			printf("Not valid: fragment path size not 1\n");
+			printf("fr1.paths size = %lu, fr2.paths size = %lu\n",fr1.paths.size(),fr2.paths.size());
+			continue; 
+		}
 		
+		if(fr1.paths[0].length > length_high && fr2.paths[0].length > length_high)
+		{
+			printf("Not valid: both fragment length > length high\n");
+			printf("length_high = %d, fr1.path[0].length = %d, fr2.path[0].length = %d\n",length_high,fr1.paths[0].length,fr2.paths[0].length);
+			continue;
+		}
+
 		int left_boundary_flag = 0;
 		int right_boundary_flag = 0;
 		int pexon_range = 5;
