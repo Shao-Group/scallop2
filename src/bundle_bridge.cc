@@ -3597,19 +3597,22 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 				}
 			}
 
-			//checking if pexon matches left boundary
-			/*for(int p=0;p<pexons.size();p++)
+			//checking if pexon matches left boundary when ref file is not given
+			if(ref_trsts.size() == 0)
 			{
-				if(pexons[p].lpos <= fr1.lpos+pexon_range && pexons[p].lpos >= fr1.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
+				for(int p=0;p<pexons.size();p++)
 				{
-					if(strcmp(fr1.h1->qname.c_str(),"simulate:268744") == 0)
+					if(pexons[p].lpos <= fr1.lpos+pexon_range && pexons[p].lpos >= fr1.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
 					{
-						printf("left pexon match, %d\n",pexons[p].ltype);
+						if(strcmp(fr1.h1->qname.c_str(),"simulate:268744") == 0)
+						{
+							printf("left pexon match, %d\n",pexons[p].ltype);
+						}
+						left_boundary_flag = 1;
+						break;
 					}
-					left_boundary_flag = 1;
-					break;
 				}
-			}*/
+			}
 
 			//checking if reads junction matches right boundary
 			for(int j=0;j<junctions.size();j++)
@@ -3652,19 +3655,22 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 				}
 			}
 		
-			//checking if pexon matches right boundary
-			/*for(int p=0;p<pexons.size();p++)
+			//checking if pexon matches right boundary when ref file is not given
+			if(ref_trsts.size() == 0)
 			{
-				if(pexons[p].rpos <= fr2.rpos+pexon_range && pexons[p].rpos >= fr2.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
+				for(int p=0;p<pexons.size();p++)
 				{
-					if(strcmp(fr1.h1->qname.c_str(),"simulate:268744") == 0)
+					if(pexons[p].rpos <= fr2.rpos+pexon_range && pexons[p].rpos >= fr2.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
 					{
-						printf("right pexon match, %d\n",pexons[p].rtype);
+						if(strcmp(fr1.h1->qname.c_str(),"simulate:268744") == 0)
+						{
+							printf("right pexon match, %d\n",pexons[p].rtype);
+						}
+						right_boundary_flag = 1;
+						break;
 					}
-					right_boundary_flag = 1;
-					break;
 				}
-			}*/
+			}
 
 			if(left_boundary_flag == 1 && right_boundary_flag == 1)
 			{
