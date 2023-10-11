@@ -2267,6 +2267,7 @@ int bundle_bridge::build_fragments()
 
 int bundle_bridge::fix_alignment_boundaries()
 {
+	int end_error = 5;
 	for(int k = 0; k < fragments.size(); k++)
 	{
 		fragment &fr = fragments[k];
@@ -2284,7 +2285,7 @@ int bundle_bridge::fix_alignment_boundaries()
 			printf("fr.h2: ");
 			fr.h2->print();*/
 
-			if(fr.h1->pos > fr.h2->pos && fr.h1->pos <= h1_supple->pos && h1_supple->rpos >= fr.h1->rpos && h1_supple->rpos >= fr.h2->rpos && fr.h1->pos - fr.h2->pos <= 5)
+			if(fr.h1->pos > fr.h2->pos && fr.h1->pos <= h1_supple->pos && h1_supple->rpos >= fr.h1->rpos && h1_supple->rpos >= fr.h2->rpos && fr.h1->pos - fr.h2->pos <= end_error)
 			{
 				string combo = "alignment error-h1p_pos>h2_pos";
 				//printf("%s\n",combo.c_str());
@@ -2301,12 +2302,12 @@ int bundle_bridge::fix_alignment_boundaries()
 					}
 				}
 
-				if(first_M_len > 5)
+				if(first_M_len > end_error)
 				{
 					fr.h2->pos = fr.h2->pos + diff;
 				}
 			}
-			else if(fr.h1->pos <= fr.h2->pos && fr.h1->pos <= h1_supple->pos && h1_supple->rpos >= fr.h1->rpos && h1_supple->rpos < fr.h2->rpos && fr.h2->rpos - h1_supple->rpos <= 5)
+			else if(fr.h1->pos <= fr.h2->pos && fr.h1->pos <= h1_supple->pos && h1_supple->rpos >= fr.h1->rpos && h1_supple->rpos < fr.h2->rpos && fr.h2->rpos - h1_supple->rpos <= end_error)
 			{
 				string combo = "alignment error-h2_rpos>h1s_rpos";
 				//printf("%s\n",combo.c_str());
@@ -2322,7 +2323,7 @@ int bundle_bridge::fix_alignment_boundaries()
 					}
 				}
 
-				if(last_M_len > 5)
+				if(last_M_len > end_error)
 				{
 					fr.h2->rpos = fr.h2->rpos - diff;
 				}
@@ -2342,7 +2343,7 @@ int bundle_bridge::fix_alignment_boundaries()
 			printf("Supple: ");
 			h2_supple->print();*/
 
-			if(h2_supple->pos <= fr.h1->pos && h2_supple->pos <= fr.h2->pos && fr.h2->rpos >= h2_supple->rpos && fr.h2->rpos < fr.h1->rpos && fr.h1->rpos - fr.h2->rpos <= 5)
+			if(h2_supple->pos <= fr.h1->pos && h2_supple->pos <= fr.h2->pos && fr.h2->rpos >= h2_supple->rpos && fr.h2->rpos < fr.h1->rpos && fr.h1->rpos - fr.h2->rpos <= end_error)
 			{
 				string combo = "alignment error-h1_rpos>h2p_rpos";
 				//printf("%s\n",combo.c_str());
@@ -2358,12 +2359,12 @@ int bundle_bridge::fix_alignment_boundaries()
 					}
 				}
 
-				if(last_M_len > 5)
+				if(last_M_len > end_error)
 				{
 					fr.h1->rpos = fr.h1->rpos - diff;
 				}
 			}
-			else if(h2_supple->pos > fr.h1->pos && h2_supple->pos <= fr.h2->pos && fr.h2->rpos >= h2_supple->rpos && fr.h2->rpos >= fr.h1->rpos && h2_supple->pos - fr.h1->pos <= 5)
+			else if(h2_supple->pos > fr.h1->pos && h2_supple->pos <= fr.h2->pos && fr.h2->rpos >= h2_supple->rpos && fr.h2->rpos >= fr.h1->rpos && h2_supple->pos - fr.h1->pos <= end_error)
 			{
 				string combo = "alignment error-h2s_pos>h1_pos";
 				//printf("%s\n",combo.c_str());
@@ -2380,7 +2381,7 @@ int bundle_bridge::fix_alignment_boundaries()
 					}
 				}
 
-				if(first_M_len > 5)
+				if(first_M_len > end_error)
 				{
 					fr.h1->pos = fr.h1->pos + diff;
 				}
