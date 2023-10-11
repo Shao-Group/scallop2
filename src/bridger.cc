@@ -990,6 +990,13 @@ int bridger::bridge_hard_fragments_circ(vector<fcluster> &open)
 					p.v = encode_vlist(p.v);
 					p.score = ps[e];
 
+					// compare score with fset.size
+					printf("FSET-SCORE: fset %lu, score %.1lf, read %s, lpos = %d/%d, length %d\n", 
+							fc.fset.size(), p.score, fr->h1->qname.c_str(), fr->h1->pos, fr->h2->pos, p.length);
+
+					double fset_score = log(1 + fc.fset.size()) - log(1 + p.score);
+					if(fset_score > 1.5) continue;
+
 					if(p.length >= length_low && p.length <= length_high)
 					{
 						//bd->breads.insert(fr->h1->qname);
