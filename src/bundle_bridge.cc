@@ -3598,7 +3598,7 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 			}
 
 			//checking if pexon matches left boundary when ref file is not given
-			if(ref_trsts.size() == 0)
+			if(ref_file == "")
 			{
 				for(int p=0;p<pexons.size();p++)
 				{
@@ -3656,7 +3656,7 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 			}
 		
 			//checking if pexon matches right boundary when ref file is not given
-			if(ref_trsts.size() == 0)
+			if(ref_file == "")
 			{
 				for(int p=0;p<pexons.size();p++)
 				{
