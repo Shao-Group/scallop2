@@ -3512,25 +3512,30 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 		fragment &fr2 = circ_fragment_pairs[i].second;
 
 
-		printf("\nPrinting separate fragments:");
-		printf("\nchrm = %s\n",bb.chrm.c_str());
+		printf("\nPrinting separate fragments: chrm = %s",bb.chrm.c_str());
 
 		fr1.print(i+1);
 		fr2.print(i+1);
 
+		if(fr1.paths.size() != 1)
+		{
+			printf("Not valid: fr1 paths size = %lu, read_name=%s, hit1_pos=%d, hit1_rpos=%d, hit2_pos=%d, hit2_rpos=%d\n",fr1.paths.size(),fr1.h1->qname.c_str(),fr1.h1->pos,fr1.h1->rpos,fr1.h2->pos,fr1.h2->rpos); 
+		}
 
-		if(fr1.paths.size() != 1 || fr2.paths.size() != 1)//not bridged
+		if(fr2.paths.size() != 1)
 		{
 			if((fr2.h1->flag & 0x800) >= 1 || (fr2.h2->flag & 0x800) >= 1)// print only not valid chimeric frags
 			{
-				printf("Not valid chimeric: fragment path size not 1\n");
-				printf("fr1.paths size = %lu, fr2.paths size = %lu\n",fr1.paths.size(),fr2.paths.size());
+				printf("Not valid chimeric: fr2 paths size = %lu, read_name=%s, hit1_pos=%d, hit1_rpos=%d, hit2_pos=%d, hit2_rpos=%d\n",fr2.paths.size(),fr2.h1->qname.c_str(),fr2.h1->pos,fr2.h1->rpos,fr2.h2->pos,fr2.h2->rpos);
 			}
-			if(fr2.h1->is_fake == true || fr2.h1->is_fake == true)// print only not valid fake frags
+			if(fr2.h1->is_fake == true || fr2.h2->is_fake == true)// print only not valid fake frags
 			{
-				printf("Not valid fake: fragment path size not 1\n");
-				printf("fr1.paths size = %lu, fr2.paths size = %lu\n",fr1.paths.size(),fr2.paths.size());
+				printf("Not valid fake: fr2 paths size = %lu, read_name=%s, hit1_pos=%d, hit1_rpos=%d, hit2_pos=%d, hit2_rpos=%d\n",fr2.paths.size(),fr2.h1->qname.c_str(),fr2.h1->pos,fr2.h1->rpos,fr2.h2->pos,fr2.h2->rpos);
 			}
+		}
+
+		if(fr1.paths.size() != 1 || fr2.paths.size() != 1)//not bridged
+		{
 			continue; 
 		}
 		
