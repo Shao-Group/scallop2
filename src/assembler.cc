@@ -176,7 +176,7 @@ int assembler::assemble()
 	printf("#RO_count hits = %d\n",RO_count);
 	//write_RO_info();
 
-	//remove_long_exon_circ_trsts();
+	remove_long_exon_circ_trsts();
 	remove_duplicate_circ_trsts();
 	print_circular_trsts();
 	write_circular();
@@ -294,7 +294,8 @@ int assembler::process(int n)
 int assembler::remove_long_exon_circ_trsts()
 {
 	for(int i=0;i<circular_trsts.size();i++)
-	{
+	{	
+		printf("Printing long exon circRNAs removed:\n");
 		circular_transcript circ = circular_trsts[i];
 		int long_flag = 0;
 		
@@ -313,15 +314,19 @@ int assembler::remove_long_exon_circ_trsts()
 		{
 			circular_trsts_long_removed.push_back(circ);
 		}
+		if(long_flag == 1)
+		{
+			circ.print(i+1);
+		}
 	}
 	return 0;
 }
 
 int assembler::remove_duplicate_circ_trsts()
 {
-	for(int i=0;i<circular_trsts.size();i++)
+	for(int i=0;i<circular_trsts_long_removed.size();i++)
 	{
-		circular_transcript circ = circular_trsts[i];
+		circular_transcript circ = circular_trsts_long_removed[i];
 
 		if(circ_trst_map.find(circ.circRNA_id) != circ_trst_map.end())// already circRNA present in map
 		{

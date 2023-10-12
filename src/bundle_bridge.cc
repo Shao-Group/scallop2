@@ -128,7 +128,7 @@ int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 	//get_frags_with_HS_from_data();
 
 	//find more chimeric reads from soft clip reads
-	get_more_chimeric();
+	//get_more_chimeric();
 
 	//create vlist of fake hits
 	align_fake_hits();
@@ -831,6 +831,19 @@ int bundle_bridge::get_more_chimeric()
 					break;
 				}
 			}
+
+			//check if soft clip end matches pexon boundary of ref not given
+			if(ref_file == "")
+			{
+				for(int p=0;p<pexons.size();p++)
+				{
+					if(pexons[p].lpos == fr.h1->pos && pexons[p].ltype == START_BOUNDARY)
+					{
+						boundary_match = 1;
+						break;
+					}
+				}
+			}
 		}
 		else if(fr.h1->pos <= fr.h2->pos && (fr.h1->cigar_vector[0].first != 'S' && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'S'))
 		{
@@ -867,6 +880,19 @@ int bundle_bridge::get_more_chimeric()
 				if(temp_flag == 1)
 				{
 					break;
+				}
+			}
+
+			//check if soft clip end matches pexon boundary of ref not given
+			if(ref_file == "")
+			{
+				for(int p=0;p<pexons.size();p++)
+				{
+					if(pexons[p].rpos == fr.h2->rpos && pexons[p].rtype == END_BOUNDARY)
+					{
+						boundary_match = 1;
+						break;
+					}
 				}
 			}
 		}
