@@ -4,6 +4,8 @@ Part of Scallop Transcript Assembler
 Part of Scallop2
 (c) 2021 by  Qimin Zhang, Mingfu Shao, and The Pennsylvania State University.
 See LICENSE for licensing.
+(c) 2023 by Tasfia Zahin, Mingfu Shao, and The Pennsylvania State University.
+See LICENSE for licensing.
 */
 
 #ifndef __ASSEMBLER_H__
@@ -13,8 +15,6 @@ See LICENSE for licensing.
 #include <string>
 #include "bundle_base.h"
 #include "transcript.h"
-#include "splice_graph.h"
-#include "hyper_set.h"
 #include "transcript_set.h"
 #include "reference.h"
 
@@ -28,7 +28,7 @@ using namespace std;
 class assembler
 {
 public:
-	assembler();
+	assembler(reference &r);
 	~assembler();
 
 private:
@@ -36,7 +36,7 @@ private:
 	faidx_t *fai;
 	bam_hdr_t *hdr;
 	bam1_t *b1t;
-	reference ref;
+	reference &ref;
 	bundle_base bb1;		// +
 	bundle_base bb2;		// -
 	vector<bundle_base> pool;
@@ -46,8 +46,6 @@ private:
 	bool terminate;
 	int qcnt;
 	double qlen;
-	vector<transcript> trsts;
-	vector<transcript> non_full_trsts;
 
 	vector<circular_transcript> circular_trsts; //a vector of circular transcripts class objs from all bundles
 	vector<circular_transcript> circular_trsts_long_removed; //a vector of circular transcripts class objs from all bundles, with long exon circs removed
@@ -70,16 +68,11 @@ private:
 	int remove_long_exon_circ_trsts();
 	vector<string> split_str(string str, string delimiter);
 	int print_circular_trsts();
-	int assemble(const splice_graph &gr, const hyper_set &hs, transcript_set &ts1, transcript_set &ts2);
-	int assign_RPKM();
 	int write_RO_info();
-	int write();
 	int write_circular_boundaries();
 	int write_circular();
 	int read_cirifull_file();
 	int split(const std::string &s, char delim, std::vector<std::string> &elems);
-	int compare(splice_graph &gr, const string &ref, const string &tex = "");
-	bool determine_regional_graph(splice_graph &gr);
 };
 
 #endif

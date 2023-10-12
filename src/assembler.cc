@@ -11,17 +11,13 @@ See LICENSE for licensing.
 #include <sstream>
 
 #include "config.h"
-#include "gtf.h"
 #include "genome.h"
 #include "assembler.h"
-#include "bundle.h"
-#include "scallop.h"
-#include "sgraph_compare.h"
-#include "super_graph.h"
+#include "bundle_bridge.h"
 #include "filter.h"
 
-assembler::assembler()
-	: ref(ref_file)
+assembler::assembler(reference &r)
+	: ref(r)
 {
     sfn = sam_open(input_file.c_str(), "r");
 
@@ -140,6 +136,8 @@ int assembler::assemble()
 
 	process(0);
 
+	// clean up; do not use the following block
+	/*
 	//printf("h1_supp_count = %d, h2_supp_count = %d\n\n",h1_supp_count, h2_supp_count);
 
 	map<string, int>::iterator itn1;
@@ -167,6 +165,7 @@ int assembler::assemble()
 	non_full_trsts = ft1.trs;
 
 	write();
+	*/
 
 	//printf("size of assembler circ vector HS = %lu\n", circular_trsts_HS.size());
 	//write_circular_boundaries();
@@ -229,13 +228,13 @@ int assembler::process(int n)
 		transcript_set ts1(bb.chrm, 0.9);		// full-length set
 		transcript_set ts2(bb.chrm, 0.9);		// non-full-length set
 
-		bundle bd(bb, ref, RO_reads_map, fai);
+		bundle_bridge br(bb, ref, RO_reads_map, fai);
 
-		RO_count += bd.br.RO_count;
+		RO_count += br.RO_count;
 
-		circular_trsts.insert(circular_trsts.end(), bd.br.circ_trsts.begin(), bd.br.circ_trsts.end());
+		circular_trsts.insert(circular_trsts.end(), br.circ_trsts.begin(), br.circ_trsts.end());
 
-		circular_trsts_HS.insert(circular_trsts_HS.end(), bd.br.circ_trsts_HS.begin(), bd.br.circ_trsts_HS.end());
+		circular_trsts_HS.insert(circular_trsts_HS.end(), br.circ_trsts_HS.begin(), br.circ_trsts_HS.end());
 
 		// RO statistics
 		//HS_both_side_reads.insert(HS_both_side_reads.end(), bd.br.HS_both_side_reads.begin(), bd.br.HS_both_side_reads.end());
@@ -740,99 +739,6 @@ int assembler::print_circular_trsts()
 	return 0;
 }
 
-int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0, transcript_set &ts1, transcript_set &ts2)
-{
-	super_graph sg(gr0, hs0);
-	sg.build();
-
-	/*
-	vector<transcript> gv;
-	vector<transcript> gv1;
-	*/
-
-	for(int k = 0; k < sg.subs.size(); k++)
-	{
-		splice_graph &gr = sg.subs[k];
-		hyper_set &hs = sg.hss[k];
-
-		if(determine_regional_graph(gr) == true) continue;
-		if(gr.num_edges() <= 0) continue;
-
-		for(int r = 0; r < assemble_duplicates; r++)
-		{
-			string gid = "gene." + tostring(index) + "." + tostring(k) + "." + tostring(r);
-			gr.gid = gid;
-			scallop sc(gr, hs, r == 0 ? false : true);
-			sc.assemble();
-
-			if(verbose >= 2)
-			{
-				printf("assembly with r = %d, total %lu transcripts:\n", r, sc.trsts.size());
-				for(int i = 0; i < sc.trsts.size(); i++) sc.trsts[i].write(cout);
-			}
-
-			for(int i = 0; i < sc.trsts.size(); i++)
-			{
-				ts1.add(sc.trsts[i], 1, 0, TRANSCRIPT_COUNT_ADD_COVERAGE_MIN, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD);
-			}
-			for(int i = 0; i < sc.non_full_trsts.size(); i++)
-			{
-				ts2.add(sc.non_full_trsts[i], 1, 0, TRANSCRIPT_COUNT_ADD_COVERAGE_MIN, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD);
-			}
-
-			/*
-			filter ft(sc.trsts);
-			//ft.join_single_exon_transcripts();
-			ft.filter_length_coverage();
-			if(ft.trs.size() >= 1) gv.insert(gv.end(), ft.trs.begin(), ft.trs.end());
-
-			if(verbose >= 2)
-			{
-			printf("transcripts after filtering:\n");
-			for(int i = 0; i < ft.trs.size(); i++) ft.trs[i].write(cout);
-
-			printf("non full length transcripts:\n");
-			for(int i = 0; i < sc.non_full_trsts.size(); i++) sc.non_full_trsts[i].write(cout);
-			}
-
-			filter ft1(sc.non_full_trsts);
-			//ft.join_single_exon_transcripts();
-			ft1.filter_length_coverage();
-			if(ft1.trs.size() >= 1) gv1.insert(gv1.end(), ft1.trs.begin(), ft1.trs.end());
-
-			if(verbose >= 2)
-			{
-			printf("non full transcripts after filtering:\n");
-			for(int i = 0; i < ft1.trs.size(); i++) ft1.trs[i].write(cout);
-			}
-			*/
-		}
-	}
-
-	return 0;
-}
-
-bool assembler::determine_regional_graph(splice_graph &gr)
-{
-	bool all_regional = true;
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
-	{
-		if(gr.get_vertex_info(i).regional == false) all_regional = false;
-		if(all_regional == false) break;
-	}
-	return all_regional;
-}
-
-int assembler::assign_RPKM() //level of expression of transcripts
-{
-	double factor = 1e9 / qlen;
-	for(int i = 0; i < trsts.size(); i++)
-	{
-		trsts[i].assign_RPKM(factor);
-	}
-	return 0;
-}
-
 int assembler::write_RO_info()
 {
 	ofstream fout("HS_both_side_reads");
@@ -854,29 +760,6 @@ int assembler::write_RO_info()
 	}
 
 	fout1.close();
-	return 0;
-}
-
-int assembler::write()
-{
-	ofstream fout(output_file.c_str());
-	if(fout.fail()) return 0;
-	for(int i = 0; i < trsts.size(); i++)
-	{
-		transcript &t = trsts[i];
-		t.write(fout);
-	}
-	fout.close();
-
-    ofstream fout1(output_file1.c_str());
-    if(fout1.fail()) return 0;
-    for(int i = 0; i < non_full_trsts.size(); i++)
-    {
-            transcript &t = non_full_trsts[i];
-            t.write(fout1);
-    }
-    fout1.close();
-
 	return 0;
 }
 
@@ -939,24 +822,6 @@ int assembler::write_circular()
 	}*/
 
 	fcirc.close();
-
-	return 0;
-}
-
-int assembler::compare(splice_graph &gr, const string &file, const string &texfile)
-{
-	if(file == "") return 0;
-
-	genome g(file);
-	if(g.genes.size() <= 0) return 0;
-
-	gtf gg(g.genes[0]);
-
-	splice_graph gt;
-	gg.build_splice_graph(gt);
-
-	sgraph_compare sgc(gt, gr);
-	sgc.compare(texfile);
 
 	return 0;
 }

@@ -15,6 +15,7 @@ See LICENSE for licensing.
 #include "fragment.h"
 #include "transcript.h"
 #include "circular_transcript.h"
+#include "reference.h"
 #include "htslib/faidx.h"
 
 using namespace std;
@@ -22,11 +23,14 @@ using namespace std;
 class bundle_bridge
 {
 public:
+	bundle_bridge(bundle_base &b, reference &r);
+	bundle_bridge(bundle_base &b, reference &r, map <string, int> RO_reads_map, faidx_t *fai);
 	bundle_bridge(bundle_base &bb);
 	virtual ~bundle_bridge();
 
 public:
 	bundle_base &bb;					// input bundle base
+	reference &ref;						// input reference
 	set<string> breads;					// bridged reads
 	vector<fragment> fragments;			// to-be-filled fragments
 	vector<fragment> circ_fragments;	// to-be-filled fragments
@@ -48,8 +52,6 @@ public:
 	vector<transcript> ref_trsts;		// overlaped genes in reference
 	vector< vector<int> > ref_phase;	// phasing paths for ref transcripts
 	vector< vector<PI> > ref_index;		// the set of trsts that contain each region
-
-	vector< vector<int> > umiLink;		// umi linked list: fragments index
 
 public:
 	int build(map <string, int> RO_reads_map, faidx_t *_fai);
@@ -94,6 +96,7 @@ public:
 	
 	int group_fragments();
 
+	int compute_strand();
 	int align_hits_transcripts();
 	int align_hit(const map<int32_t, int> &m, const hit &h, vector<int> &v);
 	int align_transcript(const map<int32_t, int> &m, const transcript &t, vector<int> &v);

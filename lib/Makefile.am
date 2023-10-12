@@ -1,2 +1,2 @@
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = util graph gtf
+SUBDIRS = util gtf

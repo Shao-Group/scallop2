@@ -8,6 +8,7 @@ See LICENSE for licensing.
 
 #include "bridger.h"
 #include "config.h"
+#include "util.h"
 
 int entry::print()
 {

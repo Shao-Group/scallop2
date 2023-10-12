@@ -45,12 +45,14 @@ int main(int argc, const char **argv)
 		printf("\n");
 	}
 
-	previewer pv; 
+	reference ref(ref_file);
+
+	previewer pv(ref); 
 	pv.preview(); //resolve strandness and estimate fragment length distirbution
 
 	if(preview_only == true) return 0;
 
-	assembler asmb;
+	assembler asmb(ref);
 	asmb.assemble();
 
 	return 0;

@@ -14,6 +14,7 @@ See LICENSE for licensing.
 
 #include "hit.h"
 #include "bundle_base.h"
+#include "reference.h"
 
 #include <fstream>
 #include <string>
@@ -26,6 +27,10 @@ private:
 	samFile *sfn;
 	bam_hdr_t *hdr;
 	bam1_t *b1t;
+	reference &ref;
+
+public:
+	previewer(reference &r);
 
 public:
 	int preview();

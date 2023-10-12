@@ -66,31 +66,16 @@ int32_t min_subregion_gap = 10; //previously = 3
 int32_t min_subregion_len = 15;
 int32_t min_subregion_max = 3;
 double min_subregion_ave = 1.5;
-
-// for revising/decomposing splice graph
 double min_guaranteed_edge_weight = 0.01;
-double min_surviving_edge_weight = 1.5;
-double max_intron_contamination_coverage = 2.0;
-double max_decompose_error_ratio[7] = {0.33, 0.05, 0.0, 0.25, 0.30, 0.0, 1.1};
 
 // for selecting paths
 double min_transcript_coverage = 1.5;
-double min_transcript_coverage_ratio = 0.005;
 double min_single_exon_coverage = 20;
 double min_transcript_numreads = 10;
 int min_transcript_length_base = 150;
 int min_transcript_length_increase = 50;
 int min_exon_length = 20;
 int max_num_exons = 1000;
-
-// for subsetsum and router
-int max_dp_table_size = 10000;
-int min_router_count = 1;
-
-// for simulation
-int simulation_num_vertices = 0;
-int simulation_num_edges = 0;
-int simulation_max_edge_weight = 0;
 
 // input and output
 //sinitializing as empty string for verifying absence
@@ -106,11 +91,8 @@ string output_circ_file = "";
 string cirifull_file = "";
 
 // for controling
-bool output_tex_files = false;
-string fixed_gene_name = "";
 int batch_bundle_size = 100;
 int verbose = 1;
-int assemble_duplicates = 10;
 string version = "v1.1.2";
 
 
@@ -182,15 +164,6 @@ int parse_arguments(int argc, const char ** argv)
 		{
 			ref_file2 = string(argv[i + 1]);
 			i++;
-		}
-		else if(string(argv[i]) == "-g")
-		{
-			fixed_gene_name = string(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "-t")
-		{
-			output_tex_files = true;
 		}
 
 		// user specified
@@ -295,26 +268,11 @@ int parse_arguments(int argc, const char ** argv)
 			min_subregion_max = atoi(argv[i + 1]);
 			i++;
 		}
-		else if(string(argv[i]) == "--min_surviving_edge_weight")
-		{
-			min_surviving_edge_weight = atof(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--max_intron_contamination_coverage")
-		{
-			max_intron_contamination_coverage = atof(argv[i + 1]);
-			i++;
-		}
 		else if(string(argv[i]) == "--min_transcript_coverage")
 		{
 			min_transcript_coverage = atof(argv[i + 1]);
 			i++;
 			if(fabs(min_transcript_coverage - 1.0) < 0.01) min_transcript_coverage = 1.01;
-		}
-		else if(string(argv[i]) == "--min_transcript_coverage_ratio")
-		{
-			min_transcript_coverage_ratio = atof(argv[i + 1]);
-			i++;
 		}
 		else if(string(argv[i]) == "--min_single_exon_coverage")
 		{
@@ -346,51 +304,6 @@ int parse_arguments(int argc, const char ** argv)
 			max_num_exons = atoi(argv[i + 1]);
 			i++;
 		}
-		else if(string(argv[i]) == "--max_dp_table_size")
-		{
-			max_dp_table_size = atoi(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--min_router_count")
-		{
-			min_router_count = atoi(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--max_decompose_error_ratio0")
-		{
-			max_decompose_error_ratio[0] = atof(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--max_decompose_error_ratio1")
-		{
-			max_decompose_error_ratio[1] = atof(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--max_decompose_error_ratio2")
-		{
-			max_decompose_error_ratio[2] = atof(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--max_decompose_error_ratio3")
-		{
-			max_decompose_error_ratio[3] = atof(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--max_decompose_error_ratio4")
-		{
-			max_decompose_error_ratio[4] = atof(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--max_decompose_error_ratio5")
-		{
-			max_decompose_error_ratio[5] = atof(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--max_decompose_error_ratio6")
-		{
-			max_decompose_error_ratio[6] = atof(argv[i + 1]);
-			i++;
-		}
 		else if(string(argv[i]) == "--library_type")
 		{
 			string s(argv[i + 1]);
@@ -417,11 +330,6 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--verbose")
 		{
 			verbose = atoi(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--assemble_duplicates")
-		{
-			assemble_duplicates = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--batch_bundle_size")
@@ -477,11 +385,13 @@ int parse_arguments(int argc, const char ** argv)
 
 	}
 
+	/*
 	if(min_surviving_edge_weight < 0.1 + min_transcript_coverage) 
 	{
 		min_surviving_edge_weight = 0.1 + min_transcript_coverage;
 		if(min_surviving_edge_weight > 10.0) min_surviving_edge_weight = 10.0;
 	}
+	*/
 
 	// verify arguments
 	if(input_file == "")
@@ -531,26 +441,6 @@ int print_parameters()
 	printf("min_subregion_max = %d\n", min_subregion_max);
 	printf("min_subregion_ave = %.2lf\n", min_subregion_ave);
 
-	// for splice graph
-	printf("max_intron_contamination_coverage = %.2lf\n", max_intron_contamination_coverage);
-	printf("min_surviving_edge_weight = %.2lf\n", min_surviving_edge_weight);
-	printf("min_transcript_coverage = %.2lf\n", min_transcript_coverage);
-	printf("min_transcript_coverage_ratio = %.2lf\n", min_transcript_coverage_ratio);
-	printf("min_single_exon_coverage = %.2lf\n", min_single_exon_coverage);
-	printf("min_transcript_numreads = %.2lf\n", min_transcript_numreads);
-	printf("min_transcript_length_base = %d\n", min_transcript_length_base);
-	printf("min_transcript_length_increase = %d\n", min_transcript_length_increase);
-	printf("max_num_exons = %d\n", max_num_exons);
-
-	// for subsetsum and router
-	printf("max_dp_table_size = %d\n", max_dp_table_size);
-	printf("min_router_count = %d\n", min_router_count);
-
-	// for simulation
-	printf("simulation_num_vertices = %d\n", simulation_num_vertices);
-	printf("simulation_num_edges = %d\n", simulation_num_edges);
-	printf("simulation_max_edge_weight = %d\n", simulation_max_edge_weight);
-
 	// for input and output
 	printf("algo = %s\n", algo.c_str());
 	printf("input_file = %s\n", input_file.c_str());
@@ -563,8 +453,6 @@ int print_parameters()
 
 	// for controling
 	printf("library_type = %d\n", library_type);
-	printf("output_tex_files = %c\n", output_tex_files ? 'T' : 'F');
-	printf("fixed_gene_name = %s\n", fixed_gene_name.c_str());
 	printf("use_second_alignment = %c\n", use_second_alignment ? 'T' : 'F');
 	printf("uniquely_mapped_only = %c\n", uniquely_mapped_only ? 'T' : 'F');
 	printf("verbose = %d\n", verbose);
@@ -598,7 +486,6 @@ int print_help()
 	printf(" %-42s  %s\n", "--verbose <0, 1, 2>",  "0: quiet; 1: one line for each graph; 2: with details, default: 1");
 	printf(" %-42s  %s\n", "-f/--transcript_fragments <filename>",  "file to which the assembled non-full-length transcripts will be written to");
 	printf(" %-42s  %s\n", "--library_type <first, second, unstranded>",  "library type of the sample, default: unstranded");
-	printf(" %-42s  %s\n", "--assemble_duplicates <integer>",  "the number of consensus runs of the decomposition, default: 10");
 	printf(" %-42s  %s\n", "--min_transcript_coverage <float>",  "minimum coverage required for a multi-exon transcript, default: 1.5");
 	printf(" %-42s  %s\n", "--min_single_exon_coverage <float>",  "minimum coverage required for a single-exon transcript, default: 20");
 	printf(" %-42s  %s\n", "--min_transcript_length_increase <integer>",  "default: 50");

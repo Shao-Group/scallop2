@@ -15,6 +15,10 @@ See LICENSE for licensing.
 #include "bundle_bridge.h"
 #include "bridger.h"
 
+previewer::previewer(reference &r)
+	: ref(r)
+{}
+
 int previewer::open_file()
 {
     sfn = sam_open(input_file.c_str(), "r");
@@ -262,7 +266,7 @@ int previewer::process_bundle(bundle_base &bb, map<int32_t, int>& m)
 
 	int cnt = 0;
 
-	bundle_bridge br(bb);
+	bundle_bridge br(bb, ref);
 
 	br.build_junctions();
 	br.extend_junctions();

@@ -16,21 +16,64 @@ See LICENSE for licensing.
 #include "region.h"
 #include "config.h"
 #include "util.h"
-#include "undirected_graph.h"
 #include "bridger.h"
 
-bundle_bridge::bundle_bridge(bundle_base &b)
-	: bb(b)
+bundle_bridge::bundle_bridge(bundle_base &b, reference &r)
+	: bb(b), ref(r)
 {
 	circ_trsts.clear(); // emptying before storing circRNAs
 	circ_trsts_HS.clear();
 	circ_fragments.clear();
 	RO_count = 0;
-	//compute_strand();
+
+	compute_strand();
+	ref_trsts = ref.get_overlapped_transcripts(bb.chrm, bb.strand, bb.lpos, bb.rpos);
+	//build(RO_reads_map, fai);
+}
+
+bundle_bridge::bundle_bridge(bundle_base &b, reference &r, map <string, int> RO_reads_map, faidx_t *fai)
+	: bb(b), ref(r)
+{
+	circ_trsts.clear(); // emptying before storing circRNAs
+	circ_trsts_HS.clear();
+	circ_fragments.clear();
+	RO_count = 0;
+
+	compute_strand();
+	ref_trsts = ref.get_overlapped_transcripts(bb.chrm, bb.strand, bb.lpos, bb.rpos);
+	build(RO_reads_map, fai);
 }
 
 bundle_bridge::~bundle_bridge()
 {}
+
+int bundle_bridge::compute_strand()
+{
+	if(library_type != UNSTRANDED) assert(bb.strand != '.');
+	if(library_type != UNSTRANDED) return 0;
+
+	int n0 = 0, np = 0, nq = 0;
+	for(int i = 0; i < bb.hits.size(); i++)
+	{
+		if(bb.hits[i].xs == '.') n0++;
+		if(bb.hits[i].xs == '+') np++;
+		if(bb.hits[i].xs == '-') nq++;
+	}
+
+	// a new way of defining strandness
+	// resulting to more "." strands
+	if(np > 0 && nq == 0) bb.strand = '+';
+	else if(nq > 0 && np == 0) bb.strand = '-';
+	else bb.strand = '.';
+
+	/*
+	if(np > nq) bb.strand = '+';
+	else if(np < nq) bb.strand = '-';
+	else bb.strand = '.';
+	*/
+	
+	return 0;
+}
 
 int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 {
