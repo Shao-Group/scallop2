@@ -8,7 +8,7 @@ GTF_LIB = $(top_builddir)/lib/gtf
 UTIL_LIB = $(top_builddir)/lib/util
 
 scallop2_CPPFLAGS = -std=c++11 -I$(GTF_INCLUDE) -I$(UTIL_INCLUDE)
-scallop2_LDFLAGS = -pthread -pg -L$(GTF_LIB) -L$(UTIL_LIB)
+scallop2_LDFLAGS = -pthread -L$(GTF_LIB) -L$(UTIL_LIB)
 scallop2_LDADD = -lgtf -lutil
 
 scallop2_SOURCES = interval_map.h interval_map.cc \
