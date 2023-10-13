@@ -128,7 +128,7 @@ int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 	//get_frags_with_HS_from_data();
 
 	//find more chimeric reads from soft clip reads
-	//get_more_chimeric();
+	get_more_chimeric();
 
 	//create vlist of fake hits
 	align_fake_hits();
@@ -296,6 +296,19 @@ int bundle_bridge::get_frags_with_HS_from_data()
 			}
 		}
 
+		//checking if pexon boundary matches left boundary if ref not given
+		if(ref_file == "")
+		{
+			for(int p=0;p<pexons.size();p++)
+			{
+				if(pexons[p].lpos == fr.h1->pos && pexons[p].ltype == START_BOUNDARY)
+				{
+					left_boundary_flag = 1;
+					break;
+				}
+			}
+		}
+
 		printf("Hit 2: ");
 		fr.h2->print();
 
@@ -335,6 +348,19 @@ int bundle_bridge::get_frags_with_HS_from_data()
 			if(temp_flag == 1)
 			{
 				break;
+			}
+		}
+
+		//checking if pexon boundary matches left boundary if ref not given
+		if(ref_file == "")
+		{
+			for(int p=0;p<pexons.size();p++)
+			{
+				if(pexons[p].rpos == fr.h2->rpos && pexons[p].rtype == END_BOUNDARY)
+				{
+					right_boundary_flag = 1;
+					break;
+				}
 			}
 		}
 
@@ -940,25 +966,20 @@ int bundle_bridge::get_more_chimeric()
 
 				int edit_match = 0;
 
-				//for(int i=0;i<fr.h1->soft_left_clip_seqs.size();i++)
-				for(int i=0;i<1;i++)
+				assert(junc_seq.size() == fr.h1->soft_left_clip_seqs[0].size());
+
+				bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
+				if(is_similar == false) continue;
+
+				int edit = get_edit_distance(junc_seq,fr.h1->soft_left_clip_seqs[0]);
+				
+				//if(edit == 0 || edit == 1)
+				if(edit <= floor(soft_len/10))
 				{
-					assert(junc_seq.size() == fr.h1->soft_left_clip_seqs[i].size());
-
-					bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
-					if(is_similar == false) break;
-
-					int edit = get_edit_distance(junc_seq,fr.h1->soft_left_clip_seqs[i]);
-					
-					//if(edit == 0 || edit == 1)
-					if(edit <= floor(soft_len/10))
-					{
-						edit_match = 1;
-						printf("editmatch case 1: junc seq pos1=%d, pos2=%d, junc_seqlen = %lu\n",pos1,pos2,junc_seq.size());
-						break;
-					}
+					edit_match = 1;
+					printf("editmatch case 1: junc seq pos1=%d, pos2=%d, junc_seqlen = %lu\n",pos1,pos2,junc_seq.size());
 				}
-
+				
 				if(edit_match == 1)
 				{
 					if(prev_pos2 != 0 && pos2 != prev_pos2)
@@ -991,46 +1012,40 @@ int bundle_bridge::get_more_chimeric()
 
 				string junc_seq = get_fasta_seq(pos1,pos2);
 
-				//for(int i=0;i<fr.h1->soft_left_clip_seqs.size();i++)
-				for(int i=0;i<1;i++)
+				assert(junc_seq.size() == fr.h1->soft_left_clip_seqs[0].size());
+
+				bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
+				if(is_similar == false) continue;
+
+				int edit = get_edit_distance(junc_seq,fr.h1->soft_left_clip_seqs[0]);
+				
+				//if(edit == 0 || edit == 1)
+				if(edit <= floor(soft_len/10))
 				{
-					assert(junc_seq.size() == fr.h1->soft_left_clip_seqs[i].size());
-
-					bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
-					if(is_similar == false) break;
-
-					int edit = get_edit_distance(junc_seq,fr.h1->soft_left_clip_seqs[i]);
-					
-					//if(edit == 0 || edit == 1)
-					if(edit <= floor(soft_len/10))
+					//printf("soft left clip: chrm=%s, read=%s, read_pos=%d\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos);
+					if((fr.h1->flag & 0x10) >= 1)
 					{
-						//printf("soft left clip: chrm=%s, read=%s, read_pos=%d\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos);
-						if((fr.h1->flag & 0x10) >= 1)
-						{
-							printf("rev comp 0x10 = on\n");
-						}
-						else
-						{
-							printf("rev comp 0x10 = off\n");
-						}
-						if((fr.h1->flag & 0x4) >= 1)
-						{
-							printf("seg unmapped 0x4 = on\n");
-						}
-						else
-						{
-							printf("seg unmapped 0x4 = off\n");
-						}
-						printf("soft left clip: combo index=%d, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, edit=%d\n",i,bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos,fr.h1->soft_left_clip_seqs[i].c_str(),edit);
-						printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
-						printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
-						create_fake_supple(k,fr,soft_len,pos1,pos2);
-						jc_flag = 1;
-						break;
+						printf("rev comp 0x10 = on\n");
 					}
+					else
+					{
+						printf("rev comp 0x10 = off\n");
+					}
+					if((fr.h1->flag & 0x4) >= 1)
+					{
+						printf("seg unmapped 0x4 = on\n");
+					}
+					else
+					{
+						printf("seg unmapped 0x4 = off\n");
+					}
+					printf("soft left clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, edit=%d\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos,fr.h1->soft_left_clip_seqs[0].c_str(),edit);
+					printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
+					printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
+					create_fake_supple(k,fr,soft_len,pos1,pos2);
+					jc_flag = 1;
+					break;
 				}
-
-				if(jc_flag == 1) break;
 			}
 			printf("\n");
 		}
@@ -1073,25 +1088,21 @@ int bundle_bridge::get_more_chimeric()
 				string junc_seq = get_fasta_seq(pos1,pos2);
 
 				int edit_match = 0;
-				//for(int i=0;i<fr.h2->soft_right_clip_seqs.size();i++)
-				for(int i=0;i<1;i++)
+
+				assert(junc_seq.size() == fr.h2->soft_right_clip_seqs[0].size());
+
+				bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
+				if(is_similar == false) continue;
+				
+				int edit = get_edit_distance(junc_seq,fr.h2->soft_right_clip_seqs[0]);
+
+				//if(edit == 0 || edit == 1)
+				if(edit <= floor(soft_len/10))
 				{
-					assert(junc_seq.size() == fr.h2->soft_right_clip_seqs[i].size());
-
-					bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
-					if(is_similar == false) break;
-					
-					int edit = get_edit_distance(junc_seq,fr.h2->soft_right_clip_seqs[i]);
-
-					//if(edit == 0 || edit == 1)
-					if(edit <= floor(soft_len/10))
-					{
-						edit_match = 1;
-						printf("editmatch case 2: junc seq pos1=%d, pos2=%d, junc_seqlen = %lu\n",pos1,pos2,junc_seq.size());
-						break;
-					}
+					edit_match = 1;
+					printf("editmatch case 2: junc seq pos1=%d, pos2=%d, junc_seqlen = %lu\n",pos1,pos2,junc_seq.size());
 				}
-
+				
 				if(edit_match == 1)
 				{
 					if(prev_pos1 != 0 && pos1 != prev_pos1)
@@ -1124,51 +1135,43 @@ int bundle_bridge::get_more_chimeric()
 
 				string junc_seq = get_fasta_seq(pos1,pos2);
 
-				//for(int i=0;i<fr.h2->soft_right_clip_seqs.size();i++)
-				for(int i=0;i<1;i++)
+				assert(junc_seq.size() == fr.h2->soft_right_clip_seqs[0].size());
+
+				bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
+				if(is_similar == false) continue;
+				
+				int edit = get_edit_distance(junc_seq,fr.h2->soft_right_clip_seqs[0]);
+
+				//if(edit == 0 || edit == 1)
+				if(edit <= floor(soft_len/10))
 				{
-					assert(junc_seq.size() == fr.h2->soft_right_clip_seqs[i].size());
-
-					bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
-					if(is_similar == false) break;
-					
-					int edit = get_edit_distance(junc_seq,fr.h2->soft_right_clip_seqs[i]);
-
-					//if(edit == 0 || edit == 1)
-					if(edit <= floor(soft_len/10))
+					//printf("soft right clip: chrm=%s, read=%s, read_pos=%d\n",bb.chrm.c_str(),fr.h2->qname.c_str(),fr.h2->pos);
+					if((fr.h2->flag & 0x10) >= 1)
 					{
-						//printf("soft right clip: chrm=%s, read=%s, read_pos=%d\n",bb.chrm.c_str(),fr.h2->qname.c_str(),fr.h2->pos);
-						if((fr.h2->flag & 0x10) >= 1)
-						{
-							printf("rev comp 0x10 = on\n");
-						}
-						else
-						{
-							printf("rev comp 0x10 = off\n");
-						}
-						if((fr.h2->flag & 0x4) >= 1)
-						{
-							printf("seg unmapped 0x4 = on\n");
-						}
-						else
-						{
-							printf("seg unmapped 0x4 = off\n");
-						}
-						//printf("read seq combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h2->soft_right_clip_seqs[i].c_str(),edit);
-						printf("soft right clip: combo index=%d, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, edit=%d\n",i,bb.chrm.c_str(),fr.h2->qname.c_str(),fr.h2->pos,fr.h2->soft_right_clip_seqs[i].c_str(),edit);
-						printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
-						printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
-						create_fake_supple(k,fr,soft_len,pos1,pos2);
-						jc_flag = 1;
-						break;
+						printf("rev comp 0x10 = on\n");
 					}
+					else
+					{
+						printf("rev comp 0x10 = off\n");
+					}
+					if((fr.h2->flag & 0x4) >= 1)
+					{
+						printf("seg unmapped 0x4 = on\n");
+					}
+					else
+					{
+						printf("seg unmapped 0x4 = off\n");
+					}
+					//printf("read seq combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h2->soft_right_clip_seqs[i].c_str(),edit);
+					printf("soft right clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, edit=%d\n",bb.chrm.c_str(),fr.h2->qname.c_str(),fr.h2->pos,fr.h2->soft_right_clip_seqs[0].c_str(),edit);
+					printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
+					printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
+					create_fake_supple(k,fr,soft_len,pos1,pos2);
+					jc_flag = 1;
+					break;
 				}
-
-				if(jc_flag == 1) break;
-
 			}
 		}
-
 	}
 	return 0;
 }
