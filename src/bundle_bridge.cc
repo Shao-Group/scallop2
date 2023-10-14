@@ -3596,35 +3596,14 @@ int bundle_bridge::extract_RO_circRNA()
 
 int bundle_bridge::extract_circ_fragment_pairs()
 {
-	//check fragments order after bridging, same
-	/*printf("fragments after bridging:\n");
-	for(int i=0;i<fragments.size();i++)
-	{
-		printf("%d-%d,",fragments[i].h1->hid,fragments[i].h2->hid);
-	}*/
-
-
-	//vector<fragment> circ_fragments;
-	//circ_fragments.clear();
 	circ_fragment_pairs.clear();
-
-	/*for(int k = 0; k < fragments.size(); k++)
-	{
-		fragment &fr = fragments[k];
-
-		if(fr.frag_type == 2) 
-		{
-			circ_fragments.push_back(fr); //bridging function called already
-		}
-	}*/
 
 	if(circ_fragments.size() > 0)
 	{
 		printf("After bridging fragments vector size = %zu\n\n",fragments.size());		
 	}
 
-
-	for(int i = 0; i < fragments.size(); i++)
+	/*for(int i = 0; i < fragments.size(); i++)
 	{
 		fragment &fr1 = fragments[i]; 
 
@@ -3643,7 +3622,7 @@ int bundle_bridge::extract_circ_fragment_pairs()
 				circ_fragment_pairs.push_back(pair<fragment,fragment>(fr1,fr2)); //fr1 is original fragment of scallop2 regardless of which of h1 or h2 has a supplement
 			}
 		}
-	}
+	}*/
 
 	// above quadratic implementation seems slow down the program
 	// an index might improve (see below)
@@ -3651,7 +3630,7 @@ int bundle_bridge::extract_circ_fragment_pairs()
 	for(int j=0;j<circ_fragments.size();j++)
 	{
 		fragment &fr2 = circ_fragments[j];
-		if(circ_map.find(fr2.h1->qname) != circ_map.end())
+		if(circ_map.find(fr2.h1->qname) == circ_map.end())
 		{
 			circ_map.insert(make_pair(fr2.h1->qname, j));
 		}
@@ -3664,8 +3643,17 @@ int bundle_bridge::extract_circ_fragment_pairs()
 		int j = circ_map[fr1.h1->qname];
 		// TODO: check frag, pi, fidx, etc
 		// TODO: add pair to circ_fragment_pairs
-	}
 
+		fragment &fr2 = circ_fragments[j]; 
+		if(fr1.pi == -1 || fr2.pi == -1 || fr1.fidx == -1 || fr2.fidx == -1) continue;
+
+		if(fr1.pi == fr2.fidx && fr2.pi == fr1.fidx)
+		{
+			//printf("Found partner fragment\n");
+			circ_fragment_pairs.push_back(pair<fragment,fragment>(fr1,fr2)); //fr1 is original fragment of scallop2 regardless of which of h1 or h2 has a supplement
+		}
+
+	}
 
 	//printf("Printing bridged fragment pairs: size = %zu\n\n",circ_fragment_pairs.size());
 
