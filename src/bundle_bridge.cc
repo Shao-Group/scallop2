@@ -3645,6 +3645,28 @@ int bundle_bridge::extract_circ_fragment_pairs()
 		}
 	}
 
+	// above quadratic implementation seems slow down the program
+	// an index might improve (see below)
+	map<string, int> circ_map;
+	for(int j=0;j<circ_fragments.size();j++)
+	{
+		fragment &fr2 = circ_fragments[j];
+		if(circ_map.find(fr2.h1->qname) != circ_map.end())
+		{
+			circ_map.insert(make_pair(fr2.h1->qname, j));
+		}
+	}
+	for(int i = 0; i < fragments.size(); i++)
+	{
+		fragment &fr1 = fragments[i]; 
+		if(circ_map.find(fr1.h1->qname) == circ_map.end()) continue;
+
+		int j = circ_map[fr1.h1->qname];
+		// TODO: check frag, pi, fidx, etc
+		// TODO: add pair to circ_fragment_pairs
+	}
+
+
 	//printf("Printing bridged fragment pairs: size = %zu\n\n",circ_fragment_pairs.size());
 
 	/*if(circ_fragment_pairs.size() > 0)
