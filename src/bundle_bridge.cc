@@ -1209,10 +1209,10 @@ int bundle_bridge::get_more_chimeric()
 					int edit = get_edit_distance(junc_seq,fr.h1->soft_left_clip_seqs[0]);
 
 					//float similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
-					if(strcmp(fr.h1->qname.c_str(),"ST-E00299:245:HKTJJALXX:6:2107:30563:57952")==0)
+					/*if(strcmp(fr.h1->qname.c_str(),"ST-E00299:245:HKTJJALXX:6:2107:30563:57952")==0)
 					{
 						printf("ST-E00299:245:HKTJJALXX:6:2107:30563:57952 soft len=%d, edit=%d, sim==%lf\n",soft_len,edit,similarity);
-					}
+					}*/
 					
 					if(edit <= floor(soft_len/10))
 					//if(similarity > 0.33)
