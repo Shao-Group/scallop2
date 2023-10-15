@@ -985,7 +985,7 @@ int bundle_bridge::get_more_chimeric()
 
 		if(fr.h1->cigar_vector[0].first != 'S' && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first != 'S') continue;
 
-		if((fr.h1->cigar_vector[0].first == 'S' && fr.h1->cigar_vector[0].second < 10) &&  (fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'S' && fr.h1->cigar_vector[fr.h2->cigar_vector.size()-1].second < 10)) continue;
+		//if((fr.h1->cigar_vector[0].first == 'S' && fr.h1->cigar_vector[0].second < 10) &&  (fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'S' && fr.h1->cigar_vector[fr.h2->cigar_vector.size()-1].second < 10)) continue;
 
 		bool exists = false;
 		//check if already exists in left_soft
@@ -1074,7 +1074,7 @@ int bundle_bridge::get_more_chimeric()
 			}
 
 			//check if soft clip end matches pexon boundary of ref not given
-			if(ref_file == "")
+			/*if(ref_file == "")
 			{
 				for(int p=0;p<pexons.size();p++)
 				{
@@ -1084,7 +1084,7 @@ int bundle_bridge::get_more_chimeric()
 						break;
 					}
 				}
-			}
+			}*/
 		}
 		if(fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'S')
 		{
@@ -1125,7 +1125,7 @@ int bundle_bridge::get_more_chimeric()
 			}
 
 			//check if soft clip end matches pexon boundary of ref not given
-			if(ref_file == "")
+			/*if(ref_file == "")
 			{
 				for(int p=0;p<pexons.size();p++)
 				{
@@ -1135,10 +1135,10 @@ int bundle_bridge::get_more_chimeric()
 						break;
 					}
 				}
-			}
+			}*/
 		}
 
-		//if(left_boundary_match == 0 && right_boundary_match == 0) continue;
+		if(left_boundary_match == 0 && right_boundary_match == 0) continue;
 
 		if(fr.h1->cigar_vector[0].first == 'S' && left_boundary_match == 0) //add to map that this frag left soft clip is invalid
 		{
@@ -1158,7 +1158,7 @@ int bundle_bridge::get_more_chimeric()
 		}
 
 		//printf("more chimeric instances:\n");
-		if(fr.h1->cigar_vector[0].first == 'S' && left_boundary_match == 1)
+		if(fr.h1->cigar_vector[0].first == 'S' && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first != 'S'  && left_boundary_match == 1)
 		{
 			int32_t soft_len = fr.h1->cigar_vector[0].second;
 			if(soft_len < 10) continue;
@@ -1203,15 +1203,15 @@ int bundle_bridge::get_more_chimeric()
 
 					assert(junc_seq.size() == fr.h1->soft_left_clip_seqs[0].size());
 
-					//bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
-					//if(is_similar == false) continue;
+					bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
+					if(is_similar == false) continue;
 
-					//int edit = get_edit_distance(junc_seq,fr.h1->soft_left_clip_seqs[0]);
+					int edit = get_edit_distance(junc_seq,fr.h1->soft_left_clip_seqs[0]);
 
-					float similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
+					//float similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
 					
-					//if(edit <= floor(soft_len/10))
-					if(similarity > 0.33)
+					if(edit <= floor(soft_len/10))
+					//if(similarity > 0.33)
 					{
 						edit_match = 1;
 						printf("editmatch case 1: junc seq pos1=%d, pos2=%d, junc_seqlen = %lu\n",pos1,pos2,junc_seq.size());
@@ -1252,17 +1252,17 @@ int bundle_bridge::get_more_chimeric()
 
 					assert(junc_seq.size() == fr.h1->soft_left_clip_seqs[0].size());
 
-					//bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
-					//if(is_similar == false) continue;
+					bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
+					if(is_similar == false) continue;
 
-					//int edit = get_edit_distance(junc_seq,fr.h1->soft_left_clip_seqs[0]);
+					int edit = get_edit_distance(junc_seq,fr.h1->soft_left_clip_seqs[0]);
 
-					float similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
+					//float similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
 					
-					//if(edit <= floor(soft_len/10))
-					if(similarity > 0.33)
+					if(edit <= floor(soft_len/10))
+					//if(similarity > 0.33)
 					{
-						printf("soft left clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, similarity=%lf\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos,fr.h1->soft_left_clip_seqs[0].c_str(),similarity);
+						printf("soft left clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, similarity=%lf\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos,fr.h1->soft_left_clip_seqs[0].c_str(),edit);
 						printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
 						printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
 						create_fake_supple(k,fr,soft_len,pos1,pos2);
@@ -1274,7 +1274,7 @@ int bundle_bridge::get_more_chimeric()
 			}
 
 		}
-		if(fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'S' && right_boundary_match == 1)
+		if(fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'S' && fr.h1->cigar_vector[0].first != 'S' && right_boundary_match == 1)
 		{
 			int32_t soft_len = fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second;
 			if(soft_len < 10) continue;
@@ -1319,15 +1319,15 @@ int bundle_bridge::get_more_chimeric()
 
 					assert(junc_seq.size() == fr.h2->soft_right_clip_seqs[0].size());
 
-					//bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
-					//if(is_similar == false) continue;
+					bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
+					if(is_similar == false) continue;
 					
-					//int edit = get_edit_distance(junc_seq,fr.h2->soft_right_clip_seqs[0]);
+					int edit = get_edit_distance(junc_seq,fr.h2->soft_right_clip_seqs[0]);
 
-					float similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
+					//float similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
 
-					//if(edit <= floor(soft_len/10))
-					if(similarity > 0.33)
+					if(edit <= floor(soft_len/10))
+					//if(similarity > 0.33)
 					{
 						edit_match = 1;
 						printf("editmatch case 2: junc seq pos1=%d, pos2=%d, junc_seqlen = %lu\n",pos1,pos2,junc_seq.size());
@@ -1368,18 +1368,18 @@ int bundle_bridge::get_more_chimeric()
 
 					assert(junc_seq.size() == fr.h2->soft_right_clip_seqs[0].size());
 
-					//bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
-					//if(is_similar == false) continue;
+					bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
+					if(is_similar == false) continue;
 					
-					//int edit = get_edit_distance(junc_seq,fr.h2->soft_right_clip_seqs[0]);
+					int edit = get_edit_distance(junc_seq,fr.h2->soft_right_clip_seqs[0]);
 
-					float similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
+					//float similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
 
-					//if(edit <= floor(soft_len/10))
-					if(similarity > 0.33)
+					if(edit <= floor(soft_len/10))
+					//if(similarity > 0.33)
 					{
 						//printf("read seq combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h2->soft_right_clip_seqs[i].c_str(),edit);
-						printf("soft right clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, similarity=%lf\n",bb.chrm.c_str(),fr.h2->qname.c_str(),fr.h2->pos,fr.h2->soft_right_clip_seqs[0].c_str(),similarity);
+						printf("soft right clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, similarity=%lf\n",bb.chrm.c_str(),fr.h2->qname.c_str(),fr.h2->pos,fr.h2->soft_right_clip_seqs[0].c_str(),edit);
 						printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
 						printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
 						create_fake_supple(k,fr,soft_len,pos1,pos2);
@@ -3903,7 +3903,7 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 			}
 
 			//checking if pexon matches left boundary when ref file is not given
-			if(ref_file == "")
+			/*if(ref_file == "")
 			{
 				for(int p=0;p<pexons.size();p++)
 				{
@@ -3917,7 +3917,7 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 						break;
 					}
 				}
-			}
+			}*/
 
 			//checking if reads junction matches right boundary
 			for(int j=0;j<junctions.size();j++)
@@ -3961,7 +3961,7 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 			}
 		
 			//checking if pexon matches right boundary when ref file is not given
-			if(ref_file == "")
+			/*if(ref_file == "")
 			{
 				for(int p=0;p<pexons.size();p++)
 				{
@@ -3975,7 +3975,7 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 						break;
 					}
 				}
-			}
+			}*/
 
 			if(left_boundary_flag == 1 && right_boundary_flag == 1)
 			{
