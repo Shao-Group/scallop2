@@ -1209,6 +1209,10 @@ int bundle_bridge::get_more_chimeric()
 					int edit = get_edit_distance(junc_seq,fr.h1->soft_left_clip_seqs[0]);
 
 					//float similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
+					if(strcmp(fr.h1->qname.c_str(),"ST-E00299:245:HKTJJALXX:6:2107:30563:57952")==0)
+					{
+						printf("ST-E00299:245:HKTJJALXX:6:2107:30563:57952 soft len=%d, edit=%d, sim==%lf\n",soft_len,edit,similarity);
+					}
 					
 					if(edit <= floor(soft_len/10))
 					//if(similarity > 0.33)
@@ -1232,7 +1236,7 @@ int bundle_bridge::get_more_chimeric()
 
 				if(jc_multiple == 1) 
 				{
-					printf("jc_multiple = %d\n",jc_multiple);
+					printf("jc_multiple = %d, frag_name=%s\n",jc_multiple,fr.h1->qname.c_str());
 					left_soft[hash] = pair<int32_t,int32_t> (-1,-1);
 					continue;
 				}
@@ -1262,7 +1266,7 @@ int bundle_bridge::get_more_chimeric()
 					if(edit <= floor(soft_len/10))
 					//if(similarity > 0.33)
 					{
-						printf("soft left clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, similarity=%lf\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos,fr.h1->soft_left_clip_seqs[0].c_str(),edit);
+						printf("soft left clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, similarity=%d\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos,fr.h1->soft_left_clip_seqs[0].c_str(),edit);
 						printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
 						printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
 						create_fake_supple(k,fr,soft_len,pos1,pos2);
@@ -1348,7 +1352,7 @@ int bundle_bridge::get_more_chimeric()
 
 				if(jc_multiple == 1) 
 				{
-					printf("jc_multiple = %d\n",jc_multiple);
+					printf("jc_multiple = %d, frag_name=%s\n",jc_multiple,fr.h1->qname.c_str());
 					right_soft[hash] = pair<int32_t,int32_t> (-1,-1);
 					continue;
 				}
@@ -1379,7 +1383,7 @@ int bundle_bridge::get_more_chimeric()
 					//if(similarity > 0.33)
 					{
 						//printf("read seq combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h2->soft_right_clip_seqs[i].c_str(),edit);
-						printf("soft right clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, similarity=%lf\n",bb.chrm.c_str(),fr.h2->qname.c_str(),fr.h2->pos,fr.h2->soft_right_clip_seqs[0].c_str(),edit);
+						printf("soft right clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, similarity=%d\n",bb.chrm.c_str(),fr.h2->qname.c_str(),fr.h2->pos,fr.h2->soft_right_clip_seqs[0].c_str(),edit);
 						printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
 						printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
 						create_fake_supple(k,fr,soft_len,pos1,pos2);
@@ -3811,7 +3815,6 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 		fragment &fr1 = circ_fragment_pairs[i].first;
 		fragment &fr2 = circ_fragment_pairs[i].second;
 
-
 		printf("\nPrinting separate fragments: chrm = %s",bb.chrm.c_str());
 
 		fr1.print(i+1);
@@ -3903,21 +3906,18 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 			}
 
 			//checking if pexon matches left boundary when ref file is not given
-			/*if(ref_file == "")
+			if(ref_file == "")
 			{
 				for(int p=0;p<pexons.size();p++)
 				{
-					if(pexons[p].lpos <= fr1.lpos+pexon_range && pexons[p].lpos >= fr1.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
+					//if(pexons[p].lpos <= fr1.lpos+pexon_range && pexons[p].lpos >= fr1.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
+					if(pexons[p].lpos == fr1.lpos && pexons[p].ltype == START_BOUNDARY)
 					{
-						if(strcmp(fr1.h1->qname.c_str(),"simulate:268744") == 0)
-						{
-							printf("left pexon match, %d\n",pexons[p].ltype);
-						}
 						left_boundary_flag = 1;
 						break;
 					}
 				}
-			}*/
+			}
 
 			//checking if reads junction matches right boundary
 			for(int j=0;j<junctions.size();j++)
@@ -3961,21 +3961,18 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 			}
 		
 			//checking if pexon matches right boundary when ref file is not given
-			/*if(ref_file == "")
+			if(ref_file == "")
 			{
 				for(int p=0;p<pexons.size();p++)
 				{
-					if(pexons[p].rpos <= fr2.rpos+pexon_range && pexons[p].rpos >= fr2.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
+					//if(pexons[p].rpos <= fr2.rpos+pexon_range && pexons[p].rpos >= fr2.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
+					if(pexons[p].rpos == fr2.rpos && pexons[p].rtype == END_BOUNDARY)
 					{
-						if(strcmp(fr1.h1->qname.c_str(),"simulate:268744") == 0)
-						{
-							printf("right pexon match, %d\n",pexons[p].rtype);
-						}
 						right_boundary_flag = 1;
 						break;
 					}
 				}
-			}*/
+			}
 
 			if(left_boundary_flag == 1 && right_boundary_flag == 1)
 			{
