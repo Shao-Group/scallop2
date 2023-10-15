@@ -3851,6 +3851,8 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 
 		int left_boundary_flag = 0;
 		int right_boundary_flag = 0;
+		int pexon_left_flag = 0;
+		int pexon_right_flag = 0;
 		int pexon_range = 5;
 		int bundle_range = 5;
 		int junc_range = 5;
@@ -3914,6 +3916,7 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 					if(pexons[p].lpos == fr1.lpos && pexons[p].ltype == START_BOUNDARY)
 					{
 						left_boundary_flag = 1;
+						pexon_left_flag = 1;
 						break;
 					}
 				}
@@ -3969,16 +3972,17 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 					if(pexons[p].rpos == fr2.rpos && pexons[p].rtype == END_BOUNDARY)
 					{
 						right_boundary_flag = 1;
+						pexon_right_flag = 1;
 						break;
 					}
 				}
 			}
 
-			if(left_boundary_flag == 1 && right_boundary_flag == 1)
+			if((left_boundary_flag == 1) && (right_boundary_flag == 1))
 			{
 				printf("Found a case with junc comp 1\n");
 				printf("valid: left_boundary_flag = %d, right_boundary_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",left_boundary_flag, right_boundary_flag, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
-				join_circ_fragment_pair(circ_fragment_pairs[i],0,0);
+				join_circ_fragment_pair(circ_fragment_pairs[i],0,0,left_boundary_flag,right_boundary_flag);
 			}
 			else
 			{
@@ -4029,14 +4033,16 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 			}
 
 			//checking if pexon matches left boundary
-			/*for(int p=0;p<pexons.size();p++)
+			for(int p=0;p<pexons.size();p++)
 			{
-				if(pexons[p].lpos <= fr2.lpos+pexon_range && pexons[p].lpos >= fr2.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
+				//if(pexons[p].lpos <= fr2.lpos+pexon_range && pexons[p].lpos >= fr2.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
+				if(pexons[p].lpos == fr2.lpos && pexons[p].ltype == START_BOUNDARY)
 				{
 					left_boundary_flag = 1;
+					pexon_left_flag = 1;
 					break;
 				}
-			}*/
+			}
 
 			//checking if reads junction matches right boundary
 			for(int j=0;j<junctions.size();j++)
@@ -4080,14 +4086,16 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 			}
 
 			//checking if pexon matches right boundary
-			/*for(int p=0;p<pexons.size();p++)
+			for(int p=0;p<pexons.size();p++)
 			{
-				if(pexons[p].rpos <= fr1.rpos+pexon_range && pexons[p].rpos >= fr1.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
+				//if(pexons[p].rpos <= fr1.rpos+pexon_range && pexons[p].rpos >= fr1.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
+				if(pexons[p].rpos == fr1.rpos && pexons[p].rtype == END_BOUNDARY)
 				{
 					right_boundary_flag = 1;
+					pexon_right_flag = 1;
 					break;
 				}
-			}*/
+			}
 
 			if(left_boundary_flag == 1 && right_boundary_flag == 1)
 			{
@@ -4105,7 +4113,7 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 	return 0;
 }
 
-int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int ex1, int ex2)
+int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int ex1, int ex2, int left_boundary_flag, int right_boundary_flag)
 {
 
 	fragment &fr1 = fr_pair.first;
@@ -4212,6 +4220,11 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 			circ.circRNA_id = circ.circRNA_id + tostring(r.lpos) + "|" + tostring(r.rpos) + "|";
 		}
 
+		//return if single exon circRNA and any one side junction flag not 1
+		/*if(circ.merged_regions.size() == 1 && (left_boundary_flag != 1 || right_boundary_flag != 1))
+		{
+			return 0;
+		}*/
 		circ_trsts.push_back(circ);
 	}
 	else if(fr2.is_compatible == 2)
@@ -4303,6 +4316,11 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 			circ.circRNA_id = circ.circRNA_id + tostring(r.lpos) + "|" + tostring(r.rpos) + "|";
 		}		
 		
+		//return if single exon circRNA and any one side junction flag not 1
+		/*if(circ.merged_regions.size() == 1 && (left_boundary_flag != 1 || right_boundary_flag != 1))
+		{
+			return 0;
+		}*/
 		circ_trsts.push_back(circ);
 	}
 	else
