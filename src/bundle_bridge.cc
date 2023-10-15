@@ -4033,14 +4033,17 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 			}
 
 			//checking if pexon matches left boundary
-			for(int p=0;p<pexons.size();p++)
+			if(ref_file == "")
 			{
-				//if(pexons[p].lpos <= fr2.lpos+pexon_range && pexons[p].lpos >= fr2.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
-				if(pexons[p].lpos == fr2.lpos && pexons[p].ltype == START_BOUNDARY)
+				for(int p=0;p<pexons.size();p++)
 				{
-					left_boundary_flag = 1;
-					pexon_left_flag = 1;
-					break;
+					//if(pexons[p].lpos <= fr2.lpos+pexon_range && pexons[p].lpos >= fr2.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
+					if(pexons[p].lpos == fr2.lpos && pexons[p].ltype == START_BOUNDARY)
+					{
+						left_boundary_flag = 1;
+						pexon_left_flag = 1;
+						break;
+					}
 				}
 			}
 
@@ -4086,14 +4089,17 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 			}
 
 			//checking if pexon matches right boundary
-			for(int p=0;p<pexons.size();p++)
+			if(ref_file == "")
 			{
-				//if(pexons[p].rpos <= fr1.rpos+pexon_range && pexons[p].rpos >= fr1.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
-				if(pexons[p].rpos == fr1.rpos && pexons[p].rtype == END_BOUNDARY)
+				for(int p=0;p<pexons.size();p++)
 				{
-					right_boundary_flag = 1;
-					pexon_right_flag = 1;
-					break;
+					//if(pexons[p].rpos <= fr1.rpos+pexon_range && pexons[p].rpos >= fr1.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
+					if(pexons[p].rpos == fr1.rpos && pexons[p].rtype == END_BOUNDARY)
+					{
+						right_boundary_flag = 1;
+						pexon_right_flag = 1;
+						break;
+					}
 				}
 			}
 
