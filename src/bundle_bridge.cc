@@ -3982,7 +3982,7 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 			{
 				printf("Found a case with junc comp 1\n");
 				printf("valid: left_boundary_flag = %d, right_boundary_flag = %d, circ left = %d, circ right = %d, bundle left = %d, bundle right = %d\n",left_boundary_flag, right_boundary_flag, fr1.lpos, fr2.rpos, bb.lpos, bb.rpos);
-				join_circ_fragment_pair(circ_fragment_pairs[i],0,0,left_boundary_flag,right_boundary_flag);
+				join_circ_fragment_pair(circ_fragment_pairs[i],0,0);
 			}
 			else
 			{
@@ -4113,7 +4113,7 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 	return 0;
 }
 
-int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int ex1, int ex2, int left_boundary_flag, int right_boundary_flag)
+int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int ex1, int ex2)
 {
 
 	fragment &fr1 = fr_pair.first;
