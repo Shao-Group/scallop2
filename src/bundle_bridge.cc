@@ -1214,8 +1214,9 @@ int bundle_bridge::get_more_chimeric()
 						printf("ST-E00299:245:HKTJJALXX:6:2107:30563:57952 soft len=%d, edit=%d, sim==%lf\n",soft_len,edit,similarity);
 					}*/
 					
-					if(edit <= floor(soft_len/10))
+					
 					//if(similarity > 0.33)
+					if(edit <= floor(soft_len/10))
 					{
 						edit_match = 1;
 						printf("editmatch case 1: junc seq pos1=%d, pos2=%d, junc_seqlen = %lu\n",pos1,pos2,junc_seq.size());
@@ -1263,8 +1264,9 @@ int bundle_bridge::get_more_chimeric()
 
 					//float similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
 					
-					if(edit <= floor(soft_len/10))
+					
 					//if(similarity > 0.33)
+					if(edit <= floor(soft_len/10))
 					{
 						printf("soft left clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, similarity=%d\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos,fr.h1->soft_left_clip_seqs[0].c_str(),edit);
 						printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
@@ -1330,8 +1332,9 @@ int bundle_bridge::get_more_chimeric()
 
 					//float similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
 
-					if(edit <= floor(soft_len/10))
+					
 					//if(similarity > 0.33)
+					if(edit <= floor(soft_len/10))
 					{
 						edit_match = 1;
 						printf("editmatch case 2: junc seq pos1=%d, pos2=%d, junc_seqlen = %lu\n",pos1,pos2,junc_seq.size());
@@ -1379,8 +1382,9 @@ int bundle_bridge::get_more_chimeric()
 
 					//float similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
 
-					if(edit <= floor(soft_len/10))
+					
 					//if(similarity > 0.33)
+					if(edit <= floor(soft_len/10))
 					{
 						//printf("read seq combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h2->soft_right_clip_seqs[i].c_str(),edit);
 						printf("soft right clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, similarity=%d\n",bb.chrm.c_str(),fr.h2->qname.c_str(),fr.h2->pos,fr.h2->soft_right_clip_seqs[0].c_str(),edit);
