@@ -6,6 +6,8 @@ Part of Coral
 Part of Scallop2
 (c) 2021 by  Qimin Zhang, Mingfu Shao, and The Pennsylvania State University.
 See LICENSE for licensing.
+(c) 2023 by Tasfia Zahin, Mingfu Shao, and The Pennsylvania State University.
+See LICENSE for licensing.
 */
 
 #ifndef __CONFIG_H__
@@ -54,6 +56,17 @@ using namespace std;
 
 //for circRNA
 extern int read_length;
+extern int min_pathscore;
+extern int max_softclip_to_junction_gap;
+extern int min_junction_count;
+extern double min_junction_count_ratio;
+extern int max_circ_vsize;
+extern int max_exon_length;
+extern int same_chain_circ_end_diff;
+extern int alignment_boundary_error;
+extern int max_fset_score;
+extern int min_soft_clip_len; 
+
 
 // for bam file and reads
 extern int min_flank_length;

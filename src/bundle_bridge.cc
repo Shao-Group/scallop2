@@ -4,6 +4,8 @@ Part of Coral
 Part of Scallop2
 (c) 2021 by  Qimin Zhang, Mingfu Shao, and The Pennsylvania State University.
 See LICENSE for licensing.
+(c) 2023 by Tasfia Zahin, Mingfu Shao, and The Pennsylvania State University.
+See LICENSE for licensing.
 */
 
 #include <cassert>
@@ -376,7 +378,6 @@ int bundle_bridge::get_frags_with_HS_from_data()
 
 		int seq_match_left_hit = 0;
 		int seq_match_right_hit = 0;
-		int max_read_to_junction_gap = 100000;
 
 		int32_t soft_len = fr.h1->cigar_vector[0].second;
 		if(soft_len < 10) continue;
@@ -408,7 +409,7 @@ int bundle_bridge::get_frags_with_HS_from_data()
 		{
 			junction jc = junctions[j];
 			if(jc.lpos <= fr.h2->rpos || jc.lpos <= fr.h1->rpos) continue;
-			if(abs(jc.lpos-fr.h2->rpos) > max_read_to_junction_gap) continue;
+			if(abs(jc.lpos-fr.h2->rpos) > max_softclip_to_junction_gap) continue;
 
 			int32_t pos1 = jc.lpos-soft_len+1;
 			int32_t pos2 = jc.lpos;
@@ -453,7 +454,7 @@ int bundle_bridge::get_frags_with_HS_from_data()
 			junction jc = junctions[j];
 
 			if(jc.lpos <= fr.h2->rpos || jc.lpos <= fr.h1->rpos) continue;
-			if(abs(jc.lpos-fr.h2->rpos) > max_read_to_junction_gap) continue;
+			if(abs(jc.lpos-fr.h2->rpos) > max_softclip_to_junction_gap) continue;
 
 			int32_t pos1 = jc.lpos-soft_len+1;
 			int32_t pos2 = jc.lpos;
@@ -526,7 +527,7 @@ int bundle_bridge::get_frags_with_HS_from_data()
 			junction jc = junctions[j];
 
 			if(jc.rpos >= fr.h2->pos || jc.rpos >= fr.h1->pos) continue;
-			if(abs(fr.h1->pos-jc.rpos) > max_read_to_junction_gap) continue;
+			if(abs(fr.h1->pos-jc.rpos) > max_softclip_to_junction_gap) continue;
 
 			int32_t pos1 = jc.rpos;
 			int32_t pos2 = jc.rpos+soft_len-1;
@@ -571,7 +572,7 @@ int bundle_bridge::get_frags_with_HS_from_data()
 			junction jc = junctions[j];
 
 			if(jc.rpos >= fr.h2->pos || jc.rpos >= fr.h1->pos) continue;
-			if(abs(fr.h1->pos-jc.rpos) > max_read_to_junction_gap) continue;
+			if(abs(fr.h1->pos-jc.rpos) > max_softclip_to_junction_gap) continue;
 
 			int32_t pos1 = jc.rpos;
 			int32_t pos2 = jc.rpos+soft_len-1;
@@ -953,8 +954,6 @@ bool bundle_bridge::are_strings_similar(int kmer_length, map<string,int> kmer_ma
 
 int bundle_bridge::get_more_chimeric()
 {
-	int max_read_to_junction_gap = 100000;
-
 	map<string, pair<int32_t, int32_t>> left_soft; //key:pos and seq, val junc pos pair
 	map<string, pair<int32_t, int32_t>> right_soft;
 
@@ -1006,7 +1005,7 @@ int bundle_bridge::get_more_chimeric()
 			else if(left_len < right_len) soft_clip_side = 2;
 			else //if both side len same, skip for now
 			{
-				if(left_len >= 10)
+				if(left_len >= min_soft_clip_len)
 				{
 					printf("both side soft clips same length in new chimeric, chrm=%s, fr.qname=%s, fr.h1.pos=%d\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos);
 				}
@@ -1014,9 +1013,9 @@ int bundle_bridge::get_more_chimeric()
 			}
 		}
 
-		//discard if soft len < 10
-		if(soft_clip_side == 1 && fr.h1->cigar_vector[0].second < 10) continue;
-		if(soft_clip_side == 2 && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second < 10) continue;
+		//discard if soft len < min_soft_clip_len(10)
+		if(soft_clip_side == 1 && fr.h1->cigar_vector[0].second < min_soft_clip_len) continue;
+		if(soft_clip_side == 2 && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second < min_soft_clip_len) continue;
 
 		bool exists = false;
 
@@ -1223,7 +1222,7 @@ int bundle_bridge::get_more_chimeric()
 				junction jc = junctions[j];
 
 				if(jc.lpos <= fr.h2->rpos || jc.lpos <= fr.h1->rpos) continue;
-				if(abs(jc.lpos-fr.h2->rpos) > max_read_to_junction_gap) continue;
+				if(abs(jc.lpos-fr.h2->rpos) > max_softclip_to_junction_gap) continue;
 
 				int32_t pos1 = jc.lpos-soft_len+1;
 				int32_t pos2 = jc.lpos;
@@ -1278,7 +1277,7 @@ int bundle_bridge::get_more_chimeric()
 				junction jc = junctions[j];
 
 				if(jc.lpos <= fr.h2->rpos || jc.lpos <= fr.h1->rpos) continue;
-				if(abs(jc.lpos-fr.h2->rpos) > max_read_to_junction_gap) continue;
+				if(abs(jc.lpos-fr.h2->rpos) > max_softclip_to_junction_gap) continue;
 
 				int32_t pos1 = jc.lpos-soft_len+1;
 				int32_t pos2 = jc.lpos;
@@ -1339,7 +1338,7 @@ int bundle_bridge::get_more_chimeric()
 				junction jc = junctions[j];
 
 				if(jc.rpos >= fr.h2->pos || jc.rpos >= fr.h1->pos) continue;
-				if(abs(fr.h1->pos-jc.rpos) > max_read_to_junction_gap) continue;
+				if(abs(fr.h1->pos-jc.rpos) > max_softclip_to_junction_gap) continue;
 
 				int32_t pos1 = jc.rpos;
 				int32_t pos2 = jc.rpos+soft_len-1;
@@ -1390,7 +1389,7 @@ int bundle_bridge::get_more_chimeric()
 				junction jc = junctions[j];
 
 				if(jc.rpos >= fr.h2->pos || jc.rpos >= fr.h1->pos) continue;
-				if(abs(fr.h1->pos-jc.rpos) > max_read_to_junction_gap) continue;
+				if(abs(fr.h1->pos-jc.rpos) > max_softclip_to_junction_gap) continue;
 
 				int32_t pos1 = jc.rpos;
 				int32_t pos2 = jc.rpos+soft_len-1;
@@ -1850,14 +1849,13 @@ int bundle_bridge::build_junctions()
 	// either J.count >= ratio * M, say ratio = 0.01, 
 	// or J.count >= a fixed threshold, say 10 
 
-	double ratio = 0.05;
 	filtered_junctions.clear();
 
 	for(int j=0;j<junctions.size();j++)
 	{
 		junction jc = junctions[j];
 		
-		if(jc.count >= ratio*max_count || jc.count >= 10) //discard if both < 10 and < 0.01*max_count
+		if(jc.count >= min_junction_count_ratio*max_count || jc.count >= min_junction_count) //discard if both < 10 and < 0.01*max_count
 		{
 			filtered_junctions.push_back(jc);
 		}
@@ -2654,7 +2652,6 @@ int bundle_bridge::build_fragments()
 
 int bundle_bridge::fix_alignment_boundaries()
 {
-	int end_error = 5;
 	for(int k = 0; k < fragments.size(); k++)
 	{
 		fragment &fr = fragments[k];
@@ -2672,7 +2669,7 @@ int bundle_bridge::fix_alignment_boundaries()
 			printf("fr.h2: ");
 			fr.h2->print();*/
 
-			if(fr.h1->pos > fr.h2->pos && fr.h1->pos <= h1_supple->pos && h1_supple->rpos >= fr.h1->rpos && h1_supple->rpos >= fr.h2->rpos && fr.h1->pos - fr.h2->pos <= end_error)
+			if(fr.h1->pos > fr.h2->pos && fr.h1->pos <= h1_supple->pos && h1_supple->rpos >= fr.h1->rpos && h1_supple->rpos >= fr.h2->rpos && fr.h1->pos - fr.h2->pos <= alignment_boundary_error)
 			{
 				string combo = "alignment error-h1p_pos>h2_pos";
 				//printf("%s\n",combo.c_str());
@@ -2689,12 +2686,12 @@ int bundle_bridge::fix_alignment_boundaries()
 					}
 				}
 
-				if(first_M_len > end_error)
+				if(first_M_len > alignment_boundary_error)
 				{
 					fr.h2->pos = fr.h2->pos + diff;
 				}
 			}
-			else if(fr.h1->pos <= fr.h2->pos && fr.h1->pos <= h1_supple->pos && h1_supple->rpos >= fr.h1->rpos && h1_supple->rpos < fr.h2->rpos && fr.h2->rpos - h1_supple->rpos <= end_error)
+			else if(fr.h1->pos <= fr.h2->pos && fr.h1->pos <= h1_supple->pos && h1_supple->rpos >= fr.h1->rpos && h1_supple->rpos < fr.h2->rpos && fr.h2->rpos - h1_supple->rpos <= alignment_boundary_error)
 			{
 				string combo = "alignment error-h2_rpos>h1s_rpos";
 				//printf("%s\n",combo.c_str());
@@ -2710,7 +2707,7 @@ int bundle_bridge::fix_alignment_boundaries()
 					}
 				}
 
-				if(last_M_len > end_error)
+				if(last_M_len > alignment_boundary_error)
 				{
 					fr.h2->rpos = fr.h2->rpos - diff;
 				}
@@ -2730,7 +2727,7 @@ int bundle_bridge::fix_alignment_boundaries()
 			printf("Supple: ");
 			h2_supple->print();*/
 
-			if(h2_supple->pos <= fr.h1->pos && h2_supple->pos <= fr.h2->pos && fr.h2->rpos >= h2_supple->rpos && fr.h2->rpos < fr.h1->rpos && fr.h1->rpos - fr.h2->rpos <= end_error)
+			if(h2_supple->pos <= fr.h1->pos && h2_supple->pos <= fr.h2->pos && fr.h2->rpos >= h2_supple->rpos && fr.h2->rpos < fr.h1->rpos && fr.h1->rpos - fr.h2->rpos <= alignment_boundary_error)
 			{
 				string combo = "alignment error-h1_rpos>h2p_rpos";
 				//printf("%s\n",combo.c_str());
@@ -2746,12 +2743,12 @@ int bundle_bridge::fix_alignment_boundaries()
 					}
 				}
 
-				if(last_M_len > end_error)
+				if(last_M_len > alignment_boundary_error)
 				{
 					fr.h1->rpos = fr.h1->rpos - diff;
 				}
 			}
-			else if(h2_supple->pos > fr.h1->pos && h2_supple->pos <= fr.h2->pos && fr.h2->rpos >= h2_supple->rpos && fr.h2->rpos >= fr.h1->rpos && h2_supple->pos - fr.h1->pos <= end_error)
+			else if(h2_supple->pos > fr.h1->pos && h2_supple->pos <= fr.h2->pos && fr.h2->rpos >= h2_supple->rpos && fr.h2->rpos >= fr.h1->rpos && h2_supple->pos - fr.h1->pos <= alignment_boundary_error)
 			{
 				string combo = "alignment error-h2s_pos>h1_pos";
 				//printf("%s\n",combo.c_str());
@@ -2768,7 +2765,7 @@ int bundle_bridge::fix_alignment_boundaries()
 					}
 				}
 
-				if(first_M_len > end_error)
+				if(first_M_len > alignment_boundary_error)
 				{
 					fr.h1->pos = fr.h1->pos + diff;
 				}

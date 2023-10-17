@@ -4,6 +4,8 @@ Part of Scallop Transcript Assembler
 Part of Scallop2
 (c) 2021 by  Qimin Zhang, Mingfu Shao, and The Pennsylvania State University.
 See LICENSE for licensing.
+(c) 2023 by Tasfia Zahin, Mingfu Shao, and The Pennsylvania State University.
+See LICENSE for licensing.
 */
 
 #include <cstdio>
@@ -303,7 +305,7 @@ int assembler::remove_long_exon_circ_trsts()
 
 		for(int j=0;j<circ.merged_regions.size();j++)
 		{
-			if(circ.merged_regions[j].rpos-circ.merged_regions[j].lpos > 2000)
+			if(circ.merged_regions[j].rpos-circ.merged_regions[j].lpos > max_exon_length)
 			{
 				long_flag = 1;
 				break;
@@ -392,9 +394,7 @@ int assembler::remove_duplicate_circ_trsts()
 			//printf("%s & %s\n",circ.circRNA_id.c_str(),old_circ.circRNA_id.c_str());
 			//printf("start diff %d. end diff %d, hash1 %s, hash2 %s\n",abs(circ.start-old_circ.start),abs(circ.end-old_circ.end),intron_chain_hash.c_str(),old_intron_chain_hash.c_str());
 
-			int end_diff = 50;
-			//&& abs(circ.start-old_circ.start) < end_diff && abs(circ.end-old_circ.end) < end_diff 
-			if((intron_chain_hash != "" && intron_chain_hash == old_intron_chain_hash && abs(circ.start-old_circ.start) < end_diff && abs(circ.end-old_circ.end) < end_diff) || (intron_chain_hash == "" && intron_chain_hash == old_intron_chain_hash && abs(circ.start-old_circ.start) < end_diff && abs(circ.end-old_circ.end) < end_diff))
+			if((intron_chain_hash != "" && intron_chain_hash == old_intron_chain_hash && abs(circ.start-old_circ.start) < same_chain_circ_end_diff && abs(circ.end-old_circ.end) < same_chain_circ_end_diff) || (intron_chain_hash == "" && intron_chain_hash == old_intron_chain_hash && abs(circ.start-old_circ.start) < same_chain_circ_end_diff && abs(circ.end-old_circ.end) < same_chain_circ_end_diff))
 			{
 				if(circ.coverage > old_circ.coverage)
 				{
@@ -412,137 +412,6 @@ int assembler::remove_duplicate_circ_trsts()
 			circ_trst_merged_map.insert(pair<string,pair<circular_transcript, int>>(circ.circRNA_id,pair<circular_transcript, int>(circ,circ.coverage)));
 		}
 	}
-
-	//merge circRNAs that have different end boundaries but same intron chain into that with higher coverage (reverse overlap)
-	for(itn = circ_trst_map.begin(); itn != circ_trst_map.end(); itn++)
-	{
-		//printf("start of check\n");
-		circular_transcript &circ = itn->second.first;
-		string hash = itn->first;
-
-		if(circ.source != "scallop2_RO") continue;
-
-		vector<string> split_coordinates = split_str(hash,"|");
-
-		//creating new hash with middle cordinates except first and last coordinate
-		string intron_chain_hash = "";
-		for(int i=3;i<split_coordinates.size()-2;i++)
-		{
-			intron_chain_hash = intron_chain_hash + split_coordinates[i] + "|";
-		}
-
-		int flag_collision = 0;
-		map<string, pair<circular_transcript, int>>::iterator itn1;
-		for(itn1 = circ_trst_merged_map.begin(); itn1 != circ_trst_merged_map.end(); itn1++)
-		{
-			//don't merge RO circRNAs for now
-			/*if(circ.source == "scallop2_RO")
-			{	
-				break;
-			}*/
-
-			circular_transcript &old_circ = itn1->second.first;
-			string old_hash = itn1->first;
-
-			//don't check with already existing RO circRNAs
-			//if(old_circ.source == "scallop2_RO") continue;
-			
-			vector<string> old_split_coordinates = split_str(old_hash,"|");
-			string old_intron_chain_hash = "";
-			for(int i=3;i<old_split_coordinates.size()-2;i++)
-			{
-				old_intron_chain_hash = old_intron_chain_hash + old_split_coordinates[i] + "|";
-			}
-
-			//printf("%s & %s\n",circ.circRNA_id.c_str(),old_circ.circRNA_id.c_str());
-			//printf("start diff %d. end diff %d, hash1 %s, hash2 %s\n",abs(circ.start-old_circ.start),abs(circ.end-old_circ.end),intron_chain_hash.c_str(),old_intron_chain_hash.c_str());
-
-			int end_diff = 50;
-			//&& abs(circ.start-old_circ.start) < end_diff && abs(circ.end-old_circ.end) < end_diff 
-			if((intron_chain_hash != "" && intron_chain_hash == old_intron_chain_hash && abs(circ.start-old_circ.start) < end_diff && abs(circ.end-old_circ.end) < end_diff) || (intron_chain_hash == "" && intron_chain_hash == old_intron_chain_hash && abs(circ.start-old_circ.start) < end_diff && abs(circ.end-old_circ.end) < end_diff))
-			{
-				if(circ.coverage > old_circ.coverage)
-				{
-					circ_trst_merged_map.erase(itn1->first);
-					circ_trst_merged_map.insert(pair<string,pair<circular_transcript, int>>(circ.circRNA_id,pair<circular_transcript, int>(circ,circ.coverage)));
-					flag_collision = 1;
-					break;
-				}
-				flag_collision = 1;
-			}
-		}
-
-		if(flag_collision == 0) //end diff and intron chain condition did not match for any entry in circ_trst_merged_map, so enter separately
-		{
-			circ_trst_merged_map.insert(pair<string,pair<circular_transcript, int>>(circ.circRNA_id,pair<circular_transcript, int>(circ,circ.coverage)));
-		}
-	}
-
-	//merge circRNAs that have different end boundaries but same intron chain into that with higher coverage (HS frag circRNAs)
-	for(itn = circ_trst_map.begin(); itn != circ_trst_map.end(); itn++)
-	{
-		//printf("start of check\n");
-		circular_transcript &circ = itn->second.first;
-		string hash = itn->first;
-
-		if(circ.source != "scallop2_HS") continue;
-
-		vector<string> split_coordinates = split_str(hash,"|");
-
-		//creating new hash with middle cordinates except first and last coordinate
-		string intron_chain_hash = "";
-		for(int i=3;i<split_coordinates.size()-2;i++)
-		{
-			intron_chain_hash = intron_chain_hash + split_coordinates[i] + "|";
-		}
-
-		int flag_collision = 0;
-		map<string, pair<circular_transcript, int>>::iterator itn1;
-		for(itn1 = circ_trst_merged_map.begin(); itn1 != circ_trst_merged_map.end(); itn1++)
-		{
-			//don't merge RO circRNAs for now
-			/*if(circ.source == "scallop2_RO")
-			{	
-				break;
-			}*/
-
-			circular_transcript &old_circ = itn1->second.first;
-			string old_hash = itn1->first;
-
-			//don't check with already existing RO circRNAs
-			//if(old_circ.source == "scallop2_RO") continue;
-			
-			vector<string> old_split_coordinates = split_str(old_hash,"|");
-			string old_intron_chain_hash = "";
-			for(int i=3;i<old_split_coordinates.size()-2;i++)
-			{
-				old_intron_chain_hash = old_intron_chain_hash + old_split_coordinates[i] + "|";
-			}
-
-			//printf("%s & %s\n",circ.circRNA_id.c_str(),old_circ.circRNA_id.c_str());
-			//printf("start diff %d. end diff %d, hash1 %s, hash2 %s\n",abs(circ.start-old_circ.start),abs(circ.end-old_circ.end),intron_chain_hash.c_str(),old_intron_chain_hash.c_str());
-
-			int end_diff = 50;
-			//&& abs(circ.start-old_circ.start) < end_diff && abs(circ.end-old_circ.end) < end_diff 
-			if((intron_chain_hash != "" && intron_chain_hash == old_intron_chain_hash && abs(circ.start-old_circ.start) < end_diff && abs(circ.end-old_circ.end) < end_diff) || (intron_chain_hash == "" && intron_chain_hash == old_intron_chain_hash && abs(circ.start-old_circ.start) < end_diff && abs(circ.end-old_circ.end) < end_diff))
-			{
-				if(circ.coverage > old_circ.coverage)
-				{
-					circ_trst_merged_map.erase(itn1->first);
-					circ_trst_merged_map.insert(pair<string,pair<circular_transcript, int>>(circ.circRNA_id,pair<circular_transcript, int>(circ,circ.coverage)));
-					flag_collision = 1;
-					break;
-				}
-				flag_collision = 1;
-			}
-		}
-
-		if(flag_collision == 0) //end diff and intron chain condition did not match for any entry in circ_trst_merged_map, so enter separately
-		{
-			circ_trst_merged_map.insert(pair<string,pair<circular_transcript, int>>(circ.circRNA_id,pair<circular_transcript, int>(circ,circ.coverage)));
-		}
-	}
-
 
 	//merge circRNAs that have different end boundaries but same intron chain into that with higher coverage (more chimeric)
 	for(itn = circ_trst_map.begin(); itn != circ_trst_map.end(); itn++)
@@ -588,9 +457,7 @@ int assembler::remove_duplicate_circ_trsts()
 			//printf("%s & %s\n",circ.circRNA_id.c_str(),old_circ.circRNA_id.c_str());
 			//printf("start diff %d. end diff %d, hash1 %s, hash2 %s\n",abs(circ.start-old_circ.start),abs(circ.end-old_circ.end),intron_chain_hash.c_str(),old_intron_chain_hash.c_str());
 
-			int end_diff = 50;
-			//&& abs(circ.start-old_circ.start) < end_diff && abs(circ.end-old_circ.end) < end_diff 
-			if((intron_chain_hash != "" && intron_chain_hash == old_intron_chain_hash && abs(circ.start-old_circ.start) < end_diff && abs(circ.end-old_circ.end) < end_diff) || (intron_chain_hash == "" && intron_chain_hash == old_intron_chain_hash && abs(circ.start-old_circ.start) < end_diff && abs(circ.end-old_circ.end) < end_diff))
+			if((intron_chain_hash != "" && intron_chain_hash == old_intron_chain_hash && abs(circ.start-old_circ.start) < same_chain_circ_end_diff && abs(circ.end-old_circ.end) < same_chain_circ_end_diff) || (intron_chain_hash == "" && intron_chain_hash == old_intron_chain_hash && abs(circ.start-old_circ.start) < same_chain_circ_end_diff && abs(circ.end-old_circ.end) < same_chain_circ_end_diff))
 			{
 				if(circ.coverage > old_circ.coverage)
 				{
@@ -816,7 +683,7 @@ int assembler::write_circular()
 		circular_transcript &circ = itn->second.first;
 		//if(circ.source != "scallop2_MC") continue;
 		//try to remove FP by discarding circRNAs with lots of vertices from many small junctions
-		if(circ.circ_path.size() > 15) continue;
+		if(circ.circ_path.size() > max_circ_vsize) continue;
 		circ.write(fcirc);
 	}
 

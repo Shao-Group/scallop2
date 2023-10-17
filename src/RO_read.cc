@@ -1,3 +1,9 @@
+/*
+Part of Coral
+(c) 2023 by Tasfia Zahin, Mingfu Shao, and The Pennsylvania State University.
+See LICENSE for licensing.
+*/
+
 #include "RO_read.h"
 
 RO_read::RO_read()

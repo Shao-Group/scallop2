@@ -1,3 +1,9 @@
+/*
+Part of Coral
+(c) 2023 by Tasfia Zahin, Mingfu Shao, and The Pennsylvania State University.
+See LICENSE for licensing.
+*/
+
 #ifndef __RO_READ_H__
 #define __RO_READ_H__
 
