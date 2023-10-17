@@ -1,3 +1,8 @@
+/*
+Part of Coral
+(c) 2023 by Tasfia Zahin, Mingfu Shao, and The Pennsylvania State University.
+See LICENSE for licensing.
+*/
 
 #ifndef __GTF_CIRCULAR_TRANSCRIPT_H__
 #define __GTF_CIRCULAR_TRANSCRIPT_H__
