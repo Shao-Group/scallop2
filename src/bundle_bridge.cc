@@ -1006,7 +1006,10 @@ int bundle_bridge::get_more_chimeric()
 			else if(left_len < right_len) soft_clip_side = 2;
 			else //if both side len same, skip for now
 			{
-				printf("both side soft clips same length in new chimeric\n");
+				if(left_len >= 10)
+				{
+					printf("both side soft clips same length in new chimeric, chrm=%s, fr.qname=%s, fr.h1.pos=%d\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos);
+				}
 				continue;
 			}
 		}
@@ -1100,7 +1103,7 @@ int bundle_bridge::get_more_chimeric()
 			}
 
 			//check if soft clip end matches pexon boundary of ref not given
-			/*if(ref_file == "")
+			if(ref_file == "")
 			{
 				for(int p=0;p<pexons.size();p++)
 				{
@@ -1110,7 +1113,7 @@ int bundle_bridge::get_more_chimeric()
 						break;
 					}
 				}
-			}*/
+			}
 		}
 		else if(soft_clip_side == 2)
 		{
@@ -1151,7 +1154,7 @@ int bundle_bridge::get_more_chimeric()
 			}
 
 			//check if soft clip end matches pexon boundary of ref not given
-			/*if(ref_file == "")
+			if(ref_file == "")
 			{
 				for(int p=0;p<pexons.size();p++)
 				{
@@ -1161,7 +1164,7 @@ int bundle_bridge::get_more_chimeric()
 						break;
 					}
 				}
-			}*/
+			}
 		}
 
 		if(left_boundary_match == 0 && right_boundary_match == 0) continue;
@@ -2087,6 +2090,7 @@ int bundle_bridge::create_fake_fragments()
 			{
 				if(z.soft_clip_side == 1)
 				{
+					printf("create_fake_frag: soft_clip_side 1\n");
 					fr.h1->suppl = &z;
 					fr.h1->supple_pos = z.pos;
 					fr.h1->suppl->paired = true;
@@ -2102,6 +2106,7 @@ int bundle_bridge::create_fake_fragments()
 				}
 				else if(z.soft_clip_side == 2)
 				{
+					printf("create_fake_frag: soft_clip_side 2\n");
 					fr.h2->suppl = &z;
 					fr.h2->supple_pos = z.pos;
 					fr.h2->suppl->paired = true;
@@ -2143,7 +2148,8 @@ int bundle_bridge::create_fake_fragments()
 
 		if(z.vlist.size() == 0) continue;
 		if(z.fake_hit_index == -1) continue;
-		if(fr.h1->qname != z.qname) continue;
+
+		assert(fr.h1->qname == z.qname);
 
 		if(fr.fake_hit_index == j && z.fake_hit_index == k)
 		{
