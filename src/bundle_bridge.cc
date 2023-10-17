@@ -1108,8 +1108,8 @@ int bundle_bridge::get_more_chimeric()
 			{
 				for(int p=0;p<pexons.size();p++)
 				{
-					if(pexons[p].lpos <= fr.h1->pos+pexon_range && pexons[p].lpos >= fr.h1->pos-pexon_range && pexons[p].ltype == START_BOUNDARY)
-					//if(pexons[p].lpos == fr.h1->pos && pexons[p].ltype == START_BOUNDARY)
+					//if(pexons[p].lpos <= fr.h1->pos+pexon_range && pexons[p].lpos >= fr.h1->pos-pexon_range && pexons[p].ltype == START_BOUNDARY)
+					if(pexons[p].lpos == fr.h1->pos && pexons[p].ltype == START_BOUNDARY)
 					{
 						left_boundary_match = 1;
 						break;
@@ -1160,8 +1160,8 @@ int bundle_bridge::get_more_chimeric()
 			{
 				for(int p=0;p<pexons.size();p++)
 				{
-					if(pexons[p].rpos <= fr.h2->rpos+pexon_range && pexons[p].rpos >= fr.h2->rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
-					//if(pexons[p].rpos == fr.h2->rpos && pexons[p].rtype == END_BOUNDARY)
+					//if(pexons[p].rpos <= fr.h2->rpos+pexon_range && pexons[p].rpos >= fr.h2->rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
+					if(pexons[p].rpos == fr.h2->rpos && pexons[p].rtype == END_BOUNDARY)
 					{
 						right_boundary_match = 1;
 						break;
@@ -3982,7 +3982,6 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 					// assert(chain[k].first < chain[k].second);
 					// if(chain[k].first <= bb.lpos) continue;
 					// if(chain[k].second >= bb.rpos) continue;
-
 					
 					if(chain[k].second == fr1.lpos)
 					//if(chain[k].second <= fr1.lpos+junc_range && chain[k].second >= fr1.lpos-junc_range)
@@ -4005,8 +4004,8 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 			{
 				for(int p=0;p<pexons.size();p++)
 				{
-					if(pexons[p].lpos <= fr1.lpos+pexon_range && pexons[p].lpos >= fr1.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
 					//if(pexons[p].lpos == fr1.lpos && pexons[p].ltype == START_BOUNDARY)
+					if(pexons[p].lpos <= fr1.lpos+pexon_range && pexons[p].lpos >= fr1.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
 					{
 						//left_boundary_flag = 1;
 						pexon_left_flag = 1;
@@ -4064,8 +4063,8 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 			{
 				for(int p=0;p<pexons.size();p++)
 				{
-					if(pexons[p].rpos <= fr2.rpos+pexon_range && pexons[p].rpos >= fr2.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
 					//if(pexons[p].rpos == fr2.rpos && pexons[p].rtype == END_BOUNDARY)
+					if(pexons[p].rpos <= fr2.rpos+pexon_range && pexons[p].rpos >= fr2.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
 					{
 						//right_boundary_flag = 1;
 						pexon_right_flag = 1;
@@ -4136,8 +4135,8 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 			{
 				for(int p=0;p<pexons.size();p++)
 				{
-					if(pexons[p].lpos <= fr2.lpos+pexon_range && pexons[p].lpos >= fr2.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
 					//if(pexons[p].lpos == fr2.lpos && pexons[p].ltype == START_BOUNDARY)
+					if(pexons[p].lpos <= fr2.lpos+pexon_range && pexons[p].lpos >= fr2.lpos-pexon_range && pexons[p].ltype == START_BOUNDARY)
 					{
 						//left_boundary_flag = 1;
 						pexon_left_flag = 1;
@@ -4195,8 +4194,8 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 			{
 				for(int p=0;p<pexons.size();p++)
 				{
-					if(pexons[p].rpos <= fr1.rpos+pexon_range && pexons[p].rpos >= fr1.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
 					//if(pexons[p].rpos == fr1.rpos && pexons[p].rtype == END_BOUNDARY)
+					if(pexons[p].rpos <= fr1.rpos+pexon_range && pexons[p].rpos >= fr1.rpos-pexon_range && pexons[p].rtype == END_BOUNDARY)
 					{
 						//right_boundary_flag = 1;
 						pexon_right_flag = 1;
