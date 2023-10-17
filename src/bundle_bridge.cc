@@ -1433,6 +1433,7 @@ int bundle_bridge::create_fake_supple(int fr_index, fragment &fr, int32_t soft_l
 	//hit id
 
 	new_hit.is_fake = true;
+	new_hit.soft_clip_side = soft_clip_side;
 	new_hit.tid = fr.h1->tid;
 	new_hit.qname = fr.h1->qname;
 	new_hit.qhash = fr.h1->qhash;
@@ -2080,10 +2081,11 @@ int bundle_bridge::create_fake_fragments()
 
 			if(z.vlist.size() == 0) continue;
 			if(z.fake_hit_index == -1) continue;
+			if(fr.h1->qname != z.qname) continue;
 
 			if(fr.fake_hit_index == i && z.fake_hit_index == k)
 			{
-				if(fr.h1->cigar_vector[0].first == 'S')
+				if(z.soft_clip_side == 1)
 				{
 					fr.h1->suppl = &z;
 					fr.h1->supple_pos = z.pos;
@@ -2098,7 +2100,7 @@ int bundle_bridge::create_fake_fragments()
 					fr.fidx = k;
 					circ_fragments.push_back(frag);
 				}
-				else if(fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'S')
+				else if(z.soft_clip_side == 2)
 				{
 					fr.h2->suppl = &z;
 					fr.h2->supple_pos = z.pos;
@@ -2116,6 +2118,68 @@ int bundle_bridge::create_fake_fragments()
 			}
 		}
 	}
+
+	//making above extraction more efficient
+
+	/*map<string, int> circ_map;
+	for(int j=0;j<bb.fake_hits.size();j++)
+	{
+		hit &z = bb.fake_hits[j];
+		if(circ_map.find(z.qname) == circ_map.end())
+		{
+			circ_map.insert(make_pair(z.qname, j));
+		}
+	}
+
+	for(int k=0; k<fragments.size(); k++)
+	{
+		fragment &fr = fragments[k];
+		if(fr.fake_hit_index == -1) continue;
+
+		if(circ_map.find(fr.h1->qname) == circ_map.end()) continue;
+
+		int j = circ_map[fr.h1->qname];
+		hit &z = bb.fake_hits[j];
+
+		if(z.vlist.size() == 0) continue;
+		if(z.fake_hit_index == -1) continue;
+		if(fr.h1->qname != z.qname) continue;
+
+		if(fr.fake_hit_index == j && z.fake_hit_index == k)
+		{
+			if(z.soft_clip_side == 1)
+			{
+				fr.h1->suppl = &z;
+				fr.h1->supple_pos = z.pos;
+				fr.h1->suppl->paired = true;
+				fragment frag(fr.h2, fr.h1->suppl);
+				frag.frag_type = 2;
+				frag.is_compatible = 1;
+				frag.type = 0;
+				frag.pi = k;
+				frag.fidx = circ_fragments.size();
+				fr.pi = circ_fragments.size(); //pi not set for all fragments, only those that have second frags, check pi before using if it is -1
+				fr.fidx = k;
+				circ_fragments.push_back(frag);
+			}
+			else if(z.soft_clip_side == 2)
+			{
+				fr.h2->suppl = &z;
+				fr.h2->supple_pos = z.pos;
+				fr.h2->suppl->paired = true;
+				fragment frag(fr.h2->suppl, fr.h1);
+				frag.frag_type = 2;
+				frag.is_compatible = 2;
+				frag.type = 0;
+				frag.pi = k;
+				frag.fidx = circ_fragments.size();
+				fr.pi = circ_fragments.size(); //pi not set for all fragments, only those that have second frags, check pi before using if it is -1
+				fr.fidx = k;
+				circ_fragments.push_back(frag);	
+			}
+		}
+	}*/
+
 	return 0;
 }
 

@@ -52,6 +52,7 @@ hit::hit()
 	is_reverse_overlap = false;
 	is_fake = false;
 	fake_hit_index = -1;
+	soft_clip_side = 0;
 	
 	left_cigar = '.';					// S=soft clip, H=hard clip, M=match, .=default
 	right_cigar = '.';					// S=soft clip, H=hard clip, M=match, .=default
@@ -113,6 +114,7 @@ hit& hit::operator=(const hit &h)
 	is_reverse_overlap = h.is_reverse_overlap;
 	is_fake = h.is_fake;
 	fake_hit_index = h.fake_hit_index;
+	soft_clip_side = h.soft_clip_side;
 
 	itvm = h.itvm;
 	itvi = h.itvi;
@@ -165,6 +167,7 @@ hit::hit(const hit &h)
 	is_reverse_overlap = h.is_reverse_overlap;
 	is_fake = h.is_fake;
 	fake_hit_index = h.fake_hit_index;
+	soft_clip_side = h.soft_clip_side;
 	suppl = h.suppl;
 
 	itvm = h.itvm;
@@ -212,6 +215,7 @@ hit::hit(bam1_t *b, int id)
 	is_reverse_overlap = false;
 	is_fake = false;
 	fake_hit_index = -1;
+	soft_clip_side = 0;
 	
 	left_cigar = '.';					// S=soft clip, H=hard clip, M=match, .=default
 	right_cigar = '.';					// S=soft clip, H=hard clip, M=match, .=default

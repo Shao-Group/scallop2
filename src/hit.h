@@ -85,6 +85,7 @@ public:
 	hit *suppl;								// supplementary hit
 	bool is_fake;							// whether this is a fake hit
 	int fake_hit_index; 					//used to keep track of fragment for which fake hit is created, stores index of partner fragment
+	int soft_clip_side;						//used to keep track of whether the fake hit comes from a soft left clip (1) or soft right clip (2)
 
 	// scallop+coral
 	vector<int64_t> itvm;					// matched interval
