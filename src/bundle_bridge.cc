@@ -908,7 +908,7 @@ int bundle_bridge::get_edit_distance(string s, string t)
 	return res;
 }
 
-float bundle_bridge::get_Jaccard(int kmer_length, map<string,int> kmer_map, string t)
+double bundle_bridge::get_Jaccard(int kmer_length, map<string,int> kmer_map, string t)
 {
 	int match_count = 0;
 
@@ -923,8 +923,8 @@ float bundle_bridge::get_Jaccard(int kmer_length, map<string,int> kmer_map, stri
 	}
 
 	int kmer_number = t.size()-kmer_length+1;
-	float jaccard = 0;
-	jaccard = (float) match_count/ (float) (kmer_number + kmer_number - match_count);
+	double jaccard = 0;
+	jaccard = (double) match_count/ (double) (kmer_number + kmer_number - match_count);
 	//printf("match count = %d, kmer_number = %d, jaccard %lf\n",match_count,kmer_number,jaccard);
 	return jaccard;
 	
@@ -1234,19 +1234,19 @@ int bundle_bridge::get_more_chimeric()
 
 				assert(junc_seq.size() == fr.h1->soft_left_clip_seqs[0].size());
 
-				bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
-				if(is_similar == false) continue;
+				//bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
+				//if(is_similar == false) continue;
 
-				int edit = get_edit_distance(junc_seq,fr.h1->soft_left_clip_seqs[0]);
+				//int edit = get_edit_distance(junc_seq,fr.h1->soft_left_clip_seqs[0]);
 
-				//float similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
+				double similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
 				/*if(strcmp(fr.h1->qname.c_str(),"ST-E00299:245:HKTJJALXX:6:2107:30563:57952")==0)
 				{
 					printf("ST-E00299:245:HKTJJALXX:6:2107:30563:57952 soft len=%d, edit=%d, sim==%lf\n",soft_len,edit,similarity);
 				}*/
 				
-				//if(similarity > 0.33)
-				if(edit <= floor(soft_len/10))
+				if(similarity > 0.5)
+				//if(edit <= floor(soft_len/10))
 				{
 					edit_match = 1;
 					printf("editmatch case 1: junc seq pos1=%d, pos2=%d, junc_seqlen = %lu\n",pos1,pos2,junc_seq.size());
@@ -1287,17 +1287,17 @@ int bundle_bridge::get_more_chimeric()
 
 				assert(junc_seq.size() == fr.h1->soft_left_clip_seqs[0].size());
 
-				bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
-				if(is_similar == false) continue;
+				//bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
+				//if(is_similar == false) continue;
 
-				int edit = get_edit_distance(junc_seq,fr.h1->soft_left_clip_seqs[0]);
+				//int edit = get_edit_distance(junc_seq,fr.h1->soft_left_clip_seqs[0]);
 
-				//float similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
+				double similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
 				
-				//if(similarity > 0.33)
-				if(edit <= floor(soft_len/10))
+				if(similarity > 0.5)
+				//if(edit <= floor(soft_len/10))
 				{
-					printf("soft left clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, similarity=%d\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos,fr.h1->soft_left_clip_seqs[0].c_str(),edit);
+					printf("soft left clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, similarity=%lf\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos,fr.h1->soft_left_clip_seqs[0].c_str(),similarity);
 					printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
 					printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
 					create_fake_supple(k,fr,soft_len,pos1,pos2,soft_clip_side);
@@ -1350,15 +1350,15 @@ int bundle_bridge::get_more_chimeric()
 
 				assert(junc_seq.size() == fr.h2->soft_right_clip_seqs[0].size());
 
-				bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
-				if(is_similar == false) continue;
+				//bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
+				//if(is_similar == false) continue;
 				
-				int edit = get_edit_distance(junc_seq,fr.h2->soft_right_clip_seqs[0]);
+				//int edit = get_edit_distance(junc_seq,fr.h2->soft_right_clip_seqs[0]);
 
-				//float similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
+				double similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
 
-				//if(similarity > 0.33)
-				if(edit <= floor(soft_len/10))
+				if(similarity > 0.5)
+				//if(edit <= floor(soft_len/10))
 				{
 					edit_match = 1;
 					printf("editmatch case 2: junc seq pos1=%d, pos2=%d, junc_seqlen = %lu\n",pos1,pos2,junc_seq.size());
@@ -1399,18 +1399,18 @@ int bundle_bridge::get_more_chimeric()
 
 				assert(junc_seq.size() == fr.h2->soft_right_clip_seqs[0].size());
 
-				bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
-				if(is_similar == false) continue;
+				//bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
+				//if(is_similar == false) continue;
 				
-				int edit = get_edit_distance(junc_seq,fr.h2->soft_right_clip_seqs[0]);
+				//int edit = get_edit_distance(junc_seq,fr.h2->soft_right_clip_seqs[0]);
 
-				//float similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
+				double similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
 
-				//if(similarity > 0.33)
-				if(edit <= floor(soft_len/10))
+				if(similarity > 0.5)
+				//if(edit <= floor(soft_len/10))
 				{
 					//printf("read seq combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h2->soft_right_clip_seqs[i].c_str(),edit);
-					printf("soft right clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, similarity=%d\n",bb.chrm.c_str(),fr.h2->qname.c_str(),fr.h2->pos,fr.h2->soft_right_clip_seqs[0].c_str(),edit);
+					printf("soft right clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, similarity=%lf\n",bb.chrm.c_str(),fr.h2->qname.c_str(),fr.h2->pos,fr.h2->soft_right_clip_seqs[0].c_str(),similarity);
 					printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
 					printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
 					create_fake_supple(k,fr,soft_len,pos1,pos2,soft_clip_side);
