@@ -2074,7 +2074,7 @@ int bundle_bridge::align_fake_hits()
 
 int bundle_bridge::create_fake_fragments()
 {
-	/*for(int k=0; k<fragments.size(); k++)
+	for(int k=0; k<fragments.size(); k++)
 	{
 		fragment &fr = fragments[k];
 
@@ -2124,11 +2124,11 @@ int bundle_bridge::create_fake_fragments()
 				}
 			}
 		}
-	}*/
+	}
 
 	//making above extraction more efficient
 
-	map<string, int> circ_map;
+	/*map<string, int> circ_map;
 	for(int j=0;j<bb.fake_hits.size();j++)
 	{
 		hit &z = bb.fake_hits[j];
@@ -2186,7 +2186,7 @@ int bundle_bridge::create_fake_fragments()
 				circ_fragments.push_back(frag);	
 			}
 		}
-	}
+	}*/
 
 	return 0;
 }
