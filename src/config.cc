@@ -6,8 +6,6 @@ Part of Coral
 Part of Scallop2
 (c) 2021 by  Qimin Zhang, Mingfu Shao, and The Pennsylvania State University.
 See LICENSE for licensing.
-(c) 2023 by Tasfia Zahin, Mingfu Shao, and The Pennsylvania State University.
-See LICENSE for licensing.
 */
 
 #include "config.h"
@@ -24,17 +22,6 @@ using namespace std;
 
 //for circRNA
 int read_length = 100;
-int min_pathscore = 1; //remove paths <= this of higher exists in bridger
-int max_softclip_to_junction_gap = 100000; //discard junction for checking seq match with softclip if > this 
-int min_junction_count = 10; // filter junction
-double min_junction_count_ratio = 0.05; //filter junction
-int max_circ_vsize = 15; //discard circRNA if vsize > this
-int max_exon_length = 2000; //discard circRNA if indivudal exon length > this
-int same_chain_circ_end_diff = 50; //allow this much diff fir merging circRNA with same intron chain
-int alignment_boundary_error = 5; //allow this much error when fixing alignment boundary
-int max_fset_score = 1.5; //bottleneck should be close to number of reads, define close as this
-int min_soft_clip_len = 10; // for new chimeric reads soft_len needs to be greater than this to be considered
-
 
 // for bam file and reads
 int min_flank_length = 3;
