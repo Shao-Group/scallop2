@@ -1245,7 +1245,7 @@ int bundle_bridge::get_more_chimeric()
 					printf("ST-E00299:245:HKTJJALXX:6:2107:30563:57952 soft len=%d, edit=%d, sim==%lf\n",soft_len,edit,similarity);
 				}*/
 				
-				if(similarity > 0.5)
+				if(similarity > 0.6)
 				//if(edit <= floor(soft_len/10))
 				{
 					edit_match = 1;
@@ -1294,7 +1294,7 @@ int bundle_bridge::get_more_chimeric()
 
 				double similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
 				
-				if(similarity > 0.5)
+				if(similarity > 0.6)
 				//if(edit <= floor(soft_len/10))
 				{
 					printf("soft left clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, similarity=%lf\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos,fr.h1->soft_left_clip_seqs[0].c_str(),similarity);
@@ -1357,7 +1357,7 @@ int bundle_bridge::get_more_chimeric()
 
 				double similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
 
-				if(similarity > 0.5)
+				if(similarity > 0.6)
 				//if(edit <= floor(soft_len/10))
 				{
 					edit_match = 1;
@@ -1406,7 +1406,7 @@ int bundle_bridge::get_more_chimeric()
 
 				double similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
 
-				if(similarity > 0.5)
+				if(similarity > 0.6)
 				//if(edit <= floor(soft_len/10))
 				{
 					//printf("read seq combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h2->soft_right_clip_seqs[i].c_str(),edit);
@@ -2409,6 +2409,7 @@ int bundle_bridge::remove_tiny_boundary(hit &h1)
 			vector<int> v(v1.begin(), v1.begin() + n1 - 1);
 			assert(v.size() + 1 == v1.size());
 			h1.vlist = encode_vlist(v);
+			h1.tiny_boundary = abs(h1.rpos-regions[k].lpos);
 			h1.rpos = regions[k].lpos;
 		}
 	}
@@ -2426,6 +2427,7 @@ int bundle_bridge::remove_tiny_boundary(hit &h1)
 			vector<int> v(v2.begin() + 1, v2.end());
 			assert(v.size() + 1 == v2.size());
 			h1.vlist = encode_vlist(v);
+			h1.tiny_boundary = abs(regions[k].rpos-h1.pos);
 			h1.pos = regions[k].rpos;
 		}
 	}

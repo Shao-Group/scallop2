@@ -68,6 +68,7 @@ public:
 	int32_t second_pos;
 	int32_t third_pos;
 	vector<pair<char, int32_t>> cigar_vector; 	//stores all cigars of a hit with length
+	int32_t tiny_boundary;
 
 
 	//vector<uint32_t> cigar_positions;		// stores putative back splice positions

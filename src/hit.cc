@@ -61,6 +61,7 @@ hit::hit()
 	first_pos = 0;						//.H.M. the three dots are the 1st, 2nd, and 3rd pos respectively
 	second_pos = 0;
 	third_pos = 0;
+	tiny_boundary = 0;
 
 	l_qseq = 0;
 	seq = "";
@@ -115,6 +116,7 @@ hit& hit::operator=(const hit &h)
 	is_fake = h.is_fake;
 	fake_hit_index = h.fake_hit_index;
 	soft_clip_side = h.soft_clip_side;
+	tiny_boundary = h.tiny_boundary;
 
 	itvm = h.itvm;
 	itvi = h.itvi;
@@ -169,6 +171,7 @@ hit::hit(const hit &h)
 	fake_hit_index = h.fake_hit_index;
 	soft_clip_side = h.soft_clip_side;
 	suppl = h.suppl;
+	tiny_boundary = h.tiny_boundary;
 
 	itvm = h.itvm;
 	itvi = h.itvi;
@@ -224,6 +227,7 @@ hit::hit(bam1_t *b, int id)
 	first_pos = 0;						//.H.M. the three dots are the 1st, 2nd, and 3rd pos respectively
 	second_pos = 0;
 	third_pos = 0;
+	tiny_boundary = 0;
 
 	cigar_vector.clear();
 	spos.clear();
