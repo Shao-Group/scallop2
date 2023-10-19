@@ -1114,7 +1114,7 @@ int bundle_bridge::get_more_chimeric()
 			}
 
 			//check if soft clip end matches a ref junction
-			int temp_flag = 0;
+			/*int temp_flag = 0;
 			for(int t=0;t<ref_trsts.size();t++)
 			{
 				transcript trst = ref_trsts[t];
@@ -1122,9 +1122,9 @@ int bundle_bridge::get_more_chimeric()
 
 				for(int p=0;p<chain.size();p++)
 				{
-					assert(chain[p].first < chain[p].second);
-					if(chain[p].first <= bb.lpos) continue;
-					if(chain[p].second >= bb.rpos) continue;
+					// assert(chain[p].first < chain[p].second);
+					// if(chain[p].first <= bb.lpos) continue;
+					// if(chain[p].second >= bb.rpos) continue;
 
 					if(chain[p].second == fr.h1->pos)
 					{
@@ -1138,7 +1138,7 @@ int bundle_bridge::get_more_chimeric()
 				{
 					break;
 				}
-			}
+			}*/
 
 			//check if soft clip end matches pexon boundary of ref not given
 			if(ref_file == "")
@@ -1170,7 +1170,7 @@ int bundle_bridge::get_more_chimeric()
 			}
 
 			//check if soft clip end matches a ref junction
-			int temp_flag = 0;
+			/*int temp_flag = 0;
 			for(int t=0;t<ref_trsts.size();t++)
 			{
 				transcript trst = ref_trsts[t];
@@ -1178,9 +1178,9 @@ int bundle_bridge::get_more_chimeric()
 
 				for(int p=0;p<chain.size();p++)
 				{
-					assert(chain[p].first < chain[p].second);
-					if(chain[p].first <= bb.lpos) continue;
-					if(chain[p].second >= bb.rpos) continue;
+					// assert(chain[p].first < chain[p].second);
+					// if(chain[p].first <= bb.lpos) continue;
+					// if(chain[p].second >= bb.rpos) continue;
 
 					if(chain[p].first == fr.h2->rpos)
 					{
@@ -1194,7 +1194,7 @@ int bundle_bridge::get_more_chimeric()
 				{
 					break;
 				}
-			}
+			}*/
 
 			//check if soft clip end matches pexon boundary of ref not given
 			if(ref_file == "")
@@ -1993,8 +1993,8 @@ int bundle_bridge::extend_junctions()
 		{
 			assert(v[k].first < v[k].second);
 			// TODO, TODO
-			if(v[k].first <= bb.lpos) continue;
-			if(v[k].second >= bb.rpos) continue;
+			//if(v[k].first <= bb.lpos) continue;
+			//if(v[k].second >= bb.rpos) continue;
 			int64_t p = pack(v[k].first, v[k].second);
 
 			if(m.find(p) == m.end())
@@ -4078,7 +4078,7 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 			}
 
 			//checking if ref junction matches left boundary
-			int temp_flag = 0;
+			/*int temp_flag = 0;
 			for(int t=0;t<ref_trsts.size();t++)
 			{
 				transcript trst = ref_trsts[t];
@@ -4086,9 +4086,9 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 
 				for(int k=0;k<chain.size();k++)
 				{
-					assert(chain[k].first < chain[k].second);
-					if(chain[k].first <= bb.lpos) continue;
-					if(chain[k].second >= bb.rpos) continue;
+					// assert(chain[k].first < chain[k].second);
+					// if(chain[k].first <= bb.lpos) continue;
+					// if(chain[k].second >= bb.rpos) continue;
 
 					if(chain[k].second == fr1.lpos)
 					//if(chain[k].second <= fr1.lpos+junc_range && chain[k].second >= fr1.lpos-junc_range)
@@ -4104,7 +4104,7 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 				{
 					break;
 				}
-			}
+			}*/
 
 			//checking if pexon matches left boundary when ref file is not given
 			if(ref_file == "")
@@ -4137,7 +4137,7 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 			}
 			
 			//checking if ref junction matches right boundary
-			temp_flag = 0;
+			/*temp_flag = 0;
 			for(int t=0;t<ref_trsts.size();t++)
 			{
 				transcript trst = ref_trsts[t];
@@ -4145,9 +4145,9 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 
 				for(int k=0;k<chain.size();k++)
 				{
-					assert(chain[k].first < chain[k].second);
-					if(chain[k].first <= bb.lpos) continue;
-					if(chain[k].second >= bb.rpos) continue;
+					// assert(chain[k].first < chain[k].second);
+					// if(chain[k].first <= bb.lpos) continue;
+					// if(chain[k].second >= bb.rpos) continue;
 
 					if(chain[k].first == fr2.rpos)
 					//if(chain[k].first <= fr2.rpos+junc_range && chain[k].first >= fr2.rpos-junc_range)
@@ -4163,7 +4163,7 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 				{
 					break;
 				}
-			}
+			}*/
 		
 			//checking if pexon matches right boundary when ref file is not given
 			if(ref_file == "")
@@ -4209,7 +4209,7 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 			}
 
 			//checking if ref junction matches left boundary
-			int temp_flag = 0;
+			/*int temp_flag = 0;
 			for(int t=0;t<ref_trsts.size();t++)
 			{
 				transcript trst = ref_trsts[t];
@@ -4217,9 +4217,9 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 
 				for(int k=0;k<chain.size();k++)
 				{
-					assert(chain[k].first < chain[k].second);
-					if(chain[k].first <= bb.lpos) continue;
-					if(chain[k].second >= bb.rpos) continue;
+					// assert(chain[k].first < chain[k].second);
+					// if(chain[k].first <= bb.lpos) continue;
+					// if(chain[k].second >= bb.rpos) continue;
 
 					if(chain[k].second == fr2.lpos)
 					//if(chain[k].second <= fr2.lpos+junc_range && chain[k].second >= fr2.lpos-junc_range)
@@ -4235,7 +4235,7 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 				{
 					break;
 				}
-			}
+			}*/
 
 			//checking if pexon matches left boundary
 			if(ref_file == "")
@@ -4268,7 +4268,7 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 			}
 
 			//checking if ref junction matches right boundary
-			temp_flag = 0;
+			/*temp_flag = 0;
 			for(int t=0;t<ref_trsts.size();t++)
 			{
 				transcript trst = ref_trsts[t];
@@ -4276,9 +4276,9 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 
 				for(int k=0;k<chain.size();k++)
 				{
-					assert(chain[k].first < chain[k].second);
-					if(chain[k].first <= bb.lpos) continue;
-					if(chain[k].second >= bb.rpos) continue;
+					// assert(chain[k].first < chain[k].second);
+					// if(chain[k].first <= bb.lpos) continue;
+					// if(chain[k].second >= bb.rpos) continue;
 
 					if(chain[k].first == fr1.rpos)
 					//if(chain[k].first <= fr1.rpos+junc_range && chain[k].first >= fr1.rpos-junc_range)
@@ -4294,7 +4294,7 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 				{
 					break;
 				}
-			}
+			}*/
 
 			//checking if pexon matches right boundary
 			if(ref_file == "")
