@@ -370,12 +370,6 @@ int assembler::remove_duplicate_circ_trsts()
 		map<string, pair<circular_transcript, int>>::iterator itn1;
 		for(itn1 = circ_trst_merged_map.begin(); itn1 != circ_trst_merged_map.end(); itn1++)
 		{
-			//don't merge RO circRNAs for now
-			/*if(circ.source == "scallop2_RO")
-			{	
-				break;
-			}*/
-
 			circular_transcript &old_circ = itn1->second.first;
 			string old_hash = itn1->first;
 
@@ -414,7 +408,7 @@ int assembler::remove_duplicate_circ_trsts()
 	}
 
 	//merge circRNAs that have different end boundaries but same intron chain into that with higher coverage (reverse overlap)
-	for(itn = circ_trst_map.begin(); itn != circ_trst_map.end(); itn++)
+	/*for(itn = circ_trst_map.begin(); itn != circ_trst_map.end(); itn++)
 	{
 		//printf("start of check\n");
 		circular_transcript &circ = itn->second.first;
@@ -435,12 +429,6 @@ int assembler::remove_duplicate_circ_trsts()
 		map<string, pair<circular_transcript, int>>::iterator itn1;
 		for(itn1 = circ_trst_merged_map.begin(); itn1 != circ_trst_merged_map.end(); itn1++)
 		{
-			//don't merge RO circRNAs for now
-			/*if(circ.source == "scallop2_RO")
-			{	
-				break;
-			}*/
-
 			circular_transcript &old_circ = itn1->second.first;
 			string old_hash = itn1->first;
 
@@ -476,10 +464,10 @@ int assembler::remove_duplicate_circ_trsts()
 		{
 			circ_trst_merged_map.insert(pair<string,pair<circular_transcript, int>>(circ.circRNA_id,pair<circular_transcript, int>(circ,circ.coverage)));
 		}
-	}
+	}*/
 
 	//merge circRNAs that have different end boundaries but same intron chain into that with higher coverage (HS frag circRNAs)
-	for(itn = circ_trst_map.begin(); itn != circ_trst_map.end(); itn++)
+	/*for(itn = circ_trst_map.begin(); itn != circ_trst_map.end(); itn++)
 	{
 		//printf("start of check\n");
 		circular_transcript &circ = itn->second.first;
@@ -500,12 +488,6 @@ int assembler::remove_duplicate_circ_trsts()
 		map<string, pair<circular_transcript, int>>::iterator itn1;
 		for(itn1 = circ_trst_merged_map.begin(); itn1 != circ_trst_merged_map.end(); itn1++)
 		{
-			//don't merge RO circRNAs for now
-			/*if(circ.source == "scallop2_RO")
-			{	
-				break;
-			}*/
-
 			circular_transcript &old_circ = itn1->second.first;
 			string old_hash = itn1->first;
 
@@ -541,7 +523,7 @@ int assembler::remove_duplicate_circ_trsts()
 		{
 			circ_trst_merged_map.insert(pair<string,pair<circular_transcript, int>>(circ.circRNA_id,pair<circular_transcript, int>(circ,circ.coverage)));
 		}
-	}
+	}*/
 
 
 	//merge circRNAs that have different end boundaries but same intron chain into that with higher coverage (more chimeric)
@@ -566,12 +548,6 @@ int assembler::remove_duplicate_circ_trsts()
 		map<string, pair<circular_transcript, int>>::iterator itn1;
 		for(itn1 = circ_trst_merged_map.begin(); itn1 != circ_trst_merged_map.end(); itn1++)
 		{
-			//don't merge RO circRNAs for now
-			/*if(circ.source == "scallop2_RO")
-			{	
-				break;
-			}*/
-
 			circular_transcript &old_circ = itn1->second.first;
 			string old_hash = itn1->first;
 

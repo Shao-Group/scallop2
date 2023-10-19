@@ -954,6 +954,7 @@ bool bundle_bridge::are_strings_similar(int kmer_length, map<string,int> kmer_ma
 int bundle_bridge::get_more_chimeric()
 {
 	int max_read_to_junction_gap = 100000;
+	int min_soft_clip_len = 15;
 
 	map<string, pair<int32_t, int32_t>> left_soft; //key:pos and seq, val junc pos pair
 	map<string, pair<int32_t, int32_t>> right_soft;
@@ -975,10 +976,10 @@ int bundle_bridge::get_more_chimeric()
 		if((fr.h1->flag & 0x800) >= 1 || (fr.h2->flag & 0x800) >= 1) continue;
 
 		//is a RO frag
-		if(fr.h1->is_reverse_overlap == true || fr.h2->is_reverse_overlap == true)
+		/*if(fr.h1->is_reverse_overlap == true || fr.h2->is_reverse_overlap == true)
 		{
 			continue;
-		}
+		}*/
 
 		//if h2 pos is to the left of h1 pos
 		if(fr.h1->pos > fr.h2->pos) continue;
@@ -1006,7 +1007,7 @@ int bundle_bridge::get_more_chimeric()
 			else if(left_len < right_len) soft_clip_side = 2;
 			else //if both side len same, skip for now
 			{
-				if(left_len >= 10)
+				if(left_len >= min_soft_clip_len)
 				{
 					printf("both side soft clips same length in new chimeric, chrm=%s, fr.qname=%s, fr.h1.pos=%d\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos);
 				}
@@ -1014,9 +1015,9 @@ int bundle_bridge::get_more_chimeric()
 			}
 		}
 
-		//discard if soft len < 10
-		if(soft_clip_side == 1 && fr.h1->cigar_vector[0].second < 10) continue;
-		if(soft_clip_side == 2 && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second < 10) continue;
+		//discard if soft len < min_soft_clip_len
+		if(soft_clip_side == 1 && fr.h1->cigar_vector[0].second < min_soft_clip_len) continue;
+		if(soft_clip_side == 2 && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second < min_soft_clip_len) continue;
 
 		bool exists = false;
 
