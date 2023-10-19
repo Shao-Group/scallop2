@@ -1122,9 +1122,9 @@ int bundle_bridge::get_more_chimeric()
 
 				for(int p=0;p<chain.size();p++)
 				{
-					assert(chain[k].first < chain[k].second);
-					if(chain[k].first <= bb.lpos) continue;
-					if(chain[k].second >= bb.rpos) continue;
+					// assert(chain[k].first < chain[k].second);
+					// if(chain[k].first <= bb.lpos) continue;
+					// if(chain[k].second >= bb.rpos) continue;
 
 					if(chain[p].second == fr.h1->pos)
 					{
@@ -1178,9 +1178,9 @@ int bundle_bridge::get_more_chimeric()
 
 				for(int p=0;p<chain.size();p++)
 				{
-					assert(chain[k].first < chain[k].second);
-					if(chain[k].first <= bb.lpos) continue;
-					if(chain[k].second >= bb.rpos) continue;
+					// assert(chain[k].first < chain[k].second);
+					// if(chain[k].first <= bb.lpos) continue;
+					// if(chain[k].second >= bb.rpos) continue;
 
 					if(chain[p].first == fr.h2->rpos)
 					{
@@ -4086,9 +4086,9 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 
 				for(int k=0;k<chain.size();k++)
 				{
-					assert(chain[k].first < chain[k].second);
-					if(chain[k].first <= bb.lpos) continue;
-					if(chain[k].second >= bb.rpos) continue;
+					// assert(chain[k].first < chain[k].second);
+					// if(chain[k].first <= bb.lpos) continue;
+					// if(chain[k].second >= bb.rpos) continue;
 
 					if(chain[k].second == fr1.lpos)
 					//if(chain[k].second <= fr1.lpos+junc_range && chain[k].second >= fr1.lpos-junc_range)
@@ -4145,9 +4145,9 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 
 				for(int k=0;k<chain.size();k++)
 				{
-					assert(chain[k].first < chain[k].second);
-					if(chain[k].first <= bb.lpos) continue;
-					if(chain[k].second >= bb.rpos) continue;
+					// assert(chain[k].first < chain[k].second);
+					// if(chain[k].first <= bb.lpos) continue;
+					// if(chain[k].second >= bb.rpos) continue;
 
 					if(chain[k].first == fr2.rpos)
 					//if(chain[k].first <= fr2.rpos+junc_range && chain[k].first >= fr2.rpos-junc_range)
@@ -4217,9 +4217,9 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 
 				for(int k=0;k<chain.size();k++)
 				{
-					assert(chain[k].first < chain[k].second);
-					if(chain[k].first <= bb.lpos) continue;
-					if(chain[k].second >= bb.rpos) continue;
+					// assert(chain[k].first < chain[k].second);
+					// if(chain[k].first <= bb.lpos) continue;
+					// if(chain[k].second >= bb.rpos) continue;
 
 					if(chain[k].second == fr2.lpos)
 					//if(chain[k].second <= fr2.lpos+junc_range && chain[k].second >= fr2.lpos-junc_range)
@@ -4276,9 +4276,9 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 
 				for(int k=0;k<chain.size();k++)
 				{
-					assert(chain[k].first < chain[k].second);
-					if(chain[k].first <= bb.lpos) continue;
-					if(chain[k].second >= bb.rpos) continue;
+					// assert(chain[k].first < chain[k].second);
+					// if(chain[k].first <= bb.lpos) continue;
+					// if(chain[k].second >= bb.rpos) continue;
 
 					if(chain[k].first == fr1.rpos)
 					//if(chain[k].first <= fr1.rpos+junc_range && chain[k].first >= fr1.rpos-junc_range)
