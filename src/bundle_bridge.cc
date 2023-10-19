@@ -122,7 +122,7 @@ int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 	//get_frags_with_HS_on_both_sides();
 
 	//create circ fragments from RO reads with H/S on both sides uisng ciri-full
-	get_RO_frags_with_HS();
+	//get_RO_frags_with_HS();
 
 	//create circ fragments from frags with H/S on both sides using our data instead of ciri-full
 	//get_frags_with_HS_from_data();
@@ -146,8 +146,8 @@ int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 	bdg.bridge_normal_fragments();
 	bdg.bridge_circ_fragments();
 
-	extract_RO_circRNA();
-	extract_HS_frags_circRNA();
+	//extract_RO_circRNA();
+	//extract_HS_frags_circRNA();
 
 	extract_circ_fragment_pairs();
 	//print_circ_fragment_pairs();
@@ -1023,10 +1023,26 @@ int bundle_bridge::get_more_chimeric()
 		//check if already exists in left_soft
 		if(soft_clip_side == 1)
 		{
-			int32_t soft_len = fr.h1->cigar_vector[0].second;
-
+			int32_t soft_len = fr.h1->cigar_vector[0].second + fr.h1->tiny_boundary;
 			assert(fr.h1->soft_left_clip_seqs.size() > 0);
-			string s = fr.h1->soft_left_clip_seqs[0];
+
+			//extract tiny seq
+			string tiny = "";
+			for(int i=fr.h1->cigar_vector[0].second; i<soft_len;i++)
+			{
+				if(i<0 || i>fr.h1->seq.size()-1)
+				{
+					tiny = "";
+					soft_len = fr.h1->cigar_vector[0].second;
+					break;
+				}
+				tiny = tiny + fr.h1->seq[i];
+			}
+
+			string s = fr.h1->soft_left_clip_seqs[0] + tiny;
+			printf("soft_len:%d\n",soft_len);
+			printf("tiny:%s\n clip:%s, s=%s \n seq=%s\n",tiny.c_str(),fr.h1->soft_left_clip_seqs[0].c_str(),s.c_str(),fr.h1->seq.c_str());
+
 			string hash = to_string(fr.h1->pos) + "|" + s;
 			if(left_soft.find(hash) != left_soft.end())
 			{
@@ -1042,10 +1058,26 @@ int bundle_bridge::get_more_chimeric()
 		//check if already exists in right_soft
 		else if(soft_clip_side == 2)
 		{
-			int32_t soft_len = fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second;
-			
+			int32_t soft_len = fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second + fr.h2->tiny_boundary;
 			assert(fr.h2->soft_right_clip_seqs.size() > 0);
-			string s = fr.h2->soft_right_clip_seqs[0];
+
+			//extract tiny seq
+			string tiny = "";
+			for(int i=fr.h2->seq.size()-soft_len; i<fr.h2->seq.size()-fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second;i++)
+			{
+				if(i<0 || i>fr.h2->seq.size()-1)
+				{
+					tiny = "";
+					soft_len = fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second;
+					break;
+				}
+				tiny = tiny + fr.h2->seq[i];
+			}
+
+			string s = tiny + fr.h2->soft_right_clip_seqs[0];
+			printf("soft_len:%d\n",soft_len);
+			printf("tiny:%s\n clip:%s, s=%s \n seq=%s\n",tiny.c_str(),fr.h2->soft_right_clip_seqs[0].c_str(),s.c_str(),fr.h2->seq.c_str());
+
 			string hash = to_string(fr.h2->rpos) + "|" + s;
 			if(right_soft.find(hash) != right_soft.end())
 			{
@@ -1090,6 +1122,10 @@ int bundle_bridge::get_more_chimeric()
 
 				for(int p=0;p<chain.size();p++)
 				{
+					assert(chain[k].first < chain[k].second);
+					if(chain[k].first <= bb.lpos) continue;
+					if(chain[k].second >= bb.rpos) continue;
+
 					if(chain[p].second == fr.h1->pos)
 					{
 						left_boundary_match = 1;
@@ -1142,6 +1178,10 @@ int bundle_bridge::get_more_chimeric()
 
 				for(int p=0;p<chain.size();p++)
 				{
+					assert(chain[k].first < chain[k].second);
+					if(chain[k].first <= bb.lpos) continue;
+					if(chain[k].second >= bb.rpos) continue;
+
 					if(chain[p].first == fr.h2->rpos)
 					{
 						right_boundary_match = 1;
@@ -1175,17 +1215,45 @@ int bundle_bridge::get_more_chimeric()
 
 		if(soft_clip_side == 1 && left_boundary_match == 0) //add to map that this frag left soft clip is invalid
 		{
-			int32_t soft_len = fr.h1->cigar_vector[0].second;
+			int32_t soft_len = fr.h1->cigar_vector[0].second + fr.h1->tiny_boundary;
 			assert(fr.h1->soft_left_clip_seqs.size() > 0);
-			string s = fr.h1->soft_left_clip_seqs[0];
+
+			//extract tiny seq
+			string tiny = "";
+			for(int i=fr.h1->cigar_vector[0].second; i<soft_len;i++)
+			{
+				if(i<0 || i>fr.h1->seq.size()-1)
+				{
+					tiny = "";
+					soft_len = fr.h1->cigar_vector[0].second;
+					break;
+				}
+				tiny = tiny + fr.h1->seq[i];
+			}
+
+			string s = fr.h1->soft_left_clip_seqs[0] + tiny;
 			string hash = to_string(fr.h1->pos) + "|" + s;
 			left_soft[hash] = pair<int32_t,int32_t> (-1,-1);
 		}
 		else if(soft_clip_side == 2 && right_boundary_match == 0) //add to map that this frag right soft clip is invalid
 		{
-			int32_t soft_len = fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second;
+			int32_t soft_len = fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second + fr.h2->tiny_boundary;
 			assert(fr.h2->soft_right_clip_seqs.size() > 0);
-			string s = fr.h2->soft_right_clip_seqs[0];
+
+			//extract tiny seq
+			string tiny = "";
+			for(int i=fr.h2->seq.size()-soft_len; i<fr.h2->seq.size()-fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second;i++)
+			{
+				if(i<0 || i>fr.h2->seq.size()-1)
+				{
+					tiny = "";
+					soft_len = fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second;
+					break;
+				}
+				tiny = tiny + fr.h2->seq[i];
+			}
+
+			string s = tiny + fr.h2->soft_right_clip_seqs[0];
 			string hash = to_string(fr.h2->rpos) + "|" + s;
 			right_soft[hash] = pair<int32_t,int32_t> (-1,-1);
 		}
@@ -1193,7 +1261,7 @@ int bundle_bridge::get_more_chimeric()
 		//printf("more chimeric instances:\n");
 		if(soft_clip_side == 1  && left_boundary_match == 1)
 		{
-			int32_t soft_len = fr.h1->cigar_vector[0].second;
+			int32_t soft_len = fr.h1->cigar_vector[0].second + fr.h1->tiny_boundary;
 
 			//create a hash map for the kmers in soft clip region and pass that for similarity testing
 			int kmer_length = 10;
@@ -1201,7 +1269,24 @@ int bundle_bridge::get_more_chimeric()
 			kmer_map.clear();
 
 			assert(fr.h1->soft_left_clip_seqs.size() > 0);
-			string s = fr.h1->soft_left_clip_seqs[0];
+
+			//extract tiny seq
+			string tiny = "";
+			for(int i=fr.h1->cigar_vector[0].second; i<soft_len;i++)
+			{
+				if(i<0 || i>fr.h1->seq.size()-1)
+				{
+					tiny = "";
+					soft_len = fr.h1->cigar_vector[0].second;
+					break;
+				}
+				tiny = tiny + fr.h1->seq[i];
+			}
+
+			string s = fr.h1->soft_left_clip_seqs[0] + tiny;
+			printf("soft_len:%d\n",soft_len);
+			printf("tiny:%s\n clip:%s, s=%s \n seq=%s\n",tiny.c_str(),fr.h1->soft_left_clip_seqs[0].c_str(),s.c_str(),fr.h1->seq.c_str());
+
 			string hash = to_string(fr.h1->pos) + "|" + s;
 
 			for(int i=0;i<=s.size()-kmer_length;i++)
@@ -1232,7 +1317,7 @@ int bundle_bridge::get_more_chimeric()
 
 				int edit_match = 0;
 
-				assert(junc_seq.size() == fr.h1->soft_left_clip_seqs[0].size());
+				assert(junc_seq.size() == s.size());
 
 				//bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
 				//if(is_similar == false) continue;
@@ -1285,7 +1370,7 @@ int bundle_bridge::get_more_chimeric()
 
 				string junc_seq = get_fasta_seq(pos1,pos2);
 
-				assert(junc_seq.size() == fr.h1->soft_left_clip_seqs[0].size());
+				assert(junc_seq.size() == s.size());
 
 				//bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
 				//if(is_similar == false) continue;
@@ -1297,7 +1382,7 @@ int bundle_bridge::get_more_chimeric()
 				if(similarity > 0.6)
 				//if(edit <= floor(soft_len/10))
 				{
-					printf("soft left clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, similarity=%lf\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos,fr.h1->soft_left_clip_seqs[0].c_str(),similarity);
+					printf("soft left clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, similarity=%lf\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos,s.c_str(),similarity);
 					printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
 					printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
 					create_fake_supple(k,fr,soft_len,pos1,pos2,soft_clip_side);
@@ -1309,7 +1394,7 @@ int bundle_bridge::get_more_chimeric()
 		}
 		else if(soft_clip_side == 2 && right_boundary_match == 1)
 		{
-			int32_t soft_len = fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second;
+			int32_t soft_len = fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second + fr.h2->tiny_boundary;
 
 			//create a hash map for the kmers in soft clip region and pass that for similarity testing
 			int kmer_length = 10;
@@ -1317,7 +1402,24 @@ int bundle_bridge::get_more_chimeric()
 			kmer_map.clear();
 
 			assert(fr.h2->soft_right_clip_seqs.size() > 0);
-			string s = fr.h2->soft_right_clip_seqs[0];
+
+			//extract tiny seq
+			string tiny = "";
+			for(int i=fr.h2->seq.size()-soft_len; i<fr.h2->seq.size()-fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second;i++)
+			{
+				if(i<0 || i>fr.h2->seq.size()-1)
+				{
+					tiny = "";
+					soft_len = fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second;
+					break;
+				}
+				tiny = tiny + fr.h2->seq[i];
+			}
+
+			string s = tiny + fr.h2->soft_right_clip_seqs[0];
+			printf("soft_len:%d\n",soft_len);
+			printf("tiny:%s\n clip:%s, s=%s \n seq=%s\n",tiny.c_str(),fr.h2->soft_right_clip_seqs[0].c_str(),s.c_str(),fr.h2->seq.c_str());
+
 			string hash = to_string(fr.h2->rpos) + "|" + s;
 
 			for(int i=0;i<=s.size()-kmer_length;i++)
@@ -1348,7 +1450,7 @@ int bundle_bridge::get_more_chimeric()
 
 				int edit_match = 0;
 
-				assert(junc_seq.size() == fr.h2->soft_right_clip_seqs[0].size());
+				assert(junc_seq.size() == s.size());
 
 				//bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
 				//if(is_similar == false) continue;
@@ -1397,7 +1499,7 @@ int bundle_bridge::get_more_chimeric()
 
 				string junc_seq = get_fasta_seq(pos1,pos2);
 
-				assert(junc_seq.size() == fr.h2->soft_right_clip_seqs[0].size());
+				assert(junc_seq.size() == s.size());
 
 				//bool is_similar = are_strings_similar(kmer_length,kmer_map,junc_seq);
 				//if(is_similar == false) continue;
@@ -1410,7 +1512,7 @@ int bundle_bridge::get_more_chimeric()
 				//if(edit <= floor(soft_len/10))
 				{
 					//printf("read seq combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h2->soft_right_clip_seqs[i].c_str(),edit);
-					printf("soft right clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, similarity=%lf\n",bb.chrm.c_str(),fr.h2->qname.c_str(),fr.h2->pos,fr.h2->soft_right_clip_seqs[0].c_str(),similarity);
+					printf("soft right clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, similarity=%lf\n",bb.chrm.c_str(),fr.h2->qname.c_str(),fr.h2->pos,s.c_str(),similarity);
 					printf("junction lpos = %d, rpos = %d\n",jc.lpos,jc.rpos);
 					printf("junc seq pos1=%d, pos2=%d, junc_seqlen = %lu, junc_seq=%s\n",pos1,pos2,junc_seq.size(),junc_seq.c_str());
 					create_fake_supple(k,fr,soft_len,pos1,pos2,soft_clip_side);
@@ -3984,11 +4086,10 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 
 				for(int k=0;k<chain.size();k++)
 				{
-					// assert(chain[k].first < chain[k].second);
-					// if(chain[k].first <= bb.lpos) continue;
-					// if(chain[k].second >= bb.rpos) continue;
+					assert(chain[k].first < chain[k].second);
+					if(chain[k].first <= bb.lpos) continue;
+					if(chain[k].second >= bb.rpos) continue;
 
-					
 					if(chain[k].second == fr1.lpos)
 					//if(chain[k].second <= fr1.lpos+junc_range && chain[k].second >= fr1.lpos-junc_range)
 					{
@@ -4044,9 +4145,9 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 
 				for(int k=0;k<chain.size();k++)
 				{
-					// assert(chain[k].first < chain[k].second);
-					// if(chain[k].first <= bb.lpos) continue;
-					// if(chain[k].second >= bb.rpos) continue;
+					assert(chain[k].first < chain[k].second);
+					if(chain[k].first <= bb.lpos) continue;
+					if(chain[k].second >= bb.rpos) continue;
 
 					if(chain[k].first == fr2.rpos)
 					//if(chain[k].first <= fr2.rpos+junc_range && chain[k].first >= fr2.rpos-junc_range)
@@ -4116,9 +4217,9 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 
 				for(int k=0;k<chain.size();k++)
 				{
-					// assert(chain[k].first < chain[k].second);
-					// if(chain[k].first <= bb.lpos) continue;
-					// if(chain[k].second >= bb.rpos) continue;
+					assert(chain[k].first < chain[k].second);
+					if(chain[k].first <= bb.lpos) continue;
+					if(chain[k].second >= bb.rpos) continue;
 
 					if(chain[k].second == fr2.lpos)
 					//if(chain[k].second <= fr2.lpos+junc_range && chain[k].second >= fr2.lpos-junc_range)
@@ -4175,9 +4276,9 @@ int bundle_bridge::join_circ_fragment_pairs(int32_t length_high)
 
 				for(int k=0;k<chain.size();k++)
 				{
-					// assert(chain[k].first < chain[k].second);
-					// if(chain[k].first <= bb.lpos) continue;
-					// if(chain[k].second >= bb.rpos) continue;
+					assert(chain[k].first < chain[k].second);
+					if(chain[k].first <= bb.lpos) continue;
+					if(chain[k].second >= bb.rpos) continue;
 
 					if(chain[k].first == fr1.rpos)
 					//if(chain[k].first <= fr1.rpos+junc_range && chain[k].first >= fr1.rpos-junc_range)
