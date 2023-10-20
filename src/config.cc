@@ -34,7 +34,7 @@ int max_exon_length = 2000; //discard circRNA if indivudal exon length > this
 int same_chain_circ_end_diff = 50; //allow this much diff for merging circRNA with same intron chain
 int alignment_boundary_error = 5; //allow this much error when fixing alignment boundary
 double max_fset_score = 1.5; //bottleneck should be close to number of reads, define close as this
-int min_soft_clip_len = 15; // for new chimeric reads soft_len needs to be greater than this to be considered
+int min_soft_clip_len = 10; // for new chimeric reads soft_len needs to be greater than this to be considered
 
 // for bam file and reads
 int min_flank_length = 3;

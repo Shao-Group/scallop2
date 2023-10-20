@@ -1039,8 +1039,8 @@ int bundle_bridge::get_more_chimeric()
 			}
 
 			string s = fr.h1->soft_left_clip_seqs[0] + tiny;
-			printf("soft_len:%d\n",soft_len);
-			printf("tiny:%s\n clip:%s, s=%s \n seq=%s\n",tiny.c_str(),fr.h1->soft_left_clip_seqs[0].c_str(),s.c_str(),fr.h1->seq.c_str());
+			//printf("soft_len:%d\n",soft_len);
+			//printf("tiny:%s\n clip:%s, s=%s \n seq=%s\n",tiny.c_str(),fr.h1->soft_left_clip_seqs[0].c_str(),s.c_str(),fr.h1->seq.c_str());
 
 			string hash = to_string(fr.h1->pos) + "|" + s;
 			if(left_soft.find(hash) != left_soft.end())
@@ -1074,8 +1074,8 @@ int bundle_bridge::get_more_chimeric()
 			}
 
 			string s = tiny + fr.h2->soft_right_clip_seqs[0];
-			printf("soft_len:%d\n",soft_len);
-			printf("tiny:%s\n clip:%s, s=%s \n seq=%s\n",tiny.c_str(),fr.h2->soft_right_clip_seqs[0].c_str(),s.c_str(),fr.h2->seq.c_str());
+			//printf("soft_len:%d\n",soft_len);
+			//printf("tiny:%s\n clip:%s, s=%s \n seq=%s\n",tiny.c_str(),fr.h2->soft_right_clip_seqs[0].c_str(),s.c_str(),fr.h2->seq.c_str());
 
 			string hash = to_string(fr.h2->rpos) + "|" + s;
 			if(right_soft.find(hash) != right_soft.end())
@@ -1261,6 +1261,8 @@ int bundle_bridge::get_more_chimeric()
 		if(soft_clip_side == 1  && left_boundary_match == 1)
 		{
 			int32_t soft_len = fr.h1->cigar_vector[0].second + fr.h1->tiny_boundary;
+			double jaccard_threshold = max(exp(1-((double)soft_len)/(double)min_soft_clip_len),0.4);
+			printf("soft_len:%d, jaccard_threshold=%lf\n",soft_len,jaccard_threshold);
 
 			//create a hash map for the kmers in soft clip region and pass that for similarity testing
 			int kmer_length = 10;
@@ -1283,8 +1285,7 @@ int bundle_bridge::get_more_chimeric()
 			}
 
 			string s = fr.h1->soft_left_clip_seqs[0] + tiny;
-			printf("soft_len:%d\n",soft_len);
-			printf("tiny:%s\n clip:%s, s=%s \n seq=%s\n",tiny.c_str(),fr.h1->soft_left_clip_seqs[0].c_str(),s.c_str(),fr.h1->seq.c_str());
+			//printf("tiny:%s\n clip:%s, s=%s \n seq=%s\n",tiny.c_str(),fr.h1->soft_left_clip_seqs[0].c_str(),s.c_str(),fr.h1->seq.c_str());
 
 			string hash = to_string(fr.h1->pos) + "|" + s;
 
@@ -1329,7 +1330,7 @@ int bundle_bridge::get_more_chimeric()
 					printf("ST-E00299:245:HKTJJALXX:6:2107:30563:57952 soft len=%d, edit=%d, sim==%lf\n",soft_len,edit,similarity);
 				}*/
 				
-				if(similarity > 0.6)
+				if(similarity > jaccard_threshold)
 				//if(edit <= floor(soft_len/10))
 				{
 					edit_match = 1;
@@ -1378,7 +1379,7 @@ int bundle_bridge::get_more_chimeric()
 
 				double similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
 				
-				if(similarity > 0.6)
+				if(similarity > jaccard_threshold)
 				//if(edit <= floor(soft_len/10))
 				{
 					printf("soft left clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, similarity=%lf\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos,s.c_str(),similarity);
@@ -1394,6 +1395,8 @@ int bundle_bridge::get_more_chimeric()
 		else if(soft_clip_side == 2 && right_boundary_match == 1)
 		{
 			int32_t soft_len = fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second + fr.h2->tiny_boundary;
+			double jaccard_threshold = max(exp(1-((double)soft_len)/(double)min_soft_clip_len),0.4);
+			printf("soft_len:%d, jaccard_threshold=%lf\n",soft_len,jaccard_threshold);
 
 			//create a hash map for the kmers in soft clip region and pass that for similarity testing
 			int kmer_length = 10;
@@ -1416,8 +1419,7 @@ int bundle_bridge::get_more_chimeric()
 			}
 
 			string s = tiny + fr.h2->soft_right_clip_seqs[0];
-			printf("soft_len:%d\n",soft_len);
-			printf("tiny:%s\n clip:%s, s=%s \n seq=%s\n",tiny.c_str(),fr.h2->soft_right_clip_seqs[0].c_str(),s.c_str(),fr.h2->seq.c_str());
+			//printf("tiny:%s\n clip:%s, s=%s \n seq=%s\n",tiny.c_str(),fr.h2->soft_right_clip_seqs[0].c_str(),s.c_str(),fr.h2->seq.c_str());
 
 			string hash = to_string(fr.h2->rpos) + "|" + s;
 
@@ -1458,7 +1460,7 @@ int bundle_bridge::get_more_chimeric()
 
 				double similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
 
-				if(similarity > 0.6)
+				if(similarity > jaccard_threshold)
 				//if(edit <= floor(soft_len/10))
 				{
 					edit_match = 1;
@@ -1507,7 +1509,7 @@ int bundle_bridge::get_more_chimeric()
 
 				double similarity = get_Jaccard(kmer_length,kmer_map,junc_seq);
 
-				if(similarity > 0.6)
+				if(similarity > jaccard_threshold)
 				//if(edit <= floor(soft_len/10))
 				{
 					//printf("read seq combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h2->soft_right_clip_seqs[i].c_str(),edit);
