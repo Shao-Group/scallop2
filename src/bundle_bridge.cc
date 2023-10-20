@@ -998,8 +998,8 @@ int bundle_bridge::get_more_chimeric()
 		}
 		else if(fr.h1->cigar_vector[0].first == 'S' && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].first == 'S')
 		{
-			int32_t left_len = fr.h1->cigar_vector[0].second;
-			int32_t right_len = fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second;
+			int32_t left_len = fr.h1->cigar_vector[0].second + fr.h1->tiny_boundary;
+			int32_t right_len = fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second + fr.h2->tiny_boundary;
 
 			if(left_len > right_len) soft_clip_side = 1;
 			else if(left_len < right_len) soft_clip_side = 2;
@@ -1014,8 +1014,8 @@ int bundle_bridge::get_more_chimeric()
 		}
 
 		//discard if soft len < min_soft_clip_len
-		if(soft_clip_side == 1 && fr.h1->cigar_vector[0].second < min_soft_clip_len) continue;
-		if(soft_clip_side == 2 && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second < min_soft_clip_len) continue;
+		if(soft_clip_side == 1 && fr.h1->cigar_vector[0].second + fr.h1->tiny_boundary < min_soft_clip_len) continue;
+		if(soft_clip_side == 2 && fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second + fr.h2->tiny_boundary < min_soft_clip_len) continue;
 
 		bool exists = false;
 
