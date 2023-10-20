@@ -995,7 +995,7 @@ int bridger::bridge_hard_fragments_circ(vector<fcluster> &open)
 					//printf("FSET-SCORE: fset %lu, score %.1lf, read %s, lpos = %d/%d, length %d\n",fc.fset.size(), p.score, fr->h1->qname.c_str(), fr->h1->pos, fr->h2->pos, p.length);
 
 					double fset_score = log(1 + fc.fset.size()) - log(1 + p.score);
-					if(fset_score > 1.5) continue;
+					if(fset_score > max_fset_score) continue;
 
 					if(p.length >= length_low && p.length <= length_high)
 					{
@@ -2061,7 +2061,7 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 			}
 		}
 
-		//remove paths with score <= 1 if there exists higher score paths
+		//remove paths with score <= min_pathscore(1) if there exists higher score paths
 		vector<path> selected_paths;
 		selected_paths.clear();
 		remove_list.clear();
@@ -2071,7 +2071,7 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 		for(int i=0;i<primary_selected_paths.size();i++)
 		{
 			path p = primary_selected_paths[i];
-			if((p.type == 3 || p.type == 4) && p.score > 1) has_higher_score = true;
+			if((p.type == 3 || p.type == 4) && p.score > min_pathscore) has_higher_score = true;
 			break;
 		}
 
@@ -2080,7 +2080,7 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 			for(int i=0;i<primary_selected_paths.size();i++)
 			{
 				path p = primary_selected_paths[i];
-				if((p.type == 3 || p.type == 4) && p.score <= 1) remove_list.push_back(p);
+				if((p.type == 3 || p.type == 4) && p.score <= min_pathscore) remove_list.push_back(p);
 			}
 		}
 
