@@ -1,5 +1,4 @@
 /*
-Part of Scallop Transcript Assembler
 (c) 2023 by Tasfia Zahin, Mingfu Shao, and The Pennsylvania State University.
 See LICENSE for licensing.
 */
