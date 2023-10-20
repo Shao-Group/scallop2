@@ -2,6 +2,8 @@
 Part of Scallop Transcript Assembler
 (c) 2017 by Mingfu Shao, Carl Kingsford, and Carnegie Mellon University.
 See LICENSE for licensing.
+(c) 2023 by Tasfia Zahin, Mingfu Shao, and The Pennsylvania State University.
+See LICENSE for licensing.
 */
 
 #ifndef __BRIDGE_H__
