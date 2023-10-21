@@ -297,18 +297,29 @@ int assembler::remove_long_exon_circ_trsts()
 {
 	for(int i=0;i<circular_trsts.size();i++)
 	{	
-		printf("Printing long exon circRNAs removed:\n");
 		circular_transcript circ = circular_trsts[i];
 		int long_flag = 0;
 		
-		//if(circ.merged_regions.size() > 1) //check only for multi exons
-
-		for(int j=0;j<circ.merged_regions.size();j++)
+		if(circ.merged_regions.size() == 1) //check for single exons
 		{
-			if(circ.merged_regions[j].rpos-circ.merged_regions[j].lpos > max_exon_length)
+			for(int j=0;j<circ.merged_regions.size();j++)
 			{
-				long_flag = 1;
-				break;
+				if(circ.merged_regions[j].rpos-circ.merged_regions[j].lpos+1 > max_single_exon_length)
+				{
+					long_flag = 1;
+					break;
+				}
+			}
+		}
+		else if(circ.merged_regions.size() > 1) //check for multi exons
+		{
+			for(int j=0;j<circ.merged_regions.size();j++)
+			{
+				if(circ.merged_regions[j].rpos-circ.merged_regions[j].lpos+1 > max_multi_exon_length)
+				{
+					long_flag = 1;
+					break;
+				}
 			}
 		}
 
@@ -316,6 +327,8 @@ int assembler::remove_long_exon_circ_trsts()
 		{
 			circular_trsts_long_removed.push_back(circ);
 		}
+
+		printf("Printing long exon circRNAs removed:\n");
 		if(long_flag == 1)
 		{
 			circ.print(i+1);
