@@ -205,6 +205,12 @@ int parse_arguments(int argc, const char ** argv)
 			printf("min_jaccard=%lf\n",min_jaccard);
 			i++;
 		}
+		else if(string(argv[i]) == "--min_soft_clip_len")
+		{
+			min_jaccard = atoi(argv[i + 1]);
+			printf("min_soft_clip_length=%d\n",min_soft_clip_len);
+			i++;
+		}
 		else if(string(argv[i]) == "--min_flank_length")
 		{
 			min_flank_length = atoi(argv[i + 1]);
