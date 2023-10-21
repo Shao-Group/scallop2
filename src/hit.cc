@@ -515,7 +515,7 @@ int hit::set_soft_clip_seq_combo()
 		int32_t len = cigar_vector[0].second;
 		//index 0, extract start len bp
 		string str0 = "";
-		for(int i=0;i<len;i++)
+		for(int i=1;i<len+1;i++)
 		{
 			str0 = str0 + seq[i];
 		}

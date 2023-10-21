@@ -1027,7 +1027,7 @@ int bundle_bridge::get_more_chimeric()
 
 			//extract tiny seq
 			string tiny = "";
-			for(int i=fr.h1->cigar_vector[0].second; i<soft_len;i++)
+			for(int i=fr.h1->cigar_vector[0].second+1;i<soft_len+1;i++)
 			{
 				if(i<0 || i>fr.h1->seq.size()-1)
 				{
@@ -1040,7 +1040,7 @@ int bundle_bridge::get_more_chimeric()
 
 			string s = fr.h1->soft_left_clip_seqs[0] + tiny;
 			//printf("soft_len:%d\n",soft_len);
-			//printf("tiny:%s\n clip:%s, s=%s \n seq=%s\n",tiny.c_str(),fr.h1->soft_left_clip_seqs[0].c_str(),s.c_str(),fr.h1->seq.c_str());
+			//printf("name=%s,tiny:%s\n clip:%s, s=%s \n seq=%s\n",fr.h1->qname.c_str(),tiny.c_str(),fr.h1->soft_left_clip_seqs[0].c_str(),s.c_str(),fr.h1->seq.c_str());
 
 			string hash = to_string(fr.h1->pos) + "|" + s;
 			if(left_soft.find(hash) != left_soft.end())
@@ -1075,7 +1075,7 @@ int bundle_bridge::get_more_chimeric()
 
 			string s = tiny + fr.h2->soft_right_clip_seqs[0];
 			//printf("soft_len:%d\n",soft_len);
-			//printf("tiny:%s\n clip:%s, s=%s \n seq=%s\n",tiny.c_str(),fr.h2->soft_right_clip_seqs[0].c_str(),s.c_str(),fr.h2->seq.c_str());
+			//printf("name=%s,tiny:%s\n clip:%s, s=%s \n seq=%s\n",fr.h2->qname.c_str(),tiny.c_str(),fr.h2->soft_right_clip_seqs[0].c_str(),s.c_str(),fr.h2->seq.c_str());
 
 			string hash = to_string(fr.h2->rpos) + "|" + s;
 			if(right_soft.find(hash) != right_soft.end())
@@ -1219,7 +1219,7 @@ int bundle_bridge::get_more_chimeric()
 
 			//extract tiny seq
 			string tiny = "";
-			for(int i=fr.h1->cigar_vector[0].second; i<soft_len;i++)
+			for(int i=fr.h1->cigar_vector[0].second+1; i<soft_len+1;i++)
 			{
 				if(i<0 || i>fr.h1->seq.size()-1)
 				{
@@ -1273,7 +1273,7 @@ int bundle_bridge::get_more_chimeric()
 
 			//extract tiny seq
 			string tiny = "";
-			for(int i=fr.h1->cigar_vector[0].second; i<soft_len;i++)
+			for(int i=fr.h1->cigar_vector[0].second+1; i<soft_len+1;i++)
 			{
 				if(i<0 || i>fr.h1->seq.size()-1)
 				{
@@ -1285,7 +1285,7 @@ int bundle_bridge::get_more_chimeric()
 			}
 
 			string s = fr.h1->soft_left_clip_seqs[0] + tiny;
-			//printf("tiny:%s\n clip:%s, s=%s \n seq=%s\n",tiny.c_str(),fr.h1->soft_left_clip_seqs[0].c_str(),s.c_str(),fr.h1->seq.c_str());
+			printf("name=%s,tiny:%s\n clip:%s, s=%s \n seq=%s\n",fr.h1->qname.c_str(),tiny.c_str(),fr.h1->soft_left_clip_seqs[0].c_str(),s.c_str(),fr.h1->seq.c_str());
 
 			string hash = to_string(fr.h1->pos) + "|" + s;
 
@@ -1419,7 +1419,7 @@ int bundle_bridge::get_more_chimeric()
 			}
 
 			string s = tiny + fr.h2->soft_right_clip_seqs[0];
-			//printf("tiny:%s\n clip:%s, s=%s \n seq=%s\n",tiny.c_str(),fr.h2->soft_right_clip_seqs[0].c_str(),s.c_str(),fr.h2->seq.c_str());
+			printf("name=%s,tiny:%s\n clip:%s, s=%s \n seq=%s\n",fr.h2->qname.c_str(),tiny.c_str(),fr.h2->soft_right_clip_seqs[0].c_str(),s.c_str(),fr.h2->seq.c_str());
 
 			string hash = to_string(fr.h2->rpos) + "|" + s;
 
