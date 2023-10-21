@@ -65,7 +65,8 @@ extern int max_exon_length;
 extern int same_chain_circ_end_diff;
 extern int alignment_boundary_error;
 extern double max_fset_score;
-extern int min_soft_clip_len; 
+extern int min_soft_clip_len;
+extern double min_jaccard;
 
 // for bam file and reads
 extern int min_flank_length;

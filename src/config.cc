@@ -35,6 +35,7 @@ int same_chain_circ_end_diff = 50; //allow this much diff for merging circRNA wi
 int alignment_boundary_error = 5; //allow this much error when fixing alignment boundary
 double max_fset_score = 1.5; //bottleneck should be close to number of reads, define close as this
 int min_soft_clip_len = 10; // for new chimeric reads soft_len needs to be greater than this to be considered
+double min_jaccard = 0.5; //new chimeric similarity threshold
 
 // for bam file and reads
 int min_flank_length = 3;
@@ -195,6 +196,11 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--read_length")
 		{
 			read_length = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_jaccard")
+		{
+			min_jaccard = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_flank_length")

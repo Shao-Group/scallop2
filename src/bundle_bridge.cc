@@ -668,8 +668,8 @@ int bundle_bridge::get_more_chimeric()
 		if(soft_clip_side == 1  && left_boundary_match == 1)
 		{
 			int32_t soft_len = fr.h1->cigar_vector[0].second + fr.h1->tiny_boundary;
-			double jaccard_threshold = max(exp(1-((double)soft_len)/(double)min_soft_clip_len),0.4);
-			printf("soft_len:%d, jaccard_threshold=%lf\n",soft_len,jaccard_threshold);
+			//double min_jaccard = max(exp(1-((double)soft_len)/(double)min_soft_clip_len),0.4);
+			//printf("soft_len:%d, min_jaccard=%lf\n",soft_len,min_jaccard);
 
 			assert(fr.h1->soft_left_clip_seqs.size() > 0);
 
@@ -747,7 +747,7 @@ int bundle_bridge::get_more_chimeric()
 					printf("ST-E00299:245:HKTJJALXX:6:2107:30563:57952 soft len=%d, edit=%d, sim==%lf\n",soft_len,edit,similarity);
 				}*/
 				
-				if(similarity > jaccard_threshold)
+				if(similarity > min_jaccard)
 				//if(edit <= floor(soft_len/10))
 				{
 					edit_match = 1;
@@ -808,7 +808,7 @@ int bundle_bridge::get_more_chimeric()
 
 				double similarity = get_Jaccard(new_s,region_seq);
 				
-				if(similarity > jaccard_threshold)
+				if(similarity > min_jaccard)
 				//if(edit <= floor(soft_len/10))
 				{
 					printf("soft left clip: combo index=0, chrm=%s, read=%s, read_pos=%d, combo_seq=%s, similarity=%lf\n",bb.chrm.c_str(),fr.h1->qname.c_str(),fr.h1->pos,new_s.c_str(),similarity);
@@ -824,8 +824,8 @@ int bundle_bridge::get_more_chimeric()
 		else if(soft_clip_side == 2 && right_boundary_match == 1)
 		{
 			int32_t soft_len = fr.h2->cigar_vector[fr.h2->cigar_vector.size()-1].second + fr.h2->tiny_boundary;
-			double jaccard_threshold = max(exp(1-((double)soft_len)/(double)min_soft_clip_len),0.4);
-			printf("soft_len:%d, jaccard_threshold=%lf\n",soft_len,jaccard_threshold);
+			//double min_jaccard = max(exp(1-((double)soft_len)/(double)min_soft_clip_len),0.4);
+			//printf("soft_len:%d, min_jaccard=%lf\n",soft_len,min_jaccard);
 
 			assert(fr.h2->soft_right_clip_seqs.size() > 0);
 
@@ -898,7 +898,7 @@ int bundle_bridge::get_more_chimeric()
 
 				double similarity = get_Jaccard(new_s,region_seq);
 
-				if(similarity > jaccard_threshold)
+				if(similarity > min_jaccard)
 				//if(edit <= floor(soft_len/10))
 				{
 					edit_match = 1;
@@ -959,7 +959,7 @@ int bundle_bridge::get_more_chimeric()
 
 				double similarity = get_Jaccard(new_s,region_seq);
 
-				if(similarity > jaccard_threshold)
+				if(similarity > min_jaccard)
 				//if(edit <= floor(soft_len/10))
 				{
 					//printf("read seq combo index=%d, combo_seq=%s, edit=%d\n",i,fr.h2->soft_right_clip_seqs[i].c_str(),edit);
