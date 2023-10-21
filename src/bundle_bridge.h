@@ -73,13 +73,11 @@ public:
 	int build_partial_exons();
 	int build_fragments();
 	int get_frags_with_HS_on_both_sides();
-	int get_RO_frags_with_HS();
-	int get_frags_with_HS_from_data();
 	string get_fasta_seq(int32_t pos1, int32_t pos2);
-	int min(int x, int y, int z);
+	int min_three(int x, int y, int z);
 	int get_edit_distance(string s, string t);
-	bool are_strings_similar(int kmer_length, map<string,int> kmer_map, string t);
-	double get_Jaccard(int kmer_length, map<string,int> kmer_map, string t);
+	bool are_strings_similar(string s, string t);
+	double get_Jaccard(string s, string t);
 	int get_more_chimeric();
 	int create_fake_fragments();
 	int create_fake_supple(int fr_index, fragment &fr, int32_t soft_len, int32_t pos1, int32_t pos2, int soft_clip_side);
