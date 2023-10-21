@@ -715,6 +715,7 @@ int bundle_bridge::get_more_chimeric()
 
 				if(rc.rpos <= fr.h2->rpos || rc.rpos <= fr.h1->rpos) continue;
 				if(abs(rc.rpos-fr.h2->rpos) > max_softclip_to_junction_gap) continue;
+				if(rc.rtype != LEFT_SPLICE) continue;
 
 				int32_t effective_len = min(soft_len,rc.rpos-rc.lpos+1);
 				
@@ -780,6 +781,7 @@ int bundle_bridge::get_more_chimeric()
 
 				if(rc.rpos <= fr.h2->rpos || rc.rpos <= fr.h1->rpos) continue;
 				if(abs(rc.lpos-fr.h2->rpos) > max_softclip_to_junction_gap) continue;
+				if(rc.rtype != LEFT_SPLICE) continue;
 
 				int32_t effective_len = min(soft_len,rc.rpos-rc.lpos+1);
 
@@ -868,6 +870,7 @@ int bundle_bridge::get_more_chimeric()
 
 				if(rc.lpos >= fr.h2->pos || rc.lpos >= fr.h1->pos) continue;
 				if(abs(fr.h1->pos-rc.lpos) > max_softclip_to_junction_gap) continue;
+				if(rc.ltype != RIGHT_SPLICE) continue;
 
 				int32_t effective_len = min(soft_len,rc.rpos-rc.lpos+1);
 				
@@ -929,6 +932,7 @@ int bundle_bridge::get_more_chimeric()
 
 				if(rc.lpos >= fr.h2->pos || rc.lpos >= fr.h1->pos) continue;
 				if(abs(fr.h1->pos-rc.lpos) > max_softclip_to_junction_gap) continue;
+				if(rc.ltype != RIGHT_SPLICE) continue;
 
 				int32_t effective_len = min(soft_len,rc.rpos-rc.lpos+1);
 
