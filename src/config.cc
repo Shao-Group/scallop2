@@ -200,7 +200,8 @@ int parse_arguments(int argc, const char ** argv)
 		}
 		else if(string(argv[i]) == "--min_jaccard")
 		{
-			min_jaccard = atoi(argv[i + 1]);
+			min_jaccard = stod(argv[i + 1]);
+			printf("min_jaccard=%lf\n",min_jaccard);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_flank_length")
