@@ -65,6 +65,7 @@ public:
 	int remove_tiny_boundary(vector<fragment> &frags);
 
 	int build_junction_graph(vector<fragment> &frags);
+	int extend_junction_graph(vector<vector<int>> &phases);
 	int bridge_hard_fragments_normal(vector<fcluster> &open);
 	int bridge_hard_fragments_circ(vector<fcluster> &open);
 	int dynamic_programming(int k1, int k2, vector< vector<entry> > &table);
