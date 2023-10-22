@@ -420,11 +420,6 @@ int bridger::extend_junction_graph(vector<vector<int>> &phases)
 			int x = v[i + 0];
 			int y = v[i + 1];
 
-			assert(jsetx[x].find(y) == jsetx[x].end());
-			assert(jsety[y].find(x) == jsety[y].end());
-			jsetx[x].insert(PI(y, w));
-			jsety[y].insert(PI(x, w));
-
 			if(jsetx[x].find(y) == jsetx[x].end()) jsetx[x].insert(PI(y, w));
 			else jsetx[x][y] += w;
 
