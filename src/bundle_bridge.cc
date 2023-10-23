@@ -1894,7 +1894,6 @@ int bundle_bridge::align_transcript(const map<int32_t, int> &m, const transcript
 	int k2 = -1;
 	for(int k = 0; k < t.exons.size(); k++)
 	{
-		// TODO: >= ?
 		if(t.exons[k].second > bb.lpos)
 		{
 			k1 = k;
@@ -1903,7 +1902,6 @@ int bundle_bridge::align_transcript(const map<int32_t, int> &m, const transcript
 	}
 	for(int k = t.exons.size() - 1; k >= 0; k--)
 	{
-		// TODO: <= ?
 		if(t.exons[k].first < bb.rpos)
 		{
 			k2 = k;
