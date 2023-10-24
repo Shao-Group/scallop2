@@ -159,7 +159,7 @@ int circular_transcript::write(ostream &fout, double cov2, int count) const
 int circular_transcript::print(int id)
 {
     printf("circRNA %d - ", id);
-    printf("circRNA_id: %s, seqname: %s, transcript_id: %s, start: %d, end: %d, fake_supple = %d, supple_len =%d, path_score = %lf, path_type = %d, path: ",circRNA_id.c_str(), seqname.c_str(), transcript_id.c_str(), start, end, (fake_supple == true)?1:0, supple_len, path_score, path_type);
+    printf("circRNA_id: %s, seqname: %s, transcript_id: %s, start: %d, end: %d, fake_supple = %d, supple_len = %d, path_score = %lf, path_type = %d, path: ",circRNA_id.c_str(), seqname.c_str(), transcript_id.c_str(), start, end, (fake_supple == true)?1:0, supple_len, path_score, path_type);
     for(int i = 0; i < circ_path.size() - 1; i++)
 	{
 		printf("%d, ", circ_path[i]);
