@@ -60,14 +60,12 @@ int bridger::bridge_normal_fragments()
 
 	// 1st round of briding hard fragments
 	build_junction_graph(bd->fragments);
-	extend_junction_graph(bd->ref_phase);
 	bridge_hard_fragments_normal(open_fclusters);
 	filter_paths(bd->fragments);
 	int n2 = get_paired_fragments(bd->fragments);
 
 	// 2nd round of briding hard fragments
 	build_junction_graph(bd->fragments);
-	extend_junction_graph(bd->ref_phase);
 	bridge_hard_fragments_normal(open_fclusters);
 	filter_paths(bd->fragments);
 	int n3 = get_paired_fragments(bd->fragments);
@@ -124,7 +122,6 @@ int bridger::bridge_circ_fragments()
 	cluster_open_fragments(open_fclusters, bd->circ_fragments);
 
 	build_junction_graph(bd->fragments);
-	extend_junction_graph(bd->ref_phase);
 	bridge_hard_fragments_circ(open_fclusters);
 
 	int n2 = get_paired_fragments(bd->circ_fragments);
@@ -409,32 +406,6 @@ int bridger::build_junction_graph(vector<fragment> &frags)
 		assert(jsety[y].find(x) == jsety[y].end());
 		jsetx[x].insert(PI(y, w));
 		jsety[y].insert(PI(x, w));
-	}
-	
-	return 0;
-}
-
-int bridger::extend_junction_graph(vector<vector<int>> &phases)
-{
-	int w = 1;		// weight of edges of references
-	for(int i = 0; i < phases.size(); i++)
-	{
-		vector<int> &v = phases[i];
-		if(v.size() <= 1) continue;
-		for(int j = 0; j < v.size() - 1; j++)
-		{
-			int x = v[j + 0];
-			int y = v[j + 1];
-
-			if(x < 0 || x >= jsetx.size()) continue;
-			if(y < 0 || y >= jsety.size()) continue;
-
-			if(jsetx[x].find(y) == jsetx[x].end()) jsetx[x].insert(PI(y, w));
-			else jsetx[x][y] += w;
-
-			if(jsety[y].find(x) == jsety[y].end()) jsety[y].insert(PI(x, w));
-			else jsety[y][x] += w;
-		}
 	}
 	
 	return 0;
