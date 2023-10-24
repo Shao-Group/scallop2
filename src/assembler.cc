@@ -347,7 +347,7 @@ int assembler::remove_duplicate_circ_trsts()
 		{
 			circ_trst_map[circ.circRNA_id].second++;
 			circ_trst_map[circ.circRNA_id].first.supple_len = circ_trst_map[circ.circRNA_id].first.supple_len + circ.supple_len;
-			circ_trst_map[circ.circRNA_id].first.path_score = circ_trst_map[circ.circRNA_id].first.supple_len + circ.path_score;
+			circ_trst_map[circ.circRNA_id].first.path_score = circ_trst_map[circ.circRNA_id].first.path_score + circ.path_score;
 			circ_trst_map[circ.circRNA_id].first.transcript_id = circ_trst_map[circ.circRNA_id].first.transcript_id + "|" + circ.transcript_id; //concatenate all hit names of hits generating this circRNA as the circRNA transcript_id
 		}
 		else //circRNA not present in map
