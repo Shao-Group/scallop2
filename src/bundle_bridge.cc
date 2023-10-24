@@ -3837,7 +3837,18 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		circ.circRNA_id = circRNA_id;
 		circ.seqname = chrm_id;
 		circ.source = "scallop2";
-		if(fr2.h1->is_fake == true || fr2.h2->is_fake == true) circ.source = "scallop2_MC";
+		circ.path_score = fr2.paths[0].score;
+		circ.path_type = fr2.paths[0].type;
+		if(fr2.h1->is_fake == true || fr2.h2->is_fake == true)
+		{
+			circ.supple_len = fr2.h2->rpos-fr2.h2->pos+1;
+			circ.fake_supple = true;
+			circ.source = "scallop2_MC";
+		}
+		else
+		{
+			circ.supple_len = fr2.h2->rpos-fr2.h2->pos;
+		}
 		circ.feature = "circRNA";
 		circ.gene_id = "gene"; //later change this to bundle id
 		circ.transcript_id = fr1.h1->qname; //use hit qname, same for all hits in fragments
@@ -3933,7 +3944,18 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		circ.circRNA_id = circRNA_id;
 		circ.seqname = chrm_id;
 		circ.source = "scallop2";
-		if(fr2.h1->is_fake == true || fr2.h2->is_fake == true) circ.source = "scallop2_MC";
+		circ.path_score = fr2.paths[0].score;
+		circ.path_type = fr2.paths[0].type;
+		if(fr2.h1->is_fake == true || fr2.h2->is_fake == true)
+		{
+			circ.fake_supple = true;
+			circ.supple_len = fr2.h1->rpos-fr2.h1->pos+1;
+			circ.source = "scallop2_MC";
+		}
+		else
+		{
+			circ.supple_len = fr2.h1->rpos-fr2.h1->pos;
+		}
 		circ.feature = "circRNA";
 		circ.gene_id = "gene"; //later change this to bundle id
 		circ.transcript_id = fr1.h1->qname; //use hit qname, same for all hits in fragments

@@ -47,13 +47,15 @@ public:
 	double FPKM;
 	double TPM;
 
+	//storing chimeric and bridging features
+	bool fake_supple;
+	int32_t supple_len; //len of supple read
+	double path_score; //bridging paths core
+	int path_type; //1/2 for ref path, 3/4 for read path 
+
     vector<int> circ_path;
 	vector<region> circ_path_regions;
 	vector<region> merged_regions;
-
-    //string circRNA_ID;
-	//int32_t start;
-	//int32_t end;
     
     int32_t junc_reads;
     int32_t non_junc_reads;
