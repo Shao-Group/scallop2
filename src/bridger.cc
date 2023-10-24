@@ -278,10 +278,14 @@ int bridger::bridge_overlapped_fragment(fragment &fr, int ex1, int ex2)
 		printf("simulate:173319 is in bridge_overlapped_fragments\n");
 	}*/
 
+	// calculate the maximum abundence of overlapped vertices
+	double max_abd = 0;
 	vector<int>::iterator j1, j2;
 	for(j1 = t1 - 1, j2 = it; j1 >= v1.begin() && j2 >= t2; j1--, j2--)
 	{
 		if((*j1) != (*j2)) return 0;
+		double w = bd->regions[*j1].ave;
+		if(w > max_abd) max_abd = w;
 	}
 
 	path p;
@@ -297,6 +301,8 @@ int bridger::bridge_overlapped_fragment(fragment &fr, int ex1, int ex2)
 		//bd->breads.insert(fr.h1->qname);
 	}
 	else p.type = 4;
+
+	p.score = max_abd;
 
 	fr.paths.push_back(p);
 
