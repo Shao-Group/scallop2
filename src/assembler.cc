@@ -346,12 +346,13 @@ int assembler::remove_duplicate_circ_trsts()
 		if(circ_trst_map.find(circ.circRNA_id) != circ_trst_map.end())// already circRNA present in map
 		{
 			circ_trst_map[circ.circRNA_id].second++;
-			circ_trst_map[circ.circRNA_id].first.supple_len = circ_trst_map[circ.circRNA_id].first.supple_len + circ.supple_len;
+			circ_trst_map[circ.circRNA_id].first.supple_len = circ_trst_map[circ.circRNA_id].first.supple_len +  min(circ.supple_len,read_length-circ.supple_len);
 			circ_trst_map[circ.circRNA_id].first.path_score = circ_trst_map[circ.circRNA_id].first.path_score + circ.path_score;
 			circ_trst_map[circ.circRNA_id].first.transcript_id = circ_trst_map[circ.circRNA_id].first.transcript_id + "|" + circ.transcript_id; //concatenate all hit names of hits generating this circRNA as the circRNA transcript_id
 		}
 		else //circRNA not present in map
 		{
+			circ.supple_len = min(circ.supple_len,read_length-circ.supple_len);
 			circ_trst_map.insert(pair<string,pair<circular_transcript, int>>(circ.circRNA_id,pair<circular_transcript, int>(circ,1)));
 		}
 	}
@@ -363,7 +364,7 @@ int assembler::remove_duplicate_circ_trsts()
 		circular_transcript &circ = itn->second.first;
 		//set score and coverage
 		//score can be supple_len/pathscore or supple_len*path_score
-		circ.score = (double)circ.path_score;
+		circ.score = (double)circ.supple_len;
 		circ.coverage = itn->second.second;
 		//printf("key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
 	}
