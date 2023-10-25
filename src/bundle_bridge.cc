@@ -3839,6 +3839,7 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		circ.source = "scallop2";
 		circ.path_score = fr2.paths[0].score;
 		circ.path_type = fr2.paths[0].type;
+		circ.bundle_size = bb.hits.size();
 
 		//calculate supple_len from cigar
 		int32_t len = 0;
@@ -3954,6 +3955,7 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		circ.source = "scallop2";
 		circ.path_score = fr2.paths[0].score;
 		circ.path_type = fr2.paths[0].type;
+		circ.bundle_size = bb.hits.size();
 
 		//calculate supple_len from cigar
 		int32_t len = 0;

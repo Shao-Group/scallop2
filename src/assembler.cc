@@ -352,7 +352,6 @@ int assembler::remove_duplicate_circ_trsts()
 		}
 		else //circRNA not present in map
 		{
-			//set suppl_len of first entrance as min
 			circ.supple_len = min(circ.supple_len,read_length-circ.supple_len);
 			circ_trst_map.insert(pair<string,pair<circular_transcript, int>>(circ.circRNA_id,pair<circular_transcript, int>(circ,1)));
 		}
@@ -364,9 +363,9 @@ int assembler::remove_duplicate_circ_trsts()
 	{
 		circular_transcript &circ = itn->second.first;
 		//set score and coverage
-		//score can be supple_len/pathscore or supple_len*path_score
-		circ.score = (double)circ.supple_len;
 		circ.coverage = itn->second.second;
+		circ.score = (double)circ.coverage/(double)circ.bundle_size;
+		
 		//printf("key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
 	}
 

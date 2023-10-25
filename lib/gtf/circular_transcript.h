@@ -59,6 +59,7 @@ public:
     
     int32_t junc_reads;
     int32_t non_junc_reads;
+	size_t bundle_size;
 };
 
 #endif
