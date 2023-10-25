@@ -352,6 +352,7 @@ int assembler::remove_duplicate_circ_trsts()
 		}
 		else //circRNA not present in map
 		{
+			//set suppl_len of first entrance as min
 			circ.supple_len = min(circ.supple_len,read_length-circ.supple_len);
 			circ_trst_map.insert(pair<string,pair<circular_transcript, int>>(circ.circRNA_id,pair<circular_transcript, int>(circ,1)));
 		}
