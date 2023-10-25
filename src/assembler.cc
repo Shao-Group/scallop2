@@ -364,7 +364,7 @@ int assembler::remove_duplicate_circ_trsts()
 		circular_transcript &circ = itn->second.first;
 		//set score and coverage
 		circ.coverage = itn->second.second;
-		circ.score = (double)circ.coverage/(double)circ.bundle_size;
+		circ.score = (double)circ.coverage/(double)sqrt(circ.bundle_size);
 		
 		//printf("key = %s, count = %d\n",itn->first.c_str(),itn->second.second);
 	}
