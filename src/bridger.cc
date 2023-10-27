@@ -2150,6 +2150,8 @@ int bridger::pick_bridge_path(vector<fragment> &frags)
 			continue;
 		}
 
+		fr.candidate_path_count = selected_paths.size();
+
 		// let A be the set of b-paths whose type is either 1 or 2 -- ref
 		// let B be the set of b-paths whose type is either 3 or 4 -- reads
 

@@ -182,6 +182,7 @@ int assembler::assemble()
 	remove_duplicate_circ_trsts();
 	print_circular_trsts();
 	write_circular();
+	write_feature();
 	
 	return 0;
 }
@@ -300,6 +301,7 @@ int assembler::remove_long_exon_circ_trsts()
 		circular_transcript circ = circular_trsts[i];
 		int long_flag = 0;
 		
+		//remove long exon FP
 		if(circ.merged_regions.size() == 1) //check for single exons
 		{
 			for(int j=0;j<circ.merged_regions.size();j++)
@@ -323,15 +325,21 @@ int assembler::remove_long_exon_circ_trsts()
 			}
 		}
 
+		//try to remove FP by discarding circRNAs with lots of vertices from many small junctions
+		if(circ.circ_path.size() > max_circ_vsize)
+		{
+			long_flag = 1;
+		}
+
 		if(long_flag == 0)
 		{
 			circular_trsts_long_removed.push_back(circ);
 		}
 
-		printf("Printing long exon circRNAs removed:\n");
 		if(long_flag == 1)
 		{
-			circ.print(i+1);
+			//printf("Printing long exon circRNAs removed:\n");
+			//circ.print(i+1);
 		}
 	}
 	return 0;
@@ -345,10 +353,21 @@ int assembler::remove_duplicate_circ_trsts()
 
 		if(circ_trst_map.find(circ.circRNA_id) != circ_trst_map.end())// already circRNA present in map
 		{
+			//increase coverage count
 			circ_trst_map[circ.circRNA_id].second++;
-			circ_trst_map[circ.circRNA_id].first.supple_len = circ_trst_map[circ.circRNA_id].first.supple_len +  min(circ.supple_len,read_length-circ.supple_len);
+
+			//accumulate features of all identical circRNAs
+			circ_trst_map[circ.circRNA_id].first.supple_len = circ_trst_map[circ.circRNA_id].first.supple_len + min(circ.supple_len,read_length-circ.supple_len);
 			circ_trst_map[circ.circRNA_id].first.path_score = circ_trst_map[circ.circRNA_id].first.path_score + circ.path_score;
-			circ_trst_map[circ.circRNA_id].first.transcript_id = circ_trst_map[circ.circRNA_id].first.transcript_id + "|" + circ.transcript_id; //concatenate all hit names of hits generating this circRNA as the circRNA transcript_id
+			circ_trst_map[circ.circRNA_id].first.fake_count = circ_trst_map[circ.circRNA_id].first.fake_count + circ.fake_count;
+			circ_trst_map[circ.circRNA_id].first.path_count_1 = circ_trst_map[circ.circRNA_id].first.path_count_1 + circ.path_count_1;
+			circ_trst_map[circ.circRNA_id].first.path_count_2 = circ_trst_map[circ.circRNA_id].first.path_count_2 + circ.path_count_2;
+			circ_trst_map[circ.circRNA_id].first.path_count_3 = circ_trst_map[circ.circRNA_id].first.path_count_3 + circ.path_count_3;
+			circ_trst_map[circ.circRNA_id].first.path_count_4 = circ_trst_map[circ.circRNA_id].first.path_count_4 + circ.path_count_4;
+			circ_trst_map[circ.circRNA_id].first.candidate_path_count= circ_trst_map[circ.circRNA_id].first.candidate_path_count + circ.candidate_path_count;
+
+			//concatenate all hit names of hits generating this circRNA as the circRNA transcript_id
+			circ_trst_map[circ.circRNA_id].first.transcript_id = circ_trst_map[circ.circRNA_id].first.transcript_id + "|" + circ.transcript_id; 
 		}
 		else //circRNA not present in map
 		{
@@ -690,9 +709,6 @@ int assembler::write_circular()
 	for(itn = circ_trst_merged_map.begin(); itn != circ_trst_merged_map.end(); itn++)
 	{
 		circular_transcript &circ = itn->second.first;
-		//if(circ.source != "scallop2_MC") continue;
-		//try to remove FP by discarding circRNAs with lots of vertices from many small junctions
-		if(circ.circ_path.size() > max_circ_vsize) continue;
 		circ.write(fcirc);
 	}
 
@@ -703,6 +719,31 @@ int assembler::write_circular()
 	}*/
 
 	fcirc.close();
+
+	return 0;
+}
+
+
+int assembler::write_feature()
+{
+	//printf("file - %s", output_circ_file.c_str());
+	ofstream fout(feature_file.c_str(), fstream::trunc);
+	
+	if(fout.fail())
+	{
+		printf("failed");
+		return 0;
+	}
+
+	fout<<"circRNA_id"<<","<<"bundle_size"<<","<<"coverage"<<","<<"fake_count"<<","<<"supple_len"<<","<<"candidate_path_count"<<","<<"path_score"<<","<<"path_count_1"<<","<<"path_count_2"<<","<<"path_count_3"<<","<<"path_count_4"<<","<<"exon_count"<<","<<"total_exon_len"<<","<<"max_exon_len"<<","<<"min_exon_len"<<","<<"avg_exon_len"<<"\n";
+	map<string, pair<circular_transcript, int>>::iterator itn;
+	for(itn = circ_trst_merged_map.begin(); itn != circ_trst_merged_map.end(); itn++)
+	{
+		circular_transcript &circ = itn->second.first;
+		fout<<circ.circRNA_id<<","<<circ.bundle_size<<","<<circ.coverage<<","<<circ.fake_count<<","<<circ.supple_len<<","<<circ.candidate_path_count<<","<<circ.path_score<<","<<circ.path_count_1<<","<<circ.path_count_2<<","<<circ.path_count_3<<","<<circ.path_count_4<<","<<circ.exon_count<<","<<circ.total_exon_length<<","<<circ.max_exon_length<<","<<circ.min_exon_length<<","<<circ.avg_exon_length<<"\n";
+	}
+
+	fout.close();
 
 	return 0;
 }

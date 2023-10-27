@@ -34,6 +34,7 @@ public:
 	int fidx;			//own fragments index
 	int fake_hit_index; //used to keep track of fragment for which fake hit is created, stores index of fake_hit
 	bool HS_frag;        //used to keep track whether this is a non chimeric frag with HS on both sides that will be used to generate circRNA
+	int candidate_path_count; //number of candidate paths from pick_bridge path
 
 	int cnt;			// count of the equal hits
 	int32_t lpos;		// equals to hits[k1].pos

@@ -104,6 +104,7 @@ string output_file = "";
 string output_file1 = "";
 string output_circ_file = "";
 string cirifull_file = "";
+string feature_file = "";
 
 // for controling
 int batch_bundle_size = 100;
@@ -151,6 +152,11 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "-fa")
 		{
 			fasta_file = string(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "-fe")
+		{
+			feature_file = string(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--transcript_fragments")

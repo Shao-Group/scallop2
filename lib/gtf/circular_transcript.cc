@@ -37,13 +37,24 @@ circular_transcript::circular_transcript()
     supple_len = 0;
     path_score = 0;
     path_type = 0;
+    bundle_size = 0;
+    exon_count = 0;
+	total_exon_length = 0;
+	min_exon_length = 0;
+	max_exon_length = 0;
+	avg_exon_length = 0;
+	path_count_1 = 0;
+	path_count_2 = 0;
+	path_count_3 = 0;
+	path_count_4 = 0;
+    candidate_path_count = 0;
+    fake_count = 0;
 
     junc_reads = 0;
     non_junc_reads = 0;
     circ_path.clear();
     circ_path_regions.clear();
     merged_regions.clear();
-    bundle_size = 0;
 }
 
 circular_transcript::circular_transcript(string circRNA_ID, string chrm_id, int32_t start, int32_t end, vector<int> circ_path)
@@ -159,8 +170,8 @@ int circular_transcript::write(ostream &fout, double cov2, int count) const
 
 int circular_transcript::print(int id)
 {
-    printf("circRNA %d - ", id);
-    printf("circRNA_id: %s, chrm: %s, bundle_size = %lu, transcript_id: %s, start: %d, end: %d, fake_supple = %d, supple_len = %d, path_score = %lf, path_type = %d, path: ",circRNA_id.c_str(), seqname.c_str(), bundle_size, transcript_id.c_str(), start, end, (fake_supple == true)?1:0, supple_len, path_score, path_type);
+    //printf("circRNA %d - ", id);
+    /*printf("circRNA_id:%s, chrm:%s, bundle_size:%lu, transcript_id:%s, start:%d, end:%d, coverage:%d, fake_supple:%d, supple_len:%d, path_score: %lf, path_type: %d, path: ",circRNA_id.c_str(), seqname.c_str(), bundle_size, transcript_id.c_str(), start, end, coverage, (fake_supple == true)?1:0, supple_len, path_score, path_type);
     for(int i = 0; i < circ_path.size() - 1; i++)
 	{
 		printf("%d, ", circ_path[i]);
@@ -177,7 +188,8 @@ int circular_transcript::print(int id)
     {
         printf("[%d, %d) ",merged_regions[i].lpos,merged_regions[i].rpos); 
     }
-    printf("\n");
+    printf("\n");*/
+    printf("circRNA_id:%s, chrm:%s, bundle_size:%lu, coverage:%d, fake_count:%d, supple_len:%d, candidate_path_count:%d, path_score:%lf, path_count_1:%d, path_count_2:%d, path_count_3:%d, path_count_4:%d, exon_count:%d, total_exon_len:%d, max_exon_len:%d, min_exon_len:%d, avg_exon_len:%lf\n",circRNA_id.c_str(), seqname.c_str(), bundle_size, coverage, fake_count, supple_len, candidate_path_count, path_score, path_count_1, path_count_2, path_count_3, path_count_4, exon_count, total_exon_length, max_exon_length, min_exon_length, avg_exon_length);
     return 0;
 
 }

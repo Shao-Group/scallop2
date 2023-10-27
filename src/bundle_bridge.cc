@@ -148,7 +148,7 @@ int bundle_bridge::build(map <string, int> RO_reads_map, faidx_t *_fai)
 	extract_circ_fragment_pairs();
 	//print_circ_fragment_pairs();
 	join_circ_fragment_pairs(bdg.length_high);
-	print_circRNAs();
+	//print_circRNAs();
 
 	//printf("fragments vector size after = %zu\n",fragments.size());
 
@@ -3035,7 +3035,7 @@ int bundle_bridge::extract_nonsupple_HS_hits()
 		if(circ.start != 0 && circ.end != 0)
 		{
 			string chrm_id = bb.chrm.c_str();
-			string circRNA_id = "chrm" + chrm_id + ":" + tostring(circ.start) + "|" + tostring(circ.end) + "|";
+			string circRNA_id = chrm_id + ":" + tostring(circ.start) + "|" + tostring(circ.end) + "|";
 			char strand = bb.strand;
 
 			circ.circRNA_id = circRNA_id;
@@ -3092,7 +3092,7 @@ int bundle_bridge::extract_HS_frags_circRNA()
 		vector<int> v = decode_vlist(fr.paths[0].v);
 
 		string chrm_id = bb.chrm.c_str();
-		string circRNA_id = "chrm" + chrm_id + ":" + tostring(fr.lpos) + "|" + tostring(fr.rpos) + "|";
+		string circRNA_id = chrm_id + ":" + tostring(fr.lpos) + "|" + tostring(fr.rpos) + "|";
 		//printf("circularRNA = %s\n",circRNA_id.c_str());
 		
 		char strand = bb.strand;
@@ -3181,7 +3181,7 @@ int bundle_bridge::extract_RO_circRNA()
 		vector<int> v = decode_vlist(fr.paths[0].v);
 
 		string chrm_id = bb.chrm.c_str();
-		string circRNA_id = "chrm" + chrm_id + ":" + tostring(fr.lpos) + "|" + tostring(fr.rpos) + "|";
+		string circRNA_id = chrm_id + ":" + tostring(fr.lpos) + "|" + tostring(fr.rpos) + "|";
 		//printf("circularRNA = %s\n",circRNA_id.c_str());
 		
 		char strand = bb.strand;
@@ -3824,7 +3824,7 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		printf("\n\n");
 	
 		string chrm_id = bb.chrm.c_str();
-		string circRNA_id = "chrm" + chrm_id + ":" + tostring(fr1.lpos) + "|" + tostring(fr2.rpos) + "|";
+		string circRNA_id = chrm_id + ":" + tostring(fr1.lpos) + "|" + tostring(fr2.rpos) + "|";
 		//printf("circularRNA = %s\n",circRNA_id.c_str());
 		
 		char strand = bb.strand;
@@ -3839,7 +3839,12 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		circ.source = "scallop2";
 		circ.path_score = fr2.paths[0].score;
 		circ.path_type = fr2.paths[0].type;
-		circ.bundle_size = bb.hits.size();
+		if(circ.path_type == 1) circ.path_count_1++;
+		else if(circ.path_type == 2) circ.path_count_2++;
+		else if(circ.path_type == 3) circ.path_count_3++;
+		else if(circ.path_type == 4) circ.path_count_4++;
+		circ.bundle_size = fragments.size();
+		circ.candidate_path_count = fr2.candidate_path_count;
 
 		//calculate supple_len from cigar
 		int32_t len = 0;
@@ -3855,6 +3860,7 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		if(fr2.h1->is_fake == true || fr2.h2->is_fake == true)
 		{
 			circ.fake_supple = true;
+			circ.fake_count = 1;
 			circ.source = "scallop2_MC";
 		}
 
@@ -3897,11 +3903,27 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 			circ.merged_regions[circ.merged_regions.size()-1].rpos = circ.end; 			
 		}
 
+		int32_t total_exon_length = 0;
+		int32_t max_exon_length = circ.merged_regions[0].rpos-circ.merged_regions[0].lpos+1;
+		int32_t min_exon_length = circ.merged_regions[0].rpos-circ.merged_regions[0].lpos+1;
+
 		for(int i=0;i<circ.merged_regions.size();i++)
     	{
 			region r = circ.merged_regions[i];
+			int32_t exon_len = (r.rpos-r.lpos)+1;
+
 			circ.circRNA_id = circ.circRNA_id + tostring(r.lpos) + "|" + tostring(r.rpos) + "|";
-		}
+
+			total_exon_length += exon_len;
+			if(exon_len > max_exon_length) max_exon_length = exon_len;
+			if(exon_len < min_exon_length) min_exon_length = exon_len;
+		}		
+		
+		circ.exon_count = circ.merged_regions.size();
+		circ.total_exon_length = total_exon_length;
+		circ.max_exon_length = max_exon_length;
+		circ.min_exon_length = min_exon_length;
+		circ.avg_exon_length = (double)circ.total_exon_length/(double)circ.exon_count;
 
 		//return if single exon circRNA and any one side junction flag not 1
 		if(circ.merged_regions.size() == 1 && (left_boundary_flag != 1 || right_boundary_flag != 1))
@@ -3940,7 +3962,7 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		printf("\n\n");
 		
 		string chrm_id = bb.chrm.c_str();
-		string circRNA_id = "chrm" + chrm_id + ":" + tostring(fr2.lpos) + "|" + tostring(fr1.rpos) + "|";
+		string circRNA_id = chrm_id + ":" + tostring(fr2.lpos) + "|" + tostring(fr1.rpos) + "|";
 		//printf("circularRNA = %s\n",circRNA_id.c_str());
 		
 		char strand = bb.strand;
@@ -3955,7 +3977,12 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		circ.source = "scallop2";
 		circ.path_score = fr2.paths[0].score;
 		circ.path_type = fr2.paths[0].type;
-		circ.bundle_size = bb.hits.size();
+		if(circ.path_type == 1) circ.path_count_1++;
+		else if(circ.path_type == 2) circ.path_count_2++;
+		else if(circ.path_type == 3) circ.path_count_3++;
+		else if(circ.path_type == 4) circ.path_count_4++;
+		circ.bundle_size = fragments.size();
+		circ.candidate_path_count = fr2.candidate_path_count;
 
 		//calculate supple_len from cigar
 		int32_t len = 0;
@@ -3971,6 +3998,7 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		if(fr2.h1->is_fake == true || fr2.h2->is_fake == true)
 		{
 			circ.fake_supple = true;
+			circ.fake_count = 1;
 			circ.source = "scallop2_MC";
 		}
 
@@ -4013,11 +4041,27 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 			circ.merged_regions[circ.merged_regions.size()-1].rpos = circ.end; 			
 		}
 
+		int32_t total_exon_length = 0;
+		int32_t max_exon_length = circ.merged_regions[0].rpos-circ.merged_regions[0].lpos+1;
+		int32_t min_exon_length = circ.merged_regions[0].rpos-circ.merged_regions[0].lpos+1;
+
 		for(int i=0;i<circ.merged_regions.size();i++)
     	{
 			region r = circ.merged_regions[i];
+			int32_t exon_len = (r.rpos-r.lpos)+1;
+
 			circ.circRNA_id = circ.circRNA_id + tostring(r.lpos) + "|" + tostring(r.rpos) + "|";
+
+			total_exon_length += exon_len;
+			if(exon_len > max_exon_length) max_exon_length = exon_len;
+			if(exon_len < min_exon_length) min_exon_length = exon_len;
 		}		
+
+		circ.exon_count = circ.merged_regions.size();
+		circ.total_exon_length = total_exon_length;
+		circ.max_exon_length = max_exon_length;
+		circ.min_exon_length = min_exon_length;
+		circ.avg_exon_length = (double)circ.total_exon_length/(double)circ.exon_count;
 		
 		//return if single exon circRNA and any one side junction flag not 1
 		if(circ.merged_regions.size() == 1 && (left_boundary_flag != 1 || right_boundary_flag != 1))

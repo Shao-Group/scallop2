@@ -71,6 +71,7 @@ private:
 	int write_RO_info();
 	int write_circular_boundaries();
 	int write_circular();
+	int write_feature();
 	int read_cirifull_file();
 	int split(const std::string &s, char delim, std::vector<std::string> &elems);
 };

@@ -51,7 +51,19 @@ public:
 	bool fake_supple;
 	int32_t supple_len; //len of supple read
 	double path_score; //bridging paths core
-	int path_type; //1/2 for ref path, 3/4 for read path 
+	int path_type; //1/2 for ref path, 3/4 for read path
+	size_t bundle_size;
+	int exon_count;
+	int32_t total_exon_length;
+	int32_t min_exon_length;
+	int32_t max_exon_length;
+	double avg_exon_length;
+	int path_count_1;
+	int path_count_2;
+	int path_count_3;
+	int path_count_4;
+	int candidate_path_count;
+	int fake_count;
 
     vector<int> circ_path;
 	vector<region> circ_path_regions;
@@ -59,7 +71,6 @@ public:
     
     int32_t junc_reads;
     int32_t non_junc_reads;
-	size_t bundle_size;
 };
 
 #endif
