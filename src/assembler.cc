@@ -306,7 +306,7 @@ int assembler::remove_long_exon_circ_trsts()
 		{
 			for(int j=0;j<circ.merged_regions.size();j++)
 			{
-				if(circ.merged_regions[j].rpos-circ.merged_regions[j].lpos+1 > max_single_exon_length)
+				if(circ.merged_regions[j].rpos-circ.merged_regions[j].lpos > max_single_exon_length)
 				{
 					long_flag = 1;
 					break;
@@ -317,7 +317,7 @@ int assembler::remove_long_exon_circ_trsts()
 		{
 			for(int j=0;j<circ.merged_regions.size();j++)
 			{
-				if(circ.merged_regions[j].rpos-circ.merged_regions[j].lpos+1 > max_multi_exon_length)
+				if(circ.merged_regions[j].rpos-circ.merged_regions[j].lpos > max_multi_exon_length)
 				{
 					long_flag = 1;
 					break;

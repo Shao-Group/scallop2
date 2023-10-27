@@ -3904,13 +3904,13 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		}
 
 		int32_t total_exon_length = 0;
-		int32_t max_exon_length = circ.merged_regions[0].rpos-circ.merged_regions[0].lpos+1;
-		int32_t min_exon_length = circ.merged_regions[0].rpos-circ.merged_regions[0].lpos+1;
+		int32_t max_exon_length = circ.merged_regions[0].rpos-circ.merged_regions[0].lpos;
+		int32_t min_exon_length = circ.merged_regions[0].rpos-circ.merged_regions[0].lpos;
 
 		for(int i=0;i<circ.merged_regions.size();i++)
     	{
 			region r = circ.merged_regions[i];
-			int32_t exon_len = (r.rpos-r.lpos)+1;
+			int32_t exon_len = r.rpos-r.lpos;
 
 			circ.circRNA_id = circ.circRNA_id + tostring(r.lpos) + "|" + tostring(r.rpos) + "|";
 
@@ -4042,13 +4042,13 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		}
 
 		int32_t total_exon_length = 0;
-		int32_t max_exon_length = circ.merged_regions[0].rpos-circ.merged_regions[0].lpos+1;
-		int32_t min_exon_length = circ.merged_regions[0].rpos-circ.merged_regions[0].lpos+1;
+		int32_t max_exon_length = circ.merged_regions[0].rpos-circ.merged_regions[0].lpos;
+		int32_t min_exon_length = circ.merged_regions[0].rpos-circ.merged_regions[0].lpos;
 
 		for(int i=0;i<circ.merged_regions.size();i++)
     	{
 			region r = circ.merged_regions[i];
-			int32_t exon_len = (r.rpos-r.lpos)+1;
+			int32_t exon_len = r.rpos-r.lpos;
 
 			circ.circRNA_id = circ.circRNA_id + tostring(r.lpos) + "|" + tostring(r.rpos) + "|";
 
