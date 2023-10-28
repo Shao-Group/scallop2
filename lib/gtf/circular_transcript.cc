@@ -38,6 +38,7 @@ circular_transcript::circular_transcript()
     path_score = 0;
     path_type = 0;
     bundle_size = 0;
+    ref_trsts_size = 0;
     exon_count = 0;
 	total_exon_length = 0;
 	min_exon_length = 0;

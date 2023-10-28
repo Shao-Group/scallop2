@@ -53,6 +53,7 @@ public:
 	double path_score; //bridging paths core
 	int path_type; //1/2 for ref path, 3/4 for read path
 	size_t bundle_size;
+	size_t ref_trsts_size;
 	int exon_count;
 	int32_t total_exon_length;
 	int32_t min_exon_length;

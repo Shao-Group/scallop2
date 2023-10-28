@@ -735,12 +735,12 @@ int assembler::write_feature()
 		return 0;
 	}
 
-	fout<<"circRNA_id"<<","<<"bundle_size"<<","<<"coverage"<<","<<"fake_count"<<","<<"supple_len"<<","<<"candidate_path_count"<<","<<"path_score"<<","<<"path_count_1"<<","<<"path_count_2"<<","<<"path_count_3"<<","<<"path_count_4"<<","<<"exon_count"<<","<<"total_exon_len"<<","<<"max_exon_len"<<","<<"min_exon_len"<<","<<"avg_exon_len"<<"\n";
+	fout<<"circRNA_id"<<","<<"bundle_size"<<","<<"ref_trsts_size"<<","<<"coverage"<<","<<"fake_count"<<","<<"supple_len"<<","<<"candidate_path_count"<<","<<"path_score"<<","<<"path_count_1"<<","<<"path_count_2"<<","<<"path_count_3"<<","<<"path_count_4"<<","<<"exon_count"<<","<<"total_exon_len"<<","<<"max_exon_len"<<","<<"min_exon_len"<<","<<"avg_exon_len"<<"\n";
 	map<string, pair<circular_transcript, int>>::iterator itn;
 	for(itn = circ_trst_merged_map.begin(); itn != circ_trst_merged_map.end(); itn++)
 	{
 		circular_transcript &circ = itn->second.first;
-		fout<<circ.circRNA_id<<","<<circ.bundle_size<<","<<circ.coverage<<","<<circ.fake_count<<","<<circ.supple_len<<","<<circ.candidate_path_count<<","<<circ.path_score<<","<<circ.path_count_1<<","<<circ.path_count_2<<","<<circ.path_count_3<<","<<circ.path_count_4<<","<<circ.exon_count<<","<<circ.total_exon_length<<","<<circ.max_exon_length<<","<<circ.min_exon_length<<","<<circ.avg_exon_length<<"\n";
+		fout<<circ.circRNA_id<<","<<circ.bundle_size<<","<<circ.ref_trsts_size<<","<<circ.coverage<<","<<circ.fake_count<<","<<circ.supple_len<<","<<circ.candidate_path_count<<","<<circ.path_score<<","<<circ.path_count_1<<","<<circ.path_count_2<<","<<circ.path_count_3<<","<<circ.path_count_4<<","<<circ.exon_count<<","<<circ.total_exon_length<<","<<circ.max_exon_length<<","<<circ.min_exon_length<<","<<circ.avg_exon_length<<"\n";
 	}
 
 	fout.close();

@@ -3844,6 +3844,7 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		else if(circ.path_type == 3) circ.path_count_3++;
 		else if(circ.path_type == 4) circ.path_count_4++;
 		circ.bundle_size = fragments.size();
+		circ.ref_trsts_size = ref_trsts.size();
 		circ.candidate_path_count = fr2.candidate_path_count;
 
 		//calculate supple_len from cigar
@@ -3982,6 +3983,7 @@ int bundle_bridge::join_circ_fragment_pair(pair<fragment,fragment> &fr_pair, int
 		else if(circ.path_type == 3) circ.path_count_3++;
 		else if(circ.path_type == 4) circ.path_count_4++;
 		circ.bundle_size = fragments.size();
+		circ.ref_trsts_size = ref_trsts.size();
 		circ.candidate_path_count = fr2.candidate_path_count;
 
 		//calculate supple_len from cigar
