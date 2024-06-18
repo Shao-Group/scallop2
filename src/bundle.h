@@ -31,6 +31,8 @@ public:
 
 public:
 	bundle_base &bb;				// input bundle base	
+
+	// TODO: we aim for comment out the br
 	bundle_bridge br;				// contains fragments
 	split_interval_map fmap;		// matched interval map
 	vector<junction> junctions;		// splice junctions

@@ -73,6 +73,9 @@ int bundle::compute_strand()
 int bundle::build_intervals()
 {
 	fmap.clear();
+
+	// TODO: to get rid of fragments
+	// simply comment out the following lines to 93
 	for(int i = 0; i < br.fragments.size(); i++)
 	{
 		fragment &fr = br.fragments[i];
@@ -92,6 +95,9 @@ int bundle::build_intervals()
 	for(int i = 0; i < bb.hits.size(); i++)
 	{
 		hit &ht = bb.hits[i];
+
+
+		// TODO: comment out the following 3 lines
 		if(ht.bridged == true) continue;
 		if((ht.flag & 0x100) >= 1) continue;
 		if(br.breads.find(ht.qname) != br.breads.end()) continue;
@@ -108,6 +114,7 @@ int bundle::build_intervals()
 int bundle::build_junctions()
 {
 	map<int64_t, vector<hit*>> m;		// bridged fragments
+	// TODO: comment out the following paragraph
 	for(int i = 0; i < br.fragments.size(); i++)
 	{
 		fragment &fr = br.fragments[i];
@@ -137,6 +144,7 @@ int bundle::build_junctions()
 
 	for(int i = 0; i < bb.hits.size(); i++)
 	{
+		// TODO: comment out the follwoing 3
 		if(bb.hits[i].bridged == true) continue;
 		if((bb.hits[i].flag & 0x100) >= 1) continue;
 		if(br.breads.find(bb.hits[i].qname) != br.breads.end()) continue;
@@ -183,6 +191,7 @@ int bundle::build_junctions()
 
 		//printf("junction: %s:%d-%d (%d, %d, %d) %d\n", bb.chrm.c_str(), p1, p2, s0, s1, s2, s1 < s2 ? s1 : s2);
 
+		// TODO: be careful about the junction strand
 		junction jc(it->first, v.size());
 		jc.nm = nm;
 		if(s1 == 0 && s2 == 0) jc.strand = '.';
@@ -1483,6 +1492,7 @@ int bundle::build_hyper_set()
 {
 	map<vector<int>, int> m;
 
+	// TODO: skip the followoing two paragraphs
 	for(int k = 0; k < br.fragments.size(); k++)
 	{
 		fragment &fr = br.fragments[k];
@@ -1596,6 +1606,7 @@ int bundle::build_hyper_set()
 		}
 	}
 	
+	// TODO: use starring from here
 	for(int k = 0; k < bb.hits.size(); k++)
 	{
 		hit &h = bb.hits[k];

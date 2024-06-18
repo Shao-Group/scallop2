@@ -49,6 +49,8 @@ int assembler::assemble()
 
 		if(p.tid < 0) continue;
 		if((p.flag & 0x4) >= 1) continue;										// read is not mapped
+
+		// TODO: maybe do not use the following four lines
 		if((p.flag & 0x100) >= 1 && use_second_alignment == false) continue;	// secondary alignment
 		if(p.n_cigar > max_num_cigar) continue;									// ignore hits with more than max-num-cigar types
 		if(p.qual < min_mapping_quality) continue;							// ignore hits with small quality
@@ -56,6 +58,8 @@ int assembler::assemble()
 
 		hit ht(b1t, hid++);
 		ht.set_tags(b1t);
+
+		// TODO: check the strandness of long reads
 		ht.set_strand();
 		//ht.print();
 
@@ -144,6 +148,7 @@ int assembler::process(int n)
 			else cnt2++;
 		}
 
+		// TODO: donot use the filter below
 		if(cnt1 + cnt2 < min_num_hits_in_bundle) continue;
 		//if(cnt1 < 5 && cnt1 * 2 + cnt2 < min_num_hits_in_bundle) continue;
 		if(bb.tid < 0) continue;
@@ -190,6 +195,7 @@ int assembler::process(int n)
 			if(gv2[k].exons.size() >= 2) gv2[k].coverage /= (1.0 * assemble_duplicates);
 		}
 
+		// TODO: do not use the following filters as well
 		filter ft1(gv1);
 		ft1.filter_length_coverage();
 		ft1.remove_nested_transcripts();
@@ -222,6 +228,7 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0, transcrip
 		if(determine_regional_graph(gr) == true) continue;
 		if(gr.num_edges() <= 0) continue;
 
+		// TODO: for now we use assemble_duplicates = 1
 		for(int r = 0; r < assemble_duplicates; r++)
 		{
 			string gid = "gene." + tostring(index) + "." + tostring(k) + "." + tostring(r);

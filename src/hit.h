@@ -78,6 +78,7 @@ public:
 	char ts;								// ts tag used in minimap2
 	string qname;							// query name
 	hit *next;								// next hit that is equivalent with current one
+											// mainly due to PCR duplicates
 
 	// UMI
 	string umi;
@@ -93,6 +94,7 @@ public:
 	int print() const;
 };
 
+// vlist = (1, 2, 3, 4, 10, 11, 12) -> (1, 4, 10, 3)
 vector<int> encode_vlist(const vector<int> &v);
 vector<int> decode_vlist(const vector<int> &v);
 

@@ -18,6 +18,7 @@ See LICENSE for licensing.
 scallop::scallop()
 {}
 
+// TODO: for now, since we use duplicates = 1, r = false
 scallop::scallop(const splice_graph &g, const hyper_set &h, bool r)
 	: gr(g), hs(h), random_ordering(r)
 {
