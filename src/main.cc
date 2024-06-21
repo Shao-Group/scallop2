@@ -41,8 +41,8 @@ int main(int argc, const char **argv)
 		printf("\n");
 	}
 
-	previewer pv;
-	pv.preview();
+	// previewer pv;
+	// pv.preview();
 
 	if(preview_only == true) return 0;
 

@@ -76,21 +76,21 @@ int bundle::build_intervals()
 
 	// TODO: to get rid of fragments
 	// simply comment out the following lines to 93
-	for(int i = 0; i < br.fragments.size(); i++)
-	{
-		fragment &fr = br.fragments[i];
-		if(fr.paths.size() != 1 || fr.paths[0].type != 1) continue;
-		vector<int32_t> vv = br.get_aligned_intervals(fr);
-		if(vv.size() <= 0) continue;
-		assert(vv.size() % 2 == 0);
+	// for(int i = 0; i < br.fragments.size(); i++)
+	// {
+	// 	fragment &fr = br.fragments[i];
+	// 	if(fr.paths.size() != 1 || fr.paths[0].type != 1) continue;
+	// 	vector<int32_t> vv = br.get_aligned_intervals(fr);
+	// 	if(vv.size() <= 0) continue;
+	// 	assert(vv.size() % 2 == 0);
 
-		for(int k = 0; k < vv.size() / 2; k++)
-		{
-			int32_t p = vv[2 * k + 0];
-			int32_t q = vv[2 * k + 1];
-			fmap += make_pair(ROI(p, q), 1);
-		}
-	}
+	// 	for(int k = 0; k < vv.size() / 2; k++)
+	// 	{
+	// 		int32_t p = vv[2 * k + 0];
+	// 		int32_t q = vv[2 * k + 1];
+	// 		fmap += make_pair(ROI(p, q), 1);
+	// 	}
+	// }
 
 	for(int i = 0; i < bb.hits.size(); i++)
 	{
@@ -98,9 +98,9 @@ int bundle::build_intervals()
 
 
 		// TODO: comment out the following 3 lines
-		if(ht.bridged == true) continue;
-		if((ht.flag & 0x100) >= 1) continue;
-		if(br.breads.find(ht.qname) != br.breads.end()) continue;
+		// if(ht.bridged == true) continue;
+		// if((ht.flag & 0x100) >= 1) continue;
+		// if(br.breads.find(ht.qname) != br.breads.end()) continue;
 		for(int k = 0; k < ht.itvm.size(); k++)
 		{
 			int32_t s = high32(ht.itvm[k]);
@@ -115,39 +115,39 @@ int bundle::build_junctions()
 {
 	map<int64_t, vector<hit*>> m;		// bridged fragments
 	// TODO: comment out the following paragraph
-	for(int i = 0; i < br.fragments.size(); i++)
-	{
-		fragment &fr = br.fragments[i];
-		if(fr.paths.size() != 1 || fr.paths[0].type != 1) continue;
-		vector<int32_t> vv = br.get_splices(fr);
-		if(vv.size() <= 0) continue;
-		assert(vv.size() % 2 == 0);
+	// for(int i = 0; i < br.fragments.size(); i++)
+	// {
+	// 	fragment &fr = br.fragments[i];
+	// 	if(fr.paths.size() != 1 || fr.paths[0].type != 1) continue;
+	// 	vector<int32_t> vv = br.get_splices(fr);
+	// 	if(vv.size() <= 0) continue;
+	// 	assert(vv.size() % 2 == 0);
 
-		for(int k = 0; k < vv.size() / 2; k++)
-		{
-			int64_t p = pack(vv[2 * k + 0], vv[2 * k + 1]);
+	// 	for(int k = 0; k < vv.size() / 2; k++)
+	// 	{
+	// 		int64_t p = pack(vv[2 * k + 0], vv[2 * k + 1]);
 
-			if(m.find(p) == m.end())
-			{
-				vector<hit*> hv;
-				hv.push_back(fr.h1);
-				//hv.push_back(fr.h2);
-				m.insert(pair< int64_t, vector<hit*> >(p, hv));
-			}
-			else
-			{
-				m[p].push_back(fr.h1);
-				//m[p].push_back(fr.h2);
-			}
-		}
-	}
+	// 		if(m.find(p) == m.end())
+	// 		{
+	// 			vector<hit*> hv;
+	// 			hv.push_back(fr.h1);
+	// 			//hv.push_back(fr.h2);
+	// 			m.insert(pair< int64_t, vector<hit*> >(p, hv));
+	// 		}
+	// 		else
+	// 		{
+	// 			m[p].push_back(fr.h1);
+	// 			//m[p].push_back(fr.h2);
+	// 		}
+	// 	}
+	// }
 
 	for(int i = 0; i < bb.hits.size(); i++)
 	{
 		// TODO: comment out the follwoing 3
-		if(bb.hits[i].bridged == true) continue;
-		if((bb.hits[i].flag & 0x100) >= 1) continue;
-		if(br.breads.find(bb.hits[i].qname) != br.breads.end()) continue;
+		// if(bb.hits[i].bridged == true) continue;
+		// if((bb.hits[i].flag & 0x100) >= 1) continue;
+		// if(br.breads.find(bb.hits[i].qname) != br.breads.end()) continue;
 
 		vector<int64_t> v = bb.hits[i].spos;
 		if(v.size() == 0) continue;
@@ -1493,27 +1493,27 @@ int bundle::build_hyper_set()
 	map<vector<int>, int> m;
 
 	// TODO: skip the followoing two paragraphs
-	for(int k = 0; k < br.fragments.size(); k++)
-	{
-		fragment &fr = br.fragments[k];
+	// for(int k = 0; k < br.fragments.size(); k++)
+	// {
+	// 	fragment &fr = br.fragments[k];
 
-		if(fr.type != 0) continue;	// note by Qimin, skip if not paired-end fragments
+	// 	if(fr.type != 0) continue;	// note by Qimin, skip if not paired-end fragments
 
-		if(fr.h1->paired != true) printf("error type: %d\n", fr.type);
-		assert(fr.h1->paired == true);
-		assert(fr.h2->paired == true);
+	// 	if(fr.h1->paired != true) printf("error type: %d\n", fr.type);
+	// 	assert(fr.h1->paired == true);
+	// 	assert(fr.h2->paired == true);
 
-		if(fr.paths.size() != 1) continue;
-		if(fr.paths[0].type != 1) continue;
+	// 	if(fr.paths.size() != 1) continue;
+	// 	if(fr.paths[0].type != 1) continue;
 
-		//if(fr.h1->bridged == false) continue;
-		//if(fr.h2->bridged == false) continue;
+	// 	//if(fr.h1->bridged == false) continue;
+	// 	//if(fr.h2->bridged == false) continue;
 
-		vector<int> v = align_fragment(fr);
+	// 	vector<int> v = align_fragment(fr);
 		
-		if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, fr.cnt));
-		else m[v] += fr.cnt;
-	}
+	// 	if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, fr.cnt));
+	// 	else m[v] += fr.cnt;
+	// }
 
 	
 	// note by Qimin, bridge umi-linked fragments into one single long path
@@ -1532,8 +1532,8 @@ int bundle::build_hyper_set()
 			if(fr.paths.size() != 1) continue;
 
 			// TODO: "bridged" may not be correct
-			if(fr.h1->bridged == false) continue;
-			if(fr.h2->bridged == false) continue;
+			// if(fr.h1->bridged == false) continue;
+			// if(fr.h2->bridged == false) continue;
 
 			v = align_fragment(fr);
 			if(fr.paths.size() != 1 || fr.paths[0].type != 1) v.clear();

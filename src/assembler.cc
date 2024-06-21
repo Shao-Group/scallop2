@@ -51,10 +51,10 @@ int assembler::assemble()
 		if((p.flag & 0x4) >= 1) continue;										// read is not mapped
 
 		// TODO: maybe do not use the following four lines
-		if((p.flag & 0x100) >= 1 && use_second_alignment == false) continue;	// secondary alignment
-		if(p.n_cigar > max_num_cigar) continue;									// ignore hits with more than max-num-cigar types
-		if(p.qual < min_mapping_quality) continue;							// ignore hits with small quality
-		if(p.n_cigar < 1) continue;												// should never happen
+		// if((p.flag & 0x100) >= 1 && use_second_alignment == false) continue;	// secondary alignment
+		// if(p.n_cigar > max_num_cigar) continue;									// ignore hits with more than max-num-cigar types
+		// if(p.qual < min_mapping_quality) continue;							// ignore hits with small quality
+		// if(p.n_cigar < 1) continue;												// should never happen
 
 		hit ht(b1t, hid++);
 		ht.set_tags(b1t);
@@ -149,7 +149,7 @@ int assembler::process(int n)
 		}
 
 		// TODO: donot use the filter below
-		if(cnt1 + cnt2 < min_num_hits_in_bundle) continue;
+		// if(cnt1 + cnt2 < min_num_hits_in_bundle) continue;
 		//if(cnt1 < 5 && cnt1 * 2 + cnt2 < min_num_hits_in_bundle) continue;
 		if(bb.tid < 0) continue;
 
@@ -162,15 +162,15 @@ int assembler::process(int n)
 
 		bundle bd(bb);
 
-		bd.build(1, true);
-		bd.print(index++);
-		assemble(bd.gr, bd.hs, ts1, ts2);
+		// bd.build(1, true);
+		// bd.print(index++);
+		// assemble(bd.gr, bd.hs, ts1, ts2);
 
-		bd.build(2, true);
-		bd.print(index++);
-		assemble(bd.gr, bd.hs, ts1, ts2);
+		// bd.build(2, true);
+		// bd.print(index++);
+		// assemble(bd.gr, bd.hs, ts1, ts2);
 
-		/*
+		
 		bd.build(1, false);
 		bd.print(index++);
 		assemble(bd.gr, bd.hs, ts1, ts2);
@@ -178,7 +178,7 @@ int assembler::process(int n)
 		bd.build(2, false);
 		bd.print(index++);
 		assemble(bd.gr, bd.hs, ts1, ts2);
-		*/
+		
 
 		int sdup = assemble_duplicates / 1 + 1;
 		int mdup = assemble_duplicates / 2 + 0;
@@ -197,13 +197,13 @@ int assembler::process(int n)
 
 		// TODO: do not use the following filters as well
 		filter ft1(gv1);
-		ft1.filter_length_coverage();
-		ft1.remove_nested_transcripts();
+		// ft1.filter_length_coverage();
+		// ft1.remove_nested_transcripts();
 		if(ft1.trs.size() >= 1) trsts.insert(trsts.end(), ft1.trs.begin(), ft1.trs.end());
 
 		filter ft2(gv2);
-		ft2.filter_length_coverage();
-		ft2.remove_nested_transcripts();
+		// ft2.filter_length_coverage();
+		// ft2.remove_nested_transcripts();
 		if(ft2.trs.size() >= 1) non_full_trsts.insert(non_full_trsts.end(), ft2.trs.begin(), ft2.trs.end());
 	}
 	pool.clear();
