@@ -373,38 +373,38 @@ int bundle::link_partial_exons()
 {
 	if(pexons.size() == 0) return 0;
 
-	// MPI lm;
-	// MPI rm;
-	// for(int i = 0; i < pexons.size(); i++)
-	// {
-	// 	int32_t l = pexons[i].lpos;
-	// 	int32_t r = pexons[i].rpos;
+	MPI lm;
+	MPI rm;
+	for(int i = 0; i < pexons.size(); i++)
+	{
+		int32_t l = pexons[i].lpos;
+		int32_t r = pexons[i].rpos;
 
-	// 	assert(lm.find(l) == lm.end());
-	// 	assert(rm.find(r) == rm.end());
-	// 	lm.insert(PPI(l, i));
-	// 	rm.insert(PPI(r, i));
-	// }
+		assert(lm.find(l) == lm.end());
+		assert(rm.find(r) == rm.end());
+		lm.insert(PPI(l, i));
+		rm.insert(PPI(r, i));
+	}
 
-	// for(int i = 0; i < junctions.size(); i++)
-	// {
-	// 	junction &b = junctions[i];
-	// 	MPI::iterator li = rm.find(b.lpos);
-	// 	MPI::iterator ri = lm.find(b.rpos);
+	for(int i = 0; i < junctions.size(); i++)
+	{
+		junction &b = junctions[i];
+		MPI::iterator li = rm.find(b.lpos);
+		MPI::iterator ri = lm.find(b.rpos);
 
-	// 	assert(li != rm.end());
-	// 	assert(ri != lm.end());
+		assert(li != rm.end());
+		assert(ri != lm.end());
 
-	// 	if(li != rm.end() && ri != lm.end())
-	// 	{
-	// 		b.lexon = li->second;
-	// 		b.rexon = ri->second;
-	// 	}
-	// 	else
-	// 	{
-	// 		b.lexon = b.rexon = -1;
-	// 	}
-	// }
+		if(li != rm.end() && ri != lm.end())
+		{
+			b.lexon = li->second;
+			b.rexon = ri->second;
+		}
+		else
+		{
+			b.lexon = b.rexon = -1;
+		}
+	}
 	return 0;
 }
 
