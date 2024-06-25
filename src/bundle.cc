@@ -1517,94 +1517,94 @@ int bundle::build_hyper_set()
 
 	
 	// note by Qimin, bridge umi-linked fragments into one single long path
-	for(int k = 0; k < br.umiLink.size(); k++)
-	{
-		vector<int> v;
-		v.clear();
+	// for(int k = 0; k < br.umiLink.size(); k++)
+	// {
+	// 	vector<int> v;
+	// 	v.clear();
 
-		int cnt = 0;
+	// 	int cnt = 0;
 
-		// if only one fr, no need to bridge into longer one
-		if(br.umiLink[k].size() == 1)
-		{
-			fragment &fr = br.fragments[(br.umiLink[k][0])];
+	// 	// if only one fr, no need to bridge into longer one
+	// 	if(br.umiLink[k].size() == 1)
+	// 	{
+	// 		fragment &fr = br.fragments[(br.umiLink[k][0])];
 
-			if(fr.paths.size() != 1) continue;
+	// 		if(fr.paths.size() != 1) continue;
 
-			// TODO: "bridged" may not be correct
-			// if(fr.h1->bridged == false) continue;
-			// if(fr.h2->bridged == false) continue;
+	// 		// TODO: "bridged" may not be correct
+	// 		// if(fr.h1->bridged == false) continue;
+	// 		// if(fr.h2->bridged == false) continue;
 
-			v = align_fragment(fr);
-			if(fr.paths.size() != 1 || fr.paths[0].type != 1) v.clear();
+	// 		v = align_fragment(fr);
+	// 		if(fr.paths.size() != 1 || fr.paths[0].type != 1) v.clear();
 
-			if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, fr.cnt));
-			else m[v] += fr.cnt;
+	// 		if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, fr.cnt));
+	// 		else m[v] += fr.cnt;
 
-			continue;
-		}
+	// 		continue;
+	// 	}
 
-		// if multiple fr in umi-link, bridge into one single long path
-		for(int kk = 0; kk < br.umiLink[k].size(); kk++)
-		{
-			fragment &fr = br.fragments[(br.umiLink[k][kk])];
+	// 	// if multiple fr in umi-link, bridge into one single long path
+	// 	for(int kk = 0; kk < br.umiLink[k].size(); kk++)
+	// 	{
+	// 		fragment &fr = br.fragments[(br.umiLink[k][kk])];
 
-			// if unbridge, then trucate and add to m
-			if(fr.paths.size() != 1 || fr.h1->bridged == false || fr.h2->bridged == false)
-			{
-				if(v.size() > 0)
-				{
-					if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, cnt));
-					else m[v] += cnt;
-				}
+	// 		// if unbridge, then trucate and add to m
+	// 		if(fr.paths.size() != 1 || fr.h1->bridged == false || fr.h2->bridged == false)
+	// 		{
+	// 			if(v.size() > 0)
+	// 			{
+	// 				if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, cnt));
+	// 				else m[v] += cnt;
+	// 			}
 
-				v.clear();
-				cnt = 0;
+	// 			v.clear();
+	// 			cnt = 0;
 
-				continue;
-			}
+	// 			continue;
+	// 		}
 
-			// otherwise, add and merge cur_v to v
-			vector<int> cur_v = align_fragment(fr);
-			if(fr.paths.size() != 1 || fr.paths[0].type != 1) cur_v.clear();
+	// 		// otherwise, add and merge cur_v to v
+	// 		vector<int> cur_v = align_fragment(fr);
+	// 		if(fr.paths.size() != 1 || fr.paths[0].type != 1) cur_v.clear();
 
-			if(cur_v.size()==0)
-			{
-				if(v.size() > 0)
-				{
-					if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, cnt));
-					else m[v] += cnt;
-				}
+	// 		if(cur_v.size()==0)
+	// 		{
+	// 			if(v.size() > 0)
+	// 			{
+	// 				if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, cnt));
+	// 				else m[v] += cnt;
+	// 			}
 
-				v.clear();
-				cnt = 0;
+	// 			v.clear();
+	// 			cnt = 0;
 
-				continue;
+	// 			continue;
 
-			}
-			cnt += fr.cnt;
+	// 		}
+	// 		cnt += fr.cnt;
 
-			v.insert(v.end(), cur_v.begin(), cur_v.end());
-			sort(v.begin(), v.end());
-			vector<int>::iterator iter = unique(v.begin(),v.end());
-			v.erase(iter,v.end());
-		}
+	// 		v.insert(v.end(), cur_v.begin(), cur_v.end());
+	// 		sort(v.begin(), v.end());
+	// 		vector<int>::iterator iter = unique(v.begin(),v.end());
+	// 		v.erase(iter,v.end());
+	// 	}
 
-		if(v.size() > 0)
-		{
-			/*
-			printf("v = ");
-			for(int ii = 0; ii < v.size(); ii++)
-			{
-				printf("%d ", v[ii]);
-			}
-			printf("\n");
-			*/
+	// 	if(v.size() > 0)
+	// 	{
+	// 		/*
+	// 		printf("v = ");
+	// 		for(int ii = 0; ii < v.size(); ii++)
+	// 		{
+	// 			printf("%d ", v[ii]);
+	// 		}
+	// 		printf("\n");
+	// 		*/
 
-			if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, cnt));
-			else m[v] += cnt;
-		}
-	}
+	// 		if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, cnt));
+	// 		else m[v] += cnt;
+	// 	}
+	// }
 	
 	// TODO: use starring from here
 	for(int k = 0; k < bb.hits.size(); k++)
