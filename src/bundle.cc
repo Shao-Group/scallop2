@@ -20,9 +20,9 @@ See LICENSE for licensing.
 #include "undirected_graph.h"
 
 bundle::bundle(bundle_base &b)
-	: bb(b), br(b)
+	: bb(b) //, br(b)
 {
-	br.build();
+	// br.build();
 	prepare();
 }
 
@@ -349,20 +349,20 @@ vector<int> bundle::align_fragment(fragment &fr)
 	bool b = true;
 	vector<int> sp2;
 	//if(fr.paths.size() != 1 || fr.paths[0].type != 1) return sp2;
-	vector<int32_t> v = br.get_aligned_intervals(fr);
-	assert(v.size() % 2 == 0);
-	if(v.size() == 0) return sp2;
+	// vector<int32_t> v = br.get_aligned_intervals(fr);
+	// assert(v.size() % 2 == 0);
+	// if(v.size() == 0) return sp2;
 
-	for(int k = 0; k < v.size() / 2; k++)
-	{
-		int32_t p1 = v[2 * k + 0];
-		int32_t p2 = v[2 * k + 1];
-		int k1 = locate_left_partial_exon(p1);
-		int k2 = locate_right_partial_exon(p2);
-		if(k1 < 0 || k2 < 0) b = false;
-		if(b == false) break;
-		for(int j = k1; j <= k2; j++) sp2.push_back(j);
-	}
+	// for(int k = 0; k < v.size() / 2; k++)
+	// {
+	// 	int32_t p1 = v[2 * k + 0];
+	// 	int32_t p2 = v[2 * k + 1];
+	// 	int k1 = locate_left_partial_exon(p1);
+	// 	int k2 = locate_right_partial_exon(p2);
+	// 	if(k1 < 0 || k2 < 0) b = false;
+	// 	if(b == false) break;
+	// 	for(int j = k1; j <= k2; j++) sp2.push_back(j);
+	// }
 
 	vector<int> e;
 	if(b == false) return e;
@@ -373,38 +373,38 @@ int bundle::link_partial_exons()
 {
 	if(pexons.size() == 0) return 0;
 
-	MPI lm;
-	MPI rm;
-	for(int i = 0; i < pexons.size(); i++)
-	{
-		int32_t l = pexons[i].lpos;
-		int32_t r = pexons[i].rpos;
+	// MPI lm;
+	// MPI rm;
+	// for(int i = 0; i < pexons.size(); i++)
+	// {
+	// 	int32_t l = pexons[i].lpos;
+	// 	int32_t r = pexons[i].rpos;
 
-		assert(lm.find(l) == lm.end());
-		assert(rm.find(r) == rm.end());
-		lm.insert(PPI(l, i));
-		rm.insert(PPI(r, i));
-	}
+	// 	assert(lm.find(l) == lm.end());
+	// 	assert(rm.find(r) == rm.end());
+	// 	lm.insert(PPI(l, i));
+	// 	rm.insert(PPI(r, i));
+	// }
 
-	for(int i = 0; i < junctions.size(); i++)
-	{
-		junction &b = junctions[i];
-		MPI::iterator li = rm.find(b.lpos);
-		MPI::iterator ri = lm.find(b.rpos);
+	// for(int i = 0; i < junctions.size(); i++)
+	// {
+	// 	junction &b = junctions[i];
+	// 	MPI::iterator li = rm.find(b.lpos);
+	// 	MPI::iterator ri = lm.find(b.rpos);
 
-		assert(li != rm.end());
-		assert(ri != lm.end());
+	// 	assert(li != rm.end());
+	// 	assert(ri != lm.end());
 
-		if(li != rm.end() && ri != lm.end())
-		{
-			b.lexon = li->second;
-			b.rexon = ri->second;
-		}
-		else
-		{
-			b.lexon = b.rexon = -1;
-		}
-	}
+	// 	if(li != rm.end() && ri != lm.end())
+	// 	{
+	// 		b.lexon = li->second;
+	// 		b.rexon = ri->second;
+	// 	}
+	// 	else
+	// 	{
+	// 		b.lexon = b.rexon = -1;
+	// 	}
+	// }
 	return 0;
 }
 
@@ -1053,203 +1053,203 @@ bool bundle::remove_intron_contamination()
 // add by Mingfu -- to use paired-end reads to remove false boundaries
 bool bundle::remove_false_boundaries()
 {
-	map<int, int> fb1;		// end
-	map<int, int> fb2;		// start
-	for(int i = 0; i < br.fragments.size(); i++)
-	{
-		fragment &fr = br.fragments[i];
-		if(fr.paths.size() == 1 && fr.paths[0].type == 1) continue;
-		//if(fr.h1->bridged == true || fr.h2->bridged == true) continue;
+	// map<int, int> fb1;		// end
+	// map<int, int> fb2;		// start
+	// for(int i = 0; i < br.fragments.size(); i++)
+	// {
+	// 	fragment &fr = br.fragments[i];
+	// 	if(fr.paths.size() == 1 && fr.paths[0].type == 1) continue;
+	// 	//if(fr.h1->bridged == true || fr.h2->bridged == true) continue;
 
-		// only use uniquely aligned reads
-		//if(fr.h1->nh >= 2 || fr.h2->nh >= 2) continue;
-		if(br.breads.find(fr.h1->qname) != br.breads.end()) continue;
+	// 	// only use uniquely aligned reads
+	// 	//if(fr.h1->nh >= 2 || fr.h2->nh >= 2) continue;
+	// 	if(br.breads.find(fr.h1->qname) != br.breads.end()) continue;
 
-		// calculate actual length
-		vector<int> v = align_fragment(fr);
+	// 	// calculate actual length
+	// 	vector<int> v = align_fragment(fr);
 		
-		if(v.size() <= 1) continue;
+	// 	if(v.size() <= 1) continue;
 
-		int32_t tlen = 0;
-		int32_t offset1 = (fr.lpos - pexons[v.front()].lpos);
-		int32_t offset2 = (pexons[v.back()].rpos - fr.rpos);
-		for(int i = 0; i < v.size(); i++)
-		{
-			int32_t l = pexons[v[i]].rpos - pexons[v[i]].lpos;
-			tlen += l;
-		}
-		tlen -= offset1;
-		tlen -= offset2;
+	// 	int32_t tlen = 0;
+	// 	int32_t offset1 = (fr.lpos - pexons[v.front()].lpos);
+	// 	int32_t offset2 = (pexons[v.back()].rpos - fr.rpos);
+	// 	for(int i = 0; i < v.size(); i++)
+	// 	{
+	// 		int32_t l = pexons[v[i]].rpos - pexons[v[i]].lpos;
+	// 		tlen += l;
+	// 	}
+	// 	tlen -= offset1;
+	// 	tlen -= offset2;
 
-		int u1 = gr.locate_vertex(fr.h1->rpos - 1);
-		int u2 = gr.locate_vertex(fr.h2->pos);
+	// 	int u1 = gr.locate_vertex(fr.h1->rpos - 1);
+	// 	int u2 = gr.locate_vertex(fr.h2->pos);
 
-		if(u1 < 0 || u2 < 0) continue;
-		if(u1 >= u2) continue;
+	// 	if(u1 < 0 || u2 < 0) continue;
+	// 	if(u1 >= u2) continue;
 
-		vertex_info v1 = gr.get_vertex_info(u1);
-		vertex_info v2 = gr.get_vertex_info(u2);
+	// 	vertex_info v1 = gr.get_vertex_info(u1);
+	// 	vertex_info v2 = gr.get_vertex_info(u2);
 
-		int types = 0;
-		int32_t lengths = 0;
-		for(int k = 0; k < fr.paths.size(); k++) types += fr.paths[k].type;
-		for(int k = 0; k < fr.paths.size(); k++) lengths += fr.paths[k].length;
+	// 	int types = 0;
+	// 	int32_t lengths = 0;
+	// 	for(int k = 0; k < fr.paths.size(); k++) types += fr.paths[k].type;
+	// 	for(int k = 0; k < fr.paths.size(); k++) lengths += fr.paths[k].length;
 
-		bool use = true;
-		if(fr.paths.size() == 1 && types == 2 && tlen > 10000) use = false;
-		//if(fr.paths.size() == 1 && types == 2 && lengths <= 1.5 * insertsize_high) use = false;
-		//if(fr.paths.size() == 1 && types == 2 && tlen <= 1.5 * insertsize_high) use = false;
-		//if(fr.paths.size() == 1 && types == 2 && lengths <= 2 * tlen) use = false;
+	// 	bool use = true;
+	// 	if(fr.paths.size() == 1 && types == 2 && tlen > 10000) use = false;
+	// 	//if(fr.paths.size() == 1 && types == 2 && lengths <= 1.5 * insertsize_high) use = false;
+	// 	//if(fr.paths.size() == 1 && types == 2 && tlen <= 1.5 * insertsize_high) use = false;
+	// 	//if(fr.paths.size() == 1 && types == 2 && lengths <= 2 * tlen) use = false;
 
-		if(verbose >= 2) printf("%s: u1 = %d, %d-%d, u2 = %d, %d-%d, h1.rpos = %d, h2.lpos = %d, #bridging = %lu, types = %d, lengths = %d, tlen = %d, use = %c\n", 
-				fr.h1->qname.c_str(), u1, v1.lpos, v1.rpos, u2, v2.lpos, v2.rpos, fr.h1->rpos, fr.h2->pos, fr.paths.size(), types, lengths, tlen, use ? 'T' : 'F');
+	// 	if(verbose >= 2) printf("%s: u1 = %d, %d-%d, u2 = %d, %d-%d, h1.rpos = %d, h2.lpos = %d, #bridging = %lu, types = %d, lengths = %d, tlen = %d, use = %c\n", 
+	// 			fr.h1->qname.c_str(), u1, v1.lpos, v1.rpos, u2, v2.lpos, v2.rpos, fr.h1->rpos, fr.h2->pos, fr.paths.size(), types, lengths, tlen, use ? 'T' : 'F');
 
-		if(use == false) continue;
+	// 	if(use == false) continue;
 
-		//if(gr.get_vertex_info(u1).rpos == fr.h1->rpos)
-		{
-			if(fb1.find(u1) != fb1.end()) fb1[u1]++;
-			else fb1.insert(make_pair(u1, 1));
-		}
+	// 	//if(gr.get_vertex_info(u1).rpos == fr.h1->rpos)
+	// 	{
+	// 		if(fb1.find(u1) != fb1.end()) fb1[u1]++;
+	// 		else fb1.insert(make_pair(u1, 1));
+	// 	}
 
-		//if(gr.get_vertex_info(u2).lpos == fr.h2->pos)
-		{
-			if(fb2.find(u2) != fb2.end()) fb2[u2]++;
-			else fb2.insert(make_pair(u2, 1));
-		}
-	}
+	// 	//if(gr.get_vertex_info(u2).lpos == fr.h2->pos)
+	// 	{
+	// 		if(fb2.find(u2) != fb2.end()) fb2[u2]++;
+	// 		else fb2.insert(make_pair(u2, 1));
+	// 	}
+	// }
 
 	bool b = false;
-	for(auto &x : fb1)
-	{
-		PEB p = gr.edge(x.first, gr.num_vertices() - 1);
-		vertex_info vi = gr.get_vertex_info(x.first);
-		if(vi.type == EMPTY_VERTEX) continue;
-		if(p.second == false) continue;
-		double w = gr.get_vertex_weight(x.first);
-		double z = log(1 + w) / log(1 + x.second);
-		double s = log(1 + w) - log(1 + x.second);
-		if(s > 1.5) continue;
-		if(verbose >= 2) printf("detect false end boundary %d with %d reads, vertex = %d, w = %.2lf, type = %d, z = %.2lf, s = %.2lf\n", vi.rpos, x.second, x.first, w, vi.type, z, s); 
-		//gr.remove_edge(p.first);
-		vi.type = EMPTY_VERTEX;
-		gr.set_vertex_info(x.first, vi);
-		b = true;
-	}
+	// for(auto &x : fb1)
+	// {
+	// 	PEB p = gr.edge(x.first, gr.num_vertices() - 1);
+	// 	vertex_info vi = gr.get_vertex_info(x.first);
+	// 	if(vi.type == EMPTY_VERTEX) continue;
+	// 	if(p.second == false) continue;
+	// 	double w = gr.get_vertex_weight(x.first);
+	// 	double z = log(1 + w) / log(1 + x.second);
+	// 	double s = log(1 + w) - log(1 + x.second);
+	// 	if(s > 1.5) continue;
+	// 	if(verbose >= 2) printf("detect false end boundary %d with %d reads, vertex = %d, w = %.2lf, type = %d, z = %.2lf, s = %.2lf\n", vi.rpos, x.second, x.first, w, vi.type, z, s); 
+	// 	//gr.remove_edge(p.first);
+	// 	vi.type = EMPTY_VERTEX;
+	// 	gr.set_vertex_info(x.first, vi);
+	// 	b = true;
+	// }
 
-	for(auto &x : fb2)
-	{
-		PEB p = gr.edge(0, x.first);
-		vertex_info vi = gr.get_vertex_info(x.first);
-		if(vi.type == EMPTY_VERTEX) continue;
-		if(p.second == false) continue;
-		double w = gr.get_vertex_weight(x.first);
-		double z = log(1 + w) / log(1 + x.second);
-		double s = log(1 + w) - log(1 + x.second);
-		if(s > 1.5) continue;
-		if(verbose >= 2) printf("detect false start boundary %d with %d reads, vertex = %d, w = %.2lf, type = %d, z = %.2lf, s = %.2lf\n", vi.lpos, x.second, x.first, w, vi.type, z, s); 
-		//gr.remove_edge(p.first);
-		vi.type = EMPTY_VERTEX;
-		gr.set_vertex_info(x.first, vi);
-		b = true;
-	}
+	// for(auto &x : fb2)
+	// {
+	// 	PEB p = gr.edge(0, x.first);
+	// 	vertex_info vi = gr.get_vertex_info(x.first);
+	// 	if(vi.type == EMPTY_VERTEX) continue;
+	// 	if(p.second == false) continue;
+	// 	double w = gr.get_vertex_weight(x.first);
+	// 	double z = log(1 + w) / log(1 + x.second);
+	// 	double s = log(1 + w) - log(1 + x.second);
+	// 	if(s > 1.5) continue;
+	// 	if(verbose >= 2) printf("detect false start boundary %d with %d reads, vertex = %d, w = %.2lf, type = %d, z = %.2lf, s = %.2lf\n", vi.lpos, x.second, x.first, w, vi.type, z, s); 
+	// 	//gr.remove_edge(p.first);
+	// 	vi.type = EMPTY_VERTEX;
+	// 	gr.set_vertex_info(x.first, vi);
+	// 	b = true;
+	// }
 	return b;
 }
 
 bool bundle::tackle_false_boundaries()
 {
 	bool b = false;
-	vector<int> points(pexons.size(), 0);
-	for(int k = 0; k < br.fragments.size(); k++)
-	{
-		fragment &fr = br.fragments[k];
+	// vector<int> points(pexons.size(), 0);
+	// for(int k = 0; k < br.fragments.size(); k++)
+	// {
+	// 	fragment &fr = br.fragments[k];
 
-		if(fr.paths.size() != 1) continue;
-		if(fr.paths[0].type != 2) continue;
-		if(br.breads.find(fr.h1->qname) != br.breads.end()) continue;
+	// 	if(fr.paths.size() != 1) continue;
+	// 	if(fr.paths[0].type != 2) continue;
+	// 	if(br.breads.find(fr.h1->qname) != br.breads.end()) continue;
 
-		vector<int> v = align_fragment(fr);
-		if(v.size() <= 1) continue;
+	// 	vector<int> v = align_fragment(fr);
+	// 	if(v.size() <= 1) continue;
 
-		int32_t offset1 = (fr.lpos - pexons[v.front()].lpos);
-		int32_t offset2 = (pexons[v.back()].rpos - fr.rpos);
+	// 	int32_t offset1 = (fr.lpos - pexons[v.front()].lpos);
+	// 	int32_t offset2 = (pexons[v.back()].rpos - fr.rpos);
 
-		int32_t tlen = 0;
-		for(int i = 0; i < v.size(); i++)
-		{
-			int32_t l = pexons[v[i]].rpos - pexons[v[i]].lpos;
-			tlen += l;
-		}
-		tlen -= offset1;
-		tlen -= offset2;
+	// 	int32_t tlen = 0;
+	// 	for(int i = 0; i < v.size(); i++)
+	// 	{
+	// 		int32_t l = pexons[v[i]].rpos - pexons[v[i]].lpos;
+	// 		tlen += l;
+	// 	}
+	// 	tlen -= offset1;
+	// 	tlen -= offset2;
 
-		// print
-		//fr.print(99);
-		if(verbose >= 2) printf("break fragment %s: total-length = %d, bridge-length = %d\n", fr.h1->qname.c_str(), tlen, fr.paths[0].length);
-		/*
-		for(int i = 0; i < v.size(); i++)
-		{
-			int32_t l = pexons[v[i]].rpos - pexons[v[i]].lpos;
-			if(i == 0) l -= offset1;
-			if(i == v.size() - 1) l -= offset2;
-			printf(" vertex %d: length = %d, region = %d-%d -> %d\n", v[i], l, pexons[v[i]].lpos, pexons[v[i]].rpos, pexons[v[i]].rpos - pexons[v[i]].lpos);
-		}
-		*/
+	// 	// print
+	// 	//fr.print(99);
+	// 	if(verbose >= 2) printf("break fragment %s: total-length = %d, bridge-length = %d\n", fr.h1->qname.c_str(), tlen, fr.paths[0].length);
+	// 	/*
+	// 	for(int i = 0; i < v.size(); i++)
+	// 	{
+	// 		int32_t l = pexons[v[i]].rpos - pexons[v[i]].lpos;
+	// 		if(i == 0) l -= offset1;
+	// 		if(i == v.size() - 1) l -= offset2;
+	// 		printf(" vertex %d: length = %d, region = %d-%d -> %d\n", v[i], l, pexons[v[i]].lpos, pexons[v[i]].rpos, pexons[v[i]].rpos - pexons[v[i]].lpos);
+	// 	}
+	// 	*/
 
-		if(tlen < insertsize_low / 2.0) continue;
-		if(tlen > insertsize_high * 2.0) continue;
-		if(tlen >= fr.paths[0].length) continue;
+	// 	if(tlen < insertsize_low / 2.0) continue;
+	// 	if(tlen > insertsize_high * 2.0) continue;
+	// 	if(tlen >= fr.paths[0].length) continue;
 
-		for(int i = 0; i < v.size() - 1; i++)
-		{
-			partial_exon &px = pexons[v[i + 0]];
-			partial_exon &py = pexons[v[i + 1]];
-			if(px.rtype == END_BOUNDARY) 
-			{
-				if(verbose >= 2) printf("break ending vertex %d, pos = %d\n", v[i], px.rpos);
-				points[v[i + 0]] += 1;
-			}
-			if(py.ltype == START_BOUNDARY) 
-			{
-				if(verbose >= 2) printf("break starting vertex %d, pos = %d\n", v[i + 1], py.lpos);
-				points[v[i + 1]] += 1;
-			}
-		}
-	}
+	// 	for(int i = 0; i < v.size() - 1; i++)
+	// 	{
+	// 		partial_exon &px = pexons[v[i + 0]];
+	// 		partial_exon &py = pexons[v[i + 1]];
+	// 		if(px.rtype == END_BOUNDARY) 
+	// 		{
+	// 			if(verbose >= 2) printf("break ending vertex %d, pos = %d\n", v[i], px.rpos);
+	// 			points[v[i + 0]] += 1;
+	// 		}
+	// 		if(py.ltype == START_BOUNDARY) 
+	// 		{
+	// 			if(verbose >= 2) printf("break starting vertex %d, pos = %d\n", v[i + 1], py.lpos);
+	// 			points[v[i + 1]] += 1;
+	// 		}
+	// 	}
+	// }
 
-	for(int k = 0; k < points.size(); k++)
-	{
-		if(points[k] <= 0) continue;
-		vertex_info vi = gr.get_vertex_info(k + 1);
-		if(vi.type == EMPTY_VERTEX) continue;
-		PEB p = gr.edge(k + 1, gr.num_vertices() - 1);
-		if(p.second == false) continue;
-		double w = gr.get_vertex_weight(k + 1);
-		double z = log(1 + w) / log(1 + points[k]);
-		double s = log(1 + w) - log(1 + points[k]);
-		if(verbose >= 2) printf("tackle false end boundary %d with %d reads, vertex = %d, w = %.2lf, z = %.2lf, s = %.2lf\n", pexons[k].rpos, points[k], k + 1, w, z, s);
-		if(s > 1.5) continue;
-		vi.type = EMPTY_VERTEX;
-		gr.set_vertex_info(k + 1, vi);
-		b = true;
-	}
+	// for(int k = 0; k < points.size(); k++)
+	// {
+	// 	if(points[k] <= 0) continue;
+	// 	vertex_info vi = gr.get_vertex_info(k + 1);
+	// 	if(vi.type == EMPTY_VERTEX) continue;
+	// 	PEB p = gr.edge(k + 1, gr.num_vertices() - 1);
+	// 	if(p.second == false) continue;
+	// 	double w = gr.get_vertex_weight(k + 1);
+	// 	double z = log(1 + w) / log(1 + points[k]);
+	// 	double s = log(1 + w) - log(1 + points[k]);
+	// 	if(verbose >= 2) printf("tackle false end boundary %d with %d reads, vertex = %d, w = %.2lf, z = %.2lf, s = %.2lf\n", pexons[k].rpos, points[k], k + 1, w, z, s);
+	// 	if(s > 1.5) continue;
+	// 	vi.type = EMPTY_VERTEX;
+	// 	gr.set_vertex_info(k + 1, vi);
+	// 	b = true;
+	// }
 
-	for(int k = 0; k < points.size(); k++)
-	{
-		if(points[k] <= 0) continue;
-		vertex_info vi = gr.get_vertex_info(k + 1);
-		if(vi.type == EMPTY_VERTEX) continue;
-		PEB p = gr.edge(0, k + 1);
-		if(p.second == false) continue;
-		double w = gr.get_vertex_weight(k + 1);
-		double z = log(1 + w) / log(1 + points[k]);
-		double s = log(1 + w) - log(1 + points[k]);
-		if(verbose >= 2) printf("tackle false start boundary %d with %d reads, vertex = %d, w = %.2lf, z = %.2lf, s = %.2lf\n", pexons[k].lpos, points[k], k + 1, w, z, s);
-		if(s > 1.5) continue;
-		vi.type = EMPTY_VERTEX;
-		gr.set_vertex_info(k + 1, vi);
-		b = true;
-	}
+	// for(int k = 0; k < points.size(); k++)
+	// {
+	// 	if(points[k] <= 0) continue;
+	// 	vertex_info vi = gr.get_vertex_info(k + 1);
+	// 	if(vi.type == EMPTY_VERTEX) continue;
+	// 	PEB p = gr.edge(0, k + 1);
+	// 	if(p.second == false) continue;
+	// 	double w = gr.get_vertex_weight(k + 1);
+	// 	double z = log(1 + w) / log(1 + points[k]);
+	// 	double s = log(1 + w) - log(1 + points[k]);
+	// 	if(verbose >= 2) printf("tackle false start boundary %d with %d reads, vertex = %d, w = %.2lf, z = %.2lf, s = %.2lf\n", pexons[k].lpos, points[k], k + 1, w, z, s);
+	// 	if(s > 1.5) continue;
+	// 	vi.type = EMPTY_VERTEX;
+	// 	gr.set_vertex_info(k + 1, vi);
+	// 	b = true;
+	// }
 
 	return b;
 }
