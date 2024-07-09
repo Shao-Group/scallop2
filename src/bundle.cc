@@ -96,17 +96,34 @@ int bundle::build_intervals()
 	{
 		hit &ht = bb.hits[i];
 
+		// instead of using itvm, we use the splicing positions 
+		// to build the interval map of this bundle
+
+		int32_t p1 = ht.pos;
+		for(int k = 0; k < spos.size(); k++)
+		{
+			int32_t s = high32(ht.spos[k]);
+			int32_t t = low32(ht.spos[k]);
+
+			fmap += make_pair(ROI(p1, s), 1);
+			p1 = t;
+		}
+		fmap += make_pair(ROI(p1, ht.rpos), 1);
+
 
 		// TODO: comment out the following 3 lines
 		// if(ht.bridged == true) continue;
 		// if((ht.flag & 0x100) >= 1) continue;
 		// if(br.breads.find(ht.qname) != br.breads.end()) continue;
+
+		/*
 		for(int k = 0; k < ht.itvm.size(); k++)
 		{
 			int32_t s = high32(ht.itvm[k]);
 			int32_t t = low32(ht.itvm[k]);
 			fmap += make_pair(ROI(s, t), 1);
 		}
+		*/
 	}
 	return 0;
 }
