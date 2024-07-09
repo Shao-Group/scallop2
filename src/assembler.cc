@@ -214,7 +214,8 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0, transcrip
 {
 	super_graph sg(gr0, hs0);
 	sg.build();
-
+	sg.print();
+	
 	/*
 	vector<transcript> gv;
 	vector<transcript> gv1;
@@ -224,6 +225,8 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0, transcrip
 	{
 		splice_graph &gr = sg.subs[k];
 		hyper_set &hs = sg.hss[k];
+		// gr.print();
+		// gr.print_weights();
 
 		if(determine_regional_graph(gr) == true) continue;
 		if(gr.num_edges() <= 0) continue;

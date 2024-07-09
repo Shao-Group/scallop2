@@ -42,6 +42,7 @@ int scallop::assemble()
 {
 	int c = classify();
 
+	gr.print();
 	gr.print_weights();
 	hs.print();
 
