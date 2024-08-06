@@ -47,6 +47,9 @@ int bundle::build(int mode, bool revise)
 	build_splice_graph(mode);
 	if(revise == true) revise_splice_graph();
 	build_hyper_set();
+
+	rebuild_splice_graph_using_refined_hyper_set();
+	refine_hyper_set();
 	return 0;
 }
 
@@ -1647,4 +1650,191 @@ int bundle::build_hyper_set()
 		if(v.size() >= 2) hs.add_node_list(v, c);
 	}
 	return 0;
+}
+
+int bundle::refine_hyper_set()
+{
+	MVII new_nodes;
+	for(auto & x: hs.nodes)
+	{
+		vector<int> &v = x.first;
+		vector<int> newv;
+		for(int k = 0; k < v.size(); k++)
+		{
+			partial_exon &p = pexons[v[k] - 1];
+			// if p is unreliable, skip it
+			// otherwise add it to newv
+		}
+		new_nodes.insert(make_pair(newv, x.second));
+	}
+	hs.nodes = new_nodes;
+	return 0;
+}
+
+int bundle::rebuild_splice_graph_using_refined_hyper_set()
+{
+	// TODO: we fill up new_gr in this function
+	splice_graph new_gr;
+
+	//gr.clear();
+
+	// vertices: start, each region, end
+	gr.add_vertex();
+	vertex_info vi0;
+	vi0.lpos = bb.lpos;
+	vi0.rpos = bb.lpos;
+	gr.set_vertex_weight(0, 0);
+	gr.set_vertex_info(0, vi0);
+	for(int i = 0; i < pexons.size(); i++)
+	{
+		const partial_exon &r = pexons[i];
+		int length = r.rpos - r.lpos;
+		assert(length >= 1);
+		if (length < reliability_threshold) continue;
+		gr.add_vertex();
+		if(mode == 1) gr.set_vertex_weight(i + 1, r.max < min_guaranteed_edge_weight ? min_guaranteed_edge_weight : r.max);
+		if(mode == 2) gr.set_vertex_weight(i + 1, r.ave < min_guaranteed_edge_weight ? min_guaranteed_edge_weight : r.ave);
+		vertex_info vi;
+		vi.lpos = r.lpos;
+		vi.rpos = r.rpos;
+		vi.length = length;
+		vi.stddev = r.dev;
+		vi.regional = regional[i];
+		vi.type = pexons[i].type;
+		if (length < reliability_threshold) vi.reliable = false;
+		gr.set_vertex_info(i + 1, vi);
+	}
+
+	gr.add_vertex();
+	vertex_info vin;
+	vin.lpos = bb.rpos;
+	vin.rpos = bb.rpos;
+	gr.set_vertex_weight(pexons.size() + 1, 0);
+	gr.set_vertex_info(pexons.size() + 1, vin);
+
+	// we use reads to add edges
+	// TODO: use starring from here
+	for(int k = 0; k < bb.hits.size(); k++)
+	{
+		hit &h = bb.hits[k];
+
+		// skip this for now
+		/*
+		// bridged used here, but maybe okay
+		if(h.bridged == true) continue;
+		*/
+
+		// align h to old graph gr
+		vector<int> v = align_hit(h);
+
+		// remove unreliable vertices
+		vector<int> newv;
+		for(int j = 0; j < v.size(); j++)
+		{
+			partial_exon &p = pexons[v[j]];
+			// if p is unreliable, skip it
+			// otherwise add it to newv
+		}
+
+		// example: if newv = (0, 2, 4, 5)
+		// add edges or increase weight
+		for(int j = 0; j < newv.size() - 1; j++)
+		{
+			// either create new edge or increase its weight
+		}
+	}
+
+	// do not use junctions to add edges
+	/*
+	// edges: each junction => and e2w
+	for(int i = 0; i < junctions.size(); i++)
+	{
+		const junction &b = junctions[i];
+
+		if(b.lexon < 0 || b.rexon < 0) continue;
+
+		const partial_exon &x = pexons[b.lexon];
+		const partial_exon &y = pexons[b.rexon];
+
+		edge_descriptor p = gr.add_edge(b.lexon + 1, b.rexon + 1);
+		assert(b.count >= 1);
+		edge_info ei;
+		ei.weight = b.count;
+		ei.strand = b.strand;
+		gr.set_edge_info(p, ei);
+		gr.set_edge_weight(p, b.count);
+	}
+	*/
+
+	// edges: connecting start/end and pexons
+	int ss = 0;
+	int tt = pexons.size() + 1;
+	for(int i = 0; i < pexons.size(); i++)
+	{
+		const partial_exon &r = pexons[i];
+
+		if(r.ltype == START_BOUNDARY)
+		{
+			edge_descriptor p = gr.add_edge(ss, i + 1);
+			double w = min_guaranteed_edge_weight;
+			if(mode == 1) w = r.max;
+			if(mode == 2) w = r.ave;
+			if(mode == 1 && i >= 1 && pexons[i - 1].rpos == r.lpos) w -= pexons[i - 1].max;
+			if(mode == 2 && i >= 1 && pexons[i - 1].rpos == r.lpos) w -= pexons[i - 1].ave;
+			if(w < min_guaranteed_edge_weight) w = min_guaranteed_edge_weight;
+			gr.set_edge_weight(p, w);
+			edge_info ei;
+			ei.weight = w;
+			gr.set_edge_info(p, ei);
+		}
+
+		if(r.rtype == END_BOUNDARY) 
+		{
+			edge_descriptor p = gr.add_edge(i + 1, tt);
+			double w = min_guaranteed_edge_weight;
+			if(mode == 1) w = r.max;
+			if(mode == 2) w = r.ave;
+			if(mode == 1 && i < pexons.size() - 1 && pexons[i + 1].lpos == r.rpos) w -= pexons[i + 1].max;
+			if(mode == 2 && i < pexons.size() - 1 && pexons[i + 1].lpos == r.rpos) w -= pexons[i + 1].ave;
+			if(w < min_guaranteed_edge_weight) w = min_guaranteed_edge_weight;
+			gr.set_edge_weight(p, w);
+			edge_info ei;
+			ei.weight = w;
+			gr.set_edge_info(p, ei);
+		}
+	}
+
+	// be careful here v1 = [100, 300], v2 = [300, 400]
+	// in this case, if v1,v2 is not yet connected, then add edge for them
+	// edges: connecting adjacent pexons => e2w
+	for(int i = 0; i < (int)(pexons.size()) - 1; i++)
+	{
+		const partial_exon &x = pexons[i];
+		const partial_exon &y = pexons[i + 1];
+
+		if(x.rpos != y.lpos) continue;
+
+		assert(x.rpos == y.lpos);
+		
+		int xd = gr.out_degree(i + 1);
+		int yd = gr.in_degree(i + 2);
+		double wt = min_guaranteed_edge_weight;
+		if(mode == 1) wt = (xd < yd) ? x.max: y.max;
+		if(mode == 2) wt = (xd < yd) ? x.ave: y.ave;
+		//int32_t xr = compute_overlap(mmap, x.rpos - 1);
+		//int32_t yl = compute_overlap(mmap, y.lpos);
+		//double wt = xr < yl ? xr : yl;
+
+		edge_descriptor p = gr.add_edge(i + 1, i + 2);
+		double w = (wt < min_guaranteed_edge_weight) ? min_guaranteed_edge_weight : wt;
+		gr.set_edge_weight(p, w);
+		edge_info ei;
+		ei.weight = w;
+		gr.set_edge_info(p, ei);
+	}
+
+	gr.strand = bb.strand;
+	gr.chrm = bb.chrm;
+	return 0;
+
 }
