@@ -105,6 +105,9 @@ int verbose = 1;
 int assemble_duplicates = 1; // CHANGED THE VALUE TO 1
 string version = "v1.1.2";
 
+// for long-reads
+int reliability_threshold = 10;
+
 int parse_arguments(int argc, const char ** argv)
 {
 	for(int i = 1; i < argc; i++)

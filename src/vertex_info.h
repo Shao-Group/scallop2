@@ -28,6 +28,7 @@ public:
 	char lstrand;		// left side strand
 	char rstrand;		// right side strand	
 	bool regional;		// if a vertex is regional
+	bool reliable;      // if a vertex is reliable
 };
 
 #endif

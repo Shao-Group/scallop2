@@ -441,6 +441,7 @@ int bundle::build_splice_graph(int mode)
 		const partial_exon &r = pexons[i];
 		int length = r.rpos - r.lpos;
 		assert(length >= 1);
+		if (length < reliability_threshold) continue;
 		gr.add_vertex();
 		if(mode == 1) gr.set_vertex_weight(i + 1, r.max < min_guaranteed_edge_weight ? min_guaranteed_edge_weight : r.max);
 		if(mode == 2) gr.set_vertex_weight(i + 1, r.ave < min_guaranteed_edge_weight ? min_guaranteed_edge_weight : r.ave);
@@ -451,6 +452,7 @@ int bundle::build_splice_graph(int mode)
 		vi.stddev = r.dev;
 		vi.regional = regional[i];
 		vi.type = pexons[i].type;
+		if (length < reliability_threshold) vi.reliable = false;
 		gr.set_vertex_info(i + 1, vi);
 	}
 
