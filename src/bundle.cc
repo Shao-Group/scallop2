@@ -100,7 +100,7 @@ int bundle::build_intervals()
 		// to build the interval map of this bundle
 
 		int32_t p1 = ht.pos;
-		for(int k = 0; k < spos.size(); k++)
+		for(int k = 0; k < ht.spos.size(); k++)
 		{
 			int32_t s = high32(ht.spos[k]);
 			int32_t t = low32(ht.spos[k]);
