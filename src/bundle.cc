@@ -444,7 +444,7 @@ int bundle::build_splice_graph(int mode)
 		const partial_exon &r = pexons[i];
 		int length = r.rpos - r.lpos;
 		assert(length >= 1);
-		if (length < reliability_threshold) continue;
+		if (length < reliability_threshold) pexons[i].rel = false;
 		gr.add_vertex();
 		if(mode == 1) gr.set_vertex_weight(i + 1, r.max < min_guaranteed_edge_weight ? min_guaranteed_edge_weight : r.max);
 		if(mode == 2) gr.set_vertex_weight(i + 1, r.ave < min_guaranteed_edge_weight ? min_guaranteed_edge_weight : r.ave);
@@ -455,7 +455,7 @@ int bundle::build_splice_graph(int mode)
 		vi.stddev = r.dev;
 		vi.regional = regional[i];
 		vi.type = pexons[i].type;
-		if (length < reliability_threshold) vi.reliable = false;
+		// if (length < reliability_threshold) vi.reliable = false;
 		gr.set_vertex_info(i + 1, vi);
 	}
 
@@ -1655,7 +1655,7 @@ int bundle::build_hyper_set()
 int bundle::refine_hyper_set()
 {
 	MVII new_nodes;
-	for(auto & x: hs.nodes)
+	for(auto &x: hs.nodes)
 	{
 		vector<int> &v = x.first;
 		vector<int> newv;
@@ -1664,6 +1664,7 @@ int bundle::refine_hyper_set()
 			partial_exon &p = pexons[v[k] - 1];
 			// if p is unreliable, skip it
 			// otherwise add it to newv
+			if(p.rel) newv.push_back(p);
 		}
 		new_nodes.insert(make_pair(newv, x.second));
 	}
@@ -1679,21 +1680,20 @@ int bundle::rebuild_splice_graph_using_refined_hyper_set()
 	//gr.clear();
 
 	// vertices: start, each region, end
-	gr.add_vertex();
+	new_gr.add_vertex();
 	vertex_info vi0;
 	vi0.lpos = bb.lpos;
 	vi0.rpos = bb.lpos;
-	gr.set_vertex_weight(0, 0);
-	gr.set_vertex_info(0, vi0);
+	new_gr.set_vertex_weight(0, 0);
+	new_gr.set_vertex_info(0, vi0);
 	for(int i = 0; i < pexons.size(); i++)
 	{
 		const partial_exon &r = pexons[i];
 		int length = r.rpos - r.lpos;
 		assert(length >= 1);
-		if (length < reliability_threshold) continue;
-		gr.add_vertex();
-		if(mode == 1) gr.set_vertex_weight(i + 1, r.max < min_guaranteed_edge_weight ? min_guaranteed_edge_weight : r.max);
-		if(mode == 2) gr.set_vertex_weight(i + 1, r.ave < min_guaranteed_edge_weight ? min_guaranteed_edge_weight : r.ave);
+		new_gr.add_vertex();
+		if(mode == 1) new_gr.set_vertex_weight(i + 1, r.max < min_guaranteed_edge_weight ? min_guaranteed_edge_weight : r.max);
+		if(mode == 2) new_gr.set_vertex_weight(i + 1, r.ave < min_guaranteed_edge_weight ? min_guaranteed_edge_weight : r.ave);
 		vertex_info vi;
 		vi.lpos = r.lpos;
 		vi.rpos = r.rpos;
@@ -1701,16 +1701,16 @@ int bundle::rebuild_splice_graph_using_refined_hyper_set()
 		vi.stddev = r.dev;
 		vi.regional = regional[i];
 		vi.type = pexons[i].type;
-		if (length < reliability_threshold) vi.reliable = false;
-		gr.set_vertex_info(i + 1, vi);
+		
+		new_gr.set_vertex_info(i + 1, vi);
 	}
 
-	gr.add_vertex();
+	new_gr.add_vertex();
 	vertex_info vin;
 	vin.lpos = bb.rpos;
 	vin.rpos = bb.rpos;
-	gr.set_vertex_weight(pexons.size() + 1, 0);
-	gr.set_vertex_info(pexons.size() + 1, vin);
+	new_gr.set_vertex_weight(pexons.size() + 1, 0);
+	new_gr.set_vertex_info(pexons.size() + 1, vin);
 
 	// we use reads to add edges
 	// TODO: use starring from here
@@ -1734,6 +1734,7 @@ int bundle::rebuild_splice_graph_using_refined_hyper_set()
 			partial_exon &p = pexons[v[j]];
 			// if p is unreliable, skip it
 			// otherwise add it to newv
+			if(p.rel) newv.push_back(p);
 		}
 
 		// example: if newv = (0, 2, 4, 5)
@@ -1741,6 +1742,7 @@ int bundle::rebuild_splice_graph_using_refined_hyper_set()
 		for(int j = 0; j < newv.size() - 1; j++)
 		{
 			// either create new edge or increase its weight
+			
 		}
 	}
 
@@ -1775,32 +1777,32 @@ int bundle::rebuild_splice_graph_using_refined_hyper_set()
 
 		if(r.ltype == START_BOUNDARY)
 		{
-			edge_descriptor p = gr.add_edge(ss, i + 1);
+			edge_descriptor p = new_gr.add_edge(ss, i + 1);
 			double w = min_guaranteed_edge_weight;
 			if(mode == 1) w = r.max;
 			if(mode == 2) w = r.ave;
 			if(mode == 1 && i >= 1 && pexons[i - 1].rpos == r.lpos) w -= pexons[i - 1].max;
 			if(mode == 2 && i >= 1 && pexons[i - 1].rpos == r.lpos) w -= pexons[i - 1].ave;
 			if(w < min_guaranteed_edge_weight) w = min_guaranteed_edge_weight;
-			gr.set_edge_weight(p, w);
+			new_gr.set_edge_weight(p, w);
 			edge_info ei;
 			ei.weight = w;
-			gr.set_edge_info(p, ei);
+			new_gr.set_edge_info(p, ei);
 		}
 
 		if(r.rtype == END_BOUNDARY) 
 		{
-			edge_descriptor p = gr.add_edge(i + 1, tt);
+			edge_descriptor p = new_gr.add_edge(i + 1, tt);
 			double w = min_guaranteed_edge_weight;
 			if(mode == 1) w = r.max;
 			if(mode == 2) w = r.ave;
 			if(mode == 1 && i < pexons.size() - 1 && pexons[i + 1].lpos == r.rpos) w -= pexons[i + 1].max;
 			if(mode == 2 && i < pexons.size() - 1 && pexons[i + 1].lpos == r.rpos) w -= pexons[i + 1].ave;
 			if(w < min_guaranteed_edge_weight) w = min_guaranteed_edge_weight;
-			gr.set_edge_weight(p, w);
+			new_gr.set_edge_weight(p, w);
 			edge_info ei;
 			ei.weight = w;
-			gr.set_edge_info(p, ei);
+			new_gr.set_edge_info(p, ei);
 		}
 	}
 
@@ -1816,8 +1818,8 @@ int bundle::rebuild_splice_graph_using_refined_hyper_set()
 
 		assert(x.rpos == y.lpos);
 		
-		int xd = gr.out_degree(i + 1);
-		int yd = gr.in_degree(i + 2);
+		int xd = new_gr.out_degree(i + 1);
+		int yd = new_gr.in_degree(i + 2);
 		double wt = min_guaranteed_edge_weight;
 		if(mode == 1) wt = (xd < yd) ? x.max: y.max;
 		if(mode == 2) wt = (xd < yd) ? x.ave: y.ave;
@@ -1825,16 +1827,17 @@ int bundle::rebuild_splice_graph_using_refined_hyper_set()
 		//int32_t yl = compute_overlap(mmap, y.lpos);
 		//double wt = xr < yl ? xr : yl;
 
-		edge_descriptor p = gr.add_edge(i + 1, i + 2);
+		edge_descriptor p = new_gr.add_edge(i + 1, i + 2);
 		double w = (wt < min_guaranteed_edge_weight) ? min_guaranteed_edge_weight : wt;
-		gr.set_edge_weight(p, w);
+		new_gr.set_edge_weight(p, w);
 		edge_info ei;
 		ei.weight = w;
-		gr.set_edge_info(p, ei);
+		new_gr.set_edge_info(p, ei);
 	}
 
-	gr.strand = bb.strand;
-	gr.chrm = bb.chrm;
+	new_gr.strand = bb.strand;
+	new_gr.chrm = bb.chrm;
+	gr = new_gr;
 	return 0;
 
 }
