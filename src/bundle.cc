@@ -49,7 +49,7 @@ int bundle::build(int mode, bool revise)
 	build_hyper_set();
 
 	rebuild_splice_graph_using_refined_hyper_set();
-	refine_hyper_set();
+	//refine_hyper_set();
 	return 0;
 }
 
@@ -1734,7 +1734,7 @@ int bundle::rebuild_splice_graph_using_refined_hyper_set()
 			partial_exon &p = pexons[v[j]];
 			// if p is unreliable, skip it
 			// otherwise add it to newv
-			if(p.rel) newv.push_back(p);
+			if(p.rel) newv.push_back(v[j]);
 		}
 
 		// example: if newv = (0, 2, 4, 5)
@@ -1742,13 +1742,25 @@ int bundle::rebuild_splice_graph_using_refined_hyper_set()
 		for(int j = 0; j < newv.size() - 1; j++)
 		{
 			// either create new edge or increase its weight
-			edge_descriptor p = new_gr.add_edge(b.lexon + 1, b.rexon + 1);
-			// assert(b.count >= 1);
-			edge_info ei;
-			// ei.weight = b.count;
-			// ei.strand = b.strand;
-			new_gr.set_edge_info(p, ei);
-			new_gr.set_edge_weight(p, b.count);
+			int v1 = newv[j + 0] + 1;
+			int v2 = newv[j + 1] + 1;
+			PEB peb = new_gr.edge(v1, v2);
+			if(peb.second == false)
+			{
+				edge_descriptor p = new_gr.add_edge(v1, v2);
+				edge_info ei;
+				ei.weight = 1;
+				new_gr.set_edge_info(p, ei);
+				new_gr.set_edge_weight(p, 1);
+			}
+			else
+			{
+				double w = new_gr.get_edge_weight(peb.first) + 1;
+				new_gr.set_edge_weight(peb.first, w);
+				edge_info ei = new_gr.get_edge_info(peb.first);
+				ei.weight = w;
+				new_gr.set_edge_info(peb.first, ei);
+			}
 		}
 	}
 
@@ -1821,9 +1833,17 @@ int bundle::rebuild_splice_graph_using_refined_hyper_set()
 		const partial_exon &y = pexons[i + 1];
 
 		if(x.rpos != y.lpos) continue;
+		
+		if(x.rel == false) continue;
+		if(y.rel == false) continue;
+
+		if(new_gr.edge(i + 1, i + 2).second == true) continue;
+		
+		// a rare case that we should add an edge
 
 		assert(x.rpos == y.lpos);
 		
+		/*
 		int xd = new_gr.out_degree(i + 1);
 		int yd = new_gr.in_degree(i + 2);
 		double wt = min_guaranteed_edge_weight;
@@ -1832,10 +1852,11 @@ int bundle::rebuild_splice_graph_using_refined_hyper_set()
 		//int32_t xr = compute_overlap(mmap, x.rpos - 1);
 		//int32_t yl = compute_overlap(mmap, y.lpos);
 		//double wt = xr < yl ? xr : yl;
+		*/
 
+		//double w = (wt < min_guaranteed_edge_weight) ? min_guaranteed_edge_weight : wt;
 		edge_descriptor p = new_gr.add_edge(i + 1, i + 2);
-		double w = (wt < min_guaranteed_edge_weight) ? min_guaranteed_edge_weight : wt;
-		new_gr.set_edge_weight(p, w);
+		new_gr.set_edge_weight(p, 1);
 		edge_info ei;
 		ei.weight = w;
 		new_gr.set_edge_info(p, ei);
@@ -1845,5 +1866,4 @@ int bundle::rebuild_splice_graph_using_refined_hyper_set()
 	new_gr.chrm = bb.chrm;
 	gr = new_gr;
 	return 0;
-
 }
