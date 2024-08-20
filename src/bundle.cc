@@ -1742,7 +1742,13 @@ int bundle::rebuild_splice_graph_using_refined_hyper_set()
 		for(int j = 0; j < newv.size() - 1; j++)
 		{
 			// either create new edge or increase its weight
-			
+			edge_descriptor p = new_gr.add_edge(b.lexon + 1, b.rexon + 1);
+			// assert(b.count >= 1);
+			edge_info ei;
+			// ei.weight = b.count;
+			// ei.strand = b.strand;
+			new_gr.set_edge_info(p, ei);
+			new_gr.set_edge_weight(p, b.count);
 		}
 	}
 

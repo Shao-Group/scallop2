@@ -30,6 +30,7 @@ public:
 	double ave;						// average abundance
 	double max;						// maximum abundance
 	double dev;						// standard-deviation of abundance
+	bool rel;                       // reliability
 
 public:
 	string label() const;
