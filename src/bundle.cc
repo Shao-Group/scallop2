@@ -48,7 +48,7 @@ int bundle::build(int mode, bool revise)
 	if(revise == true) revise_splice_graph();
 	build_hyper_set();
 
-	rebuild_splice_graph_using_refined_hyper_set();
+	rebuild_splice_graph_using_refined_hyper_set(mode);
 	//refine_hyper_set();
 	return 0;
 }
@@ -1654,25 +1654,25 @@ int bundle::build_hyper_set()
 
 int bundle::refine_hyper_set()
 {
-	MVII new_nodes;
-	for(auto &x: hs.nodes)
-	{
-		vector<int> &v = x.first;
-		vector<int> newv;
-		for(int k = 0; k < v.size(); k++)
-		{
-			partial_exon &p = pexons[v[k] - 1];
-			// if p is unreliable, skip it
-			// otherwise add it to newv
-			if(p.rel) newv.push_back(p);
-		}
-		new_nodes.insert(make_pair(newv, x.second));
-	}
-	hs.nodes = new_nodes;
+	//MVII new_nodes;
+	//for(auto &x: hs.nodes)
+	//{
+	//	vector<int> &v = x.first;
+	//	vector<int> newv;
+	//	for(int k = 0; k < v.size(); k++)
+	//	{
+	//		partial_exon &p = pexons[v[k] - 1];
+	//		// if p is unreliable, skip it
+	//		// otherwise add it to newv
+	//		if(p.rel) newv.push_back(p);
+	//	}
+	//	new_nodes.insert(make_pair(newv, x.second));
+	//}
+	//hs.nodes = new_nodes;
 	return 0;
 }
 
-int bundle::rebuild_splice_graph_using_refined_hyper_set()
+int bundle::rebuild_splice_graph_using_refined_hyper_set(int mode)
 {
 	// TODO: we fill up new_gr in this function
 	splice_graph new_gr;
@@ -1858,7 +1858,7 @@ int bundle::rebuild_splice_graph_using_refined_hyper_set()
 		edge_descriptor p = new_gr.add_edge(i + 1, i + 2);
 		new_gr.set_edge_weight(p, 1);
 		edge_info ei;
-		ei.weight = w;
+		ei.weight = 1;
 		new_gr.set_edge_info(p, ei);
 	}
 

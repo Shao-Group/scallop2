@@ -69,6 +69,7 @@ public:
 	int build_partial_exons();
 	int link_partial_exons();
 	int build_splice_graph(int mode);
+	int rebuild_splice_graph_using_refined_hyper_set(int mode);
 	int build_partial_exon_map();
 	int locate_left_partial_exon(int32_t x);
 	int locate_right_partial_exon(int32_t x);
@@ -93,6 +94,7 @@ public:
 
 	// hyper set
 	int build_hyper_set();
+	int refine_hyper_set();
 };
 
 #endif
