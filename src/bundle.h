@@ -41,6 +41,7 @@ public:
 	vector<bool> regional;			// if a pe is regional
 	split_interval_map pmap;		// partial exon map
 	splice_graph gr;				// splice graph
+	splice_graph new_gr;				// splice graph
 	hyper_set hs;					// hyper set
 
 public:
@@ -80,6 +81,7 @@ public:
 	VE compute_maximal_edges();
 	int revise_splice_graph();
 	int refine_splice_graph();
+	int refine_modified_splice_graph();
 	bool keep_surviving_edges();
 	bool extend_boundaries();
 	bool extend_start_boundaries();

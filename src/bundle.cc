@@ -47,8 +47,10 @@ int bundle::build(int mode, bool revise)
 	build_splice_graph(mode);
 	if(revise == true) revise_splice_graph();
 	build_hyper_set();
-
+	// printf("rebuild splice graph started ....");
 	rebuild_splice_graph_using_refined_hyper_set(mode);
+	refine_modified_splice_graph();
+	// printf("rebuild splice graph completed ...");
 	//refine_hyper_set();
 	return 0;
 }
@@ -619,6 +621,22 @@ int bundle::refine_splice_graph()
 	return 0;
 }
 
+int bundle::refine_modified_splice_graph()
+{
+	while(true)
+	{
+		bool b = false;
+		for(int i = 1; i < new_gr.num_vertices() - 1; i++)
+		{
+			if(new_gr.degree(i) == 0) continue;
+			if(new_gr.in_degree(i) >= 1 && new_gr.out_degree(i) >= 1) continue;
+			new_gr.clear_vertex(i);
+			b = true;
+		}
+		if(b == false) break;
+	}
+	return 0;
+}
 bool bundle::extend_start_boundaries()
 {
 	bool flag = false;
@@ -1675,7 +1693,7 @@ int bundle::refine_hyper_set()
 int bundle::rebuild_splice_graph_using_refined_hyper_set(int mode)
 {
 	// TODO: we fill up new_gr in this function
-	splice_graph new_gr;
+	// splice_graph new_gr;
 
 	//gr.clear();
 
@@ -1864,6 +1882,6 @@ int bundle::rebuild_splice_graph_using_refined_hyper_set(int mode)
 
 	new_gr.strand = bb.strand;
 	new_gr.chrm = bb.chrm;
-	gr = new_gr;
+	// gr = new_gr;
 	return 0;
 }

@@ -82,7 +82,7 @@ int assembler::assemble()
 			pool.push_back(bb2);
 			bb2.clear();
 		}
-
+		
 		// process
 		process(batch_bundle_size);
 
@@ -170,14 +170,15 @@ int assembler::process(int n)
 		// bd.print(index++);
 		// assemble(bd.gr, bd.hs, ts1, ts2);
 
-		
 		bd.build(1, false);
 		bd.print(index++);
-		assemble(bd.gr, bd.hs, ts1, ts2);
+		// assemble(bd.gr, bd.hs, ts1, ts2);
+		assemble(bd.new_gr, bd.hs, ts1, ts2);
 
 		bd.build(2, false);
 		bd.print(index++);
-		assemble(bd.gr, bd.hs, ts1, ts2);
+		// assemble(bd.gr, bd.hs, ts1, ts2);
+		assemble(bd.new_gr, bd.hs, ts1, ts2);
 		
 
 		int sdup = assemble_duplicates / 1 + 1;
@@ -213,7 +214,10 @@ int assembler::process(int n)
 int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0, transcript_set &ts1, transcript_set &ts2)
 {
 	super_graph sg(gr0, hs0);
+	printf("sg started");
 	sg.build();
+	printf("sg finished");
+	
 	sg.print();
 	
 	/*
