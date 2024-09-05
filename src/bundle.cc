@@ -46,10 +46,10 @@ int bundle::build(int mode, bool revise)
 {
 	build_splice_graph(mode);
 	if(revise == true) revise_splice_graph();
-	build_hyper_set();
 	// printf("rebuild splice graph started ....");
 	rebuild_splice_graph_using_refined_hyper_set(mode);
 	refine_modified_splice_graph();
+	build_hyper_set();
 	// printf("rebuild splice graph completed ...");
 	//refine_hyper_set();
 	return 0;
@@ -1654,7 +1654,14 @@ int bundle::build_hyper_set()
 		// bridged used here, but maybe okay
 		if(h.bridged == true) continue;
 
-		vector<int> v = align_hit(h);
+		vector<int> v1 = align_hit(h);
+
+		// v is the list of nodes without unrealizable ones
+		vector<int> v;
+		for(int j=0; j < v1.size(); j++)
+		{
+			if(v1[j].rel == true) v.push_back(v1[j]); 
+		}
 		
 		if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, 1));
 		else m[v] += 1;
@@ -1667,6 +1674,7 @@ int bundle::build_hyper_set()
 		int c = it->second;
 		if(v.size() >= 2) hs.add_node_list(v, c);
 	}
+	hs.print();
 	return 0;
 }
 
