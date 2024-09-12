@@ -46,7 +46,7 @@ int bundle::build(int mode, bool revise)
 {
 	build_splice_graph(mode);
 	if(revise == true) revise_splice_graph();
-	// printf("rebuild splice graph started ....");
+	printf("rebuild splice graph started ....");
 	rebuild_splice_graph_using_refined_hyper_set(mode);
 	refine_modified_splice_graph();
 	build_hyper_set();
@@ -447,6 +447,7 @@ int bundle::build_splice_graph(int mode)
 		int length = r.rpos - r.lpos;
 		assert(length >= 1);
 		if (length < reliability_threshold) pexons[i].rel = false;
+		else pexons[i].rel = true; //TODO: add else later
 		gr.add_vertex();
 		if(mode == 1) gr.set_vertex_weight(i + 1, r.max < min_guaranteed_edge_weight ? min_guaranteed_edge_weight : r.max);
 		if(mode == 2) gr.set_vertex_weight(i + 1, r.ave < min_guaranteed_edge_weight ? min_guaranteed_edge_weight : r.ave);
@@ -1393,18 +1394,21 @@ int bundle::print(int index)
 	//for(int i = 0; i < bb.hits.size(); i++) bb.hits[i].print();
 
 	// print regions
+	printf("Printing regions:\n");
 	for(int i = 0; i < regions.size(); i++)
 	{
 		regions[i].print(i);
 	}
 
 	// print junctions 
+	printf("Printing junctions:\n");
 	for(int i = 0; i < junctions.size(); i++)
 	{
 		junctions[i].print(bb.chrm, i);
 	}
 
 	// print partial exons
+	printf("Printing pexons:\n");
 	for(int i = 0; i < pexons.size(); i++)
 	{
 		pexons[i].print(i);
@@ -1660,7 +1664,10 @@ int bundle::build_hyper_set()
 		vector<int> v;
 		for(int j=0; j < v1.size(); j++)
 		{
-			if(v1[j].rel == true) v.push_back(v1[j]); 
+			partial_exon &p = pexons[v1[j]];
+			// if p is unreliable, skip it
+			// otherwise add it to newv
+			if(p.rel == true) v.push_back(v1[j]);
 		}
 		
 		if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, 1));
@@ -1674,6 +1681,9 @@ int bundle::build_hyper_set()
 		int c = it->second;
 		if(v.size() >= 2) hs.add_node_list(v, c);
 	}
+	printf("------------------------------------\n");
+
+	//printf("Printing the modified hyperset for Bundle %d:\n", index);
 	hs.print();
 	return 0;
 }
@@ -1703,7 +1713,7 @@ int bundle::rebuild_splice_graph_using_refined_hyper_set(int mode)
 	// TODO: we fill up new_gr in this function
 	// splice_graph new_gr;
 
-	//gr.clear();
+	new_gr.clear();
 
 	// vertices: start, each region, end
 	new_gr.add_vertex();
@@ -1760,14 +1770,19 @@ int bundle::rebuild_splice_graph_using_refined_hyper_set(int mode)
 			partial_exon &p = pexons[v[j]];
 			// if p is unreliable, skip it
 			// otherwise add it to newv
-			if(p.rel) newv.push_back(v[j]);
+			if(p.rel == true) newv.push_back(v[j]);
 		}
 
 		// example: if newv = (0, 2, 4, 5)
 		// add edges or increase weight
-		for(int j = 0; j < newv.size() - 1; j++)
+		//printf("newv size: %lu , old_v size = %lu\n", newv.size(), v.size() );	
+		//if(newv.size() <= 0) continue;
+
+		for(int j = 0; j < (int)(newv.size() - 1) ; j++)
 		{
 			// either create new edge or increase its weight
+			
+			//printf("j = %d,", j);
 			int v1 = newv[j + 0] + 1;
 			int v2 = newv[j + 1] + 1;
 			PEB peb = new_gr.edge(v1, v2);
@@ -1788,6 +1803,7 @@ int bundle::rebuild_splice_graph_using_refined_hyper_set(int mode)
 				new_gr.set_edge_info(peb.first, ei);
 			}
 		}
+		//printf("\nDone making newv\n");
 	}
 
 	// do not use junctions to add edges
