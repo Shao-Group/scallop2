@@ -178,6 +178,8 @@ int region::build_partial_exons()
 	{
 		partial_exon pe(lpos, rpos, ltype, rtype);
 		evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev, pe.max);
+
+		// TODO; print pe.lpos, pe.rpos, pe.ave
 		pexons.push_back(pe);
 		return 0;
 	}
@@ -210,7 +212,11 @@ int region::build_partial_exons()
 		if(b == true) pe.type = EMPTY_VERTEX;
 		else pe.type = 0;
 
+
 		evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev, pe.max);
+
+		// TODO; print pe.lpos, pe.rpos, pe.ave, type
+
 		pexons.push_back(pe);
 	}
 
