@@ -180,6 +180,7 @@ int region::build_partial_exons()
 		evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev, pe.max);
 
 		// TODO; print pe.lpos, pe.rpos, pe.ave
+		printf("pos = [%d, %d), cov = %.2lf, type=%d\n", pe.lpos, pe.rpos, pe.ave, pe.type);
 		pexons.push_back(pe);
 		return 0;
 	}
@@ -214,9 +215,9 @@ int region::build_partial_exons()
 
 
 		evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev, pe.max);
-
+		
 		// TODO; print pe.lpos, pe.rpos, pe.ave, type
-
+		printf("pos = [%d, %d), cov = %.2lf, type=%d\n", pe.lpos, pe.rpos, pe.ave, pe.type);
 		pexons.push_back(pe);
 	}
 
