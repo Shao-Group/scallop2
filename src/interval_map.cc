@@ -98,6 +98,7 @@ int32_t compute_sum_overlap(const split_interval_map &imap, SIMI &p, SIMI &q)
 		int u = upper(it->first);
 		assert(u > l);
 
+		// TODO: uncomment the line below
 		//printf(" AA add [%d, %d) : %d\n", lower(it->first), upper(it->first), it->second);
 
 		s += (u - l) * it->second;
@@ -152,6 +153,8 @@ int evaluate_rectangle(const split_interval_map &imap, int ll, int rr, double &a
 	//if(dev < 1.0) dev = 1.0;
 
 	max = 1.0 * compute_max_overlap(imap, lit, rit);
+
+	// TODO: print, ll, rr, ave, var, dev
 	return 0;
 }
 
