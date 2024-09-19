@@ -57,7 +57,7 @@ int bundle_base::add_hit(const hit &ht)
 	{
 		int32_t s = high32(ht.itvm[k]);
 		int32_t t = low32(ht.itvm[k]);
-		//printf(" add interval %d-%d\n", s, t);
+		printf(" add interval %d-%d\n", s, t);
 		mmap += make_pair(ROI(s, t), 1);
 	}
 
