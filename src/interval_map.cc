@@ -105,7 +105,7 @@ int32_t compute_sum_overlap(const split_interval_map &imap, SIMI &p, SIMI &q)
 	}
 	if(q != imap.end())
 	{
-		//printf(" BB add [%d, %d) : %d\n", lower(q->first), upper(q->first), q->second);
+		printf(" BB add [%d, %d) : %d\n", lower(q->first), upper(q->first), q->second);
 		s += (upper(q->first) - lower(q->first)) * q->second;
 	}
 	return s;
