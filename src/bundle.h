@@ -76,6 +76,7 @@ public:
 	int locate_right_partial_exon(int32_t x);
 	vector<int> align_hit(hit &h);
 	vector<int> align_fragment(fragment &f);
+	void print_fmap();
 
 	// revise splice graph
 	VE compute_maximal_edges();

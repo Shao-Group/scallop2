@@ -48,6 +48,7 @@ int region::build_join_interval_map()
 	{
 		//if(it->second >= 2) 
 		jmap += make_pair(it->first, 1);
+		printf("Adding %d, %d to jmap\n", lower(it->first), upper(it->first));
 		if(it == rit) break;
 		it++;
 	}

@@ -124,8 +124,8 @@ hit::hit(bam1_t *b, int id)
 
 		if(k == 0 || k == n_cigar - 1) continue;
 		if(bam_cigar_op(cigar[k]) != BAM_CREF_SKIP) continue;
-		if(bam_cigar_op(cigar[k-1]) != BAM_CMATCH) continue;
-		if(bam_cigar_op(cigar[k+1]) != BAM_CMATCH) continue;
+		// if(bam_cigar_op(cigar[k-1]) != BAM_CMATCH) continue;
+		// if(bam_cigar_op(cigar[k+1]) != BAM_CMATCH) continue;
 
 		// consider ALL splice positions
 		//if(bam_cigar_oplen(cigar[k-1]) < min_flank_length) continue;
@@ -316,7 +316,7 @@ bool hit::operator<(const hit &h) const
 int hit::print() const
 {
 	// print basic information
-	printf("Hit %s: hid = %d, [%d-%d), mpos = %d, flag = %d, quality = %d, strand = %c, xs = %c, ts = %c, isize = %d, qlen = %d, hi = %d, nh = %d, umi = %s, bridged = %c\n", 
+	printf("Hit %s: hid = %d, [%d-%d), mpos = %d, flag = %d, quality = %d, strand = %c, xs = %c, ts = %c, isize = %lu, qlen = %d, hi = %d, nh = %d, umi = %s, bridged = %c\n", 
 			qname.c_str(), hid, pos, rpos, mpos, flag, qual, strand, xs, ts, isize, qlen, hi, nh, umi.c_str(), bridged ? 'T' : 'F');
 
 	/*

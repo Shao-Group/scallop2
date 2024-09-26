@@ -29,10 +29,12 @@ bundle::bundle(bundle_base &b)
 bundle::~bundle()
 {}
 
+
 int bundle::prepare()
 {
 	compute_strand();
 	build_intervals();
+	print_fmap();
 	build_junctions();
 	build_regions();
 	build_partial_exons();
@@ -46,8 +48,9 @@ int bundle::build(int mode, bool revise)
 {
 	build_splice_graph(mode);
 	if(revise == true) revise_splice_graph();
-	printf("rebuild splice graph started ....");
+	// printf("rebuild splice graph started ....");
 	rebuild_splice_graph_using_refined_hyper_set(mode);
+	// refine_splice_graph();
 	refine_modified_splice_graph();
 	build_hyper_set();
 	// printf("rebuild splice graph completed ...");
@@ -111,9 +114,12 @@ int bundle::build_intervals()
 			int32_t t = low32(ht.spos[k]);
 
 			fmap += make_pair(ROI(p1, s), 1);
+			// printf("qname: %s insert to fmap: %d -- %d\n",ht.qname.c_str(), p1,s);
 			p1 = t;
+			print_fmap();
 		}
 		fmap += make_pair(ROI(p1, ht.rpos), 1);
+		// printf("insert to fmap: %d -- %d\n", p1,ht.rpos);
 
 
 		// TODO: comment out the following 3 lines
@@ -130,6 +136,7 @@ int bundle::build_intervals()
 		}
 		*/
 	}
+
 	return 0;
 }
 
@@ -235,7 +242,7 @@ int bundle::build_regions()
 		junction &jc = junctions[i];
 
 		double ave, dev, max;
-		evaluate_rectangle(fmap, jc.lpos, jc.rpos, ave, dev, max);
+		evaluate_rectangle(fmap, jc.lpos, jc.rpos, ave, dev, max);		
 
 		int32_t l = jc.lpos;
 		int32_t r = jc.rpos;
@@ -247,6 +254,7 @@ int bundle::build_regions()
 		else if(s[r] == LEFT_SPLICE) s[r] = LEFT_RIGHT_SPLICE;
 	}
 
+	assert(pexons.size() == 0);
 	for(int i = 0; i < pexons.size(); i++)
 	{
 		partial_exon &p = pexons[i];
@@ -268,6 +276,8 @@ int bundle::build_regions()
 		if(ltype == LEFT_RIGHT_SPLICE) ltype = RIGHT_SPLICE;
 		if(rtype == LEFT_RIGHT_SPLICE) rtype = LEFT_SPLICE;
 
+		// printf("Build region: %d - %d\n", l, r);
+
 		regions.push_back(region(l, r, ltype, rtype, &fmap, &(bb.imap)));
 	}
 	return 0;
@@ -286,6 +296,7 @@ int bundle::build_partial_exons()
 			pe.rid = i;
 			pe.pid = pexons.size();
 			pexons.push_back(pe);
+			
 			if((pe.lpos != bb.lpos || pe.rpos != bb.rpos) && pe.ltype == START_BOUNDARY && pe.rtype == END_BOUNDARY) regional.push_back(true);
 			else regional.push_back(false);
 		}
@@ -1665,6 +1676,7 @@ int bundle::build_hyper_set()
 		for(int j=0; j < v1.size(); j++)
 		{
 			partial_exon &p = pexons[v1[j]];
+			// p.rel = true;
 			// if p is unreliable, skip it
 			// otherwise add it to newv
 			if(p.rel == true) v.push_back(v1[j]);
@@ -1908,4 +1920,14 @@ int bundle::rebuild_splice_graph_using_refined_hyper_set(int mode)
 	new_gr.chrm = bb.chrm;
 	// gr = new_gr;
 	return 0;
+}
+
+void bundle::print_fmap(){
+	printf("fmap:\n");
+	SIMI it = fmap.begin();
+	while(it != fmap.end()){
+		printf("%d %d: %d\n", lower(it->first), upper(it->first), it->second);
+		it++;
+	}
+
 }

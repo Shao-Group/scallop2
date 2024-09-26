@@ -57,7 +57,7 @@ int bundle_base::add_hit(const hit &ht)
 	{
 		int32_t s = high32(ht.itvm[k]);
 		int32_t t = low32(ht.itvm[k]);
-		printf(" add interval %d-%d\n", s, t);
+		// printf(" add interval %d-%d\n", s, t);
 		mmap += make_pair(ROI(s, t), 1);
 	}
 
@@ -65,6 +65,7 @@ int bundle_base::add_hit(const hit &ht)
 	{
 		int32_t s = high32(ht.itvi[k]);
 		int32_t t = low32(ht.itvi[k]);
+		// printf(" itvi:: add interval %d-%d\n", s, t);
 		imap += make_pair(ROI(s, t), 1);
 	}
 
@@ -72,6 +73,7 @@ int bundle_base::add_hit(const hit &ht)
 	{
 		int32_t s = high32(ht.itvd[k]);
 		int32_t t = low32(ht.itvd[k]);
+		// printf(" itvd:: add interval %d-%d\n", s, t);
 		imap += make_pair(ROI(s, t), 1);
 	}
 

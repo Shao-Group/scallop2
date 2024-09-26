@@ -172,12 +172,12 @@ int assembler::process(int n)
 
 		bd.build(1, false);
 		bd.print(index++);
-		//assemble(bd.gr, bd.hs, ts1, ts2);
+		// assemble(bd.gr, bd.hs, ts1, ts2);
 		assemble(bd.new_gr, bd.hs, ts1, ts2);
 
 		bd.build(2, false);
 		bd.print(index++);
-		//assemble(bd.gr, bd.hs, ts1, ts2);
+		// assemble(bd.gr, bd.hs, ts1, ts2);
 		assemble(bd.new_gr, bd.hs, ts1, ts2);
 		
 
