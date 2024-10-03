@@ -34,7 +34,7 @@ int bundle::prepare()
 {
 	compute_strand();
 	build_intervals();
-	print_fmap();
+	// print_fmap();
 	build_junctions();
 	build_regions();
 	build_partial_exons();
@@ -50,6 +50,7 @@ int bundle::build(int mode, bool revise)
 	if(revise == true) revise_splice_graph();
 	// printf("rebuild splice graph started ....");
 	rebuild_splice_graph_using_refined_hyper_set(mode);
+
 	// refine_splice_graph();
 	refine_modified_splice_graph();
 	build_hyper_set();
@@ -116,7 +117,7 @@ int bundle::build_intervals()
 			fmap += make_pair(ROI(p1, s), 1);
 			// printf("qname: %s insert to fmap: %d -- %d\n",ht.qname.c_str(), p1,s);
 			p1 = t;
-			print_fmap();
+			// print_fmap();
 		}
 		fmap += make_pair(ROI(p1, ht.rpos), 1);
 		// printf("insert to fmap: %d -- %d\n", p1,ht.rpos);
@@ -425,8 +426,9 @@ int bundle::link_partial_exons()
 		MPI::iterator li = rm.find(b.lpos);
 		MPI::iterator ri = lm.find(b.rpos);
 
-		assert(li != rm.end());
-		assert(ri != lm.end());
+		if(ri == lm.end()) printf("ri-lm: l=%d, r=%d\n", b.lpos, b.rpos);
+		// assert(li != rm.end());
+		// assert(ri != lm.end());
 
 		if(li != rm.end() && ri != lm.end())
 		{
@@ -1774,6 +1776,50 @@ int bundle::rebuild_splice_graph_using_refined_hyper_set(int mode)
 
 		// align h to old graph gr
 		vector<int> v = align_hit(h);
+		
+		// printf("v size = %d\n", v.size());
+		// small reliable pexons are merged
+		// for(int j = 1; j < (int)(v.size()-1); j++){
+		// 	partial_exon &p = pexons[v[j]];
+		// 	partial_exon &p_prev = pexons[v[j-1]];
+		// 	partial_exon &p_next = pexons[v[j+1]];
+
+		// 	// printf("Working on [%d, %d]\n", p.lpos, p.rpos);
+
+		// 	// if there is an unreliable pexon in the middle of two adjacent reliable pexons
+		// 	if(p.rel == false && (p_prev.rel == true && p_next.rel == true) && (p.rpos == p_next.lpos && p.lpos == p_prev.rpos)) 
+		// 	{
+		// 		p.rel = true;
+		// 	}
+		// 	// if there are multiple adjacent unreliable exons which can be meged to form a single reliable exon
+		// 	else if(p.rel == false && p_next.rel == false && (p.rpos == p_next.lpos))
+		// 	{
+		// 		int total_len = p.rpos - p.lpos;
+		// 		int nxt_idx = j+1;
+		// 		partial_exon &nxt = p_next;
+		// 		partial_exon &cur = p;
+				
+		// 		while(nxt.rel == false && (nxt.lpos == cur.rpos ))
+		// 		{
+		// 			total_len += (nxt.rpos - nxt.lpos);
+		// 			nxt_idx++;
+		// 			if(nxt_idx == v.size()) break;
+		// 			cur = nxt;
+		// 			nxt = pexons[v[nxt_idx]];
+		// 		}
+
+		// 		if(total_len >= reliability_threshold){
+		// 			for(int jj=j; jj < nxt_idx; jj++) pexons[v[jj]].rel = true;
+		// 			j = nxt_idx-1;
+					
+		// 		}
+
+
+		// 	}
+
+		// }
+
+
 
 		// remove unreliable vertices
 		vector<int> newv;
@@ -1785,6 +1831,7 @@ int bundle::rebuild_splice_graph_using_refined_hyper_set(int mode)
 			if(p.rel == true) newv.push_back(v[j]);
 		}
 
+		
 		// example: if newv = (0, 2, 4, 5)
 		// add edges or increase weight
 		//printf("newv size: %lu , old_v size = %lu\n", newv.size(), v.size() );	

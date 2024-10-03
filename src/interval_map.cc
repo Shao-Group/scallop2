@@ -92,21 +92,21 @@ int32_t compute_sum_overlap(const split_interval_map &imap, SIMI &p, SIMI &q)
 	if(p == imap.end()) return 0;
 
 	int32_t s = 0;
-	printf("p->first: %d, %d; q->first: %d, %d \n", lower(p->first), upper(p->first), lower(q->first), upper(q->first));
+	// printf("p->first: %d, %d; q->first: %d, %d \n", lower(p->first), upper(p->first), lower(q->first), upper(q->first));
 	for(SIMI it = p; it != q; it++)
 	{
 		int l = lower(it->first);
 		int u = upper(it->first);
-		printf("u= %d, l = %d \n", u, l);
+		// printf("u= %d, l = %d \n", u, l);
 		assert(u > l);
 
 		// TODO: uncomment the line below
-		printf(" AA add [%d, %d) : %d\n", lower(it->first), upper(it->first), it->second);
+		// printf(" AA add [%d, %d) : %d\n", lower(it->first), upper(it->first), it->second);
 		s += (u - l) * it->second;
 	}
 	if(q != imap.end())
 	{
-		printf(" BB add [%d, %d) : %d\n", lower(q->first), upper(q->first), q->second);
+		// printf(" BB add [%d, %d) : %d\n", lower(q->first), upper(q->first), q->second);
 		s += (upper(q->first) - lower(q->first)) * q->second;
 	}
 	return s;
@@ -139,7 +139,7 @@ int evaluate_rectangle(const split_interval_map &imap, int ll, int rr, double &a
 	if(rit == imap.end()) return 0;
 
 	ave = 1.0 * compute_sum_overlap(imap, lit, rit) / (rr - ll);
-	printf("compute average %d-%d = %.2lf\n", ll, rr, ave);
+	// printf("compute average %d-%d = %.2lf\n", ll, rr, ave);
 
 	double var = 0;
 	for(SIMI it = lit; ; it++)
@@ -156,7 +156,7 @@ int evaluate_rectangle(const split_interval_map &imap, int ll, int rr, double &a
 	max = 1.0 * compute_max_overlap(imap, lit, rit);
 
 	// TODO: print, ll, rr, ave, var, dev
-	printf("ll=%d, rr=%d, ave=%.2lf, var=%.2lf, dev=%.2lf\n", ll, rr, ave, var, dev);
+	// printf("ll=%d, rr=%d, ave=%.2lf, var=%.2lf, dev=%.2lf\n", ll, rr, ave, var, dev);
 	return 0;
 }
 

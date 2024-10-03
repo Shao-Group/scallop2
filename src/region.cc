@@ -48,7 +48,7 @@ int region::build_join_interval_map()
 	{
 		//if(it->second >= 2) 
 		jmap += make_pair(it->first, 1);
-		printf("Adding %d, %d to jmap\n", lower(it->first), upper(it->first));
+		// printf("Adding %d, %d to jmap\n", lower(it->first), upper(it->first));
 		if(it == rit) break;
 		it++;
 	}
@@ -181,7 +181,7 @@ int region::build_partial_exons()
 		evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev, pe.max);
 
 		// TODO; print pe.lpos, pe.rpos, pe.ave
-		printf("single interval --> pos = [%d, %d), cov = %.2lf, type=%d\n", pe.lpos, pe.rpos, pe.ave, pe.type);
+		// printf("single interval --> pos = [%d, %d), cov = %.2lf, type=%d\n", pe.lpos, pe.rpos, pe.ave, pe.type);
 		pexons.push_back(pe);
 		return 0;
 	}
@@ -218,7 +218,7 @@ int region::build_partial_exons()
 		evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev, pe.max);
 		
 		// TODO; print pe.lpos, pe.rpos, pe.ave, type
-		printf("multi interval -->-->-->--> pos = [%d, %d), cov = %.2lf, type=%d\n", pe.lpos, pe.rpos, pe.ave, pe.type);
+		// printf("multi interval -->-->-->--> pos = [%d, %d), cov = %.2lf, type=%d\n", pe.lpos, pe.rpos, pe.ave, pe.type);
 		pexons.push_back(pe);
 	}
 
