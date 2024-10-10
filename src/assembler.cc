@@ -173,12 +173,14 @@ int assembler::process(int n)
 		bd.build(1, false);
 		bd.print(index++);
 		// assemble(bd.gr, bd.hs, ts1, ts2);
-		assemble(bd.new_gr, bd.hs, ts1, ts2);
+		//assemble(bd.new_gr, bd.hs, ts1, ts2);
+		assemble2(bd, ts1, ts2);
 
 		bd.build(2, false);
 		bd.print(index++);
 		// assemble(bd.gr, bd.hs, ts1, ts2);
-		assemble(bd.new_gr, bd.hs, ts1, ts2);
+		//assemble(bd.new_gr, bd.hs, ts1, ts2);
+		assemble2(bd, ts1, ts2);
 		
 
 		int sdup = assemble_duplicates / 1 + 1;
@@ -210,6 +212,43 @@ int assembler::process(int n)
 	pool.clear();
 	return 0;
 }
+
+int assembler::assemble2(bundle &bd,transcript_set &ts1, transcript_set &ts2)
+{
+	splice_graph &gr = bd.new_gr;
+	hyper_set &hs = bd.hs;
+
+	if(determine_regional_graph(gr) == true) continue;
+	if(gr.num_edges() <= 0) continue;
+
+	// TODO: for now we use assemble_duplicates = 1
+	for(int r = 0; r < assemble_duplicates; r++)
+	{
+		int k = 0;
+		string gid = "gene." + tostring(index) + "." + tostring(k) + "." + tostring(r);
+		gr.gid = gid;
+		scallop sc(gr, hs, r == 0 ? false : true);
+		sc.assemble();
+
+		if(verbose >= 2)
+		{
+			printf("assembly with r = %d, total %lu transcripts:\n", r, sc.trsts.size());
+			for(int i = 0; i < sc.trsts.size(); i++) sc.trsts[i].write(cout);
+		}
+
+		for(int i = 0; i < sc.trsts.size(); i++)
+		{
+			ts1.add(sc.trsts[i], 1, 0, TRANSCRIPT_COUNT_ADD_COVERAGE_MIN, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD);
+		}
+		for(int i = 0; i < sc.non_full_trsts.size(); i++)
+		{
+			ts2.add(sc.non_full_trsts[i], 1, 0, TRANSCRIPT_COUNT_ADD_COVERAGE_MIN, TRANSCRIPT_COUNT_ADD_COVERAGE_ADD);
+		}
+	}
+
+	return 0;
+}
+
 
 int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0, transcript_set &ts1, transcript_set &ts2)
 {

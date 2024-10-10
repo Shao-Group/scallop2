@@ -1548,6 +1548,7 @@ int bundle::output_transcript(transcript &trst, const path &p, const string &gid
 int bundle::build_hyper_set()
 {
 	map<vector<int>, int> m;
+	map<vector<int>, map<vector<int>, int>> mm;
 
 	// TODO: skip the followoing two paragraphs
 	// for(int k = 0; k < br.fragments.size(); k++)
@@ -1683,17 +1684,51 @@ int bundle::build_hyper_set()
 			// otherwise add it to newv
 			if(p.rel == true) v.push_back(v1[j]);
 		}
+
+		if(mm.find(v) == mm.end())
+		{
+			map<vector<int>, int> tm;
+			tm.insert(make_pair(v1, 1));
+			mm.insert(tm);
+		}
+		else
+		{
+			if(mm[v].find(v1) == mm[v].end())
+			{
+				mm[v].insert(make_pair(v1, 1));
+			}
+			else
+			{
+				mm[v][v1] += 1;
+			}
+		}
 		
-		if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, 1));
-		else m[v] += 1;
+		//if(m.find(v) == m.end()) m.insert(pair<vector<int>, int>(v, 1));
+		//else m[v] += 1;
+		
 	}
 
 	hs.clear();
-	for(map<vector<int>, int>::iterator it = m.begin(); it != m.end(); it++)
+	hs2.clear();
+	for(auto & it = mm.begin(); it != mm.end(); it++)
 	{
 		const vector<int> &v = it->first;
-		int c = it->second;
-		if(v.size() >= 2) hs.add_node_list(v, c);
+		int cc = 0;
+		map<vector<int>, int> & tm = it->second;
+
+		int start = hs2.nodes.size();
+		for(auto &ix = tm.begin(); ix != tm.end(); ix++)
+		{
+			const vector<int> &v1 = ix->first;
+			int c = ix->second;
+			hs2.add_node_list(v1, c);
+
+			cc += c;
+		}
+		int end = hs2.nodes.size();
+
+		hs.add_node_list(v, cc);
+		plink.push_back(make_pair(start, end));
 	}
 	printf("------------------------------------\n");
 

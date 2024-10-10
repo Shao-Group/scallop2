@@ -42,7 +42,9 @@ public:
 	split_interval_map pmap;		// partial exon map
 	splice_graph gr;				// splice graph
 	splice_graph new_gr;				// splice graph
-	hyper_set hs;					// hyper set
+	hyper_set hs;					// hyper set w/o unreliable vertices
+	hyper_set hs2;					// hyper set w/ unreliaable vertices
+	vector<pair<int, int>>; plink;		
 
 public:
 	virtual int build(int mode, bool revise);
