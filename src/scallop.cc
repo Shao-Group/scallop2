@@ -106,6 +106,8 @@ int scallop::assemble()
 	collect_existing_st_paths();
 	greedy_decompose();
 
+	// TODO: now to modify each path in paths
+
 	trsts.clear();
 	//gr.output_transcripts(trsts, paths);
 	
