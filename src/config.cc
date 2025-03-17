@@ -112,6 +112,7 @@ int anchor_nm_threshold = -1;
 string anchor_start = "";
 string anchor_end = "";
 int berth_neighborhood = 50;
+string anchor_file_name="";
 
 // for long-reads
 int reliability_threshold = 25;
@@ -473,6 +474,11 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--anchor_nm_threshold")
 		{
 			anchor_nm_threshold = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--anchor_file")
+		{
+			anchor_file_name = string(argv[i+1]);
 			i++;
 		}
 	}

@@ -28,10 +28,13 @@ int init_files()
 	// cout << tss_file_name << tes_file_name << endl;
     ofstream tss_file(tss_file_name);
 	ofstream tes_file(tes_file_name);
+	ofstream anchor_file(anchor_file_name);
+	cout << "hit_id\t" << "left_clipped_seq\t" << "left_adapter_pos\t" << "right_clipped_seq\t" << "right_adapter_pos" << endl;
 	// ofstream read_st_end_file(read_st_end_file_name);
 
 	tss_file.close();
 	tes_file.close();
+	anchor_file.close();
 	// read_st_end_file.close();
 	return 0;
 }

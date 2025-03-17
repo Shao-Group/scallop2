@@ -29,7 +29,7 @@ bool validate_dna_seq(const Strings&... sequences)
         static const set<char> dnachars {'A', 'T', 'C', 'G'};
         for (char c : seq) 
         {
-            if (dnachars.find(c) == dnachars.end()) return false;        
+            if (dnachars.find(c) == dnachars.end()) {return false;}
         }
         return true;
     };

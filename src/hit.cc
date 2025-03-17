@@ -13,6 +13,7 @@ See LICENSE for licensing.
 #include <cstdio>
 #include <sstream>
 #include <cmath>
+#include <fstream>
 
 #include "hit.h"
 #include "config.h"
@@ -175,6 +176,7 @@ hit::hit(bam1_t *b, int id)
 
 		if(bam_cigar_op(cigar[k]) == BAM_CSOFT_CLIP || bam_cigar_op(cigar[k]) == BAM_CHARD_CLIP)
 		{
+			assert(bam_cigar_op(cigar[k]) != BAM_CHARD_CLIP);
 			assert (k == 0 || k == n_cigar - 1);
 			if (k == 0)	
 			{
@@ -193,7 +195,10 @@ hit::hit(bam1_t *b, int id)
 
 int hit::set_anchors(bam1_t *b)
 {
-	left_anchor_padding  = -1;
+	cout << "hitid : " << qname << endl ;
+	vector<string> sc_info;
+	sc_info.push_back(qname);
+ 	left_anchor_padding  = -1;
 	right_anchor_padding = -1;
 
 	int anchor_start_nm = anchor_nm_threshold >= 0? anchor_nm_threshold : 10;
@@ -215,7 +220,8 @@ int hit::set_anchors(bam1_t *b)
 	{
 		int ql1 = itvc1.first;
 		int ql2 = itvc1.second;
-		int seqlen = ql2 - ql1 + 1;
+		int seqlen = ql2 - ql1;
+		cout << ql1 << ", " << ql2 << ", " << qlen <<  "," << pos << endl;
 		assert (seqlen >= 0);	
 
 		// get left clip seq
@@ -223,9 +229,10 @@ int hit::set_anchors(bam1_t *b)
 		uint8_t *seq_ptr = bam_get_seq (b);
 		for (int i = 0; i < seqlen; i++)
 		{
-			leftclipseq[i - ql1] = seq_nt16_str[bam_seqi(seq_ptr, i)];
+			leftclipseq[i] = seq_nt16_str[bam_seqi(seq_ptr, i)];
 		}
 		cout << "leftclipseq: " << leftclipseq << endl; //CLEAN:
+		sc_info.push_back(leftclipseq);
 
 		// get left anchor position
 		int anchorpos = -1;
@@ -233,6 +240,8 @@ int hit::set_anchors(bam1_t *b)
 		else	    anchorpos = subseq_pos(leftclipseq,          anchor_start, anchor_start_nm);
 
 		left_anchor_padding = anchorpos >= 0? seqlen - anchorpos: -1;
+		cout << "left anchor padding: " << left_anchor_padding << endl;
+		sc_info.push_back(to_string(left_anchor_padding));
 	}
 
 	// right clipped sequence
@@ -240,25 +249,36 @@ int hit::set_anchors(bam1_t *b)
 	{
 		int ql1 = itvc2.first;
 		int ql2 = itvc2.second;
-		int seqlen = ql2 - ql1 + 1;
+		int seqlen = ql2 - ql1;
+		cout << ql1 << ", " << ql2 << ", " << qlen <<  "," << pos << endl;
 		assert (seqlen >= 0);	
 
 		// get right clip seq
 		string rightclipseq(seqlen, 'N');	
 		uint8_t *seq_ptr = bam_get_seq (b);
-		for (int i = ql1 - pos; i < ql1 - pos + seqlen; i++)
+		for (int i = 0; i < seqlen; i++)
 		{	
-			rightclipseq[i - ql1 - pos] = seq_nt16_str[bam_seqi(seq_ptr, i)];
+			// assert( i + ql1 - pos < qlen);
+			rightclipseq[i] = seq_nt16_str[bam_seqi(seq_ptr, qlen - seqlen + i)];
+			// rightclipseq[i] = seq_nt16_str[bam_seqi(seq_ptr, i + ql1)
+// -			];
 		}
 		cout << "rightclipseq: " << rightclipseq << endl; //CLEAN:
-
+		sc_info.push_back(rightclipseq);
 		// get right anchor position
 		int anchorpos = -1;
 		if (seqrev)	anchorpos = subseq_pos(rightclipseq, revcomp(anchor_start), anchor_start_nm);	// double rev comp //FIXME: is it right?
 		else	    anchorpos = subseq_pos(revcomp(rightclipseq), revcomp(anchor_end), anchor_end_nm);
 
 		right_anchor_padding = anchorpos >= 0? seqlen - anchorpos: -1;
+		cout << "right anchor padding: " << right_anchor_padding << endl;
+		sc_info.push_back(to_string(right_anchor_padding));
 	}
+
+	std::ofstream anchor_file(anchor_file_name, std::ios::app);
+	for(int i=0; i<sc_info.size(); i++) anchor_file << sc_info[i] << "\t";
+	anchor_file << endl;
+	anchor_file.close();
 
 	return 0;
 }

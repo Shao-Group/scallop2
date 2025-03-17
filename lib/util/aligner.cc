@@ -9,6 +9,7 @@ See LICENSE for licensing.
 #include <algorithm>
 #include <iostream>
 #include <set>
+#include <unordered_map>
 #include "aligner.h"
 
 

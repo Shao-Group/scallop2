@@ -146,6 +146,7 @@ extern int anchor_nm_threshold;
 extern string anchor_start;
 extern string anchor_end;
 extern int berth_neighborhood;
+extern string anchor_file_name;
 
 // for long-reads
 extern int reliability_threshold;

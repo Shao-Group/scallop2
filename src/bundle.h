@@ -72,6 +72,9 @@ public:
 	vector<pair<int32_t,int>> tes_list_sg;		// TES as (pos, cnt)
 	vector<tss_tes> tss_merged;		// merged TSS
 	vector<tss_tes> tes_merged;		// merged TES
+	
+	vector<int32_t> left_anchorpos_list;
+	vector<int32_t> right_anchorpos_list;
 
 public:
 	virtual int build(int mode, bool revise);
@@ -105,11 +108,14 @@ public:
 	int locate_right_partial_exon(int32_t x);
 	vector<int> align_hit(hit &h);
 	vector<int> align_fragment(fragment &f);
-	void print_fmap();
+	void print_fmap(); // Debug
+
+	// TSS-TES
 	int build_tss_tes();
 	void write_tss_tes();
 	void write_tss_tes_features();
 	int merge_tss_tes();
+	int build_anchors();
 
 	// revise splice graph
 	VE compute_maximal_edges();

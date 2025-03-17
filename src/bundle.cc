@@ -68,6 +68,7 @@ int bundle::build(int mode, bool revise)
 	// write_tss_tes();
 	merge_tss_tes();
 	write_tss_tes_features();
+	build_anchors();
 	return 0;
 }
 
@@ -2291,6 +2292,28 @@ void bundle::write_tss_tes_features()
 		tes_file <<  "\n";		
 	}
 	tes_file.close();
+}
+
+
+int bundle::build_anchors()
+{
+	int padding_max = 1000;
+	left_anchorpos_list.clear();
+	right_anchorpos_list.clear();
+	for(int i = 0; i < bb.hits.size(); i++)
+	{	
+		hit &h = bb.hits[i];
+		if(h.is_anchor_satisfactory(0, padding_max)) left_anchorpos_list.push_back(h.left_anchor_padding);
+		if(h.is_anchor_satisfactory(1, padding_max)) right_anchorpos_list.push_back(h.right_anchor_padding);
+	}
+	cout << "Left anchor list: ";
+	for(int i=0; i<left_anchorpos_list.size(); i++) cout << left_anchorpos_list[i] << " ";
+	cout << endl;
+	cout << "Right anchor list: ";
+	for(int i=0; i<right_anchorpos_list.size(); i++) cout << right_anchorpos_list[i] << " ";
+	cout << endl;
+
+	return 0;
 }
 
 
