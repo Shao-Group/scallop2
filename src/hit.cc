@@ -239,7 +239,7 @@ int hit::set_anchors(bam1_t *b)
 		if (seqrev)	anchorpos = subseq_pos(revcomp(leftclipseq), anchor_end, anchor_end_nm);
 		else	    anchorpos = subseq_pos(leftclipseq,          anchor_start, anchor_start_nm);
 
-		left_anchor_padding = anchorpos >= 0? seqlen - anchorpos: -1;
+		left_anchor_padding = anchorpos >= 0? anchorpos: -1;
 		cout << "left anchor padding: " << left_anchor_padding << endl;
 		sc_info.push_back(to_string(left_anchor_padding));
 	}
@@ -270,7 +270,7 @@ int hit::set_anchors(bam1_t *b)
 		if (seqrev)	anchorpos = subseq_pos(rightclipseq, revcomp(anchor_start), anchor_start_nm);	// double rev comp //FIXME: is it right?
 		else	    anchorpos = subseq_pos(revcomp(rightclipseq), revcomp(anchor_end), anchor_end_nm);
 
-		right_anchor_padding = anchorpos >= 0? seqlen - anchorpos: -1;
+		right_anchor_padding = anchorpos >= 0? anchorpos: -1;
 		cout << "right anchor padding: " << right_anchor_padding << endl;
 		sc_info.push_back(to_string(right_anchor_padding));
 	}
