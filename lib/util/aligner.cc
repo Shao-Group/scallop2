@@ -11,6 +11,7 @@ See LICENSE for licensing.
 #include <set>
 #include <unordered_map>
 #include "aligner.h"
+#include <climits>
 
 
 /**
@@ -29,6 +30,9 @@ int subseq_pos(const std::string& seq1, const std::string& seq2, int nm, int ind
     {
         cerr << "WARNING:\t sequenes have non-ATCG bases. Proceed anyway." << endl;
     }
+
+    int best_pos = -1;
+    int min_penalty = INT_MAX;
 
     // Initialize
     vector<vector<int>> mx(seq1.length() + 1, vector<int>(seq2.length() + 1, 0));
@@ -50,10 +54,15 @@ int subseq_pos(const std::string& seq1, const std::string& seq2, int nm, int ind
         }
         
         // Check if we found a match within allowed edit distance
-        if (mx[seq1.length()][j] <= nm) return j; //FIXME: return highest score position
+        // if (mx[seq1.length()][j] <= nm) return j; //FIXME: return highest score position
+        if (mx[seq1.length()][j] <= nm && mx[seq1.length()][j] < min_penalty)  //FIXED: saving min dist position
+        {
+            best_pos = j;
+            min_penalty = mx[seq1.length()][j];
+        }
     }
 
-    return -1;
+    return best_pos;
 }
 
 
