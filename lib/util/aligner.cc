@@ -22,22 +22,22 @@ See LICENSE for licensing.
  * @return position of seq2's first subsequence that can be transformed into seq1
  * @return -1 if unfeasible (or seq1 is longer than seq2)
  */
-int subseq_pos(const std::string& seq1, const std::string& seq2, int nm, int indel_penalty, int mis_penalty) 
+pair<int, int> subseq_pos(const std::string& seq1, const std::string& seq2, int nm, int indel_penalty, int mis_penalty) 
 {
-    if (seq1.length() > seq2.length())  return -1;
+    if (seq1.length() > seq2.length())  return make_pair(-1, -1);
 
     if (! validate_dna_seq(seq1, seq2)) 
     {
         cerr << "WARNING:\t sequenes have non-ATCG bases. Proceed anyway." << endl;
     }
 
-    int best_pos = -1;
+    int end_pos = -1;
     int min_penalty = INT_MAX;
 
     // Initialize
     vector<vector<int>> mx(seq1.length() + 1, vector<int>(seq2.length() + 1, 0));
-    for (size_t i = 0; i < seq1.length() + 1; ++i) mx[i][0] = 0;
-    for (size_t i = 0; i < seq1.length() + 1; ++i) mx[0][i] = 0;
+    mx[0][0] = 0;
+    for (size_t i = 0; i < seq2.length() + 1; ++i) mx[0][i] = 0;
     for (size_t i = 1; i < seq1.length() + 1; ++i) mx[i][0] = i * indel_penalty;
 
     // DP body
@@ -57,12 +57,30 @@ int subseq_pos(const std::string& seq1, const std::string& seq2, int nm, int ind
         // if (mx[seq1.length()][j] <= nm) return j; //FIXME: return highest score position
         if (mx[seq1.length()][j] <= nm && mx[seq1.length()][j] < min_penalty)  //FIXED: saving min dist position
         {
-            best_pos = j;
+            end_pos = j;
             min_penalty = mx[seq1.length()][j];
         }
     }
 
-    return best_pos;
+    if(end_pos == -1) return make_pair(-1,-1);
+    int start_pos = end_pos;
+    int i = seq1.length();
+    while( i > 1)
+    {
+        if(mx[i-1][start_pos-1] < mx[i-1][start_pos] && mx[i-1][start_pos-1] < mx[i][start_pos-1]) 
+        {
+            start_pos = start_pos - 1;
+            i--;
+        }
+        else if (mx[i-1][start_pos] < mx[i][start_pos-1]) i--;
+        else start_pos--;
+        if (start_pos < 1) cout << seq1 << " " << seq2 << endl;
+        assert(start_pos >= 1);
+
+    }
+
+    return make_pair(start_pos-1, end_pos-1);
+
 }
 
 
