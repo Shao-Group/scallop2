@@ -211,6 +211,8 @@ int hit::set_anchors(bam1_t *b)
 	if((flag & 0x10) >= 1) seqrev = true;
 	if((flag & 0x10) <= 0) seqrev = false;
 	sc_info.push_back(string(seqrev ? "-": "+"));
+	sc_info.push_back(to_string(pos));
+	sc_info.push_back(to_string(rpos));
 	// whether second in pair	// TODO: what if seq attachment to 1st strand but sequence 2nd strand
 	bool second_in_pair;
 	if((flag & 0x1) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) second_in_pair = true;
