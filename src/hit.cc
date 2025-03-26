@@ -210,7 +210,7 @@ int hit::set_anchors(bam1_t *b)
 	bool seqrev;
 	if((flag & 0x10) >= 1) seqrev = true;
 	if((flag & 0x10) <= 0) seqrev = false;
-	
+	sc_info.push_back(string(seqrev ? "-": "+"));
 	// whether second in pair	// TODO: what if seq attachment to 1st strand but sequence 2nd strand
 	bool second_in_pair;
 	if((flag & 0x1) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) second_in_pair = true;
@@ -249,7 +249,9 @@ int hit::set_anchors(bam1_t *b)
 
 		// left_anchor_padding = anchorpos >= 0? seqlen - anchorpos: -1;
 		cout << "left anchor padding: " << left_anchor_padding << endl;
+	
 		sc_info.push_back(to_string(left_anchor_padding));
+
 	}
 
 	// right clipped sequence
