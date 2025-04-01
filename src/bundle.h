@@ -27,7 +27,7 @@ using namespace std;
 class tss_tes
 {
 public:
-	tss_tes(int type);
+	tss_tes(int type = 0);
 	tss_tes(int type, int32_t pos, int weight_berth, int weight_sg);
 	void calculate_junction_cnt(vector<junction> &sorted_junctions_start, vector<junction> &sorted_junctions_end);
 	void calculate_clip_length(vector<hit> &hits);

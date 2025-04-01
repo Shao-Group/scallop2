@@ -2319,7 +2319,7 @@ int bundle::build_anchors()
 
 
 // TODO: separate this class functions to a different file
-tss_tes::tss_tes(int type = 0)
+tss_tes::tss_tes(int type)
 {
 	this->type = type;
 }
