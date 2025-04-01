@@ -34,3 +34,6 @@ configure~
 berth
 *.bed
 *.gtf
+*.tsv
+*.txt
+*.png
