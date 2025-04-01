@@ -83,21 +83,29 @@ pair<int, int> subseq_pos(const std::string& seq1, const std::string& seq2, int 
 
 }
 
-
+// returns the length of polyT with a local search
+// truncate when the ratio of T's in the sequence is less than polyT_ratio
 int polyT(const std::string& seq1, int start, double polyT_ratio, int min_polyT_len) 
 {
     if (seq1.length() < min_polyT_len) return 0;
 
     int count = 0;
+    int lastT = start;
     for (size_t i = start; i < seq1.length(); ++i) 
     {
-        if (seq1[i] == 'T' || seq1[i] == 't') count++;
+        cout << seq1[i];
+        if (seq1[i] == 'T' || seq1[i] == 't') 
+        {
+            count++;
+            lastT = i;
+        }
+        else if (count <= min_polyT_len || (count / (double)(i - start + 1) >= polyT_ratio)) continue;
         else break;
     }
+    cout << endl;
 
-    if (count >= min_polyT_len && count / (double)(seq1.length() - start - 1) >= polyT_ratio) return count;
-    
-    return -1;
+    if (count >= min_polyT_len) return lastT - start + 1; // not counts of T but length of T tail
+    else return 0;
 }
 
 
