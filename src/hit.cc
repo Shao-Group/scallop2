@@ -236,13 +236,16 @@ int hit::set_anchors(bam1_t *b)
 		int anchorpos = -1;
 		if(strand == '+')
 		{
-			pair<int, int> pos_pair = subseq_pos(anchor_end, revcomp(leftclipseq), anchor_end_nm);
-			left_anchor_padding = pos_pair.first >= 0 ? pos_pair.first : -1; //incorrect minus local search FIXME:
+			pair<int, int> pos_pair = subseq_pos(anchor_end, leftclipseq, anchor_end_nm);
+			left_anchor_padding = pos_pair.first >= 0 ?  seqlen - pos_pair.second -1 : -1;
 		}
 		else if(strand == '-')
 		{
+			// polyT tail
 			pair<int, int> pos_pair = subseq_pos(anchor_start, leftclipseq, anchor_start_nm);
-			left_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second : -1;
+			int pT = polyT(leftclipseq, pos_pair.second);
+			pT = pT > 0 ? pT : -1;
+			left_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second - pT - 1 : -1;
 		}
 
 		// left_anchor_padding = anchorpos >= 0? seqlen - anchorpos: -1;
@@ -272,15 +275,20 @@ int hit::set_anchors(bam1_t *b)
 		sc_info.push_back(rightclipseq);
 		// get right anchor position
 		int anchorpos = -1;
+		string revcomp_rightclipseq = revcomp(rightclipseq); 
 		if(strand == '+') 
 		{
-			pair<int, int> pos_pair = subseq_pos(anchor_start, revcomp(rightclipseq), anchor_start_nm);
-			right_anchor_padding = pos_pair.second >= 0 ? pos_pair.second : -1;
+			// polyA tail
+			pair<int, int> pos_pair = subseq_pos(anchor_start, revcomp_rightclipseq, anchor_start_nm);
+			int pT = polyT(revcomp_rightclipseq, pos_pair.second);
+			pT = pT > 0 ? pT : -1;
+			right_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second - pT - 1 : -1;
+			// right_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second + 1 : -1;
 		}
 		else if(strand == '-')
 		{
-			pair<int, int> pos_pair = subseq_pos(anchor_end, rightclipseq, anchor_end_nm);
-			right_anchor_padding = pos_pair.first >= 0 ? seqlen - pos_pair.first : -1;
+			pair<int, int> pos_pair = subseq_pos(anchor_end, revcomp_rightclipseq, anchor_end_nm);
+			right_anchor_padding = pos_pair.first >= 0 ? seqlen - pos_pair.second -1 : -1;
 		}
 	
 		// right_anchor_padding = anchorpos >= 0? anchorpos: -1;
