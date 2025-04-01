@@ -198,7 +198,7 @@ int hit::set_anchors(bam1_t *b)
 	cout << "hitid : " << qname << endl ;
 	vector<string> sc_info;
 	sc_info.push_back(qname);
- 	left_anchor_padding  = -1;
+	left_anchor_padding  = -1;
 	right_anchor_padding = -1;
 
 	int anchor_start_nm = anchor_nm_threshold >= 0? anchor_nm_threshold : 10;
@@ -207,10 +207,6 @@ int hit::set_anchors(bam1_t *b)
 	if (berth_mode == 0) return 0;
 
 	// whether SEQ in bam is reverse complemente
-	bool seqrev;
-	if((flag & 0x10) >= 1) seqrev = true;
-	if((flag & 0x10) <= 0) seqrev = false;
-	sc_info.push_back(string(seqrev ? "-": "+"));
 	sc_info.push_back(to_string(pos));
 	sc_info.push_back(to_string(rpos));
 	// whether second in pair	// TODO: what if seq attachment to 1st strand but sequence 2nd strand
@@ -218,12 +214,11 @@ int hit::set_anchors(bam1_t *b)
 	if((flag & 0x1) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) second_in_pair = true;
 
 	// left clipped sequence
-	if ((anchor_start != "" && !seqrev) || (anchor_end != "" && seqrev))
+	if ((anchor_start != "" && strand == '-') || (anchor_end != "" && strand == '+'))
 	{
 		int ql1 = itvc1.first;
 		int ql2 = itvc1.second;
 		int seqlen = ql2 - ql1;
-		cout << ql1 << ", " << ql2 << ", " << qlen <<  "," << pos << endl;
 		assert (seqlen >= 0);	
 
 		// get left clip seq
@@ -239,12 +234,12 @@ int hit::set_anchors(bam1_t *b)
 
 		// get left anchor position
 		int anchorpos = -1;
-		if (seqrev)	
+		if(strand == '+')
 		{
 			pair<int, int> pos_pair = subseq_pos(anchor_end, revcomp(leftclipseq), anchor_end_nm);
-			left_anchor_padding = pos_pair.first >= 0 ? pos_pair.first : -1;
+			left_anchor_padding = pos_pair.first >= 0 ? pos_pair.first : -1; //incorrect minus local search FIXME:
 		}
-		else
+		else if(strand == '-')
 		{
 			pair<int, int> pos_pair = subseq_pos(anchor_start, leftclipseq, anchor_start_nm);
 			left_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second : -1;
@@ -258,7 +253,7 @@ int hit::set_anchors(bam1_t *b)
 	}
 
 	// right clipped sequence
-	if ((anchor_end != "" && !seqrev) || (anchor_start != "" && seqrev)) 
+	if ((anchor_end != "" && strand == '-') || (anchor_start != "" && strand == '+')) 
 	{
 		int ql1 = itvc2.first;
 		int ql2 = itvc2.second;
@@ -271,21 +266,18 @@ int hit::set_anchors(bam1_t *b)
 		uint8_t *seq_ptr = bam_get_seq (b);
 		for (int i = 0; i < seqlen; i++)
 		{	
-			// assert( i + ql1 - pos < qlen);
 			rightclipseq[i] = seq_nt16_str[bam_seqi(seq_ptr, qlen - seqlen + i)];
-			// rightclipseq[i] = seq_nt16_str[bam_seqi(seq_ptr, i + ql1)
-// -			];
 		}
 		cout << "rightclipseq: " << rightclipseq << endl; //CLEAN:
 		sc_info.push_back(rightclipseq);
 		// get right anchor position
 		int anchorpos = -1;
-		if(seqrev) 
+		if(strand == '+') 
 		{
 			pair<int, int> pos_pair = subseq_pos(anchor_start, revcomp(rightclipseq), anchor_start_nm);
 			right_anchor_padding = pos_pair.second >= 0 ? pos_pair.second : -1;
 		}
-		else
+		else if(strand == '-')
 		{
 			pair<int, int> pos_pair = subseq_pos(anchor_end, rightclipseq, anchor_end_nm);
 			right_anchor_padding = pos_pair.first >= 0 ? seqlen - pos_pair.first : -1;
