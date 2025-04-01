@@ -243,8 +243,9 @@ int hit::set_anchors(bam1_t *b)
 		{
 			// polyT tail
 			pair<int, int> pos_pair = subseq_pos(anchor_start, leftclipseq, anchor_start_nm);
-			int pT = polyT(leftclipseq, pos_pair.second);
-			pT = pT > 0 ? pT : -1;
+			int pT = polyT(leftclipseq, pos_pair.second + 1);
+			cout << "pT " << pT << endl;
+			pT = pT > 0 ? pT : 0;
 			left_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second - pT - 1 : -1;
 		}
 
@@ -280,10 +281,10 @@ int hit::set_anchors(bam1_t *b)
 		{
 			// polyA tail
 			pair<int, int> pos_pair = subseq_pos(anchor_start, revcomp_rightclipseq, anchor_start_nm);
-			int pT = polyT(revcomp_rightclipseq, pos_pair.second);
-			pT = pT > 0 ? pT : -1;
+			int pT = polyT(revcomp_rightclipseq, pos_pair.second + 1);
+			cout << "pT " << pT << endl;
+			pT = pT > 0 ? pT : 0;
 			right_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second - pT - 1 : -1;
-			// right_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second + 1 : -1;
 		}
 		else if(strand == '-')
 		{
