@@ -84,6 +84,23 @@ pair<int, int> subseq_pos(const std::string& seq1, const std::string& seq2, int 
 }
 
 
+int polyT(const std::string& seq1, int start, double polyT_ratio, int min_polyT_len) 
+{
+    if (seq1.length() < min_polyT_len) return 0;
+
+    int count = 0;
+    for (size_t i = start; i < seq1.length(); ++i) 
+    {
+        if (seq1[i] == 'T' || seq1[i] == 't') count++;
+        else break;
+    }
+
+    if (count >= min_polyT_len && count / (double)(seq1.length() - start - 1) >= polyT_ratio) return count;
+    
+    return -1;
+}
+
+
 // Reverse complement, convert to uppercase
 char revcomp_char(const char& c)
 {

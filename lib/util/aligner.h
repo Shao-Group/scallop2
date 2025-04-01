@@ -16,6 +16,8 @@ pair<int, int> subseq_pos(const string& seq1, const string& seq2, int nm = 1, in
 string revcomp(const string& s);
 char   revcomp_char(const char&   c);
 
+int polyT(const std::string& seq1, int start = 0, double polyT_ratio = 0.8, int min_polyT_len = 1);
+
 
 /**
  * @param sequences Variable number of sequences to validate
