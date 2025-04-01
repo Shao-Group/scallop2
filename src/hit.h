@@ -73,6 +73,8 @@ public:
 	pair<int32_t, int32_t> itvc2;			// clipped interval	tailing <clipped pos, soft span>
 	int32_t	left_anchor_padding;					// left anchor position		(start/end anchor which ever on left side)
 	int32_t	right_anchor_padding;					// right anchor position	(start/end anchor which ever on right side)
+	string left_s_seq;						// sequence of left  soft clipped sequence (empty if no S in CIGAR)
+	string right_s_seq;						// sequence of right soft clipped sequence (empty if no S in CIGAR)
 
 	bool concordant;						// whether it is concordant
 	bool paired;							// whether this hit has been paired
@@ -91,6 +93,7 @@ public:
 
 public:
  	static string get_qname(bam1_t *b);
+	static string get_seq(int start, int end, bam1_t *b);
 	int set_tags(bam1_t *b);
 	int set_strand();
 	int set_concordance();

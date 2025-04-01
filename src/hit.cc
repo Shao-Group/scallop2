@@ -227,6 +227,7 @@ int hit::set_anchors(bam1_t *b)
 		assert (seqlen >= 0);	
 
 		// get left clip seq
+		// stringstream leftclipseq;
 		string leftclipseq(seqlen, 'N');	
 		uint8_t *seq_ptr = bam_get_seq (b);
 		for (int i = 0; i < seqlen; i++)
@@ -253,7 +254,7 @@ int hit::set_anchors(bam1_t *b)
 		cout << "left anchor padding: " << left_anchor_padding << endl;
 	
 		sc_info.push_back(to_string(left_anchor_padding));
-
+		left_s_seq = leftclipseq;
 	}
 
 	// right clipped sequence
@@ -293,6 +294,7 @@ int hit::set_anchors(bam1_t *b)
 		// right_anchor_padding = anchorpos >= 0? anchorpos: -1;
 		cout << "right anchor padding: " << right_anchor_padding << endl;
 		sc_info.push_back(to_string(right_anchor_padding));
+		right_s_seq = rightclipseq;
 	}
 
 	std::ofstream anchor_file(anchor_file_name, std::ios::app);
