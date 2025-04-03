@@ -193,6 +193,7 @@ hit::hit(bam1_t *b, int id)
 	//printf("call regular constructor\n");
 }
 
+// CLEAN
 int hit::set_anchors(bam1_t *b)
 {
 	cout << "hitid : " << qname << endl ;
@@ -204,11 +205,19 @@ int hit::set_anchors(bam1_t *b)
 	int anchor_start_nm = anchor_nm_threshold >= 0? anchor_nm_threshold : 10;
 	int anchor_end_nm   = anchor_nm_threshold >= 0? anchor_nm_threshold : 10;
 
+	anchor_start_nm = (int)anchor_start.length()*0.2;
+	anchor_end_nm = (int)anchor_end.length()*0.2;
+
 	if (berth_mode == 0) return 0;
 
 	// whether SEQ in bam is reverse complemente
+	sc_info.push_back(to_string(tid));
 	sc_info.push_back(to_string(pos));
 	sc_info.push_back(to_string(rpos));
+	sc_info.push_back(string(1,strand));
+	sc_info.push_back((flag & 0x10) >= 1 ? string("-") : string("+"));
+	sc_info.push_back(string(1,xs));
+	sc_info.push_back(string(1,ts));
 	// whether second in pair	// TODO: what if seq attachment to 1st strand but sequence 2nd strand
 	bool second_in_pair;
 	if((flag & 0x1) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) second_in_pair = true;
@@ -237,13 +246,16 @@ int hit::set_anchors(bam1_t *b)
 		if(strand == '+')
 		{
 			pair<int, int> pos_pair = subseq_pos(anchor_end, leftclipseq, anchor_end_nm);
-			left_anchor_padding = pos_pair.first >= 0 ?  seqlen - pos_pair.second -1 : -1;
+			cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
+			left_anchor_padding = pos_pair.second >= 0 ?  seqlen - pos_pair.second -1 : -1;
 		}
 		else if(strand == '-')
 		{
 			// polyT tail
 			pair<int, int> pos_pair = subseq_pos(anchor_start, leftclipseq, anchor_start_nm);
-			int pT = polyT(leftclipseq, pos_pair.second + 1);
+			cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
+			int pT = 0;
+			if (pos_pair.second >= 0 ) pT = polyT(leftclipseq, pos_pair.second + 1);
 			cout << "pT " << pT << endl;
 			pT = pT > 0 ? pT : 0;
 			left_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second - pT - 1 : -1;
@@ -281,7 +293,9 @@ int hit::set_anchors(bam1_t *b)
 		{
 			// polyA tail
 			pair<int, int> pos_pair = subseq_pos(anchor_start, revcomp_rightclipseq, anchor_start_nm);
-			int pT = polyT(revcomp_rightclipseq, pos_pair.second + 1);
+			cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
+			int pT = 0;
+			if (pos_pair.second >= 0) pT = polyT(revcomp_rightclipseq, pos_pair.second + 1);
 			cout << "pT " << pT << endl;
 			pT = pT > 0 ? pT : 0;
 			right_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second - pT - 1 : -1;
@@ -289,6 +303,7 @@ int hit::set_anchors(bam1_t *b)
 		else if(strand == '-')
 		{
 			pair<int, int> pos_pair = subseq_pos(anchor_end, revcomp_rightclipseq, anchor_end_nm);
+			cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
 			right_anchor_padding = pos_pair.first >= 0 ? seqlen - pos_pair.second -1 : -1;
 		}
 	

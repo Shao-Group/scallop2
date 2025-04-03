@@ -28,7 +28,7 @@ pair<int, int> subseq_pos(const std::string& seq1, const std::string& seq2, int 
 
     if (! validate_dna_seq(seq1, seq2)) 
     {
-        cerr << "WARNING:\t sequenes have non-ATCG bases. Proceed anyway." << endl;
+        cerr << "WARNING:\t sequenes have non-ATCG bases. Proceed anyway." << seq1 << " -- " << seq2 << endl;
     }
 
     int end_pos = -1;
