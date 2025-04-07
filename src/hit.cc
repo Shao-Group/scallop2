@@ -189,7 +189,7 @@ hit::hit(bam1_t *b, int id)
 		}
 	}
 	
-	set_anchors(b);
+	// set_anchors(b);
 	//printf("call regular constructor\n");
 }
 
@@ -209,6 +209,8 @@ int hit::set_anchors(bam1_t *b)
 	anchor_end_nm = (int)anchor_end.length()*0.2;
 
 	if (berth_mode == 0) return 0;
+
+	// if (library_type == EMPTY && strand == '.' && xs != '.') strand = xs; 
 
 	// whether SEQ in bam is reverse complemente
 	sc_info.push_back(to_string(tid));
@@ -331,7 +333,7 @@ bool hit::is_anchor_satisfactory(int side, int padding_max = 20)
 
 	if (side == 0) // left
 	{
-		if ((anchor_start != "" && !seqrev) || (anchor_end != "" && seqrev))
+		if ((anchor_start != "" && strand == '-') || (anchor_end != "" && strand == '+'))
 		{
 			if (left_anchor_padding < 0) return false; 
 			if (left_anchor_padding > padding_max) return false;
@@ -342,7 +344,7 @@ bool hit::is_anchor_satisfactory(int side, int padding_max = 20)
 
 	if (side == 1) // right
 	{
-		if ((anchor_end != "" && !seqrev) || (anchor_start != "" && seqrev)) 
+		if ((anchor_end != "" && strand == '-') || (anchor_start != "" && strand == '+')) 
 		{
 			if (right_anchor_padding < 0) return false; 
 			if (right_anchor_padding > padding_max) return false;

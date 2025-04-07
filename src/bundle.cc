@@ -2205,6 +2205,7 @@ int bundle::merge_tss_tes()
 		
 		new_tss.calculate_clip_length(sorted_hits_compatible);
 		new_tss.calculate_junction_cnt(sorted_junctions_start, sorted_junctions_end);
+		new_tss.calculate_anchor_features(sorted_hits_compatible);
 		tss_merged.push_back(new_tss);
 		tss_merged_map[tss_sg] = tss_merged.size()-1;
 	}
@@ -2240,6 +2241,7 @@ int bundle::merge_tss_tes()
 		
 		new_tes.calculate_clip_length(sorted_hits_compatible);
 		new_tes.calculate_junction_cnt(sorted_junctions_start, sorted_junctions_end);
+		new_tes.calculate_anchor_features(sorted_hits_compatible);
 		tes_merged.push_back(new_tes);
 		tes_merged_map[tes_sg] = tes_merged.size()-1;
 	}
@@ -2267,6 +2269,10 @@ void bundle::write_tss_tes_features()
 		tss_file << tss.junction_start_cnt << "\t";
 		tss_file << tss.junction_end_cnt << "\t";
 		tss_file << tss.junction_cross_cnt << "\t";
+		tss_file << tss.left_anchor_cnt << "\t";
+		tss_file << tss.right_anchor_cnt << "\t";
+		tss_file << tss.left_anchor_padding_mean << "\t";
+		tss_file << tss.right_anchor_padding_mean << "\t";
 		tss_file <<  "\n";
 		
 	}
@@ -2289,6 +2295,10 @@ void bundle::write_tss_tes_features()
 		tes_file << tes.junction_start_cnt << "\t";
 		tes_file << tes.junction_start_cnt << "\t";
 		tes_file << tes.junction_cross_cnt << "\t";
+		tes_file << tes.left_anchor_cnt << "\t";
+		tes_file << tes.right_anchor_cnt << "\t";
+		tes_file << tes.left_anchor_padding_mean << "\t";
+		tes_file << tes.right_anchor_padding_mean << "\t";
 		tes_file <<  "\n";		
 	}
 	tes_file.close();
@@ -2380,4 +2390,29 @@ void tss_tes::calculate_junction_cnt(vector<junction> &sorted_junctions_start, v
 			this->junction_cross_cnt++;
 		}
 	}
+}
+
+void tss_tes::calculate_anchor_features(vector<hit> &hits)
+{
+	int left_anchor_count, right_anchor_count = 0;
+	float left_anchor_padding_sum, right_anchor_padding_sum = 0;
+	for (int i=0; i<hits.size(); i++)
+	{
+		hit &h = hits[i];
+		if(h.is_anchor_satisfactory(0, 1000))
+		{
+			left_anchor_count++;
+			left_anchor_padding_sum += h.left_anchor_padding;
+		} 
+		if(h.is_anchor_satisfactory(1, 1000)) 
+		{
+			right_anchor_count++;
+			right_anchor_padding_sum += h.right_anchor_padding;
+		}
+	}
+
+	this->left_anchor_cnt = left_anchor_count;
+	this->right_anchor_cnt = right_anchor_count;
+	this->left_anchor_padding_mean = left_anchor_padding_sum / left_anchor_count;
+	this->right_anchor_padding_mean = right_anchor_padding_sum / right_anchor_count;
 }
