@@ -50,7 +50,7 @@ pair<int, int> subseq_pos(const std::string& seq1, const std::string& seq2, int 
             int consume_seq1 = mx[i][j-1]   + indel_penalty;
             int consume_seq2 = mx[i-1][j]   + indel_penalty;
             
-            mx[i][j] = min({consume_both, consume_seq1, consume_seq2});
+            mx[i][j] = min({ consume_both, consume_seq1, consume_seq2});
         }
         
         // Check if we found a match within allowed edit distance

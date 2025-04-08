@@ -63,6 +63,7 @@ int assembler::assemble()
 		// TODO: check the strandness of long reads
 		ht.set_strand();
 		//ht.print();
+		ht.set_anchors(b1t);
 
 		//if(ht.nh >= 2 && p.qual < min_mapping_quality) continue;
 		//if(ht.nm > max_edit_distance) continue;
@@ -97,7 +98,7 @@ int assembler::assemble()
 		if(library_type != UNSTRANDED && ht.strand == '.' && ht.xs != '.') ht.strand = ht.xs;
 		if(library_type == EMPTY && ht.strand == '.' && ht.xs != '.') ht.strand = ht.xs;
 
-		ht.set_anchors(b1t);
+		// ht.set_anchors(b1t);
 		if(library_type != UNSTRANDED && ht.strand == '+') bb1.add_hit(ht);
 		if(library_type != UNSTRANDED && ht.strand == '-') bb2.add_hit(ht);
 		if(library_type == UNSTRANDED && ht.xs == '.' && ht.spos.size() <= 0) bb1.add_hit(ht);

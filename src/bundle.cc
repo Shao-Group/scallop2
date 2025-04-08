@@ -2174,7 +2174,7 @@ int bundle::merge_tss_tes()
 	sort(sorted_junctions_end.begin(), sorted_junctions_end.end(), [](const junction &a, const junction &b) -> bool { return a.rpos < b.rpos; });
 	//-------------------------------------------------------------------------------------------------------------------
 
-
+	// insert all tss_berth at end of tss_sg
 	map<int32_t, int>  tss_berth = bth.get_berth_side(0);
 	int tss_sg_size = tss_list_sg.size();
 	for (const auto &kv : tss_berth)
@@ -2201,6 +2201,12 @@ int bundle::merge_tss_tes()
 		auto sorted_hits_tss_low = lower_bound(sorted_hits_tss.begin(), sorted_hits_tss.end(), tss_sg-berth_neighborhood, [](const hit &a, const int32_t &b) -> bool { return a.pos < b; });
 		auto sorted_hits_tss_high = upper_bound(sorted_hits_tss.begin(), sorted_hits_tss.end(), tss_sg+berth_neighborhood, [](const int32_t &a, const hit &b) -> bool { return a < b.pos; });
 		vector<hit> sorted_hits_compatible(sorted_hits_tss_low, sorted_hits_tss_high);
+
+		cout << "TSS : neighbours" << tss_sg << endl;
+		for (auto h:sorted_hits_compatible)
+		{
+			cout << h.pos << "," << h.rpos << endl; 
+		}
 		new_tss.read_density = sorted_hits_compatible.size();
 		
 		new_tss.calculate_clip_length(sorted_hits_compatible);
@@ -2237,6 +2243,12 @@ int bundle::merge_tss_tes()
 		auto sorted_hits_tes_low = lower_bound(sorted_hits_tes.begin(), sorted_hits_tes.end(), tes_sg-berth_neighborhood, [](const hit &a, const int32_t &b) -> bool { return a.rpos < b; });
 		auto sorted_hits_tes_high = upper_bound(sorted_hits_tes.begin(), sorted_hits_tes.end(), tes_sg+berth_neighborhood, [](const int32_t &a, const hit &b) -> bool { return a < b.rpos; });
 		vector<hit> sorted_hits_compatible(sorted_hits_tes_low, sorted_hits_tes_high);
+		
+		cout << "TES : neighbours" << tes_sg << endl;
+		for (auto h:sorted_hits_compatible)
+		{
+			cout << h.pos << "," << h.rpos << endl; 
+		}
 		new_tes.read_density = sorted_hits_compatible.size();
 		
 		new_tes.calculate_clip_length(sorted_hits_compatible);
@@ -2394,8 +2406,8 @@ void tss_tes::calculate_junction_cnt(vector<junction> &sorted_junctions_start, v
 
 void tss_tes::calculate_anchor_features(vector<hit> &hits)
 {
-	int left_anchor_count, right_anchor_count = 0;
-	float left_anchor_padding_sum, right_anchor_padding_sum = 0;
+	int left_anchor_count=0, right_anchor_count = 0;
+	float left_anchor_padding_sum=0, right_anchor_padding_sum = 0;
 	for (int i=0; i<hits.size(); i++)
 	{
 		hit &h = hits[i];
@@ -2413,6 +2425,6 @@ void tss_tes::calculate_anchor_features(vector<hit> &hits)
 
 	this->left_anchor_cnt = left_anchor_count;
 	this->right_anchor_cnt = right_anchor_count;
-	this->left_anchor_padding_mean = left_anchor_padding_sum / left_anchor_count;
-	this->right_anchor_padding_mean = right_anchor_padding_sum / right_anchor_count;
+	this->left_anchor_padding_mean = left_anchor_count>0 ? left_anchor_padding_sum / left_anchor_count : 0;
+	this->right_anchor_padding_mean = right_anchor_count > 0 ? right_anchor_padding_sum / right_anchor_count : 0;
 }

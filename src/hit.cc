@@ -205,12 +205,12 @@ int hit::set_anchors(bam1_t *b)
 	int anchor_start_nm = anchor_nm_threshold >= 0? anchor_nm_threshold : 10;
 	int anchor_end_nm   = anchor_nm_threshold >= 0? anchor_nm_threshold : 10;
 
-	anchor_start_nm = (int)anchor_start.length()*0.2;
-	anchor_end_nm = (int)anchor_end.length()*0.2;
+	anchor_start_nm = (int)anchor_start.length()*0.15;
+	anchor_end_nm = (int)anchor_end.length()*0.15;
 
 	if (berth_mode == 0) return 0;
 
-	// if (library_type == EMPTY && strand == '.' && xs != '.') strand = xs; 
+	if (library_type == EMPTY && strand == '.' && xs != '.') strand = xs; 
 
 	// whether SEQ in bam is reverse complemente
 	sc_info.push_back(to_string(tid));
