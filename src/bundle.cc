@@ -681,9 +681,9 @@ int bundle::build_tss_tes()
 			wv = new_gr.get_vertex_weight(i);
 			vertex_info vtss = new_gr.get_vertex_info(i);
 			if(bb.strand == '+') tss_list_sg.push_back(make_pair(vtss.lpos,wv));
-			else if (bb.strand == '-') tss_list_sg.push_back(make_pair(vtss.lpos, wv));
+			else if (bb.strand == '-') tes_list_sg.push_back(make_pair(vtss.lpos, wv));
 			
-			printf("TSS: %d %d\n", vtss.lpos, wv);
+			bb.strand =='+' ? printf("TSS: %d %d\n", vtss.lpos, wv) : printf("TES: %d %d\n", vtss.lpos, wv);;
 		} 
 		
 		// TES
@@ -692,10 +692,11 @@ int bundle::build_tss_tes()
 		{
 			wv = new_gr.get_vertex_weight(i);
 			vertex_info vtes = new_gr.get_vertex_info(i);
-			if(bb.strand == '-') tes_list_sg.push_back(make_pair(vtes.rpos,wv));
+			if(bb.strand == '-') tss_list_sg.push_back(make_pair(vtes.rpos,wv));
 			else if (bb.strand == '+') tes_list_sg.push_back(make_pair(vtes.rpos, wv));
 			// else { printf("Bundle (%d, %d) strand: %c", bb.lpos, bb.rpos, bb.strand)};
-			printf("TES: %d %d\n", vtes.rpos, wv);
+			// printf("TES: %d %d\n", vtes.rpos, wv);
+			bb.strand =='+' ? printf("TES: %d %d\n", vtes.rpos, wv) : printf("TSS: %d %d\n", vtes.rpos, wv);;
 		}
 
 	}
