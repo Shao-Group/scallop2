@@ -681,7 +681,7 @@ int bundle::build_tss_tes()
 			wv = new_gr.get_vertex_weight(i);
 			vertex_info vtss = new_gr.get_vertex_info(i);
 			if(bb.strand == '+') tss_list_sg.push_back(make_pair(vtss.lpos,wv));
-			else if (bb.strand == '-') tss_list_sg.push_back(make_pair(vtss.rpos, wv));
+			else if (bb.strand == '-') tss_list_sg.push_back(make_pair(vtss.lpos, wv));
 			
 			printf("TSS: %d %d\n", vtss.lpos, wv);
 		} 
@@ -692,7 +692,7 @@ int bundle::build_tss_tes()
 		{
 			wv = new_gr.get_vertex_weight(i);
 			vertex_info vtes = new_gr.get_vertex_info(i);
-			if(bb.strand == '-') tes_list_sg.push_back(make_pair(vtes.lpos,wv));
+			if(bb.strand == '-') tes_list_sg.push_back(make_pair(vtes.rpos,wv));
 			else if (bb.strand == '+') tes_list_sg.push_back(make_pair(vtes.rpos, wv));
 			// else { printf("Bundle (%d, %d) strand: %c", bb.lpos, bb.rpos, bb.strand)};
 			printf("TES: %d %d\n", vtes.rpos, wv);
@@ -1800,13 +1800,13 @@ int bundle::build_hyper_set()
 	printf("------------------------------------\n");
 
 	//printf("Printing the modified hyperset for Bundle %d:\n", index);
-	hs.print();
-	printf("With unreliable vertices:\n");
-	// hs2.print();
-	for(auto pl : hs.plink)
-	{
-		printf("%d --> %d\n", pl.first, pl.second);
-	}
+	// hs.print();
+	// printf("With unreliable vertices:\n");
+	// // hs2.print();
+	// for(auto pl : hs.plink)
+	// {
+	// 	printf("%d --> %d\n", pl.first, pl.second);
+	// }
 	return 0;
 }
 
