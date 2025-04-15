@@ -248,6 +248,10 @@ int hit::set_anchors(bam1_t *b)
 		if(strand == '+')
 		{
 			pair<int, int> pos_pair = subseq_pos(anchor_end, leftclipseq, anchor_end_nm);
+			if (pos_pair.second < 0) 
+			{
+				pos_pair = subseq_pos_local(anchor_end, leftclipseq, -5);
+			}
 			cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
 			left_anchor_padding = pos_pair.second >= 0 ?  seqlen - pos_pair.second -1 : -1;
 		}
@@ -258,6 +262,11 @@ int hit::set_anchors(bam1_t *b)
 			cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
 			int pT = 0;
 			if (pos_pair.second >= 0 ) pT = polyT(leftclipseq, pos_pair.second + 1);
+			else 
+			{
+				pos_pair = subseq_pos_local(anchor_start, leftclipseq, -5);
+				if (pos_pair.second >= 0) pT = polyT(leftclipseq, pos_pair.second + 1);
+			}
 			cout << "pT " << pT << endl;
 			pT = pT > 0 ? pT : 0;
 			left_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second - pT - 1 : -1;
@@ -298,6 +307,11 @@ int hit::set_anchors(bam1_t *b)
 			cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
 			int pT = 0;
 			if (pos_pair.second >= 0) pT = polyT(revcomp_rightclipseq, pos_pair.second + 1);
+			else
+			{
+				pos_pair = subseq_pos_local(anchor_start, revcomp_rightclipseq, -5);
+				if (pos_pair.second >= 0) pT = polyT(revcomp_rightclipseq, pos_pair.second + 1);
+			}
 			cout << "pT " << pT << endl;
 			pT = pT > 0 ? pT : 0;
 			right_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second - pT - 1 : -1;
@@ -305,6 +319,10 @@ int hit::set_anchors(bam1_t *b)
 		else if(strand == '-')
 		{
 			pair<int, int> pos_pair = subseq_pos(anchor_end, revcomp_rightclipseq, anchor_end_nm);
+			if (pos_pair.second < 0) 
+			{
+				pos_pair = subseq_pos_local(anchor_end, revcomp_rightclipseq, -5);
+			}
 			cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
 			right_anchor_padding = pos_pair.first >= 0 ? seqlen - pos_pair.second -1 : -1;
 		}

@@ -2089,6 +2089,7 @@ void bundle::print_fmap(){
 
 }
 
+// FIXME: Remove this function
 void bundle::write_tss_tes()
 {
 	string tss_file_name = berth_folder + string("tss_splice_graph.bed");
@@ -2199,9 +2200,28 @@ int bundle::merge_tss_tes()
 			new_tss.weight_sg = 0;
 		}
 
-		auto sorted_hits_tss_low = lower_bound(sorted_hits_tss.begin(), sorted_hits_tss.end(), tss_sg-berth_neighborhood, [](const hit &a, const int32_t &b) -> bool { return a.pos < b; });
-		auto sorted_hits_tss_high = upper_bound(sorted_hits_tss.begin(), sorted_hits_tss.end(), tss_sg+berth_neighborhood, [](const int32_t &a, const hit &b) -> bool { return a < b.pos; });
-		vector<hit> sorted_hits_compatible(sorted_hits_tss_low, sorted_hits_tss_high);
+		// auto sorted_hits_tss_low = lower_bound(sorted_hits_tss.begin(), sorted_hits_tss.end(), tss_sg-berth_neighborhood, [](const hit &a, const int32_t &b) -> bool { return a.pos < b; });
+		// auto sorted_hits_tss_high = upper_bound(sorted_hits_tss.begin(), sorted_hits_tss.end(), tss_sg+berth_neighborhood, [](const int32_t &a, const hit &b) -> bool { return a < b.pos; });
+		// vector<hit> sorted_hits_compatible(sorted_hits_tss_low, sorted_hits_tss_high);
+		vector<hit> sorted_hits_compatible, spanning_hits;
+		for(int i = 0; i<sorted_hits_tss.size(); i++ )
+		{
+			hit &hi = sorted_hits_tss[i];
+			if(hi.strand == '+' || (hi.strand == '.' && bb.strand == '+'))
+			{
+				if (hi.pos > (tss_sg - berth_neighborhood) && hi.pos <= (tss_sg + berth_neighborhood)  ) sorted_hits_compatible.push_back(hi);
+				
+			}
+			else
+			{
+				assert(hi.strand == '-' || (hi.strand == '.' && bb.strand == '-'));
+				if (hi.rpos > (tss_sg - berth_neighborhood) && hi.rpos <= (tss_sg + berth_neighborhood)  ) sorted_hits_compatible.push_back(hi);
+			}
+			if(hi.pos <= (tss_sg - berth_neighborhood) && hi.rpos > (tss_sg + berth_neighborhood))
+			{
+				spanning_hits.push_back(hi);
+			}
+		}
 
 		cout << "TSS : neighbours" << tss_sg << endl;
 		for (auto h:sorted_hits_compatible)
@@ -2209,8 +2229,9 @@ int bundle::merge_tss_tes()
 			cout << h.pos << "," << h.rpos << endl; 
 		}
 		new_tss.read_density = sorted_hits_compatible.size();
+		new_tss.spanning_reads_cnt = spanning_hits.size();
 		
-		new_tss.calculate_clip_length(sorted_hits_compatible);
+		new_tss.calculate_clip_length(sorted_hits_compatible, bb.strand);
 		new_tss.calculate_junction_cnt(sorted_junctions_start, sorted_junctions_end);
 		new_tss.calculate_anchor_features(sorted_hits_compatible);
 		tss_merged.push_back(new_tss);
@@ -2241,18 +2262,38 @@ int bundle::merge_tss_tes()
 			new_tes.weight_sg = 0;
 		}
 
-		auto sorted_hits_tes_low = lower_bound(sorted_hits_tes.begin(), sorted_hits_tes.end(), tes_sg-berth_neighborhood, [](const hit &a, const int32_t &b) -> bool { return a.rpos < b; });
-		auto sorted_hits_tes_high = upper_bound(sorted_hits_tes.begin(), sorted_hits_tes.end(), tes_sg+berth_neighborhood, [](const int32_t &a, const hit &b) -> bool { return a < b.rpos; });
-		vector<hit> sorted_hits_compatible(sorted_hits_tes_low, sorted_hits_tes_high);
+		// auto sorted_hits_tes_low = lower_bound(sorted_hits_tes.begin(), sorted_hits_tes.end(), tes_sg-berth_neighborhood, [](const hit &a, const int32_t &b) -> bool { return a.rpos < b; });
+		// auto sorted_hits_tes_high = upper_bound(sorted_hits_tes.begin(), sorted_hits_tes.end(), tes_sg+berth_neighborhood, [](const int32_t &a, const hit &b) -> bool { return a < b.rpos; });
+		// vector<hit> sorted_hits_compatible(sorted_hits_tes_low, sorted_hits_tes_high);
 		
+		vector<hit> sorted_hits_compatible, spanning_hits;
+		for(int i = 0; i<sorted_hits_tss.size(); i++ )
+		{
+			hit &hi = sorted_hits_tss[i];
+			if(hi.strand == '-' || (hi.strand == '.' && bb.strand == '-'))
+			{
+				if (hi.pos > (tes_sg - berth_neighborhood) && hi.pos <= (tes_sg + berth_neighborhood)  ) sorted_hits_compatible.push_back(hi);
+			}
+			else
+			{
+				assert(hi.strand == '+' || (hi.strand == '.' && bb.strand == '+'));
+				if (hi.rpos > (tes_sg - berth_neighborhood) && hi.rpos <= (tes_sg + berth_neighborhood)  ) sorted_hits_compatible.push_back(hi);
+			}
+			if(hi.pos <= (tes_sg - berth_neighborhood) && hi.rpos > (tes_sg + berth_neighborhood))
+			{
+				spanning_hits.push_back(hi);
+			}
+		}
+
 		cout << "TES : neighbours" << tes_sg << endl;
 		for (auto h:sorted_hits_compatible)
 		{
 			cout << h.pos << "," << h.rpos << endl; 
 		}
 		new_tes.read_density = sorted_hits_compatible.size();
+		new_tes.spanning_reads_cnt = spanning_hits.size();
 		
-		new_tes.calculate_clip_length(sorted_hits_compatible);
+		new_tes.calculate_clip_length(sorted_hits_compatible, bb.strand);
 		new_tes.calculate_junction_cnt(sorted_junctions_start, sorted_junctions_end);
 		new_tes.calculate_anchor_features(sorted_hits_compatible);
 		tes_merged.push_back(new_tes);
@@ -2277,6 +2318,7 @@ void bundle::write_tss_tes_features()
 		tss_file << tss.weight_sg << "\t";
 		tss_file << tss.weight_berth << "\t";
 		tss_file << tss.read_density << "\t";
+		tss_file << tss.spanning_reads_cnt << "\t";
 		tss_file << tss.leading_clip_length << "\t";
 		tss_file << tss.trailing_clip_length << "\t";
 		tss_file << tss.junction_start_cnt << "\t";
@@ -2303,6 +2345,7 @@ void bundle::write_tss_tes_features()
 		tes_file << tes.weight_sg << "\t";
 		tes_file << tes.weight_berth << "\t";
 		tes_file << tes.read_density << "\t";
+		tes_file << tes.spanning_reads_cnt << "\t";
 		tes_file << tes.leading_clip_length << "\t";
 		tes_file << tes.trailing_clip_length << "\t";
 		tes_file << tes.junction_start_cnt << "\t";
@@ -2357,14 +2400,25 @@ tss_tes::tss_tes(int type, int32_t pos, int weight_sg, int weight_berth)
 }
 
 //TODO: separate this class functions to a different file
-void tss_tes::calculate_clip_length(vector<hit> &sorted_hits_compatible)
+void tss_tes::calculate_clip_length(vector<hit> &sorted_hits_compatible, char bb_strand)
 {
 	float avg_leading_clip_length = 0, avg_trailing_clip_length = 0;
 	for(int i=0; i<sorted_hits_compatible.size(); i++)
 	{
 		hit &h = sorted_hits_compatible[i];
-		avg_leading_clip_length += abs(h.itvc1.second - h.itvc1.first) / sorted_hits_compatible.size();
-		avg_trailing_clip_length += abs(h.itvc2.second - h.itvc2.first) / sorted_hits_compatible.size();
+		float lc = abs(h.itvc1.second - h.itvc1.first) / sorted_hits_compatible.size();
+		float rc = abs(h.itvc2.second - h.itvc2.first) / sorted_hits_compatible.size();
+		if( h.strand == '+' || (h.strand == '.' && bb_strand == '+'))
+		{
+			avg_leading_clip_length += lc;
+			avg_trailing_clip_length += rc;
+		}
+		else
+		{
+			avg_leading_clip_length += rc;
+			avg_trailing_clip_length += lc;
+		}
+		
 	}
 	
 	this->leading_clip_length = avg_leading_clip_length;
