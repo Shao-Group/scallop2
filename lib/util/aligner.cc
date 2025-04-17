@@ -74,7 +74,7 @@ pair<int, int> subseq_pos(const std::string& seq1, const std::string& seq2, int 
         }
         else if (mx[i-1][start_pos] < mx[i][start_pos-1]) i--;
         else start_pos--;
-        if (start_pos < 1) cout << seq1 << " " << seq2 << endl;
+        // if (start_pos < 1) cout << seq1 << " " << seq2 << endl;
         assert(start_pos >= 1);
 
     }
@@ -145,7 +145,7 @@ pair<int, int> subseq_pos_local(const std::string& seq1, const std::string& seq2
         {
             break;
         }
-        if (start_pos < 1) cout << seq1 << " " << seq2 << endl;
+        // if (start_pos < 1) cout << seq1 << " " << seq2 << endl;
         assert(start_pos >= 1);
 
     }
@@ -164,7 +164,7 @@ int polyT(const std::string& seq1, int start, double polyT_ratio, int min_polyT_
     int lastT = start;
     for (size_t i = start; i < seq1.length(); ++i) 
     {
-        cout << seq1[i];
+        // cout << seq1[i];
         if (seq1[i] == 'T' || seq1[i] == 't') 
         {
             count++;
@@ -173,7 +173,7 @@ int polyT(const std::string& seq1, int start, double polyT_ratio, int min_polyT_
         else if (count <= min_polyT_len || (count / (double)(i - start + 1) >= polyT_ratio)) continue;
         else break;
     }
-    cout << endl;
+    // cout << endl;
 
     if (count >= min_polyT_len) return lastT - start + 1; // not counts of T but length of T tail
     else return 0;

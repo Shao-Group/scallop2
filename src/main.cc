@@ -21,8 +21,8 @@ using namespace std;
 
 int init_files()
 {
-	string tss_file_name = berth_folder + string("tss_merged_features.tsv");
-	string tes_file_name = berth_folder + string("tes_merged_features.tsv");
+	string tss_file_name = berth_folder + tss_output_file;
+	string tes_file_name = berth_folder + tes_output_file;
 	// string read_st_end_file_name = berth_folder + string("read_st_end.tsv");
 	
 	// cout << tss_file_name << tes_file_name << endl;

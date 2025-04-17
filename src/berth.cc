@@ -130,15 +130,15 @@ int berth::init_sites()
     {
         //CLEAN:
         i ++;
-        printf("un sorted [%d] ss sl tt tr: ", i);  
-        printv(*v);
-        printf("\n");  
+        // printf("un sorted [%d] ss sl tt tr: ", i);  
+        // printv(*v);
+        // printf("\n");  
 
         sort(v->begin(), v->end());
         
-        printf("is sorted [%d] ss sl tt tr: ", i);  
-        printv(*v);
-        printf("\n");
+        // printf("is sorted [%d] ss sl tt tr: ", i);  
+        // printv(*v);
+        // printf("\n");
     }
 
     vector<map<int32_t, int>*> maps = {&ssc, &slc, &ttc, &trc};
@@ -160,14 +160,14 @@ int berth::init_sites()
     }
 
     //CLEAN:
-    for (int i = 0; i < maps.size(); i++)
-    {
-        printf("map ssc etc [%d]....: \n", i);
-        map<int32_t, int>     &m = *(maps[i]);
-        for (const auto& [key, value] : m) 
-            std::cout << key << ": " << value << '\n';
-    }
-    cout << "map ssc printed....: " << i << endl;
+    // for (int i = 0; i < maps.size(); i++)
+    // {
+    //     printf("map ssc etc [%d]....: \n", i);
+    //     map<int32_t, int>     &m = *(maps[i]);
+    //     for (const auto& [key, value] : m) 
+    //         std::cout << key << ": " << value << '\n';
+    // }
+    // cout << "map ssc printed....: " << i << endl;
 
     return 0;
 }
@@ -221,14 +221,14 @@ int berth::filter_window(map<int32_t, int>* site_counts, bool dir)
     assert(peakc.size() >= 1);
 
     {   //CLEAN:
-        std::cout << "peakc: " << '\n'; 
-        for (const auto& [key, value] : peakc) cout << key << ": " << value << '\n';
+        // std::cout << "peakc: " << '\n'; 
+        // for (const auto& [key, value] : peakc) cout << key << ": " << value << '\n';
     }
 
     auto _tmp = find_local_or_isolated_max(peakc);
     {   //CLEAN:
-        std::cout << "peakc after local_or_iso_max: " << '\n'; 
-        for (const auto& [key, value] : _tmp) cout << key << ": " << value << '\n';
+        // std::cout << "peakc after local_or_iso_max: " << '\n'; 
+        // for (const auto& [key, value] : _tmp) cout << key << ": " << value << '\n';
     }
     *site_counts = _tmp;
     // *site_counts = find_local_or_isolated_max(peakc);

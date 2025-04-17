@@ -113,6 +113,8 @@ string anchor_start = "";
 string anchor_end = "";
 int berth_neighborhood = 50;
 string anchor_file_name="";
+string tss_output_file="";
+string tes_output_file="";
 
 // for long-reads
 int reliability_threshold = 25;
@@ -481,6 +483,17 @@ int parse_arguments(int argc, const char ** argv)
 			anchor_file_name = string(argv[i+1]);
 			i++;
 		}
+		else if(string(argv[i]) == "--tss_out")
+		{
+			tss_output_file = string(argv[i+1]);
+			i++;
+		}
+		else if (string(argv[i]) == "--tes_out")
+		{
+			tes_output_file = string (argv[i+1]);
+			i++;
+		}
+
 	}
 
 	if(min_surviving_edge_weight < 0.1 + min_transcript_coverage) 

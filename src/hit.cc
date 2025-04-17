@@ -196,7 +196,7 @@ hit::hit(bam1_t *b, int id)
 // CLEAN
 int hit::set_anchors(bam1_t *b)
 {
-	cout << "hitid : " << qname << endl ;
+	// cout << "hitid : " << qname << endl ;
 	vector<string> sc_info;
 	sc_info.push_back(qname);
 	left_anchor_padding  = -1;
@@ -222,6 +222,7 @@ int hit::set_anchors(bam1_t *b)
 	sc_info.push_back(string(1,ts));
 	// whether second in pair	// TODO: what if seq attachment to 1st strand but sequence 2nd strand
 	bool second_in_pair;
+	pair<int, int> predicted_strand(0, 0);
 	if((flag & 0x1) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) second_in_pair = true;
 
 	// left clipped sequence
@@ -240,26 +241,29 @@ int hit::set_anchors(bam1_t *b)
 		{
 			leftclipseq[i] = seq_nt16_str[bam_seqi(seq_ptr, i)];
 		}
-		cout << "leftclipseq: " << leftclipseq << endl; //CLEAN:
+		// cout << "leftclipseq: " << leftclipseq << endl; //CLEAN:
 		sc_info.push_back(leftclipseq);
 
 		// get left anchor position
 		int anchorpos = -1;
-		if(strand == '+')
+		
+		// pair<int, int> pos_left_anchor_padding(-1, -1);
+		if(strand == '+' || strand == '.')
 		{
 			pair<int, int> pos_pair = subseq_pos(anchor_end, leftclipseq, anchor_end_nm);
 			if (pos_pair.second < 0) 
 			{
 				pos_pair = subseq_pos_local(anchor_end, leftclipseq, -5);
 			}
-			cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
+			// cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
 			left_anchor_padding = pos_pair.second >= 0 ?  seqlen - pos_pair.second -1 : -1;
+			if (strand == '.' && pos_pair.second >= 0) predicted_strand.first++;
 		}
-		else if(strand == '-')
+		if(strand == '-' || strand == '.')
 		{
 			// polyT tail
 			pair<int, int> pos_pair = subseq_pos(anchor_start, leftclipseq, anchor_start_nm);
-			cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
+			// cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
 			int pT = 0;
 			if (pos_pair.second >= 0 ) pT = polyT(leftclipseq, pos_pair.second + 1);
 			else 
@@ -267,13 +271,29 @@ int hit::set_anchors(bam1_t *b)
 				pos_pair = subseq_pos_local(anchor_start, leftclipseq, -5);
 				if (pos_pair.second >= 0) pT = polyT(leftclipseq, pos_pair.second + 1);
 			}
-			cout << "pT " << pT << endl;
+			// cout << "pT " << pT << endl;
 			pT = pT > 0 ? pT : 0;
-			left_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second - pT - 1 : -1;
-		}
+			// left_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second - pT - 1 : -1;
+			if ( strand == '.' )
+			{
+				if (pos_pair.second >= 0)
+				{
+					predicted_strand.second++;
+					if ( left_anchor_padding >= 0)
+					{
+						cerr << "Error: Left anchor padding found on both sides " << qname << ":" << pos << "," << rpos << endl;
+					}
+					left_anchor_padding = seqlen - pos_pair.second - pT - 1;
+					
+				}
+			} 
+			else
+			{
+				left_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second - pT - 1 : -1;
+			}
 
-		// left_anchor_padding = anchorpos >= 0? seqlen - anchorpos: -1;
-		cout << "left anchor padding: " << left_anchor_padding << endl;
+
+		}
 	
 		sc_info.push_back(to_string(left_anchor_padding));
 		left_s_seq = leftclipseq;
@@ -285,7 +305,7 @@ int hit::set_anchors(bam1_t *b)
 		int ql1 = itvc2.first;
 		int ql2 = itvc2.second;
 		int seqlen = ql2 - ql1;
-		cout << ql1 << ", " << ql2 << ", " << qlen <<  "," << pos << endl;
+		// cout << ql1 << ", " << ql2 << ", " << qlen <<  "," << pos << endl;
 		assert (seqlen >= 0);	
 
 		// get right clip seq
@@ -295,16 +315,16 @@ int hit::set_anchors(bam1_t *b)
 		{	
 			rightclipseq[i] = seq_nt16_str[bam_seqi(seq_ptr, qlen - seqlen + i)];
 		}
-		cout << "rightclipseq: " << rightclipseq << endl; //CLEAN:
+		// cout << "rightclipseq: " << rightclipseq << endl; //CLEAN:
 		sc_info.push_back(rightclipseq);
 		// get right anchor position
 		int anchorpos = -1;
 		string revcomp_rightclipseq = revcomp(rightclipseq); 
-		if(strand == '+') 
+		if(strand == '+' || strand == '.') 
 		{
 			// polyA tail
 			pair<int, int> pos_pair = subseq_pos(anchor_start, revcomp_rightclipseq, anchor_start_nm);
-			cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
+			// cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
 			int pT = 0;
 			if (pos_pair.second >= 0) pT = polyT(revcomp_rightclipseq, pos_pair.second + 1);
 			else
@@ -312,26 +332,43 @@ int hit::set_anchors(bam1_t *b)
 				pos_pair = subseq_pos_local(anchor_start, revcomp_rightclipseq, -5);
 				if (pos_pair.second >= 0) pT = polyT(revcomp_rightclipseq, pos_pair.second + 1);
 			}
-			cout << "pT " << pT << endl;
+			// cout << "pT " << pT << endl;
 			pT = pT > 0 ? pT : 0;
 			right_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second - pT - 1 : -1;
+			if (strand == '.' && pos_pair.second >= 0) predicted_strand.first++;
 		}
-		else if(strand == '-')
+		if(strand == '-' || strand == '.')
 		{
 			pair<int, int> pos_pair = subseq_pos(anchor_end, revcomp_rightclipseq, anchor_end_nm);
 			if (pos_pair.second < 0) 
 			{
 				pos_pair = subseq_pos_local(anchor_end, revcomp_rightclipseq, -5);
 			}
-			cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
-			right_anchor_padding = pos_pair.first >= 0 ? seqlen - pos_pair.second -1 : -1;
+			// cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
+			if (strand == '.')
+			{
+				if ( pos_pair.second >= 0)
+				{
+					predicted_strand.second++;
+					if ( right_anchor_padding >= 0)
+					{
+						cerr << "Error: Right anchor padding found on both sides " << qname << ":" << pos << "," << rpos << endl;
+					}
+					right_anchor_padding = seqlen - pos_pair.second -1;
+				}
+			}
+			else 
+			{
+				right_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second -1 : -1;
+			}
+			
 		}
 	
-		// right_anchor_padding = anchorpos >= 0? anchorpos: -1;
-		cout << "right anchor padding: " << right_anchor_padding << endl;
 		sc_info.push_back(to_string(right_anchor_padding));
 		right_s_seq = rightclipseq;
 	}
+
+	strand =  predicted_strand.first >= predicted_strand.second ? '+' : '-';
 
 	std::ofstream anchor_file(anchor_file_name, std::ios::app);
 	for(int i=0; i<sc_info.size(); i++) anchor_file << sc_info[i] << "\t";

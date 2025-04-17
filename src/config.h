@@ -147,6 +147,8 @@ extern string anchor_start;
 extern string anchor_end;
 extern int berth_neighborhood;
 extern string anchor_file_name;
+extern string tss_output_file;
+extern string tes_output_file;
 
 // for long-reads
 extern int reliability_threshold;

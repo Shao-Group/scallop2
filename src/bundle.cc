@@ -1459,7 +1459,9 @@ int bundle::print(int index)
 
 	// print bb.hits
 	//for(int i = 0; i < bb.hits.size(); i++) bb.hits[i].print();
-
+	
+	return 0; // FIXME: CLEANUP
+	
 	// print regions
 	printf("Printing regions:\n");
 	for(int i = 0; i < regions.size(); i++)
@@ -2166,8 +2168,8 @@ int bundle::merge_tss_tes()
 	vector<hit> sorted_hits_tss = bb.hits;
 	sort(sorted_hits_tss.begin(), sorted_hits_tss.end(), [](const hit &a, const hit &b) -> bool { return a.pos < b.pos; });
 	//sort all the hits based on end position
-	vector<hit> sorted_hits_tes = bb.hits;
-	sort(sorted_hits_tes.begin(), sorted_hits_tes.end(), [](const hit &a, const hit &b) -> bool { return a.rpos < b.rpos; });
+	// vector<hit> sorted_hits_tes = bb.hits;
+	// sort(sorted_hits_tes.begin(), sorted_hits_tes.end(), [](const hit &a, const hit &b) -> bool { return a.rpos < b.rpos; });
 
 	//sort all the junctions based on start and end position
 	vector<junction> sorted_junctions_start = junctions;
@@ -2204,30 +2206,34 @@ int bundle::merge_tss_tes()
 		// auto sorted_hits_tss_high = upper_bound(sorted_hits_tss.begin(), sorted_hits_tss.end(), tss_sg+berth_neighborhood, [](const int32_t &a, const hit &b) -> bool { return a < b.pos; });
 		// vector<hit> sorted_hits_compatible(sorted_hits_tss_low, sorted_hits_tss_high);
 		vector<hit> sorted_hits_compatible, spanning_hits;
+		cout << "Total hits: " << sorted_hits_tss.size() << " Uncompatible :";
 		for(int i = 0; i<sorted_hits_tss.size(); i++ )
 		{
 			hit &hi = sorted_hits_tss[i];
 			if(hi.strand == '+' || (hi.strand == '.' && bb.strand == '+'))
 			{
 				if (hi.pos > (tss_sg - berth_neighborhood) && hi.pos <= (tss_sg + berth_neighborhood)  ) sorted_hits_compatible.push_back(hi);
-				
+				else cout << hi.qname << " ";
 			}
 			else
 			{
 				assert(hi.strand == '-' || (hi.strand == '.' && bb.strand == '-'));
 				if (hi.rpos > (tss_sg - berth_neighborhood) && hi.rpos <= (tss_sg + berth_neighborhood)  ) sorted_hits_compatible.push_back(hi);
+				else cout << hi.qname << " ";
 			}
 			if(hi.pos <= (tss_sg - berth_neighborhood) && hi.rpos > (tss_sg + berth_neighborhood))
 			{
 				spanning_hits.push_back(hi);
 			}
-		}
+		}	
 
-		cout << "TSS : neighbours" << tss_sg << endl;
+		// CLEANUP
+		cout << "TSS : neighbours ---> " << tss_sg << endl;
 		for (auto h:sorted_hits_compatible)
 		{
-			cout << h.pos << "," << h.rpos << endl; 
+			cout << h.qname << " "; 
 		}
+		cout << endl;
 		new_tss.read_density = sorted_hits_compatible.size();
 		new_tss.spanning_reads_cnt = spanning_hits.size();
 		
@@ -2267,17 +2273,20 @@ int bundle::merge_tss_tes()
 		// vector<hit> sorted_hits_compatible(sorted_hits_tes_low, sorted_hits_tes_high);
 		
 		vector<hit> sorted_hits_compatible, spanning_hits;
+		cout << "Total hits: " << sorted_hits_tss.size() << " Uncompatible :";
 		for(int i = 0; i<sorted_hits_tss.size(); i++ )
 		{
 			hit &hi = sorted_hits_tss[i];
 			if(hi.strand == '-' || (hi.strand == '.' && bb.strand == '-'))
 			{
 				if (hi.pos > (tes_sg - berth_neighborhood) && hi.pos <= (tes_sg + berth_neighborhood)  ) sorted_hits_compatible.push_back(hi);
+				else cout << hi.qname << " ";
 			}
 			else
 			{
 				assert(hi.strand == '+' || (hi.strand == '.' && bb.strand == '+'));
 				if (hi.rpos > (tes_sg - berth_neighborhood) && hi.rpos <= (tes_sg + berth_neighborhood)  ) sorted_hits_compatible.push_back(hi);
+				else cout << hi.qname << " ";
 			}
 			if(hi.pos <= (tes_sg - berth_neighborhood) && hi.rpos > (tes_sg + berth_neighborhood))
 			{
@@ -2285,11 +2294,13 @@ int bundle::merge_tss_tes()
 			}
 		}
 
-		cout << "TES : neighbours" << tes_sg << endl;
+		// CLEANUP
+		cout << "TES : neighbours ---> " << tes_sg << endl;
 		for (auto h:sorted_hits_compatible)
 		{
-			cout << h.pos << "," << h.rpos << endl; 
+			cout << h.qname << " ";
 		}
+		cout << endl;
 		new_tes.read_density = sorted_hits_compatible.size();
 		new_tes.spanning_reads_cnt = spanning_hits.size();
 		
@@ -2305,7 +2316,7 @@ int bundle::merge_tss_tes()
 
 void bundle::write_tss_tes_features()
 {
-	string tss_fname = berth_folder + string("tss_merged_features.tsv");
+	string tss_fname = berth_folder + tss_output_file;
 	ofstream tss_file(tss_fname, ios::app);
 
 	for(int i=0; i<tss_merged.size(); i++)
@@ -2333,7 +2344,7 @@ void bundle::write_tss_tes_features()
 	}
 	tss_file.close();
 
-	string tes_fname = berth_folder + string("tes_merged_features.tsv");
+	string tes_fname = berth_folder + tes_output_file;
 	ofstream tes_file(tes_fname, ios::app);
 	for(int i=0; i<tes_merged.size(); i++)
 	{
@@ -2349,7 +2360,7 @@ void bundle::write_tss_tes_features()
 		tes_file << tes.leading_clip_length << "\t";
 		tes_file << tes.trailing_clip_length << "\t";
 		tes_file << tes.junction_start_cnt << "\t";
-		tes_file << tes.junction_start_cnt << "\t";
+		tes_file << tes.junction_end_cnt << "\t";
 		tes_file << tes.junction_cross_cnt << "\t";
 		tes_file << tes.left_anchor_cnt << "\t";
 		tes_file << tes.right_anchor_cnt << "\t";
