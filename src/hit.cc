@@ -251,7 +251,7 @@ int hit::set_anchors(bam1_t *b)
 		if(strand == '+' || strand == '.')
 		{
 			pair<int, int> pos_pair = subseq_pos(anchor_end, leftclipseq, anchor_end_nm);
-			if (pos_pair.second < 0) 
+			if (pos_pair.second < 0 && strand != '.')  // Exclude local alignment from strand prediction
 			{
 				pos_pair = subseq_pos_local(anchor_end, leftclipseq, -5);
 			}
@@ -266,7 +266,7 @@ int hit::set_anchors(bam1_t *b)
 			// cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
 			int pT = 0;
 			if (pos_pair.second >= 0 ) pT = polyT(leftclipseq, pos_pair.second + 1);
-			else 
+			else if (strand != '.') // Exclude local alignment from strand prediction
 			{
 				pos_pair = subseq_pos_local(anchor_start, leftclipseq, -5);
 				if (pos_pair.second >= 0) pT = polyT(leftclipseq, pos_pair.second + 1);
@@ -327,7 +327,7 @@ int hit::set_anchors(bam1_t *b)
 			// cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
 			int pT = 0;
 			if (pos_pair.second >= 0) pT = polyT(revcomp_rightclipseq, pos_pair.second + 1);
-			else
+			else if (strand != '.') // Exclude local alignment from strand prediction
 			{
 				pos_pair = subseq_pos_local(anchor_start, revcomp_rightclipseq, -5);
 				if (pos_pair.second >= 0) pT = polyT(revcomp_rightclipseq, pos_pair.second + 1);
@@ -340,11 +340,11 @@ int hit::set_anchors(bam1_t *b)
 		if(strand == '-' || strand == '.')
 		{
 			pair<int, int> pos_pair = subseq_pos(anchor_end, revcomp_rightclipseq, anchor_end_nm);
-			if (pos_pair.second < 0) 
+			if (pos_pair.second < 0 && strand != '.') // Exclude local alignment from strand prediction
 			{
 				pos_pair = subseq_pos_local(anchor_end, revcomp_rightclipseq, -5);
 			}
-			// cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
+			cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
 			if (strand == '.')
 			{
 				if ( pos_pair.second >= 0)
