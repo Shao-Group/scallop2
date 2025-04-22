@@ -251,13 +251,17 @@ int hit::set_anchors(bam1_t *b)
 		if(strand == '+' || strand == '.')
 		{
 			pair<int, int> pos_pair = subseq_pos(anchor_end, leftclipseq, anchor_end_nm);
+			int is_local = 0; // Debug: whether local alignment is used
 			if (pos_pair.second < 0 && strand != '.')  // Exclude local alignment from strand prediction
 			{
 				pos_pair = subseq_pos_local(anchor_end, leftclipseq, -5);
+				is_local = 1; // Debug: whether local alignment is used
 			}
 			// cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
 			left_anchor_padding = pos_pair.second >= 0 ?  seqlen - pos_pair.second -1 : -1;
 			if (strand == '.' && pos_pair.second >= 0) predicted_strand.first++;
+
+			if(pos_pair.second >= 0) cout << "Anchor end found on left side --- original strand: " << strand << ", hitid:" << qname << ":" << pos << "," << rpos << "---> local: "<< is_local << endl; // Debug: whether local alignment is used
 		}
 		if(strand == '-' || strand == '.')
 		{
@@ -265,11 +269,13 @@ int hit::set_anchors(bam1_t *b)
 			pair<int, int> pos_pair = subseq_pos(anchor_start, leftclipseq, anchor_start_nm);
 			// cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
 			int pT = 0;
+			int is_local = 0; // Debug: whether local alignment is used
 			if (pos_pair.second >= 0 ) pT = polyT(leftclipseq, pos_pair.second + 1);
 			else if (strand != '.') // Exclude local alignment from strand prediction
 			{
 				pos_pair = subseq_pos_local(anchor_start, leftclipseq, -5);
 				if (pos_pair.second >= 0) pT = polyT(leftclipseq, pos_pair.second + 1);
+				is_local = 1; // Debug: whether local alignment is used
 			}
 			// cout << "pT " << pT << endl;
 			pT = pT > 0 ? pT : 0;
@@ -292,7 +298,7 @@ int hit::set_anchors(bam1_t *b)
 				left_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second - pT - 1 : -1;
 			}
 
-
+			if(pos_pair.second >= 0) cout << "Anchor start found on left side --- original strand: " << strand << ", hitid:" << qname << ":" << pos << "," << rpos << "---> local: "<< is_local << endl;	 // Debug: whether local alignment is used
 		}
 	
 		sc_info.push_back(to_string(left_anchor_padding));
@@ -326,23 +332,28 @@ int hit::set_anchors(bam1_t *b)
 			pair<int, int> pos_pair = subseq_pos(anchor_start, revcomp_rightclipseq, anchor_start_nm);
 			// cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
 			int pT = 0;
+			int is_local = 0; // Debug: whether local alignment is used
 			if (pos_pair.second >= 0) pT = polyT(revcomp_rightclipseq, pos_pair.second + 1);
 			else if (strand != '.') // Exclude local alignment from strand prediction
 			{
 				pos_pair = subseq_pos_local(anchor_start, revcomp_rightclipseq, -5);
 				if (pos_pair.second >= 0) pT = polyT(revcomp_rightclipseq, pos_pair.second + 1);
+				is_local = 1; // Debug: whether local alignment is used
 			}
 			// cout << "pT " << pT << endl;
 			pT = pT > 0 ? pT : 0;
 			right_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second - pT - 1 : -1;
 			if (strand == '.' && pos_pair.second >= 0) predicted_strand.first++;
+			if(pos_pair.second >= 0) cout << "Anchor start found on right side --- original strand: " << strand << ", hitid:" << qname << ":" << pos << "," << rpos << "---> local: "<< is_local << endl; // Debug: whether local alignment is used
 		}
 		if(strand == '-' || strand == '.')
 		{
 			pair<int, int> pos_pair = subseq_pos(anchor_end, revcomp_rightclipseq, anchor_end_nm);
+			int is_local = 0; // Debug: whether local alignment is used
 			if (pos_pair.second < 0 && strand != '.') // Exclude local alignment from strand prediction
 			{
 				pos_pair = subseq_pos_local(anchor_end, revcomp_rightclipseq, -5);
+				is_local = 1; // Debug: whether local alignment is used
 			}
 			cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
 			if (strand == '.')
@@ -361,6 +372,7 @@ int hit::set_anchors(bam1_t *b)
 			{
 				right_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second -1 : -1;
 			}
+			if(pos_pair.second >= 0) cout << "Anchor end found on right side --- original strand: " << strand << ", hitid:" << qname << ":" << pos << "," << rpos << "---> local: "<< is_local << endl; // Debug: whether local alignment is used
 			
 		}
 	
@@ -368,7 +380,12 @@ int hit::set_anchors(bam1_t *b)
 		right_s_seq = rightclipseq;
 	}
 
-	strand =  predicted_strand.first >= predicted_strand.second ? '+' : '-';
+	if(predicted_strand.first != 0 || predicted_strand.second != 0)
+	{
+		assert (strand == '.');
+		strand =  predicted_strand.first >= predicted_strand.second ? '+' : '-';
+		cout << "Predicted strand: " << strand << ", Original Strand: ." << endl;
+	}
 
 	std::ofstream anchor_file(anchor_file_name, std::ios::app);
 	for(int i=0; i<sc_info.size(); i++) anchor_file << sc_info[i] << "\t";
