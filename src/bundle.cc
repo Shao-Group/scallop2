@@ -2277,12 +2277,12 @@ int bundle::merge_tss_tes()
 		for(int i = 0; i<sorted_hits_tss.size(); i++ )
 		{
 			hit &hi = sorted_hits_tss[i];
-			if(hi.strand == '-' || (hi.strand == '.' && bb.strand == '-'))
+			if(hi.strand == '-') // || (hi.strand == '.' && bb.strand == '-')) // Exclude . hits
 			{
 				if (hi.pos > (tes_sg - berth_neighborhood) && hi.pos <= (tes_sg + berth_neighborhood)  ) sorted_hits_compatible.push_back(hi);
 				else cout << hi.qname << " ";
 			}
-			else
+			else if (hi.strand == '+') // || (hi.strand == '.' && bb.strand == '+')) // Exclude . hits
 			{
 				assert(hi.strand == '+' || (hi.strand == '.' && bb.strand == '+'));
 				if (hi.rpos > (tes_sg - berth_neighborhood) && hi.rpos <= (tes_sg + berth_neighborhood)  ) sorted_hits_compatible.push_back(hi);

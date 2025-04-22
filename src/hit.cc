@@ -208,6 +208,9 @@ int hit::set_anchors(bam1_t *b)
 	anchor_start_nm = (int)anchor_start.length()*0.15;
 	anchor_end_nm = (int)anchor_end.length()*0.15;
 
+	int anchor_start_local_nm = -1 * (int) anchor_start.length()*0.75;
+	int anchor_end_local_nm = -1 * (int) anchor_end.length()*0.75;
+
 	if (berth_mode == 0) return 0;
 
 	if (library_type == EMPTY && strand == '.' && xs != '.') strand = xs; 
@@ -222,7 +225,11 @@ int hit::set_anchors(bam1_t *b)
 	sc_info.push_back(string(1,ts));
 	// whether second in pair	// TODO: what if seq attachment to 1st strand but sequence 2nd strand
 	bool second_in_pair;
+
+	// Unknown strand prediction
 	pair<int, int> predicted_strand(0, 0);
+	int is_anchor_both_sides = 0;
+
 	if((flag & 0x1) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) second_in_pair = true;
 
 	// left clipped sequence
@@ -254,7 +261,7 @@ int hit::set_anchors(bam1_t *b)
 			int is_local = 0; // Debug: whether local alignment is used
 			if (pos_pair.second < 0 && strand != '.')  // Exclude local alignment from strand prediction
 			{
-				pos_pair = subseq_pos_local(anchor_end, leftclipseq, -5);
+				pos_pair = subseq_pos_local(anchor_end, leftclipseq, anchor_end_local_nm);
 				is_local = 1; // Debug: whether local alignment is used
 			}
 			// cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
@@ -273,7 +280,7 @@ int hit::set_anchors(bam1_t *b)
 			if (pos_pair.second >= 0 ) pT = polyT(leftclipseq, pos_pair.second + 1);
 			else if (strand != '.') // Exclude local alignment from strand prediction
 			{
-				pos_pair = subseq_pos_local(anchor_start, leftclipseq, -5);
+				pos_pair = subseq_pos_local(anchor_start, leftclipseq, anchor_start_local_nm);
 				if (pos_pair.second >= 0) pT = polyT(leftclipseq, pos_pair.second + 1);
 				is_local = 1; // Debug: whether local alignment is used
 			}
@@ -287,9 +294,10 @@ int hit::set_anchors(bam1_t *b)
 					predicted_strand.second++;
 					if ( left_anchor_padding >= 0)
 					{
-						cerr << "Error: Left anchor padding found on both sides " << qname << ":" << pos << "," << rpos << endl;
+						cout << "Error: Left anchor padding found on both sides " << qname << ":" << pos << "," << rpos << endl;
+						is_anchor_both_sides = 1;
 					}
-					left_anchor_padding = seqlen - pos_pair.second - pT - 1;
+					else left_anchor_padding = seqlen - pos_pair.second - pT - 1;
 					
 				}
 			} 
@@ -336,7 +344,7 @@ int hit::set_anchors(bam1_t *b)
 			if (pos_pair.second >= 0) pT = polyT(revcomp_rightclipseq, pos_pair.second + 1);
 			else if (strand != '.') // Exclude local alignment from strand prediction
 			{
-				pos_pair = subseq_pos_local(anchor_start, revcomp_rightclipseq, -5);
+				pos_pair = subseq_pos_local(anchor_start, revcomp_rightclipseq, anchor_start_local_nm);
 				if (pos_pair.second >= 0) pT = polyT(revcomp_rightclipseq, pos_pair.second + 1);
 				is_local = 1; // Debug: whether local alignment is used
 			}
@@ -352,7 +360,7 @@ int hit::set_anchors(bam1_t *b)
 			int is_local = 0; // Debug: whether local alignment is used
 			if (pos_pair.second < 0 && strand != '.') // Exclude local alignment from strand prediction
 			{
-				pos_pair = subseq_pos_local(anchor_end, revcomp_rightclipseq, -5);
+				pos_pair = subseq_pos_local(anchor_end, revcomp_rightclipseq, anchor_end_local_nm);
 				is_local = 1; // Debug: whether local alignment is used
 			}
 			cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
@@ -363,9 +371,10 @@ int hit::set_anchors(bam1_t *b)
 					predicted_strand.second++;
 					if ( right_anchor_padding >= 0)
 					{
-						cerr << "Error: Right anchor padding found on both sides " << qname << ":" << pos << "," << rpos << endl;
+						cout << "Error: Right anchor padding found on both sides " << qname << ":" << pos << "," << rpos << endl;
+						is_anchor_both_sides = 2;
 					}
-					right_anchor_padding = seqlen - pos_pair.second -1;
+					else right_anchor_padding = seqlen - pos_pair.second -1;
 				}
 			}
 			else 
@@ -380,7 +389,7 @@ int hit::set_anchors(bam1_t *b)
 		right_s_seq = rightclipseq;
 	}
 
-	if(predicted_strand.first != 0 || predicted_strand.second != 0)
+	if( (is_anchor_both_sides == 0) && (predicted_strand.first != 0 || predicted_strand.second != 0 ))
 	{
 		assert (strand == '.');
 		strand =  predicted_strand.first >= predicted_strand.second ? '+' : '-';
