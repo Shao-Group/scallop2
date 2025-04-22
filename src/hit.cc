@@ -226,7 +226,7 @@ int hit::set_anchors(bam1_t *b)
 	if((flag & 0x1) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) second_in_pair = true;
 
 	// left clipped sequence
-	if ((anchor_start != "" && strand == '-') || (anchor_end != "" && strand == '+'))
+	if ((anchor_start != "" && strand == '-') || (anchor_end != "" && strand == '+') || (anchor_start != "" && anchor_end != "" && strand == '.'))
 	{
 		int ql1 = itvc1.first;
 		int ql2 = itvc1.second;
@@ -306,7 +306,7 @@ int hit::set_anchors(bam1_t *b)
 	}
 
 	// right clipped sequence
-	if ((anchor_end != "" && strand == '-') || (anchor_start != "" && strand == '+')) 
+	if ((anchor_end != "" && strand == '-') || (anchor_start != "" && strand == '+') || (anchor_start != "" && anchor_end != "" && strand == '.')) 
 	{
 		int ql1 = itvc2.first;
 		int ql2 = itvc2.second;
