@@ -84,7 +84,7 @@ pair<int, int> subseq_pos(const std::string& seq1, const std::string& seq2, int 
 }
 
 
-pair<int, int> subseq_pos_local(const std::string& seq1, const std::string& seq2, int nm, int indel_penalty, int mis_penalty) 
+pair<int, int> subseq_pos_local(const std::string& seq1, const std::string& seq2, float fm, int indel_penalty, int mis_penalty) 
 {
     // if (seq1.length() > seq2.length())  return make_pair(-1, -1);
 
@@ -99,56 +99,62 @@ pair<int, int> subseq_pos_local(const std::string& seq1, const std::string& seq2
     // Initialize
     vector<vector<int>> mx(seq1.length() + 1, vector<int>(seq2.length() + 1, 0));
     mx[0][0] = 0;
-    for (size_t i = 0; i < seq2.length() + 1; ++i) mx[0][i] = 0;
-    for (size_t i = 1; i < seq1.length() + 1; ++i) mx[i][0] = i * indel_penalty;
+    for (size_t i = 0; i < seq2.length() + 1; ++i) mx[0][i] = INT_MAX;
+    for (size_t i = 1; i < seq1.length() + 1; ++i) mx[i][0] = 0;
 
     // DP body
     for (size_t j = 1; j <= seq2.length(); ++j) 
     {
         for (size_t i = 1; i <= seq1.length(); ++i) 
         {
-            int examine_match = (seq1[i - 1] == seq2[j - 1]) ? -1 : mis_penalty;
+            int examine_match = (seq1[i - 1] == seq2[j - 1]) ? 0 : mis_penalty;
             int consume_both = mx[i-1][j-1] + examine_match;
             int consume_seq1 = mx[i][j-1]   + indel_penalty;
             int consume_seq2 = mx[i-1][j]   + indel_penalty;
             
-            mx[i][j] = min({ 0, consume_both, consume_seq1, consume_seq2});
-            if (mx[i][j] < min_penalty) 
-            {
-                end_pos = j;
-                min_penalty = mx[i][j];
-            }
+            mx[i][j] = min({ consume_both, consume_seq1, consume_seq2});
+            
         }
         
-        // Check if we found a match within allowed edit distance
-        // if (mx[seq1.length()][j] <= nm) return j; //FIXME: return highest score position
-        // if (mx[seq1.length()][j] <= nm && mx[seq1.length()][j] < min_penalty)  //FIXED: saving min dist position
-        // {
-        //     end_pos = j;
-        //     min_penalty = mx[seq1.length()][j];
-        // }
     }
 
-    if(end_pos == -1 || min_penalty > nm) return make_pair(-1,-1);
-    int start_pos = end_pos;
-    int i = seq1.length();
-    while( i > 1)
+    // Find best match  in the last row
+    for (size_t j = 1; j <= seq2.length(); ++j) 
     {
-        if(mx[i-1][start_pos-1] < mx[i-1][start_pos] && mx[i-1][start_pos-1] < mx[i][start_pos-1]) 
+        if (mx[seq1.length()][j] < min_penalty) 
         {
-            start_pos = start_pos - 1;
-            i--;
+            end_pos = j;
+            min_penalty = mx[seq1.length()][j];
         }
-        else if (mx[i-1][start_pos] < mx[i][start_pos-1]) i--;
-        else start_pos--;
-        if (mx[i][start_pos] == 0) 
-        {
-            break;
-        }
-        // if (start_pos < 1) cout << seq1 << " " << seq2 << endl;
-        assert(start_pos >= 1);
-
     }
+    
+
+    if(end_pos == -1) return make_pair(-1,-1);
+
+    int start_pos = 1;
+    // int i = seq1.length();
+    // while( i > 1)
+    // {
+    //     if(mx[i-1][start_pos-1] < mx[i-1][start_pos] && mx[i-1][start_pos-1] < mx[i][start_pos-1]) 
+    //     {
+    //         start_pos = start_pos - 1;
+    //         i--;
+    //     }
+    //     else if (mx[i-1][start_pos] < mx[i][start_pos-1]) i--;
+    //     else start_pos--;
+    //     if (mx[i][start_pos] == 0) 
+    //     {
+    //         break;
+    //     }
+    //     // if (start_pos < 1) cout << seq1 << " " << seq2 << endl;
+    //     assert(start_pos >= 1);
+
+    // }
+
+    int nm = fm * (end_pos - start_pos + 1); // nm is the number of mismatches dependent on the length of the match
+    // if (nm < 0) nm = 0;
+
+    if(min_penalty > nm) return make_pair(-1,-1);
 
     return make_pair(start_pos-1, end_pos-1);
 

@@ -12,7 +12,7 @@ See LICENSE for licensing.
 using namespace std;
 
 pair<int, int> subseq_pos(const string& seq1, const string& seq2, int nm = 1, int indel_penalty = 1, int mis_penalty = 1);
-pair<int, int> subseq_pos_local(const string& seq1, const string& seq2, int nm = 1, int indel_penalty = 1, int mis_penalty = 1);
+pair<int, int> subseq_pos_local(const string& seq1, const string& seq2, float fm = 0.1, int indel_penalty = 1, int mis_penalty = 1);
 
 string revcomp(const string& s);
 char   revcomp_char(const char&   c);

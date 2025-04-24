@@ -205,11 +205,11 @@ int hit::set_anchors(bam1_t *b)
 	int anchor_start_nm = anchor_nm_threshold >= 0? anchor_nm_threshold : 10;
 	int anchor_end_nm   = anchor_nm_threshold >= 0? anchor_nm_threshold : 10;
 
-	anchor_start_nm = (int)anchor_start.length()*0.15;
-	anchor_end_nm = (int)anchor_end.length()*0.15;
+	anchor_start_nm = (int)anchor_start.length()*0.10;
+	anchor_end_nm = (int)anchor_end.length()*0.10;
 
-	int anchor_start_local_nm = -1 * (int) anchor_start.length()*0.75;
-	int anchor_end_local_nm = -1 * (int) anchor_end.length()*0.75;
+	float anchor_start_local_nm = 0.10;
+	float anchor_end_local_nm = 0.10;
 
 	if (berth_mode == 0) return 0;
 
@@ -229,6 +229,9 @@ int hit::set_anchors(bam1_t *b)
 	// Unknown strand prediction
 	pair<int, int> predicted_strand(0, 0);
 	int is_anchor_both_sides = 0;
+	char left_anchor_type = '#'; // Left anchor type = 's' for start anchor, 'e' for end anchor
+	char right_anchor_type = '#'; // Right anchor type = 's' for start anchor, 'e' for end anchor
+	 
 
 	if((flag & 0x1) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) second_in_pair = true;
 
@@ -259,7 +262,7 @@ int hit::set_anchors(bam1_t *b)
 		{
 			pair<int, int> pos_pair = subseq_pos(anchor_end, leftclipseq, anchor_end_nm);
 			int is_local = 0; // Debug: whether local alignment is used
-			if (pos_pair.second < 0 && strand != '.')  // Exclude local alignment from strand prediction
+			if (pos_pair.second < 0  )  // Include local alignment for strand prediction
 			{
 				pos_pair = subseq_pos_local(anchor_end, leftclipseq, anchor_end_local_nm);
 				is_local = 1; // Debug: whether local alignment is used
@@ -268,7 +271,12 @@ int hit::set_anchors(bam1_t *b)
 			left_anchor_padding = pos_pair.second >= 0 ?  seqlen - pos_pair.second -1 : -1;
 			if (strand == '.' && pos_pair.second >= 0) predicted_strand.first++;
 
-			if(pos_pair.second >= 0) cout << "Anchor end found on left side --- original strand: " << strand << ", hitid:" << qname << ":" << pos << "," << rpos << "---> local: "<< is_local << endl; // Debug: whether local alignment is used
+			if(pos_pair.second >= 0) 
+			{
+				left_anchor_type = 'e';
+				cout << "Anchor end found on left side --- original strand: " << strand << ", hitid:" << qname << ":" << pos << "," << rpos << "---> local: "<< is_local << endl; // Debug: whether local alignment is used
+			}
+			
 		}
 		if(strand == '-' || strand == '.')
 		{
@@ -278,7 +286,7 @@ int hit::set_anchors(bam1_t *b)
 			int pT = 0;
 			int is_local = 0; // Debug: whether local alignment is used
 			if (pos_pair.second >= 0 ) pT = polyT(leftclipseq, pos_pair.second + 1);
-			else if (strand != '.') // Exclude local alignment from strand prediction
+			else // Include local alignment from strand prediction
 			{
 				pos_pair = subseq_pos_local(anchor_start, leftclipseq, anchor_start_local_nm);
 				if (pos_pair.second >= 0) pT = polyT(leftclipseq, pos_pair.second + 1);
@@ -306,7 +314,12 @@ int hit::set_anchors(bam1_t *b)
 				left_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second - pT - 1 : -1;
 			}
 
-			if(pos_pair.second >= 0) cout << "Anchor start found on left side --- original strand: " << strand << ", hitid:" << qname << ":" << pos << "," << rpos << "---> local: "<< is_local << endl;	 // Debug: whether local alignment is used
+			if(pos_pair.second >= 0) 
+			{
+				left_anchor_type = 's';
+				cout << "Anchor start found on left side --- original strand: " << strand << ", hitid:" << qname << ":" << pos << "," << rpos << "---> local: "<< is_local << endl;	 // Debug: whether local alignment is used
+			}
+			
 		}
 	
 		sc_info.push_back(to_string(left_anchor_padding));
@@ -342,7 +355,7 @@ int hit::set_anchors(bam1_t *b)
 			int pT = 0;
 			int is_local = 0; // Debug: whether local alignment is used
 			if (pos_pair.second >= 0) pT = polyT(revcomp_rightclipseq, pos_pair.second + 1);
-			else if (strand != '.') // Exclude local alignment from strand prediction
+			else // Include local alignment from strand prediction
 			{
 				pos_pair = subseq_pos_local(anchor_start, revcomp_rightclipseq, anchor_start_local_nm);
 				if (pos_pair.second >= 0) pT = polyT(revcomp_rightclipseq, pos_pair.second + 1);
@@ -352,7 +365,11 @@ int hit::set_anchors(bam1_t *b)
 			pT = pT > 0 ? pT : 0;
 			right_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second - pT - 1 : -1;
 			if (strand == '.' && pos_pair.second >= 0) predicted_strand.first++;
-			if(pos_pair.second >= 0) cout << "Anchor start found on right side --- original strand: " << strand << ", hitid:" << qname << ":" << pos << "," << rpos << "---> local: "<< is_local << endl; // Debug: whether local alignment is used
+			if(pos_pair.second >= 0) 
+			{
+				right_anchor_type = 's';
+				cout << "Anchor start found on right side --- original strand: " << strand << ", hitid:" << qname << ":" << pos << "," << rpos << "---> local: "<< is_local << endl; // Debug: whether local alignment is used
+			}
 		}
 		if(strand == '-' || strand == '.')
 		{
@@ -381,8 +398,11 @@ int hit::set_anchors(bam1_t *b)
 			{
 				right_anchor_padding = pos_pair.second >= 0 ? seqlen - pos_pair.second -1 : -1;
 			}
-			if(pos_pair.second >= 0) cout << "Anchor end found on right side --- original strand: " << strand << ", hitid:" << qname << ":" << pos << "," << rpos << "---> local: "<< is_local << endl; // Debug: whether local alignment is used
-			
+			if(pos_pair.second >= 0)
+			{	
+				right_anchor_type = 'e';
+				cout << "Anchor end found on right side --- original strand: " << strand << ", hitid:" << qname << ":" << pos << "," << rpos << "---> local: "<< is_local << endl; // Debug: whether local alignment is used
+			}
 		}
 	
 		sc_info.push_back(to_string(right_anchor_padding));
@@ -394,6 +414,11 @@ int hit::set_anchors(bam1_t *b)
 		assert (strand == '.');
 		strand =  predicted_strand.first >= predicted_strand.second ? '+' : '-';
 		cout << "Predicted strand: " << strand << ", Original Strand: ." << endl;
+	}
+
+	if((left_anchor_type != '#' && right_anchor_type == left_anchor_type) || is_anchor_both_sides > 1)
+	{
+		strand = '.';
 	}
 
 	std::ofstream anchor_file(anchor_file_name, std::ios::app);
