@@ -84,7 +84,7 @@ pair<int, int> subseq_pos(const std::string& seq1, const std::string& seq2, int 
 }
 
 
-pair<int, int> subseq_pos_local(const std::string& seq1, const std::string& seq2, float fm, int indel_penalty, int mis_penalty) 
+pair<int, int> subseq_pos_local(const std::string& seq1, const std::string& seq2, float fm, int min_match_length, int indel_penalty, int mis_penalty) 
 {
     // if (seq1.length() > seq2.length())  return make_pair(-1, -1);
 
@@ -95,11 +95,12 @@ pair<int, int> subseq_pos_local(const std::string& seq1, const std::string& seq2
 
     int end_pos = -1;
     int min_penalty = INT_MAX;
+    int max_penalty_val = seq1.length() > seq2.length() ? seq1.length() : seq2.length();
 
     // Initialize
     vector<vector<int>> mx(seq1.length() + 1, vector<int>(seq2.length() + 1, 0));
     mx[0][0] = 0;
-    for (size_t i = 0; i < seq2.length() + 1; ++i) mx[0][i] = INT_MAX;
+    for (size_t i = 0; i < seq2.length() + 1; ++i) mx[0][i] = max_penalty_val;
     for (size_t i = 1; i < seq1.length() + 1; ++i) mx[i][0] = 0;
 
     // DP body
@@ -150,8 +151,9 @@ pair<int, int> subseq_pos_local(const std::string& seq1, const std::string& seq2
     //     assert(start_pos >= 1);
 
     // }
-
-    int nm = fm * (end_pos - start_pos + 1); // nm is the number of mismatches dependent on the length of the match
+    int match_length = end_pos - start_pos + 1;
+    if (match_length < min_match_length) return make_pair(-1,-1);
+    int nm = fm * match_length; // nm is the number of mismatches dependent on the length of the match
     // if (nm < 0) nm = 0;
 
     if(min_penalty > nm) return make_pair(-1,-1);

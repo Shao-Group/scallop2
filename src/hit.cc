@@ -210,6 +210,8 @@ int hit::set_anchors(bam1_t *b)
 
 	float anchor_start_local_nm = 0.10;
 	float anchor_end_local_nm = 0.10;
+	int anchor_start_min_length = (int)(0.5*anchor_start.length());
+	int anchor_end_min_length = (int)(0.5*anchor_end.length());
 
 	if (berth_mode == 0) return 0;
 
@@ -264,7 +266,7 @@ int hit::set_anchors(bam1_t *b)
 			int is_local = 0; // Debug: whether local alignment is used
 			if (pos_pair.second < 0  )  // Include local alignment for strand prediction
 			{
-				pos_pair = subseq_pos_local(anchor_end, leftclipseq, anchor_end_local_nm);
+				pos_pair = subseq_pos_local(anchor_end, leftclipseq, anchor_end_local_nm, anchor_end_min_length);
 				is_local = 1; // Debug: whether local alignment is used
 			}
 			// cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
@@ -288,7 +290,7 @@ int hit::set_anchors(bam1_t *b)
 			if (pos_pair.second >= 0 ) pT = polyT(leftclipseq, pos_pair.second + 1);
 			else // Include local alignment from strand prediction
 			{
-				pos_pair = subseq_pos_local(anchor_start, leftclipseq, anchor_start_local_nm);
+				pos_pair = subseq_pos_local(anchor_start, leftclipseq, anchor_start_local_nm, anchor_start_min_length);
 				if (pos_pair.second >= 0) pT = polyT(leftclipseq, pos_pair.second + 1);
 				is_local = 1; // Debug: whether local alignment is used
 			}
@@ -357,7 +359,7 @@ int hit::set_anchors(bam1_t *b)
 			if (pos_pair.second >= 0) pT = polyT(revcomp_rightclipseq, pos_pair.second + 1);
 			else // Include local alignment from strand prediction
 			{
-				pos_pair = subseq_pos_local(anchor_start, revcomp_rightclipseq, anchor_start_local_nm);
+				pos_pair = subseq_pos_local(anchor_start, revcomp_rightclipseq, anchor_start_local_nm, anchor_start_min_length);
 				if (pos_pair.second >= 0) pT = polyT(revcomp_rightclipseq, pos_pair.second + 1);
 				is_local = 1; // Debug: whether local alignment is used
 			}
@@ -377,7 +379,7 @@ int hit::set_anchors(bam1_t *b)
 			int is_local = 0; // Debug: whether local alignment is used
 			if (pos_pair.second < 0 && strand != '.') // Exclude local alignment from strand prediction
 			{
-				pos_pair = subseq_pos_local(anchor_end, revcomp_rightclipseq, anchor_end_local_nm);
+				pos_pair = subseq_pos_local(anchor_end, revcomp_rightclipseq, anchor_end_local_nm, anchor_end_min_length);
 				is_local = 1; // Debug: whether local alignment is used
 			}
 			cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
