@@ -411,7 +411,7 @@ int hit::set_anchors(bam1_t *b)
 		right_s_seq = rightclipseq;
 	}
 
-	if( (is_anchor_both_sides == 0) && (predicted_strand.first != 0 || predicted_strand.second != 0 ))
+	if( (is_anchor_both_sides == 0) && (predicted_strand.first != 0 || predicted_strand.second != 0 ) && (predicted_strand.first != predicted_strand.second))
 	{
 		assert (strand == '.');
 		strand =  predicted_strand.first >= predicted_strand.second ? '+' : '-';
