@@ -262,7 +262,8 @@ int hit::set_anchors(bam1_t *b)
 		// pair<int, int> pos_left_anchor_padding(-1, -1);
 		if(strand == '+' || strand == '.')
 		{
-			pair<int, int> pos_pair = subseq_pos(anchor_end, leftclipseq, anchor_end_nm);
+			// pair<int, int> pos_pair = subseq_pos(anchor_end, leftclipseq, anchor_end_nm);
+			pair<int, int> pos_pair = {-1, -1}; // Trying only local alignment
 			int is_local = 0; // Debug: whether local alignment is used
 			if (pos_pair.second < 0  )  // Include local alignment for strand prediction
 			{
@@ -283,7 +284,8 @@ int hit::set_anchors(bam1_t *b)
 		if(strand == '-' || strand == '.')
 		{
 			// polyT tail
-			pair<int, int> pos_pair = subseq_pos(anchor_start, leftclipseq, anchor_start_nm);
+			// pair<int, int> pos_pair = subseq_pos(anchor_start, leftclipseq, anchor_start_nm);
+			pair<int, int> pos_pair = {-1, -1}; // Trying only local alignment
 			// cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
 			int pT = 0;
 			int is_local = 0; // Debug: whether local alignment is used
@@ -304,7 +306,7 @@ int hit::set_anchors(bam1_t *b)
 					predicted_strand.second++;
 					if ( left_anchor_padding >= 0)
 					{
-						cout << "Error: Left anchor padding found on both sides " << qname << ":" << pos << "," << rpos << endl;
+						cout << "Error: Left clip contains both anchors " << qname << ":" << pos << "," << rpos << endl;
 						is_anchor_both_sides = 1;
 					}
 					else left_anchor_padding = seqlen - pos_pair.second - pT - 1;
@@ -352,7 +354,8 @@ int hit::set_anchors(bam1_t *b)
 		if(strand == '+' || strand == '.') 
 		{
 			// polyA tail
-			pair<int, int> pos_pair = subseq_pos(anchor_start, revcomp_rightclipseq, anchor_start_nm);
+			// pair<int, int> pos_pair = subseq_pos(anchor_start, revcomp_rightclipseq, anchor_start_nm);
+			pair<int, int> pos_pair = {-1, -1}; // Trying only local alignment
 			// cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
 			int pT = 0;
 			int is_local = 0; // Debug: whether local alignment is used
@@ -375,7 +378,8 @@ int hit::set_anchors(bam1_t *b)
 		}
 		if(strand == '-' || strand == '.')
 		{
-			pair<int, int> pos_pair = subseq_pos(anchor_end, revcomp_rightclipseq, anchor_end_nm);
+			// pair<int, int> pos_pair = subseq_pos(anchor_end, revcomp_rightclipseq, anchor_end_nm);
+			pair<int, int> pos_pair = {-1, -1}; // Trying only local alignment
 			int is_local = 0; // Debug: whether local alignment is used
 			if (pos_pair.second < 0 && strand != '.') // Exclude local alignment from strand prediction
 			{
@@ -390,7 +394,7 @@ int hit::set_anchors(bam1_t *b)
 					predicted_strand.second++;
 					if ( right_anchor_padding >= 0)
 					{
-						cout << "Error: Right anchor padding found on both sides " << qname << ":" << pos << "," << rpos << endl;
+						cout << "Error: Right clip contains both anchors " << qname << ":" << pos << "," << rpos << endl;
 						is_anchor_both_sides = 2;
 					}
 					else right_anchor_padding = seqlen - pos_pair.second -1;
@@ -406,7 +410,6 @@ int hit::set_anchors(bam1_t *b)
 				cout << "Anchor end found on right side --- original strand: " << strand << ", hitid:" << qname << ":" << pos << "," << rpos << "---> local: "<< is_local << endl; // Debug: whether local alignment is used
 			}
 		}
-	
 		sc_info.push_back(to_string(right_anchor_padding));
 		right_s_seq = rightclipseq;
 	}
@@ -421,8 +424,15 @@ int hit::set_anchors(bam1_t *b)
 	if((left_anchor_type != '#' && right_anchor_type == left_anchor_type) || is_anchor_both_sides > 1)
 	{
 		strand = '.';
+		cout << "Anchor found on both sides: " << qname << "-->" << tid << ":" << pos << "," << rpos << endl;
+		sc_info.push_back("BOTH");
 	}
-
+	else 
+	{
+		string anchor_type = string(1,left_anchor_type) + string(1,right_anchor_type);
+		sc_info.push_back(anchor_type);
+	}
+	
 	std::ofstream anchor_file(anchor_file_name, std::ios::app);
 	for(int i=0; i<sc_info.size(); i++) anchor_file << sc_info[i] << "\t";
 	anchor_file << endl;
