@@ -4,12 +4,13 @@ bin_PROGRAMS = scallop2
 GTF_INCLUDE = $(top_srcdir)/lib/gtf
 UTIL_INCLUDE = $(top_srcdir)/lib/util
 GRAPH_INCLUDE = $(top_srcdir)/lib/graph
+BOOST_INCLUDE = /datadisk1/ixk5174/tools/lib/boost_1_87_0
 
 GTF_LIB = $(top_builddir)/lib/gtf
 UTIL_LIB = $(top_builddir)/lib/util
 GRAPH_LIB = $(top_builddir)/lib/graph
 
-scallop2_CPPFLAGS = -std=c++11 -I$(GTF_INCLUDE) -I$(GRAPH_INCLUDE) -I$(UTIL_INCLUDE)
+scallop2_CPPFLAGS = -std=c++11 -I$(GTF_INCLUDE) -I$(GRAPH_INCLUDE) -I$(UTIL_INCLUDE) -I$(BOOST_INCLUDE)
 scallop2_LDFLAGS = -pthread -L$(GTF_LIB) -L$(GRAPH_LIB) -L$(UTIL_LIB)
 scallop2_LDADD = -lgtf -lgraph -lutil
 
@@ -42,4 +43,5 @@ scallop2_SOURCES = splice_graph.h splice_graph.cc \
 				   transcript_set.h transcript_set.cc \
 				   filter.h filter.cc \
 				   berth.h berth.cc \
+				   tss_tes.h tss_tes.cc \
 				   main.cc

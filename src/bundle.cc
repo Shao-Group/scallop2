@@ -19,6 +19,7 @@ See LICENSE for licensing.
 #include "config.h"
 #include "util.h"
 #include "undirected_graph.h"
+#include "tss_tes.h"
 
 
 // bundle::bundle()
@@ -2397,6 +2398,43 @@ int bundle::calculate_window_coverage(int32_t window_start, int32_t window_end, 
     max_coverage = compute_max_overlap(bb.mmap, lit, rit);
 
     return coverage_sum;
+}
+
+vector<hit> bundle::get_compatible_hits(int32_t pos, bool is_tss) {
+    vector<hit> compatible;
+    for(const hit& h : bb.hits) {
+        bool is_compatible = false;
+        if(is_tss) {
+            if(h.strand == '+' || (h.strand == '.' && bb.strand == '+')) {
+                is_compatible = h.pos > (pos - berth_neighborhood) && 
+                              h.pos <= (pos + berth_neighborhood);
+            } else {
+                is_compatible = h.rpos > (pos - berth_neighborhood) && 
+                              h.rpos <= (pos + berth_neighborhood);
+            }
+        } else {
+            if(h.strand == '-' || (h.strand == '.' && bb.strand == '-')) {
+                is_compatible = h.pos > (pos - berth_neighborhood) && 
+                              h.pos <= (pos + berth_neighborhood);
+            } else {
+                is_compatible = h.rpos > (pos - berth_neighborhood) && 
+                              h.rpos <= (pos + berth_neighborhood);
+            }
+        }
+        if(is_compatible) compatible.push_back(h);
+    }
+    return compatible;
+}
+
+vector<hit> bundle::get_spanning_hits(int32_t pos) {
+    vector<hit> spanning;
+    for(const hit& h : bb.hits) {
+        if(h.pos <= (pos - berth_neighborhood) && 
+           h.rpos > (pos + berth_neighborhood)) {
+            spanning.push_back(h);
+        }
+    }
+    return spanning;
 }
 
 
