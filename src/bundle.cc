@@ -2156,170 +2156,136 @@ void bundle::write_tss_tes()
 }
 
 
-int bundle::merge_tss_tes()
-{
-	// Initialize 
-	map<int32_t, int> tss_merged_map; // merged tss map to keep track of tss
-	map<int32_t, int> tes_merged_map; // merged tes map to keep track of tes
-	tss_merged.clear();
-	tes_merged.clear();
+int bundle::merge_tss_tes() {
+    // Clear previous results
+    tss_merged.clear();
+    tes_merged.clear();
+    
+    // Create maps for faster lookups
+    map<int32_t, int> tss_merged_map;
+    map<int32_t, int> tes_merged_map;
 
-	//sort all the hits based on start position
-	vector<hit> sorted_hits_tss = bb.hits;
-	sort(sorted_hits_tss.begin(), sorted_hits_tss.end(), [](const hit &a, const hit &b) -> bool { return a.pos < b.pos; });
-	//sort all the hits based on end position
-	// vector<hit> sorted_hits_tes = bb.hits;
-	// sort(sorted_hits_tes.begin(), sorted_hits_tes.end(), [](const hit &a, const hit &b) -> bool { return a.rpos < b.rpos; });
+    // Sort hits and junctions (keep existing sorting code)...
+    vector<hit> sorted_hits = bb.hits;
+    sort(sorted_hits.begin(), sorted_hits.end(), 
+         [](const hit &a, const hit &b) { return a.pos < b.pos; });
 
-	//sort all the junctions based on start and end position
-	vector<junction> sorted_junctions_start = junctions;
-	sort(sorted_junctions_start.begin(), sorted_junctions_start.end(), [](const junction &a, const junction &b) -> bool { return a.lpos < b.lpos; });
-	vector<junction> sorted_junctions_end = junctions;
-	sort(sorted_junctions_end.begin(), sorted_junctions_end.end(), [](const junction &a, const junction &b) -> bool { return a.rpos < b.rpos; });
-	//-------------------------------------------------------------------------------------------------------------------
+    vector<junction> sorted_junctions_start = junctions;
+    vector<junction> sorted_junctions_end = junctions;
+    sort(sorted_junctions_start.begin(), sorted_junctions_start.end(), 
+         [](const junction &a, const junction &b) { return a.lpos < b.lpos; });
+    sort(sorted_junctions_end.begin(), sorted_junctions_end.end(), 
+         [](const junction &a, const junction &b) { return a.rpos < b.rpos; });
 
-	// insert all tss_berth at end of tss_sg
-	map<int32_t, int>  tss_berth = bth.get_berth_side(0);
-	int tss_sg_size = tss_list_sg.size();
-	for (const auto &kv : tss_berth)
-	{
-		tss_list_sg.push_back(make_pair(kv.first, kv.second));
-	}
+    // Keep the helper lambdas for get_compatible_hits and get_spanning_hits...
 
-	for(int i=0; i<tss_list_sg.size(); i++)
-	{
-		int32_t tss_sg = tss_list_sg[i].first;
-		int weight_sg = tss_list_sg[i].second;
-		if(tss_merged_map.find(tss_sg) != tss_merged_map.end()) continue;
-		
-		tss_tes new_tss(0, tss_sg, weight_sg, 0);
-		if(tss_berth.find(tss_sg) != tss_berth.end())
-		{
-			new_tss.weight_berth = tss_berth[tss_sg];
-		}
-		if(i >= tss_sg_size)
-		{
-			new_tss.weight_sg = 0;
-		}
+    // Process TSS sites
+    map<int32_t, int> tss_berth = bth.get_berth_side(0);
+    for(const auto& tss : tss_list_sg) {
+        int32_t tss_pos = tss.first;
+        int weight_sg = tss.second;
+        
+        // Skip if already processed
+        if(tss_merged_map.find(tss_pos) != tss_merged_map.end()) continue;
+        
+        tss_tes new_tss(0, tss_pos, weight_sg, 
+                       tss_berth.count(tss_pos) ? tss_berth[tss_pos] : 0);
 
-		// auto sorted_hits_tss_low = lower_bound(sorted_hits_tss.begin(), sorted_hits_tss.end(), tss_sg-berth_neighborhood, [](const hit &a, const int32_t &b) -> bool { return a.pos < b; });
-		// auto sorted_hits_tss_high = upper_bound(sorted_hits_tss.begin(), sorted_hits_tss.end(), tss_sg+berth_neighborhood, [](const int32_t &a, const hit &b) -> bool { return a < b.pos; });
-		// vector<hit> sorted_hits_compatible(sorted_hits_tss_low, sorted_hits_tss_high);
-		vector<hit> sorted_hits_compatible, spanning_hits;
-		cout << "Total hits: " << sorted_hits_tss.size() << " Uncompatible :";
-		for(int i = 0; i<sorted_hits_tss.size(); i++ )
-		{
-			hit &hi = sorted_hits_tss[i];
-			if(hi.strand == '+' || (hi.strand == '.' && bb.strand == '+'))
-			{
-				if (hi.pos > (tss_sg - berth_neighborhood) && hi.pos <= (tss_sg + berth_neighborhood)  ) sorted_hits_compatible.push_back(hi);
-				// else cout << hi.qname << " ";
-			}
-			else
-			{
-				assert(hi.strand == '-' || (hi.strand == '.' && bb.strand == '-'));
-				if (hi.rpos > (tss_sg - berth_neighborhood) && hi.rpos <= (tss_sg + berth_neighborhood)  ) sorted_hits_compatible.push_back(hi);
-				// else cout << hi.qname << " ";
-			}
-			if(hi.pos <= (tss_sg - berth_neighborhood) && hi.rpos > (tss_sg + berth_neighborhood))
-			{
-				spanning_hits.push_back(hi);
-			}
-		}	
+        vector<hit> compatible_hits = get_compatible_hits(tss_pos, true);
+        vector<hit> spanning_hits = get_spanning_hits(tss_pos);
 
-		// CLEANUP
-		// cout << "TSS : neighbours ---> " << tss_sg << endl;
-		// for (auto h:sorted_hits_compatible)
-		// {
-		// 	cout << h.qname << " "; 
-		// }
-		cout << endl;
-		new_tss.read_density = sorted_hits_compatible.size();
-		new_tss.spanning_reads_cnt = spanning_hits.size();
-		
-		new_tss.calculate_clip_length(sorted_hits_compatible, bb.strand);
-		new_tss.calculate_junction_cnt(sorted_junctions_start, sorted_junctions_end);
-		new_tss.calculate_anchor_features(sorted_hits_compatible);
-		tss_merged.push_back(new_tss);
-		tss_merged_map[tss_sg] = tss_merged.size()-1;
-	}
-	cout << "Bundle:" << bb.lpos << " - " << bb.rpos << " ---- " << tss_merged.size() << " - " << tss_berth.size() << " - " << tss_list_sg.size() - tss_berth.size() << endl;
-	map<int32_t, int>  tes_berth = bth.get_berth_side(1);
+        new_tss.read_density = compatible_hits.size();
+        new_tss.spanning_reads_cnt = spanning_hits.size();
+        new_tss.calculate_clip_length(compatible_hits, bb.strand);
+        new_tss.calculate_junction_cnt(sorted_junctions_start, sorted_junctions_end);
+        new_tss.calculate_anchor_features(compatible_hits);
+        new_tss.soft_clip_entropy(compatible_hits);
 
-	int tes_sg_size = tes_list_sg.size();
-	for (const auto &kv : tes_berth)
-	{
-		tes_list_sg.push_back(make_pair(kv.first, kv.second));
-	}
+        tss_merged.push_back(new_tss);
+        tss_merged_map[tss_pos] = tss_merged.size() - 1;
+    }
 
-	for(int i=0; i<tes_list_sg.size(); i++)
-	{
-		int32_t tes_sg = tes_list_sg[i].first;
-		int weight_sg = tes_list_sg[i].second;
-		if(tes_merged_map.find(tes_sg) != tes_merged_map.end()) continue;
-		
-		tss_tes new_tes(1, tes_sg, weight_sg, 0);
-		if(tes_berth.find(tes_sg) != tes_berth.end())
-		{
-			new_tes.weight_berth = tes_berth[tes_sg];
-		}
-		if(i >= tes_sg_size)
-		{
-			new_tes.weight_sg = 0;
-		}
+    // Add remaining TSS from berth
+    for(const auto& kv : tss_berth) {
+        if(tss_merged_map.find(kv.first) == tss_merged_map.end()) {
+            tss_tes new_tss(0, kv.first, 0, kv.second);
+            vector<hit> compatible_hits = get_compatible_hits(kv.first, true);
+            vector<hit> spanning_hits = get_spanning_hits(kv.first);
+            
+            new_tss.read_density = compatible_hits.size();
+            new_tss.spanning_reads_cnt = spanning_hits.size();
+            new_tss.calculate_clip_length(compatible_hits, bb.strand);
+            new_tss.calculate_junction_cnt(sorted_junctions_start, sorted_junctions_end);
+            new_tss.calculate_anchor_features(compatible_hits);
+            new_tss.soft_clip_entropy(compatible_hits);
 
-		// auto sorted_hits_tes_low = lower_bound(sorted_hits_tes.begin(), sorted_hits_tes.end(), tes_sg-berth_neighborhood, [](const hit &a, const int32_t &b) -> bool { return a.rpos < b; });
-		// auto sorted_hits_tes_high = upper_bound(sorted_hits_tes.begin(), sorted_hits_tes.end(), tes_sg+berth_neighborhood, [](const int32_t &a, const hit &b) -> bool { return a < b.rpos; });
-		// vector<hit> sorted_hits_compatible(sorted_hits_tes_low, sorted_hits_tes_high);
-		
-		vector<hit> sorted_hits_compatible, spanning_hits;
-		// cout << "Total hits: " << sorted_hits_tss.size() << "\n Uncompatible :";
-		for(int i = 0; i<sorted_hits_tss.size(); i++ )
-		{
-			hit &hi = sorted_hits_tss[i];
-			if(hi.strand == '-') // || (hi.strand == '.' && bb.strand == '-')) // Exclude . hits
-			{
-				if (hi.pos > (tes_sg - berth_neighborhood) && hi.pos <= (tes_sg + berth_neighborhood)  ) sorted_hits_compatible.push_back(hi);
-				// else cout << hi.qname << " ";
-			}
-			else if (hi.strand == '+') // || (hi.strand == '.' && bb.strand == '+')) // Exclude . hits
-			{
-				assert(hi.strand == '+' || (hi.strand == '.' && bb.strand == '+'));
-				if (hi.rpos > (tes_sg - berth_neighborhood) && hi.rpos <= (tes_sg + berth_neighborhood)  ) sorted_hits_compatible.push_back(hi);
-				// else cout << hi.qname << " ";
-			}
-			if(hi.pos <= (tes_sg - berth_neighborhood) && hi.rpos > (tes_sg + berth_neighborhood))
-			{
-				spanning_hits.push_back(hi);
-			}
-		}
+            tss_merged.push_back(new_tss);
+            tss_merged_map[kv.first] = tss_merged.size() - 1;
+        }
+    }
 
-		// CLEANUP
-		// cout << "TES : neighbours ---> " << tes_sg << endl;
-		// for (auto h:sorted_hits_compatible)
-		// {
-		// 	cout << h.qname << " ";
-		// }
-		cout << endl;
-		new_tes.read_density = sorted_hits_compatible.size();
-		new_tes.spanning_reads_cnt = spanning_hits.size();
-		
-		new_tes.calculate_clip_length(sorted_hits_compatible, bb.strand);
-		new_tes.calculate_junction_cnt(sorted_junctions_start, sorted_junctions_end);
-		new_tes.calculate_anchor_features(sorted_hits_compatible);
+    // Process TES sites
+    map<int32_t, int> tes_berth = bth.get_berth_side(1);
+    for(const auto& tes : tes_list_sg) {
+        int32_t tes_pos = tes.first;
+        int weight_sg = tes.second;
+        
+        // Skip if already processed
+        if(tes_merged_map.find(tes_pos) != tes_merged_map.end()) continue;
 
-		double mean_coverage, max_coverage;
-		int coverage_before = calculate_window_coverage(tes_sg-berth_neighborhood, tes_sg, mean_coverage, max_coverage);
-		new_tes.coverage_before = coverage_before;
-		int coverage_after = calculate_window_coverage(tes_sg, tes_sg+berth_neighborhood, mean_coverage, max_coverage);
-		new_tes.coverage_after = coverage_after;
-		new_tes.delta_coverage = coverage_after - coverage_before;
+        tss_tes new_tes(1, tes_pos, weight_sg,
+                       tes_berth.count(tes_pos) ? tes_berth[tes_pos] : 0);
 
-		tes_merged.push_back(new_tes);
-		tes_merged_map[tes_sg] = tes_merged.size()-1;
-	}
-	cout << "Bundle:" << bb.lpos << " - " << bb.rpos << " ---- " << tes_merged.size() << " - " << tes_berth.size() << " - " << tes_list_sg.size() - tes_berth.size() << endl;
-	return 0;
+        vector<hit> compatible_hits = get_compatible_hits(tes_pos, false);
+        vector<hit> spanning_hits = get_spanning_hits(tes_pos);
+
+        new_tes.read_density = compatible_hits.size();
+        new_tes.spanning_reads_cnt = spanning_hits.size();
+        new_tes.calculate_clip_length(compatible_hits, bb.strand);
+        new_tes.calculate_junction_cnt(sorted_junctions_start, sorted_junctions_end);
+        new_tes.calculate_anchor_features(compatible_hits);
+        new_tes.soft_clip_entropy(compatible_hits);
+
+        // Calculate coverage features
+        double mean_coverage, max_coverage;
+        new_tes.coverage_before = calculate_window_coverage(
+            tes_pos - berth_neighborhood, tes_pos, mean_coverage, max_coverage);
+        new_tes.coverage_after = calculate_window_coverage(
+            tes_pos, tes_pos + berth_neighborhood, mean_coverage, max_coverage);
+        new_tes.delta_coverage = new_tes.coverage_after - new_tes.coverage_before;
+
+        tes_merged.push_back(new_tes);
+        tes_merged_map[tes_pos] = tes_merged.size() - 1;
+    }
+
+    // Add remaining TES from berth
+    for(const auto& kv : tes_berth) {
+        if(tes_merged_map.find(kv.first) == tes_merged_map.end()) {
+            tss_tes new_tes(1, kv.first, 0, kv.second);
+            vector<hit> compatible_hits = get_compatible_hits(kv.first, false);
+            vector<hit> spanning_hits = get_spanning_hits(kv.first);
+            
+            new_tes.read_density = compatible_hits.size();
+            new_tes.spanning_reads_cnt = spanning_hits.size();
+            new_tes.calculate_clip_length(compatible_hits, bb.strand);
+            new_tes.calculate_junction_cnt(sorted_junctions_start, sorted_junctions_end);
+            new_tes.calculate_anchor_features(compatible_hits);
+            new_tes.soft_clip_entropy(compatible_hits);
+
+            // Calculate coverage features
+            double mean_coverage, max_coverage;
+            new_tes.coverage_before = calculate_window_coverage(
+                kv.first - berth_neighborhood, kv.first, mean_coverage, max_coverage);
+            new_tes.coverage_after = calculate_window_coverage(
+                kv.first, kv.first + berth_neighborhood, mean_coverage, max_coverage);
+            new_tes.delta_coverage = new_tes.coverage_after - new_tes.coverage_before;
+
+            tes_merged.push_back(new_tes);
+            tes_merged_map[kv.first] = tes_merged.size() - 1;
+        }
+    }
+
+    return 0;
 }
 
 void bundle::write_tss_tes_features()
