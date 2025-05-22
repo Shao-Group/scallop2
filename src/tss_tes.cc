@@ -102,8 +102,8 @@ void tss_tes::soft_clip_entropy(vector<hit> &hits)
     // Collect lengths and frequencies
     for(auto &h : hits)
     {
-        int left_len = h.left_s_seq.length();
-        int right_len = h.right_s_seq.length();
+        int left_len = abs(h.itvc1.second - h.itvc1.first);
+        int right_len = abs(h.itvc2.second - h.itvc2.first);
         
         left_freq[left_len]++;
         right_freq[right_len]++;
