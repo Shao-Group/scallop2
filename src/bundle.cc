@@ -2213,13 +2213,13 @@ int bundle::merge_tss_tes()
 			if(hi.strand == '+' || (hi.strand == '.' && bb.strand == '+'))
 			{
 				if (hi.pos > (tss_sg - berth_neighborhood) && hi.pos <= (tss_sg + berth_neighborhood)  ) sorted_hits_compatible.push_back(hi);
-				else cout << hi.qname << " ";
+				// else cout << hi.qname << " ";
 			}
 			else
 			{
 				assert(hi.strand == '-' || (hi.strand == '.' && bb.strand == '-'));
 				if (hi.rpos > (tss_sg - berth_neighborhood) && hi.rpos <= (tss_sg + berth_neighborhood)  ) sorted_hits_compatible.push_back(hi);
-				else cout << hi.qname << " ";
+				// else cout << hi.qname << " ";
 			}
 			if(hi.pos <= (tss_sg - berth_neighborhood) && hi.rpos > (tss_sg + berth_neighborhood))
 			{
@@ -2228,11 +2228,11 @@ int bundle::merge_tss_tes()
 		}	
 
 		// CLEANUP
-		cout << "TSS : neighbours ---> " << tss_sg << endl;
-		for (auto h:sorted_hits_compatible)
-		{
-			cout << h.qname << " "; 
-		}
+		// cout << "TSS : neighbours ---> " << tss_sg << endl;
+		// for (auto h:sorted_hits_compatible)
+		// {
+		// 	cout << h.qname << " "; 
+		// }
 		cout << endl;
 		new_tss.read_density = sorted_hits_compatible.size();
 		new_tss.spanning_reads_cnt = spanning_hits.size();
@@ -2273,20 +2273,20 @@ int bundle::merge_tss_tes()
 		// vector<hit> sorted_hits_compatible(sorted_hits_tes_low, sorted_hits_tes_high);
 		
 		vector<hit> sorted_hits_compatible, spanning_hits;
-		cout << "Total hits: " << sorted_hits_tss.size() << " Uncompatible :";
+		// cout << "Total hits: " << sorted_hits_tss.size() << "\n Uncompatible :";
 		for(int i = 0; i<sorted_hits_tss.size(); i++ )
 		{
 			hit &hi = sorted_hits_tss[i];
 			if(hi.strand == '-') // || (hi.strand == '.' && bb.strand == '-')) // Exclude . hits
 			{
 				if (hi.pos > (tes_sg - berth_neighborhood) && hi.pos <= (tes_sg + berth_neighborhood)  ) sorted_hits_compatible.push_back(hi);
-				else cout << hi.qname << " ";
+				// else cout << hi.qname << " ";
 			}
 			else if (hi.strand == '+') // || (hi.strand == '.' && bb.strand == '+')) // Exclude . hits
 			{
 				assert(hi.strand == '+' || (hi.strand == '.' && bb.strand == '+'));
 				if (hi.rpos > (tes_sg - berth_neighborhood) && hi.rpos <= (tes_sg + berth_neighborhood)  ) sorted_hits_compatible.push_back(hi);
-				else cout << hi.qname << " ";
+				// else cout << hi.qname << " ";
 			}
 			if(hi.pos <= (tes_sg - berth_neighborhood) && hi.rpos > (tes_sg + berth_neighborhood))
 			{
@@ -2295,11 +2295,11 @@ int bundle::merge_tss_tes()
 		}
 
 		// CLEANUP
-		cout << "TES : neighbours ---> " << tes_sg << endl;
-		for (auto h:sorted_hits_compatible)
-		{
-			cout << h.qname << " ";
-		}
+		// cout << "TES : neighbours ---> " << tes_sg << endl;
+		// for (auto h:sorted_hits_compatible)
+		// {
+		// 	cout << h.qname << " ";
+		// }
 		cout << endl;
 		new_tes.read_density = sorted_hits_compatible.size();
 		new_tes.spanning_reads_cnt = spanning_hits.size();
@@ -2307,6 +2307,14 @@ int bundle::merge_tss_tes()
 		new_tes.calculate_clip_length(sorted_hits_compatible, bb.strand);
 		new_tes.calculate_junction_cnt(sorted_junctions_start, sorted_junctions_end);
 		new_tes.calculate_anchor_features(sorted_hits_compatible);
+
+		double mean_coverage, max_coverage;
+		int coverage_before = calculate_window_coverage(tes_sg-berth_neighborhood, tes_sg, mean_coverage, max_coverage);
+		new_tes.coverage_before = coverage_before;
+		int coverage_after = calculate_window_coverage(tes_sg, tes_sg+berth_neighborhood, mean_coverage, max_coverage);
+		new_tes.coverage_after = coverage_after;
+		new_tes.delta_coverage = coverage_after - coverage_before;
+
 		tes_merged.push_back(new_tes);
 		tes_merged_map[tes_sg] = tes_merged.size()-1;
 	}
@@ -2339,6 +2347,11 @@ void bundle::write_tss_tes_features()
 		tss_file << tss.right_anchor_cnt << "\t";
 		tss_file << tss.left_anchor_padding_mean << "\t";
 		tss_file << tss.right_anchor_padding_mean << "\t";
+		tss_file << tss.coverage_before << "\t";
+		tss_file << tss.coverage_after << "\t";
+		tss_file << tss.delta_coverage << "\t";
+		tss_file << tss.left_soft_clip_entropy << "\t";
+		tss_file << tss.right_soft_clip_entropy << "\t";
 		tss_file <<  "\n";
 		
 	}
@@ -2366,6 +2379,11 @@ void bundle::write_tss_tes_features()
 		tes_file << tes.right_anchor_cnt << "\t";
 		tes_file << tes.left_anchor_padding_mean << "\t";
 		tes_file << tes.right_anchor_padding_mean << "\t";
+		tes_file << tes.coverage_before << "\t";
+		tes_file << tes.coverage_after << "\t";
+		tes_file << tes.delta_coverage << "\t";
+		tes_file << tes.left_soft_clip_entropy << "\t";
+		tes_file << tes.right_soft_clip_entropy << "\t";
 		tes_file <<  "\n";		
 	}
 	tes_file.close();
@@ -2393,104 +2411,29 @@ int bundle::build_anchors()
 	return 0;
 }
 
-
-
-// TODO: separate this class functions to a different file
-tss_tes::tss_tes(int type)
+int bundle::calculate_window_coverage(int32_t window_start, int32_t window_end, double &mean_coverage, double &max_coverage) 
 {
-	this->type = type;
+    if(window_start >= window_end) return -1;
+    if(bb.hits.size() == 0) return 0;
+
+    // Use the pre-calculated mmap from bundle_base
+    PSIMI pei = locate_boundary_iterators(bb.mmap, window_start, window_end);
+    SIMI lit = pei.first, rit = pei.second;
+
+    if(lit == bb.mmap.end()) return 0;
+
+	int32_t window_size = window_end - window_start;
+	int32_t coverage_sum = compute_sum_overlap(bb.mmap, lit, rit);
+    // Calculate mean coverage using interval map
+    mean_coverage = 1.0 * coverage_sum / window_size;
+    
+    // Calculate max coverage across the window
+    max_coverage = compute_max_overlap(bb.mmap, lit, rit);
+
+    return coverage_sum;
 }
 
-// TODO: separate this class functions to a different file
-tss_tes::tss_tes(int type, int32_t pos, int weight_sg, int weight_berth)
-{
-	this->type = type;
-	this->pos = pos;
-	this->weight_sg = weight_sg;
-	this->weight_berth = weight_berth;
-}
 
-//TODO: separate this class functions to a different file
-void tss_tes::calculate_clip_length(vector<hit> &sorted_hits_compatible, char bb_strand)
-{
-	float avg_leading_clip_length = 0, avg_trailing_clip_length = 0;
-	for(int i=0; i<sorted_hits_compatible.size(); i++)
-	{
-		hit &h = sorted_hits_compatible[i];
-		float lc = abs(h.itvc1.second - h.itvc1.first) / sorted_hits_compatible.size();
-		float rc = abs(h.itvc2.second - h.itvc2.first) / sorted_hits_compatible.size();
-		if( h.strand == '+' || (h.strand == '.' && bb_strand == '+'))
-		{
-			avg_leading_clip_length += lc;
-			avg_trailing_clip_length += rc;
-		}
-		else
-		{
-			avg_leading_clip_length += rc;
-			avg_trailing_clip_length += lc;
-		}
-		
-	}
-	
-	this->leading_clip_length = avg_leading_clip_length;
-	this->trailing_clip_length = avg_trailing_clip_length;
-}
 
-// TODO: separate this class functions to a different file
-void tss_tes::calculate_junction_cnt(vector<junction> &sorted_junctions_start, vector<junction> &sorted_junctions_end)
-{
-	
-	auto junction_start_low = lower_bound(sorted_junctions_start.begin(), sorted_junctions_start.end(), this->pos - berth_neighborhood, [](const junction &a, const int32_t &b) -> bool { return a.lpos < b; });
-	auto junction_start_high = upper_bound(sorted_junctions_start.begin(), sorted_junctions_start.end(), this->pos + berth_neighborhood, [](const int32_t &a, const junction &b) -> bool { return a < b.lpos; });
-	this->junction_start_cnt = std::distance(junction_start_low, junction_start_high);
-	
-	auto junction_end_low = lower_bound(sorted_junctions_end.begin(), sorted_junctions_end.end(), this->pos - berth_neighborhood, [](const junction &a, const int32_t &b) -> bool { return a.rpos < b; });
-	auto junction_end_high = upper_bound(sorted_junctions_end.begin(), sorted_junctions_end.end(), this->pos + berth_neighborhood, [](const int32_t &a, const junction &b) -> bool { return a < b.rpos; });
-	this->junction_end_cnt = std::distance(junction_end_low, junction_end_high);
 
-	// Count junctions that start before the neighborhood and end after it
-	this->junction_cross_cnt = 0;
-	for(int i=0; i<sorted_junctions_start.size(); i++)
-	{
-		junction &j = sorted_junctions_start[i];
-		if(j.lpos >= this->pos - berth_neighborhood)
-		{
-			break;
-		}
 
-		if(j.rpos <= this->pos + berth_neighborhood)
-		{
-			continue;
-		}
-		
-		if(j.lpos < this->pos - berth_neighborhood && j.rpos > this->pos + berth_neighborhood)
-		{
-			this->junction_cross_cnt++;
-		}
-	}
-}
-
-void tss_tes::calculate_anchor_features(vector<hit> &hits)
-{
-	int left_anchor_count=0, right_anchor_count = 0;
-	float left_anchor_padding_sum=0, right_anchor_padding_sum = 0;
-	for (int i=0; i<hits.size(); i++)
-	{
-		hit &h = hits[i];
-		if(h.is_anchor_satisfactory(0, 1000))
-		{
-			left_anchor_count++;
-			left_anchor_padding_sum += h.left_anchor_padding;
-		} 
-		if(h.is_anchor_satisfactory(1, 1000)) 
-		{
-			right_anchor_count++;
-			right_anchor_padding_sum += h.right_anchor_padding;
-		}
-	}
-
-	this->left_anchor_cnt = left_anchor_count;
-	this->right_anchor_cnt = right_anchor_count;
-	this->left_anchor_padding_mean = left_anchor_count>0 ? left_anchor_padding_sum / left_anchor_count : 0;
-	this->right_anchor_padding_mean = right_anchor_count > 0 ? right_anchor_padding_sum / right_anchor_count : 0;
-}

@@ -21,36 +21,9 @@ See LICENSE for licensing.
 #include "gene.h"
 #include "transcript.h"
 #include "berth.h"
+#include "tss_tes.h"
 
 using namespace std;
-
-class tss_tes
-{
-public:
-	tss_tes(int type = 0);
-	tss_tes(int type, int32_t pos, int weight_berth, int weight_sg);
-	void calculate_junction_cnt(vector<junction> &sorted_junctions_start, vector<junction> &sorted_junctions_end);
-	void calculate_clip_length(vector<hit> &hits, char bb_strand);
-	void calculate_anchor_features(vector<hit> &hits);
-public:
-	int type; // 0: TSS, 1: TES
-	int32_t pos; // position
-	int weight_berth; // weight from berth
-	int weight_sg; // weight from splice graph
-	int read_density; // count of read starting/ending in the neighborhood
-	int spanning_reads_cnt; // number of reads passing through the neighborhood
-	float leading_clip_length; // average leading soft clip length of reads starting/ending in the neighborhood
-	float trailing_clip_length; // average trailing soft clip length of reads starting/ending in the neighborhood
-	int junction_start_cnt; // count of junction starting in the neighborhood
-	int junction_end_cnt; // count of junction ending in the neighborhood
-	int junction_cross_cnt; // count of junction crossing the neighborhood
-	int left_anchor_cnt; // count of anchors in leftclip of reads in the neighborhood
-	int right_anchor_cnt; // count of anchors in rightclip of reads in the neighborhood
-	int left_anchor_padding_mean; // average anchor padding length of leftclip of reads starting/ending in the neighborhood
-	int right_anchor_padding_mean; // average anchor padding length of rightclip reads starting/ending in the neighborhood
-	// int anchor_padding_stddev; // stddev of anchor padding length of reads starting/ending in the neighborhood
-	
-};
 
 class bundle
 {
@@ -146,8 +119,9 @@ public:
 	int build_hyper_set();
 	int refine_hyper_set();
 	int build_majority_hyper_set();
+
+	// coverage calculation
+	int calculate_window_coverage(int32_t window_start, int32_t window_end, double &mean_coverage, double &max_coverage);
 };
-
-
 
 #endif

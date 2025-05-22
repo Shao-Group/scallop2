@@ -112,6 +112,7 @@ int anchor_nm_threshold = -1;
 string anchor_start = "";
 string anchor_end = "";
 int berth_neighborhood = 50;
+int soft_clip_window = 10;
 string anchor_file_name="";
 string tss_output_file="";
 string tes_output_file="";

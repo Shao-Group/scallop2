@@ -146,6 +146,7 @@ extern int anchor_nm_threshold;
 extern string anchor_start;
 extern string anchor_end;
 extern int berth_neighborhood;
+extern int soft_clip_window;
 extern string anchor_file_name;
 extern string tss_output_file;
 extern string tes_output_file;

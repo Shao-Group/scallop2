@@ -5,6 +5,7 @@ See LICENSE for licensing.
 */
 
 #include "util.h"
+#include <cmath>
 
 vector<int> get_random_permutation(int n)
 {
@@ -39,4 +40,20 @@ size_t vector_hash(const vector<int32_t> & vec)
 		seed ^= (size_t)(vec[i]) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 	}
 	return (seed & 0x7FFFFFFF);
+}
+
+double entropy(const vector<size_t> &vec)
+{
+	map<size_t, size_t> count;
+	for(int i = 0; i < vec.size(); i++)
+	{
+		count[vec[i]]++;
+	}	
+	double entropy = 0;
+	for(map<size_t, size_t>::iterator it = count.begin(); it != count.end(); it++)
+	{
+		double p = (double)it->second / vec.size();
+		entropy -= p * log2(p);
+	}
+	return entropy;
 }

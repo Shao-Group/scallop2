@@ -185,6 +185,7 @@ vector<K> get_keys(const map<K, V> &m)
 vector<int> get_random_permutation(int n);
 size_t string_hash(const std::string& str);
 size_t vector_hash(const vector<int32_t> &str);
+double entropy(const vector<size_t> &vec);
 
 template<typename Itor>
 void randome_shuffle_customized(Itor begin, Itor end)
