@@ -1,4 +1,6 @@
 #include "tss_tes.h"
+#include <unordered_map>
+#include "config.h"
 #include <cmath>
 #include <map>
 
@@ -20,26 +22,43 @@ tss_tes::tss_tes(int type, int32_t pos, int weight_sg, int weight_berth)
 
 void tss_tes::calculate_clip_length(vector<hit> &sorted_hits_compatible, char bb_strand)
 {
-    float avg_leading_clip_length = 0, avg_trailing_clip_length = 0;
+    double mean_clip_length = 0, stddev_clip_length = 0, soft_clip_entropy = 0;
+    vector<int> clip_lengths;
+    clip_lengths.reserve(sorted_hits_compatible.size());
     for(int i = 0; i < sorted_hits_compatible.size(); i++)
     {
         hit &h = sorted_hits_compatible[i];
-        float lc = abs(h.itvc1.second - h.itvc1.first) / sorted_hits_compatible.size();
-        float rc = abs(h.itvc2.second - h.itvc2.first) / sorted_hits_compatible.size();
-        if(h.strand == '+' || (h.strand == '.' && bb_strand == '+'))
-        {
-            avg_leading_clip_length += lc;
-            avg_trailing_clip_length += rc;
-        }
-        else
-        {
-            avg_leading_clip_length += rc;
-            avg_trailing_clip_length += lc;
-        }
+        float lc = abs(h.itvc1.second - h.itvc1.first) ;
+        float rc = abs(h.itvc2.second - h.itvc2.first) ;
+        if(h.strand == '+' && this->type == 0) clip_lengths.push_back(lc);
+        else if (h.strand == '+' && this->type == 1) clip_lengths.push_back(rc);
+        else if (h.strand == '-' && this->type == 0) clip_lengths.push_back(rc);
+        else if (h.strand == '-' && this->type == 1) clip_lengths.push_back(lc);
     }
     
-    this->leading_clip_length = avg_leading_clip_length;
-    this->trailing_clip_length = avg_trailing_clip_length;
+    unordered_map<int, double> clip_length_freq;
+    clip_length_freq.reserve(clip_lengths.size());
+    for (auto &l : clip_lengths)
+    {
+        mean_clip_length += l / clip_lengths.size();
+        clip_length_freq[l] += 1 / clip_lengths.size();
+    }
+    for (auto &l : clip_lengths)
+    {
+        stddev_clip_length += (l - mean_clip_length) * (l - mean_clip_length);
+    }
+    stddev_clip_length = sqrt(stddev_clip_length / clip_lengths.size());
+
+    // calculate soft clip entropy
+    for (auto &p : clip_length_freq)
+    {
+        soft_clip_entropy -= p.second * log2(p.second);
+    }
+    
+    this->mean_clip_length = mean_clip_length;
+    this->std_clip_length = stddev_clip_length;
+    this->soft_clip_entropy = soft_clip_entropy;
+
 }
 
 void tss_tes::calculate_junction_cnt(vector<junction> &sorted_junctions_start, vector<junction> &sorted_junctions_end)
@@ -71,63 +90,27 @@ void tss_tes::calculate_junction_cnt(vector<junction> &sorted_junctions_start, v
 
 void tss_tes::calculate_anchor_features(vector<hit> &hits)
 {
-    int left_anchor_count = 0, right_anchor_count = 0;
-    float left_anchor_padding_sum = 0, right_anchor_padding_sum = 0;
-    
+    int anchor_count = 0;
+    double mean_anchor_padding = 0, stddev_anchor_padding = 0;
+    vector<int> anchor_padding;
+    int left_padding, right_padding;
     for(auto &h : hits)
     {
-        if(h.is_anchor_satisfactory(0, 1000))
-        {
-            left_anchor_count++;
-            left_anchor_padding_sum += h.left_anchor_padding;
-        }
-        if(h.is_anchor_satisfactory(1, 1000))
-        {
-            right_anchor_count++;
-            right_anchor_padding_sum += h.right_anchor_padding;
-        }
+        left_padding = h.is_anchor_satisfactory(0, 1000) ? h.left_anchor_padding : -1;
+        right_padding = h.is_anchor_satisfactory(1, 1000) ? h.right_anchor_padding : 0;
+        if (h.strand == '+' && this->type == 0) anchor_padding.push_back(left_padding);
+        else if (h.strand == '+' && this->type == 1) anchor_padding.push_back(right_padding);
+        else if (h.strand == '-' && this->type == 0) anchor_padding.push_back(right_padding);
+        else if (h.strand == '-' && this->type == 1) anchor_padding.push_back(left_padding);
     }
 
-    this->left_anchor_cnt = left_anchor_count;
-    this->right_anchor_cnt = right_anchor_count;
-    this->left_anchor_padding_mean = left_anchor_count > 0 ? left_anchor_padding_sum / left_anchor_count : 0;
-    this->right_anchor_padding_mean = right_anchor_count > 0 ? right_anchor_padding_sum / right_anchor_count : 0;
+    for (auto &p : anchor_padding)
+    {
+        mean_anchor_padding += p / anchor_padding.size();
+    }
+    for (auto &p : anchor_padding)
+    {
+        stddev_anchor_padding += (p - mean_anchor_padding) * (p - mean_anchor_padding);
+    }
+    stddev_anchor_padding = sqrt(stddev_anchor_padding / anchor_padding.size());
 }
-
-void tss_tes::soft_clip_entropy(vector<hit> &hits)
-{
-    vector<int> left_soft_clip_lengths, right_soft_clip_lengths;
-    map<int, int> left_freq, right_freq;
-    
-    // Collect lengths and frequencies
-    for(auto &h : hits)
-    {
-        int left_len = abs(h.itvc1.second - h.itvc1.first);
-        int right_len = abs(h.itvc2.second - h.itvc2.first);
-        
-        left_freq[left_len]++;
-        right_freq[right_len]++;
-        
-        left_soft_clip_lengths.push_back(left_len);
-        right_soft_clip_lengths.push_back(right_len);
-    }
-    
-    // Calculate entropy for left clips
-    double left_entropy = 0;
-    for(auto &pair : left_freq)
-    {
-        double p = (double)pair.second / left_soft_clip_lengths.size();
-        left_entropy -= p * log2(p);
-    }
-    
-    // Calculate entropy for right clips
-    double right_entropy = 0;
-    for(auto &pair : right_freq)
-    {
-        double p = (double)pair.second / right_soft_clip_lengths.size();
-        right_entropy -= p * log2(p);
-    }
-    
-    this->left_soft_clip_entropy = left_entropy;
-    this->right_soft_clip_entropy = right_entropy;
-} 

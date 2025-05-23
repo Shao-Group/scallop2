@@ -2200,7 +2200,6 @@ int bundle::merge_tss_tes() {
         new_tss.calculate_clip_length(compatible_hits, bb.strand);
         new_tss.calculate_junction_cnt(sorted_junctions_start, sorted_junctions_end);
         new_tss.calculate_anchor_features(compatible_hits);
-        new_tss.soft_clip_entropy(compatible_hits);
 
         tss_merged.push_back(new_tss);
         tss_merged_map[tss_pos] = tss_merged.size() - 1;
@@ -2218,7 +2217,6 @@ int bundle::merge_tss_tes() {
             new_tss.calculate_clip_length(compatible_hits, bb.strand);
             new_tss.calculate_junction_cnt(sorted_junctions_start, sorted_junctions_end);
             new_tss.calculate_anchor_features(compatible_hits);
-            new_tss.soft_clip_entropy(compatible_hits);
 
             tss_merged.push_back(new_tss);
             tss_merged_map[kv.first] = tss_merged.size() - 1;
@@ -2245,7 +2243,7 @@ int bundle::merge_tss_tes() {
         new_tes.calculate_clip_length(compatible_hits, bb.strand);
         new_tes.calculate_junction_cnt(sorted_junctions_start, sorted_junctions_end);
         new_tes.calculate_anchor_features(compatible_hits);
-        new_tes.soft_clip_entropy(compatible_hits);
+        
 
         // Calculate coverage features
         double mean_coverage, max_coverage;
@@ -2271,7 +2269,6 @@ int bundle::merge_tss_tes() {
             new_tes.calculate_clip_length(compatible_hits, bb.strand);
             new_tes.calculate_junction_cnt(sorted_junctions_start, sorted_junctions_end);
             new_tes.calculate_anchor_features(compatible_hits);
-            new_tes.soft_clip_entropy(compatible_hits);
 
             // Calculate coverage features
             double mean_coverage, max_coverage;
@@ -2305,20 +2302,18 @@ void bundle::write_tss_tes_features()
 		tss_file << tss.weight_berth << "\t";
 		tss_file << tss.read_density << "\t";
 		tss_file << tss.spanning_reads_cnt << "\t";
-		tss_file << tss.leading_clip_length << "\t";
-		tss_file << tss.trailing_clip_length << "\t";
+		tss_file << tss.mean_clip_length << "\t";
+		tss_file << tss.std_clip_length << "\t";
 		tss_file << tss.junction_start_cnt << "\t";
 		tss_file << tss.junction_end_cnt << "\t";
 		tss_file << tss.junction_cross_cnt << "\t";
-		tss_file << tss.left_anchor_cnt << "\t";
-		tss_file << tss.right_anchor_cnt << "\t";
-		tss_file << tss.left_anchor_padding_mean << "\t";
-		tss_file << tss.right_anchor_padding_mean << "\t";
+		tss_file << tss.anchor_cnt << "\t";
+		tss_file << tss.mean_anchor_padding << "\t";
+		tss_file << tss.stddev_anchor_padding << "\t";
 		tss_file << tss.coverage_before << "\t";
 		tss_file << tss.coverage_after << "\t";
 		tss_file << tss.delta_coverage << "\t";
-		tss_file << tss.left_soft_clip_entropy << "\t";
-		tss_file << tss.right_soft_clip_entropy << "\t";
+		tss_file << tss.soft_clip_entropy << "\t";
 		tss_file <<  "\n";
 		
 	}
@@ -2337,20 +2332,18 @@ void bundle::write_tss_tes_features()
 		tes_file << tes.weight_berth << "\t";
 		tes_file << tes.read_density << "\t";
 		tes_file << tes.spanning_reads_cnt << "\t";
-		tes_file << tes.leading_clip_length << "\t";
-		tes_file << tes.trailing_clip_length << "\t";
+		tes_file << tes.mean_clip_length << "\t";
+		tes_file << tes.std_clip_length << "\t";
 		tes_file << tes.junction_start_cnt << "\t";
 		tes_file << tes.junction_end_cnt << "\t";
 		tes_file << tes.junction_cross_cnt << "\t";
-		tes_file << tes.left_anchor_cnt << "\t";
-		tes_file << tes.right_anchor_cnt << "\t";
-		tes_file << tes.left_anchor_padding_mean << "\t";
-		tes_file << tes.right_anchor_padding_mean << "\t";
+		tes_file << tes.anchor_cnt << "\t";
+		tes_file << tes.mean_anchor_padding << "\t";
+		tes_file << tes.stddev_anchor_padding << "\t";
 		tes_file << tes.coverage_before << "\t";
 		tes_file << tes.coverage_after << "\t";
 		tes_file << tes.delta_coverage << "\t";
-		tes_file << tes.left_soft_clip_entropy << "\t";
-		tes_file << tes.right_soft_clip_entropy << "\t";
+		tes_file << tes.soft_clip_entropy << "\t";
 		tes_file <<  "\n";		
 	}
 	tes_file.close();
