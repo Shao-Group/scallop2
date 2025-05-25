@@ -20,12 +20,14 @@ tss_tes::tss_tes(int type, int32_t pos, int weight_sg, int weight_berth)
     this->weight_berth = weight_berth;
 }
 
-void tss_tes::build(bundle_base &bb, const vector<hit> &hits, vector<junction> &sorted_junctions_start, vector<junction> &sorted_junctions_end)
+void tss_tes::build(bundle_base &bb, const vector<hit> &hits, vector<junction> &sorted_junctions_start, vector<junction> &sorted_junctions_end, const vector<hit> &spanning_hits)
 {
     this->calculate_clip_length(hits);
     this->calculate_junction_cnt(sorted_junctions_start, sorted_junctions_end);
     this->calculate_anchor_features(hits);
     this->calculate_coverage_features(bb, this->pos);
+    this->spanning_reads_cnt = spanning_hits.size();
+    this->read_density = hits.size();
 }
 
 void tss_tes::calculate_clip_length(const vector<hit> &sorted_hits_compatible)
@@ -99,14 +101,14 @@ void tss_tes::calculate_anchor_features(const vector<hit> &hits)
     
     for(const auto &h : hits)
     {
-        int left_padding = h.is_anchor_satisfactory(0, 1000) ? h.left_anchor_padding : (h.itvc1.second - h.itvc1.first);
-        int right_padding = h.is_anchor_satisfactory(1, 1000) ? h.right_anchor_padding : (h.itvc2.second - h.itvc2.first);
-        
-        int padding = get_appropriate_padding(h, left_padding, right_padding);
-        anchor_padding.push_back(padding);
+        int left_padding = h.is_anchor_satisfactory(0, 1000) ? h.left_anchor_padding : -1; //(h.itvc1.second - h.itvc1.first);
+        int right_padding = h.is_anchor_satisfactory(1, 1000) ? h.right_anchor_padding : -1; //(h.itvc2.second - h.itvc2.first);
+                
         
         if (h.is_anchor_satisfactory(get_anchor_index(h.strand), 1000)) {
             anchor_count++;
+            int padding = get_appropriate_padding(h, left_padding, right_padding);
+            anchor_padding.push_back(padding);
         }
     }
 

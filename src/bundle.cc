@@ -2189,7 +2189,7 @@ int bundle::merge_tss_tes() {
         
         tss_tes new_tss(0, tss_pos, weight_sg, 
                        tss_berth.count(tss_pos) ? tss_berth[tss_pos] : 0);
-        new_tss.build(bb, get_compatible_hits(tss_pos, true), sorted_junctions_start, sorted_junctions_end);
+        new_tss.build(bb, get_compatible_hits(tss_pos, true), sorted_junctions_start, sorted_junctions_end, get_spanning_hits(tss_pos));
         tss_merged.push_back(new_tss);
         tss_merged_map[tss_pos] = tss_merged.size() - 1;
     }
@@ -2198,7 +2198,7 @@ int bundle::merge_tss_tes() {
     for(const auto& kv : tss_berth) {
         if(tss_merged_map.find(kv.first) == tss_merged_map.end()) {
             tss_tes new_tss(0, kv.first, 0, kv.second);
-            new_tss.build(bb, get_compatible_hits(kv.first, true), sorted_junctions_start, sorted_junctions_end);
+            new_tss.build(bb, get_compatible_hits(kv.first, true), sorted_junctions_start, sorted_junctions_end, get_spanning_hits(kv.first));
             tss_merged.push_back(new_tss);
             tss_merged_map[kv.first] = tss_merged.size() - 1;
         }
@@ -2215,7 +2215,7 @@ int bundle::merge_tss_tes() {
 
         tss_tes new_tes(1, tes_pos, weight_sg,
                        tes_berth.count(tes_pos) ? tes_berth[tes_pos] : 0);
-        new_tes.build(bb, get_compatible_hits(tes_pos, false), sorted_junctions_start, sorted_junctions_end);
+        new_tes.build(bb, get_compatible_hits(tes_pos, false), sorted_junctions_start, sorted_junctions_end, get_spanning_hits(tes_pos));
         tes_merged.push_back(new_tes);
         tes_merged_map[tes_pos] = tes_merged.size() - 1;
     }
@@ -2224,7 +2224,7 @@ int bundle::merge_tss_tes() {
     for(const auto& kv : tes_berth) {
         if(tes_merged_map.find(kv.first) == tes_merged_map.end()) {
             tss_tes new_tes(1, kv.first, 0, kv.second);
-            new_tes.build(bb, get_compatible_hits(kv.first, false), sorted_junctions_start, sorted_junctions_end);
+            new_tes.build(bb, get_compatible_hits(kv.first, false), sorted_junctions_start, sorted_junctions_end, get_spanning_hits(kv.first));
             tes_merged.push_back(new_tes);
             tes_merged_map[kv.first] = tes_merged.size() - 1;
         }

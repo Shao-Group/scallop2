@@ -18,7 +18,7 @@ public:
     void calculate_clip_length(const vector<hit> &hits);
     void calculate_anchor_features(const vector<hit> &hits);
     void calculate_coverage_features(bundle_base &bb, int32_t pos);
-    void build(bundle_base &bb, const vector<hit> &hits, vector<junction> &sorted_junctions_start, vector<junction> &sorted_junctions_end);
+    void build(bundle_base &bb, const vector<hit> &hits, vector<junction> &sorted_junctions_start, vector<junction> &sorted_junctions_end, const vector<hit> &spanning_hits);
     // void soft_clip_entropy(vector<hit> &hits);
 
 public:
