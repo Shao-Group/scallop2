@@ -441,37 +441,36 @@ int hit::set_anchors(bam1_t *b)
 	return 0;
 }
 
-bool hit::is_anchor_satisfactory(int side, int padding_max = 20)
+bool hit::is_anchor_satisfactory(int side, int padding_max) const
 {
-	bool seqrev;
-	if((flag & 0x10) >= 1) seqrev = true;
-	if((flag & 0x10) <= 0) seqrev = false;
+    bool seqrev;
+    if((flag & 0x10) >= 1) seqrev = true;
+    if((flag & 0x10) <= 0) seqrev = false;
 
-	assert (side == 0 || side == 1);
+    assert(side == 0 || side == 1);
 
-	if (side == 0) // left
-	{
-		if ((anchor_start != "" && strand == '-') || (anchor_end != "" && strand == '+'))
-		{
-			if (left_anchor_padding < 0) return false; 
-			if (left_anchor_padding > padding_max) return false;
-			return true;
-		}
-		
-	}
+    if(side == 0) // left
+    {
+        if((anchor_start != "" && strand == '-') || (anchor_end != "" && strand == '+'))
+        {
+            if(left_anchor_padding < 0) return false;
+            if(left_anchor_padding > padding_max) return false;
+            return true;
+        }
+    }
 
-	if (side == 1) // right
-	{
-		if ((anchor_end != "" && strand == '-') || (anchor_start != "" && strand == '+')) 
-		{
-			if (right_anchor_padding < 0) return false; 
-			if (right_anchor_padding > padding_max) return false;
-			return true;
-		}
-	}
-	
-	// anchor seq not provided
-	return true;
+    if(side == 1) // right
+    {
+        if((anchor_end != "" && strand == '-') || (anchor_start != "" && strand == '+'))
+        {
+            if(right_anchor_padding < 0) return false;
+            if(right_anchor_padding > padding_max) return false;
+            return true;
+        }
+    }
+
+    // anchor seq not provided
+    return true;
 }
 
 int hit::get_aligned_intervals(vector<int64_t> &v) const

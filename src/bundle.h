@@ -121,7 +121,7 @@ public:
 	int build_majority_hyper_set();
 
 	// coverage calculation
-	int calculate_window_coverage(int32_t window_start, int32_t window_end, double &mean_coverage, double &max_coverage);
+	// int calculate_window_coverage(int32_t window_start, int32_t window_end, double &mean_coverage, double &max_coverage);
 
 	// Helper functions for TSS/TES analysis
 	vector<hit> get_compatible_hits(int32_t pos, bool is_tss);

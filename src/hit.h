@@ -98,7 +98,7 @@ public:
 	int set_strand();
 	int set_concordance();
 	int set_anchors(bam1_t *b);
-	bool is_anchor_satisfactory(int side, int padding_max); //side: 0 - left, 1 - right
+	bool is_anchor_satisfactory(int side, int padding_max) const; //side: 0 - left, 1 - right
 	int get_aligned_intervals(vector<int64_t> &v) const;
 	int print() const;
 };

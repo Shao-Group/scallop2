@@ -2178,8 +2178,6 @@ int bundle::merge_tss_tes() {
     sort(sorted_junctions_end.begin(), sorted_junctions_end.end(), 
          [](const junction &a, const junction &b) { return a.rpos < b.rpos; });
 
-    // Keep the helper lambdas for get_compatible_hits and get_spanning_hits...
-
     // Process TSS sites
     map<int32_t, int> tss_berth = bth.get_berth_side(0);
     for(const auto& tss : tss_list_sg) {
@@ -2191,16 +2189,7 @@ int bundle::merge_tss_tes() {
         
         tss_tes new_tss(0, tss_pos, weight_sg, 
                        tss_berth.count(tss_pos) ? tss_berth[tss_pos] : 0);
-
-        vector<hit> compatible_hits = get_compatible_hits(tss_pos, true);
-        vector<hit> spanning_hits = get_spanning_hits(tss_pos);
-
-        new_tss.read_density = compatible_hits.size();
-        new_tss.spanning_reads_cnt = spanning_hits.size();
-        new_tss.calculate_clip_length(compatible_hits, bb.strand);
-        new_tss.calculate_junction_cnt(sorted_junctions_start, sorted_junctions_end);
-        new_tss.calculate_anchor_features(compatible_hits);
-
+        new_tss.build(bb, get_compatible_hits(tss_pos, true), sorted_junctions_start, sorted_junctions_end);
         tss_merged.push_back(new_tss);
         tss_merged_map[tss_pos] = tss_merged.size() - 1;
     }
@@ -2209,15 +2198,7 @@ int bundle::merge_tss_tes() {
     for(const auto& kv : tss_berth) {
         if(tss_merged_map.find(kv.first) == tss_merged_map.end()) {
             tss_tes new_tss(0, kv.first, 0, kv.second);
-            vector<hit> compatible_hits = get_compatible_hits(kv.first, true);
-            vector<hit> spanning_hits = get_spanning_hits(kv.first);
-            
-            new_tss.read_density = compatible_hits.size();
-            new_tss.spanning_reads_cnt = spanning_hits.size();
-            new_tss.calculate_clip_length(compatible_hits, bb.strand);
-            new_tss.calculate_junction_cnt(sorted_junctions_start, sorted_junctions_end);
-            new_tss.calculate_anchor_features(compatible_hits);
-
+            new_tss.build(bb, get_compatible_hits(kv.first, true), sorted_junctions_start, sorted_junctions_end);
             tss_merged.push_back(new_tss);
             tss_merged_map[kv.first] = tss_merged.size() - 1;
         }
@@ -2234,25 +2215,7 @@ int bundle::merge_tss_tes() {
 
         tss_tes new_tes(1, tes_pos, weight_sg,
                        tes_berth.count(tes_pos) ? tes_berth[tes_pos] : 0);
-
-        vector<hit> compatible_hits = get_compatible_hits(tes_pos, false);
-        vector<hit> spanning_hits = get_spanning_hits(tes_pos);
-
-        new_tes.read_density = compatible_hits.size();
-        new_tes.spanning_reads_cnt = spanning_hits.size();
-        new_tes.calculate_clip_length(compatible_hits, bb.strand);
-        new_tes.calculate_junction_cnt(sorted_junctions_start, sorted_junctions_end);
-        new_tes.calculate_anchor_features(compatible_hits);
-        
-
-        // Calculate coverage features
-        double mean_coverage, max_coverage;
-        new_tes.coverage_before = calculate_window_coverage(
-            tes_pos - berth_neighborhood, tes_pos, mean_coverage, max_coverage);
-        new_tes.coverage_after = calculate_window_coverage(
-            tes_pos, tes_pos + berth_neighborhood, mean_coverage, max_coverage);
-        new_tes.delta_coverage = new_tes.coverage_after - new_tes.coverage_before;
-
+        new_tes.build(bb, get_compatible_hits(tes_pos, false), sorted_junctions_start, sorted_junctions_end);
         tes_merged.push_back(new_tes);
         tes_merged_map[tes_pos] = tes_merged.size() - 1;
     }
@@ -2261,23 +2224,7 @@ int bundle::merge_tss_tes() {
     for(const auto& kv : tes_berth) {
         if(tes_merged_map.find(kv.first) == tes_merged_map.end()) {
             tss_tes new_tes(1, kv.first, 0, kv.second);
-            vector<hit> compatible_hits = get_compatible_hits(kv.first, false);
-            vector<hit> spanning_hits = get_spanning_hits(kv.first);
-            
-            new_tes.read_density = compatible_hits.size();
-            new_tes.spanning_reads_cnt = spanning_hits.size();
-            new_tes.calculate_clip_length(compatible_hits, bb.strand);
-            new_tes.calculate_junction_cnt(sorted_junctions_start, sorted_junctions_end);
-            new_tes.calculate_anchor_features(compatible_hits);
-
-            // Calculate coverage features
-            double mean_coverage, max_coverage;
-            new_tes.coverage_before = calculate_window_coverage(
-                kv.first - berth_neighborhood, kv.first, mean_coverage, max_coverage);
-            new_tes.coverage_after = calculate_window_coverage(
-                kv.first, kv.first + berth_neighborhood, mean_coverage, max_coverage);
-            new_tes.delta_coverage = new_tes.coverage_after - new_tes.coverage_before;
-
+            new_tes.build(bb, get_compatible_hits(kv.first, false), sorted_junctions_start, sorted_junctions_end);
             tes_merged.push_back(new_tes);
             tes_merged_map[kv.first] = tes_merged.size() - 1;
         }
@@ -2371,45 +2318,24 @@ int bundle::build_anchors()
 	return 0;
 }
 
-int bundle::calculate_window_coverage(int32_t window_start, int32_t window_end, double &mean_coverage, double &max_coverage) 
-{
-    if(window_start >= window_end) return -1;
-    if(bb.hits.size() == 0) return 0;
-
-    // Use the pre-calculated mmap from bundle_base
-    PSIMI pei = locate_boundary_iterators(bb.mmap, window_start, window_end);
-    SIMI lit = pei.first, rit = pei.second;
-
-    if(lit == bb.mmap.end()) return 0;
-
-	int32_t window_size = window_end - window_start;
-	int32_t coverage_sum = compute_sum_overlap(bb.mmap, lit, rit);
-    // Calculate mean coverage using interval map
-    mean_coverage = 1.0 * coverage_sum / window_size;
-    
-    // Calculate max coverage across the window
-    max_coverage = compute_max_overlap(bb.mmap, lit, rit);
-
-    return coverage_sum;
-}
 
 vector<hit> bundle::get_compatible_hits(int32_t pos, bool is_tss) {
     vector<hit> compatible;
     for(const hit& h : bb.hits) {
         bool is_compatible = false;
         if(is_tss) {
-            if(h.strand == '+' || (h.strand == '.' && bb.strand == '+')) {
+            if(h.strand == '+' ) {
                 is_compatible = h.pos > (pos - berth_neighborhood) && 
                               h.pos <= (pos + berth_neighborhood);
-            } else {
+            } else if (h.strand == '-'){
                 is_compatible = h.rpos > (pos - berth_neighborhood) && 
                               h.rpos <= (pos + berth_neighborhood);
             }
         } else {
-            if(h.strand == '-' || (h.strand == '.' && bb.strand == '-')) {
+            if(h.strand == '-') {
                 is_compatible = h.pos > (pos - berth_neighborhood) && 
                               h.pos <= (pos + berth_neighborhood);
-            } else {
+            } else if (h.strand == '+'){
                 is_compatible = h.rpos > (pos - berth_neighborhood) && 
                               h.rpos <= (pos + berth_neighborhood);
             }

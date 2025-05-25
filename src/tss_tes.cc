@@ -20,20 +20,24 @@ tss_tes::tss_tes(int type, int32_t pos, int weight_sg, int weight_berth)
     this->weight_berth = weight_berth;
 }
 
-void tss_tes::calculate_clip_length(vector<hit> &sorted_hits_compatible, char bb_strand)
+void tss_tes::build(bundle_base &bb, const vector<hit> &hits, vector<junction> &sorted_junctions_start, vector<junction> &sorted_junctions_end)
+{
+    this->calculate_clip_length(hits);
+    this->calculate_junction_cnt(sorted_junctions_start, sorted_junctions_end);
+    this->calculate_anchor_features(hits);
+    this->calculate_coverage_features(bb, this->pos);
+}
+
+void tss_tes::calculate_clip_length(const vector<hit> &sorted_hits_compatible)
 {
     double mean_clip_length = 0, stddev_clip_length = 0, soft_clip_entropy = 0;
     vector<int> clip_lengths;
     clip_lengths.reserve(sorted_hits_compatible.size());
-    for(int i = 0; i < sorted_hits_compatible.size(); i++)
+    for(const auto &h : sorted_hits_compatible)
     {
-        hit &h = sorted_hits_compatible[i];
-        float lc = abs(h.itvc1.second - h.itvc1.first) ;
-        float rc = abs(h.itvc2.second - h.itvc2.first) ;
-        if(h.strand == '+' && this->type == 0) clip_lengths.push_back(lc);
-        else if (h.strand == '+' && this->type == 1) clip_lengths.push_back(rc);
-        else if (h.strand == '-' && this->type == 0) clip_lengths.push_back(rc);
-        else if (h.strand == '-' && this->type == 1) clip_lengths.push_back(lc);
+        float lc = abs(h.itvc1.second - h.itvc1.first);
+        float rc = abs(h.itvc2.second - h.itvc2.first);
+        clip_lengths.push_back(get_appropriate_padding(h, lc, rc));
     }
     
     unordered_map<int, double> clip_length_freq;
@@ -41,7 +45,7 @@ void tss_tes::calculate_clip_length(vector<hit> &sorted_hits_compatible, char bb
     for (auto &l : clip_lengths)
     {
         mean_clip_length += l / clip_lengths.size();
-        clip_length_freq[l] += 1 / clip_lengths.size();
+        clip_length_freq[l] += 1.0 / clip_lengths.size();
     }
     for (auto &l : clip_lengths)
     {
@@ -58,7 +62,6 @@ void tss_tes::calculate_clip_length(vector<hit> &sorted_hits_compatible, char bb
     this->mean_clip_length = mean_clip_length;
     this->std_clip_length = stddev_clip_length;
     this->soft_clip_entropy = soft_clip_entropy;
-
 }
 
 void tss_tes::calculate_junction_cnt(vector<junction> &sorted_junctions_start, vector<junction> &sorted_junctions_end)
@@ -88,20 +91,23 @@ void tss_tes::calculate_junction_cnt(vector<junction> &sorted_junctions_start, v
     }
 }
 
-void tss_tes::calculate_anchor_features(vector<hit> &hits)
+void tss_tes::calculate_anchor_features(const vector<hit> &hits)
 {
     int anchor_count = 0;
     double mean_anchor_padding = 0, stddev_anchor_padding = 0;
     vector<int> anchor_padding;
-    int left_padding, right_padding;
-    for(auto &h : hits)
+    
+    for(const auto &h : hits)
     {
-        left_padding = h.is_anchor_satisfactory(0, 1000) ? h.left_anchor_padding : -1;
-        right_padding = h.is_anchor_satisfactory(1, 1000) ? h.right_anchor_padding : 0;
-        if (h.strand == '+' && this->type == 0) anchor_padding.push_back(left_padding);
-        else if (h.strand == '+' && this->type == 1) anchor_padding.push_back(right_padding);
-        else if (h.strand == '-' && this->type == 0) anchor_padding.push_back(right_padding);
-        else if (h.strand == '-' && this->type == 1) anchor_padding.push_back(left_padding);
+        int left_padding = h.is_anchor_satisfactory(0, 1000) ? h.left_anchor_padding : (h.itvc1.second - h.itvc1.first);
+        int right_padding = h.is_anchor_satisfactory(1, 1000) ? h.right_anchor_padding : (h.itvc2.second - h.itvc2.first);
+        
+        int padding = get_appropriate_padding(h, left_padding, right_padding);
+        anchor_padding.push_back(padding);
+        
+        if (h.is_anchor_satisfactory(get_anchor_index(h.strand), 1000)) {
+            anchor_count++;
+        }
     }
 
     for (auto &p : anchor_padding)
@@ -113,4 +119,16 @@ void tss_tes::calculate_anchor_features(vector<hit> &hits)
         stddev_anchor_padding += (p - mean_anchor_padding) * (p - mean_anchor_padding);
     }
     stddev_anchor_padding = sqrt(stddev_anchor_padding / anchor_padding.size());
+
+    this->anchor_cnt = anchor_count;
+    this->mean_anchor_padding = mean_anchor_padding;
+    this->stddev_anchor_padding = stddev_anchor_padding;
 }
+
+void tss_tes::calculate_coverage_features(bundle_base &bb, int32_t pos)
+{
+    this->coverage_before = calculate_window_coverage(bb, pos - berth_neighborhood, pos);
+    this->coverage_after = calculate_window_coverage(bb, pos, pos + berth_neighborhood);
+    this->delta_coverage = this->coverage_after - this->coverage_before;
+}
+
