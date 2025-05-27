@@ -7,7 +7,10 @@ See LICENSE for licensing.
 #include "berth.h"
 #include <cassert>
 #include <cstdint>
-#include <fstream> 
+#include <fstream>
+#include <cmath>
+#include <algorithm>
+#include <iostream>
 
 berth::berth(bundle_base &b)
 	: bb(b), hits(b.hits)
@@ -86,7 +89,16 @@ int berth::build_berths()
     assert (status == 0);
     
     init_sites();
-    pick_peaks();
+    init_directional_coverage();  // New: compute directional coverage
+    
+    // Choose peak calling method based on data characteristics
+    int total_sites = ssc.size() + ttc.size();
+    if (total_sites > 50) {
+        pick_peaks_gmm();  // Use GMM for complex data
+    } else {
+        pick_peaks();      // Use traditional method for sparse data
+    }
+    
     assign_hit_berth();
 
     if (is_empty()) 
@@ -172,6 +184,71 @@ int berth::init_sites()
     return 0;
 }
 
+int berth::init_directional_coverage()
+{
+    cout << "Computing directional coverage..." << endl;
+    
+    // Compute directional coverage for TSS sites
+    tss_directional_cov = compute_directional_coverage(ssc, true);
+    
+    // Compute directional coverage for TES sites  
+    tes_directional_cov = compute_directional_coverage(ttc, false);
+    
+    cout << "Directional coverage analysis completed." << endl;
+    return 0;
+}
+
+DirectionalCoverage berth::compute_directional_coverage(const map<int32_t, int>& site_counts, bool is_tss)
+{
+    DirectionalCoverage dir_cov;
+    
+    // For each site, analyze coverage in both directions
+    for (const auto& [pos, count] : site_counts) {
+        int forward_count = 0;
+        int reverse_count = 0;
+        
+        // Define window around the site
+        int window_start = pos - DIRECTIONAL_WINDOW_SIZE;
+        int window_end = pos + DIRECTIONAL_WINDOW_SIZE;
+        
+        // Count reads supporting forward and reverse directions
+        for (const auto& hit : hits) {
+            int32_t hit_tss = hit.itvc1.second;
+            int32_t hit_tes = hit.itvc2.first;
+            int32_t relevant_pos = is_tss ? hit_tss : hit_tes;
+            
+            if (relevant_pos >= window_start && relevant_pos <= window_end) {
+                // Determine direction based on strand and read orientation
+                bool is_forward_read = (bb.strand == '+' && is_tss) || (bb.strand == '-' && !is_tss);
+                
+                if (is_forward_read) {
+                    if (relevant_pos <= pos) forward_count++;
+                    else reverse_count++;
+                } else {
+                    if (relevant_pos >= pos) forward_count++;
+                    else reverse_count++;
+                }
+            }
+        }
+        
+        dir_cov.forward_coverage[pos] = forward_count;
+        dir_cov.reverse_coverage[pos] = reverse_count;
+        dir_cov.directional_score[pos] = calculate_directional_score(forward_count, reverse_count);
+    }
+    
+    return dir_cov;
+}
+
+double berth::calculate_directional_score(int forward_count, int reverse_count)
+{
+    int total = forward_count + reverse_count;
+    if (total == 0) return 0.0;
+    
+    // Normalized difference: (forward - reverse) / total
+    double score = (double)(forward_count - reverse_count) / total;
+    return score;
+}
+
 int berth::pick_peaks()
 {
     // OR filter_gaussian();
@@ -185,6 +262,263 @@ int berth::pick_peaks()
     filter_window(&trc, true);
     cout << "window4 done CLEAN: " << endl;
     return 0;
+}
+
+int berth::pick_peaks_gmm()
+{
+    cout << "GMM peak calling started..." << endl;
+    
+    // Apply GMM to TSS sites with directional filtering
+    map<int32_t, int> filtered_ssc = filter_by_directionality(ssc, tss_directional_cov);
+    tss_gmm_components = fit_gaussian_mixture(filtered_ssc, GMM_MAX_COMPONENTS);
+    vector<int32_t> tss_peaks = extract_peaks_from_gmm(tss_gmm_components, filtered_ssc);
+    
+    // Update ssc with GMM-detected peaks
+    ssc.clear();
+    for (int32_t peak_pos : tss_peaks) {
+        auto it = filtered_ssc.find(peak_pos);
+        if (it != filtered_ssc.end()) {
+            ssc[peak_pos] = it->second;
+        }
+    }
+    
+    // Apply GMM to TES sites with directional filtering
+    map<int32_t, int> filtered_ttc = filter_by_directionality(ttc, tes_directional_cov);
+    tes_gmm_components = fit_gaussian_mixture(filtered_ttc, GMM_MAX_COMPONENTS);
+    vector<int32_t> tes_peaks = extract_peaks_from_gmm(tes_gmm_components, filtered_ttc);
+    
+    // Update ttc with GMM-detected peaks
+    ttc.clear();
+    for (int32_t peak_pos : tes_peaks) {
+        auto it = filtered_ttc.find(peak_pos);
+        if (it != filtered_ttc.end()) {
+            ttc[peak_pos] = it->second;
+        }
+    }
+    
+    // Also apply traditional filtering to sl and tr (less critical)
+    filter_window(&slc, false);
+    filter_window(&trc, true);
+    
+    cout << "GMM peak calling completed. TSS peaks: " << tss_peaks.size() 
+         << ", TES peaks: " << tes_peaks.size() << endl;
+    
+    return 0;
+}
+
+map<int32_t, int> berth::filter_by_directionality(const map<int32_t, int>& sites, 
+                                                  const DirectionalCoverage& dir_cov)
+{
+    map<int32_t, int> filtered_sites;
+    
+    for (const auto& [pos, count] : sites) {
+        auto score_it = dir_cov.directional_score.find(pos);
+        if (score_it != dir_cov.directional_score.end()) {
+            double score = score_it->second;
+            // Keep sites with strong directional bias
+            if (abs(score) >= MIN_DIRECTIONAL_SCORE) {
+                filtered_sites[pos] = count;
+            }
+        } else {
+            // If no directional info, keep the site
+            filtered_sites[pos] = count;
+        }
+    }
+    
+    return filtered_sites;
+}
+
+vector<GaussianComponent> berth::fit_gaussian_mixture(const map<int32_t, int>& coverage_data, int max_components)
+{
+    if (coverage_data.empty()) {
+        return vector<GaussianComponent>();
+    }
+    
+    // Convert data to vector format for EM algorithm
+    vector<pair<int32_t, int>> data_points;
+    for (const auto& [pos, count] : coverage_data) {
+        data_points.push_back({pos, count});
+    }
+    
+    if (data_points.size() < 2) {
+        // Not enough data for GMM
+        vector<GaussianComponent> single_component(1);
+        single_component[0].mean = data_points[0].first;
+        single_component[0].variance = 1.0;
+        single_component[0].weight = 1.0;
+        return single_component;
+    }
+    
+    vector<GaussianComponent> best_components;
+    double best_bic = -INFINITY;
+    
+    // Try different numbers of components and select best by BIC
+    for (int n_components = 1; n_components <= min(max_components, (int)data_points.size()); n_components++) {
+        vector<GaussianComponent> components(n_components);
+        
+        // Initialize components
+        for (int i = 0; i < n_components; i++) {
+            int idx = i * data_points.size() / n_components;
+            components[i].mean = data_points[idx].first;
+            components[i].variance = 10000.0; // Initial large variance
+            components[i].weight = 1.0 / n_components;
+        }
+        
+        // Run EM algorithm
+        expectation_maximization(components, data_points);
+        
+        // Calculate BIC for model selection
+        double bic = calculate_bic(components, coverage_data);
+        
+        if (bic > best_bic) {
+            best_bic = bic;
+            best_components = components;
+        }
+    }
+    
+    return best_components;
+}
+
+void berth::expectation_maximization(vector<GaussianComponent>& components, 
+                                    const vector<pair<int32_t, int>>& data_points)
+{
+    int n_components = components.size();
+    int n_points = data_points.size();
+    
+    for (int iter = 0; iter < GMM_MAX_ITERATIONS; iter++) {
+        // E-step: compute responsibilities
+        vector<vector<double>> responsibilities(n_points, vector<double>(n_components));
+        
+        for (int i = 0; i < n_points; i++) {
+            double total_prob = 0.0;
+            for (int j = 0; j < n_components; j++) {
+                double prob = components[j].weight * gaussian_pdf(data_points[i].first, 
+                                                                 components[j].mean, 
+                                                                 components[j].variance);
+                responsibilities[i][j] = prob;
+                total_prob += prob;
+            }
+            
+            // Normalize responsibilities
+            for (int j = 0; j < n_components; j++) {
+                responsibilities[i][j] /= (total_prob + 1e-10);
+            }
+        }
+        
+        // M-step: update parameters
+        vector<GaussianComponent> new_components(n_components);
+        
+        for (int j = 0; j < n_components; j++) {
+            double total_responsibility = 0.0;
+            double weighted_sum = 0.0;
+            double weighted_var_sum = 0.0;
+            
+            for (int i = 0; i < n_points; i++) {
+                double resp = responsibilities[i][j];
+                total_responsibility += resp;
+                weighted_sum += resp * data_points[i].first;
+            }
+            
+            new_components[j].weight = total_responsibility / n_points;
+            new_components[j].mean = weighted_sum / (total_responsibility + 1e-10);
+            
+            // Calculate variance
+            for (int i = 0; i < n_points; i++) {
+                double diff = data_points[i].first - new_components[j].mean;
+                weighted_var_sum += responsibilities[i][j] * diff * diff;
+            }
+            new_components[j].variance = weighted_var_sum / (total_responsibility + 1e-10);
+            
+            // Ensure minimum variance
+            if (new_components[j].variance < 1.0) {
+                new_components[j].variance = 1.0;
+            }
+        }
+        
+        // Check for convergence
+        double max_change = 0.0;
+        for (int j = 0; j < n_components; j++) {
+            double change = abs(new_components[j].mean - components[j].mean);
+            max_change = max(max_change, change);
+        }
+        
+        components = new_components;
+        
+        if (max_change < GMM_CONVERGENCE_THRESHOLD) {
+            break;
+        }
+    }
+}
+
+double berth::gaussian_pdf(double x, double mean, double variance)
+{
+    double diff = x - mean;
+    return exp(-0.5 * diff * diff / variance) / sqrt(2.0 * M_PI * variance);
+}
+
+double berth::calculate_bic(const vector<GaussianComponent>& components, const map<int32_t, int>& data)
+{
+    if (data.empty()) return -INFINITY;
+    
+    double log_likelihood = 0.0;
+    int n_points = 0;
+    
+    for (const auto& [pos, count] : data) {
+        double point_likelihood = 0.0;
+        for (const auto& comp : components) {
+            point_likelihood += comp.weight * gaussian_pdf(pos, comp.mean, comp.variance);
+        }
+        log_likelihood += count * log(point_likelihood + 1e-10);
+        n_points += count;
+    }
+    
+    int n_params = components.size() * 3; // mean, variance, weight for each component
+    double bic = 2 * log_likelihood - n_params * log(n_points);
+    
+    return bic;
+}
+
+vector<int32_t> berth::extract_peaks_from_gmm(const vector<GaussianComponent>& components, 
+                                             const map<int32_t, int>& original_data)
+{
+    vector<int32_t> peaks;
+    
+    for (const auto& comp : components) {
+        // Find the data point closest to the component mean
+        int32_t best_pos = -1;
+        double min_distance = INFINITY;
+        
+        for (const auto& [pos, count] : original_data) {
+            double distance = abs(pos - comp.mean);
+            if (distance < min_distance) {
+                min_distance = distance;
+                best_pos = pos;
+            }
+        }
+        
+        if (best_pos != -1 && min_distance < ISOLATED_DISTANCE / 2) {
+            peaks.push_back(best_pos);
+        }
+    }
+    
+    // Remove duplicate peaks that are too close
+    sort(peaks.begin(), peaks.end());
+    vector<int32_t> filtered_peaks;
+    
+    for (int32_t peak : peaks) {
+        bool too_close = false;
+        for (int32_t existing_peak : filtered_peaks) {
+            if (abs(peak - existing_peak) < SLIDINGD_WINDOW_SIZE) {
+                too_close = true;
+                break;
+            }
+        }
+        if (!too_close) {
+            filtered_peaks.push_back(peak);
+        }
+    }
+    
+    return filtered_peaks;
 }
 
 // dir: 0 for ss, 1 for tt
@@ -468,7 +802,7 @@ int berth::write_bed_one_end(string filename = "berth_one_end.bed") const
 
 int berth::print(int index) const
 {
-    printf("Berth %d (size %d, status) :  \n", index, berths.size(), status);
+    printf("Berth %d (size %d, status %d) :  \n", index, (int)berths.size(), status);
 
     assert (berths.size() == weights.size());
     for (int i = 0; i < berths.size(); i++)
@@ -482,6 +816,41 @@ int berth::print(int index) const
         printf("\tberth [%d, %d]: ", bh.first.first, bh.first.second);
         printv(bh.second);
         printf("\n");
+    }
+    
+    // Print directional coverage statistics
+    if (!tss_directional_cov.directional_score.empty()) {
+        printf("TSS Directional Coverage (top 5): \n");
+        int count = 0;
+        for (const auto& [pos, score] : tss_directional_cov.directional_score) {
+            if (count >= 5) break;
+            printf("\tpos %d: dir_score = %.3f (fwd=%d, rev=%d)\n", 
+                   pos, score, 
+                   tss_directional_cov.forward_coverage.at(pos),
+                   tss_directional_cov.reverse_coverage.at(pos));
+            count++;
+        }
+    }
+    
+    // Print GMM components
+    if (!tss_gmm_components.empty()) {
+        printf("TSS GMM Components (%d): \n", (int)tss_gmm_components.size());
+        for (int i = 0; i < tss_gmm_components.size(); i++) {
+            printf("\tcomp %d: mean=%.1f, var=%.1f, weight=%.3f\n", 
+                   i, tss_gmm_components[i].mean, 
+                   tss_gmm_components[i].variance,
+                   tss_gmm_components[i].weight);
+        }
+    }
+    
+    if (!tes_gmm_components.empty()) {
+        printf("TES GMM Components (%d): \n", (int)tes_gmm_components.size());
+        for (int i = 0; i < tes_gmm_components.size(); i++) {
+            printf("\tcomp %d: mean=%.1f, var=%.1f, weight=%.3f\n", 
+                   i, tes_gmm_components[i].mean, 
+                   tes_gmm_components[i].variance,
+                   tes_gmm_components[i].weight);
+        }
     }
     
     if (is_empty()) 
