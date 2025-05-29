@@ -53,7 +53,10 @@ void tss_tes::calculate_clip_length(const vector<hit> &sorted_hits_compatible)
     {
         stddev_clip_length += (l - mean_clip_length) * (l - mean_clip_length);
     }
-    stddev_clip_length = sqrt(stddev_clip_length / clip_lengths.size());
+    if (clip_lengths.size() > 0)
+    {
+        stddev_clip_length = sqrt(stddev_clip_length / clip_lengths.size());
+    }
 
     // calculate soft clip entropy
     for (auto &p : clip_length_freq)
@@ -120,7 +123,10 @@ void tss_tes::calculate_anchor_features(const vector<hit> &hits)
     {
         stddev_anchor_padding += (p - mean_anchor_padding) * (p - mean_anchor_padding);
     }
-    stddev_anchor_padding = sqrt(stddev_anchor_padding / anchor_padding.size());
+    if (anchor_padding.size() > 0)
+    {
+        stddev_anchor_padding = sqrt(stddev_anchor_padding / anchor_padding.size());
+    }
 
     this->anchor_cnt = anchor_count;
     this->mean_anchor_padding = mean_anchor_padding;

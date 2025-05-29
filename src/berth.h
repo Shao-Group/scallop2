@@ -56,6 +56,7 @@ private:
 	map<int32_t, int> slc;  // <pos, count> of left range of TSS
 	map<int32_t, int> ttc;  // <pos, count> of TTS
 	map<int32_t, int> trc;  // <pos, count> of right range of TTS
+	map<int32_t, int> allc;  // <pos, count> of all sites
 	map<PI32, vector<int>> berth2hit;  // <TSS, TES> -> hit index. may incld illegal berths
 
 	vector<PI32> berths;          // a vector of legal <TSS, TES> pairs
@@ -66,6 +67,7 @@ private:
 	// Enhanced data structures for directional analysis and GMM
 	DirectionalCoverage tss_directional_cov;
 	DirectionalCoverage tes_directional_cov;
+	DirectionalCoverage all_directional_cov;
 	vector<GaussianComponent> tss_gmm_components;
 	vector<GaussianComponent> tes_gmm_components;
 
@@ -78,8 +80,8 @@ private:
 	
 	// New parameters for enhanced analysis
 	const int DIRECTIONAL_WINDOW_SIZE = 50;
-	const double MIN_DIRECTIONAL_SCORE = 0.3;
-	const int GMM_MAX_COMPONENTS = 10;
+	const double MIN_DIRECTIONAL_SCORE = 0.1;
+	const int GMM_MAX_COMPONENTS = 5;
 	const int GMM_MAX_ITERATIONS = 100;
 	const double GMM_CONVERGENCE_THRESHOLD = 1e-6;
 

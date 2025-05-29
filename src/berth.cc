@@ -125,6 +125,7 @@ int berth::init_sites()
 	vector<int32_t> sl;  // left range of TSS
 	vector<int32_t> tt;  // TTS
 	vector<int32_t> tr;  // right range of TTS
+    // vector<int32_t> all; // all sites
     
     for (const auto &hit : hits) 
     {
@@ -132,6 +133,8 @@ int berth::init_sites()
         ss.push_back(hit.itvc1.second);
         tt.push_back(hit.itvc2.first);
         tr.push_back(hit.itvc2.second);
+        // all.push_back(hit.itvc1.second);
+        // all.push_back(hit.itvc2.first);
     }
     assert (sl.size() == ss.size());
     assert (tt.size() == tr.size());
@@ -189,10 +192,13 @@ int berth::init_directional_coverage()
     cout << "Computing directional coverage..." << endl;
     
     // Compute directional coverage for TSS sites
-    tss_directional_cov = compute_directional_coverage(ssc, true);
+    tss_directional_cov = compute_directional_coverage(ssc, bb.strand == '+' ? true : false);
     
     // Compute directional coverage for TES sites  
-    tes_directional_cov = compute_directional_coverage(ttc, false);
+    tes_directional_cov = compute_directional_coverage(ttc, bb.strand == '+' ? false : true);
+
+    // Compute directional coverage for all sites
+    // all_directional_cov = compute_directional_coverage(allc, true);
     
     cout << "Directional coverage analysis completed." << endl;
     return 0;
@@ -213,13 +219,18 @@ DirectionalCoverage berth::compute_directional_coverage(const map<int32_t, int>&
         
         // Count reads supporting forward and reverse directions
         for (const auto& hit : hits) {
-            int32_t hit_tss = hit.itvc1.second;
-            int32_t hit_tes = hit.itvc2.first;
-            int32_t relevant_pos = is_tss ? hit_tss : hit_tes;
+            assert (bb.strand == hit.strand);
+            int32_t relevant_pos;
+            // TSS: on + strand it's hit.itvc1.second; on − strand it's hit.itvc2.first 
+            if (is_tss) relevant_pos = (hit.strand == '+' ? hit.itvc1.second : hit.itvc2.first); 
+            // TES: on + strand it's hit.itvc2.first; on − strand it's hit.itvc1.second
+            else relevant_pos = (hit.strand == '+' ? hit.itvc2.first : hit.itvc1.second); 
+            
             
             if (relevant_pos >= window_start && relevant_pos <= window_end) {
                 // Determine direction based on strand and read orientation
-                bool is_forward_read = (bb.strand == '+' && is_tss) || (bb.strand == '-' && !is_tss);
+                
+                bool is_forward_read = (hit.strand == '+' && is_tss) || (hit.strand == '-' && !is_tss);
                 
                 if (is_forward_read) {
                     if (relevant_pos <= pos) forward_count++;
