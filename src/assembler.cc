@@ -98,9 +98,19 @@ int assembler::assemble()
 		if(library_type != UNSTRANDED && ht.strand == '.' && ht.xs != '.') ht.strand = ht.xs;
 		if(library_type == EMPTY && ht.strand == '.' && ht.xs != '.') ht.strand = ht.xs;
 
+		
 		// ht.set_anchors(b1t);
 		if(library_type != UNSTRANDED && ht.strand == '+') bb1.add_hit(ht);
 		if(library_type != UNSTRANDED && ht.strand == '-') bb2.add_hit(ht);
+		// If library type is empty, we need to add both strands to the bundle		
+		if (library_type == EMPTY && ht.strand == '.')
+		{
+			ht.strand = '+';
+			bb1.add_hit(ht);
+			ht.strand = '-';
+			bb2.add_hit(ht);
+		}
+
 		// if(library_type == EMPTY && ht.strand == '.' && ht.spos.size() ) bb1.add_hit(ht);
 		if(library_type == UNSTRANDED && ht.xs == '.' && ht.spos.size() <= 0) bb1.add_hit(ht);
 		if(library_type == UNSTRANDED && ht.xs == '.' && ht.spos.size() <= 0) bb2.add_hit(ht);

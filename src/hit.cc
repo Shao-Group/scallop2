@@ -218,13 +218,13 @@ int hit::set_anchors(bam1_t *b)
 	if (library_type == EMPTY && strand == '.' && xs != '.') strand = xs; 
 
 	// whether SEQ in bam is reverse complemente
-	sc_info.push_back(to_string(tid));
-	sc_info.push_back(to_string(pos));
-	sc_info.push_back(to_string(rpos));
-	sc_info.push_back(string(1,strand));
-	sc_info.push_back((flag & 0x10) >= 1 ? string("-") : string("+"));
-	sc_info.push_back(string(1,xs));
-	sc_info.push_back(string(1,ts));
+	// sc_info.push_back(to_string(tid));
+	// sc_info.push_back(to_string(pos));
+	// sc_info.push_back(to_string(rpos));
+	// sc_info.push_back(string(1,strand));
+	// sc_info.push_back((flag & 0x10) >= 1 ? string("-") : string("+"));
+	// sc_info.push_back(string(1,xs));
+	// sc_info.push_back(string(1,ts));
 	// whether second in pair	// TODO: what if seq attachment to 1st strand but sequence 2nd strand
 	bool second_in_pair;
 
@@ -262,8 +262,8 @@ int hit::set_anchors(bam1_t *b)
 		// pair<int, int> pos_left_anchor_padding(-1, -1);
 		if(strand == '+' || strand == '.')
 		{
-			// pair<int, int> pos_pair = subseq_pos(anchor_end, leftclipseq, anchor_end_nm);
-			pair<int, int> pos_pair = {-1, -1}; // Trying only local alignment
+			pair<int, int> pos_pair = subseq_pos(anchor_end, leftclipseq, anchor_end_nm);
+			// pair<int, int> pos_pair = {-1, -1}; // Trying only local alignment
 			int is_local = 0; // Debug: whether local alignment is used
 			if (pos_pair.second < 0  )  // Include local alignment for strand prediction
 			{
@@ -284,8 +284,8 @@ int hit::set_anchors(bam1_t *b)
 		if(strand == '-' || strand == '.')
 		{
 			// polyT tail
-			// pair<int, int> pos_pair = subseq_pos(anchor_start, leftclipseq, anchor_start_nm);
-			pair<int, int> pos_pair = {-1, -1}; // Trying only local alignment
+			pair<int, int> pos_pair = subseq_pos(anchor_start, leftclipseq, anchor_start_nm);
+			// pair<int, int> pos_pair = {-1, -1}; // Trying only local alignment
 			// cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
 			int pT = 0;
 			int is_local = 0; // Debug: whether local alignment is used
@@ -354,8 +354,8 @@ int hit::set_anchors(bam1_t *b)
 		if(strand == '+' || strand == '.') 
 		{
 			// polyA tail
-			// pair<int, int> pos_pair = subseq_pos(anchor_start, revcomp_rightclipseq, anchor_start_nm);
-			pair<int, int> pos_pair = {-1, -1}; // Trying only local alignment
+			pair<int, int> pos_pair = subseq_pos(anchor_start, revcomp_rightclipseq, anchor_start_nm);
+			// pair<int, int> pos_pair = {-1, -1}; // Trying only local alignment
 			// cout << strand << ":" << pos_pair.first << "," << pos_pair.second << endl;
 			int pT = 0;
 			int is_local = 0; // Debug: whether local alignment is used
@@ -378,8 +378,8 @@ int hit::set_anchors(bam1_t *b)
 		}
 		if(strand == '-' || strand == '.')
 		{
-			// pair<int, int> pos_pair = subseq_pos(anchor_end, revcomp_rightclipseq, anchor_end_nm);
-			pair<int, int> pos_pair = {-1, -1}; // Trying only local alignment
+			pair<int, int> pos_pair = subseq_pos(anchor_end, revcomp_rightclipseq, anchor_end_nm);
+			// pair<int, int> pos_pair = {-1, -1}; // Trying only local alignment
 			int is_local = 0; // Debug: whether local alignment is used
 			if (pos_pair.second < 0 && strand != '.') // Exclude local alignment from strand prediction
 			{
