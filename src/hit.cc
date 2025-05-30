@@ -433,10 +433,10 @@ int hit::set_anchors(bam1_t *b)
 		sc_info.push_back(anchor_type);
 	}
 	
-	std::ofstream anchor_file(anchor_file_name, std::ios::app);
-	for(int i=0; i<sc_info.size(); i++) anchor_file << sc_info[i] << "\t";
-	anchor_file << endl;
-	anchor_file.close();
+	// std::ofstream anchor_file(anchor_file_name, std::ios::app);
+	// for(int i=0; i<sc_info.size(); i++) anchor_file << sc_info[i] << "\t";
+	// anchor_file << endl;
+	// anchor_file.close();
 
 	return 0;
 }
