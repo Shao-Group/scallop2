@@ -30,11 +30,13 @@ public:
 	int32_t rpos;					// the rightmost boundary on reference
 	char strand;					// strandness
 	vector<hit> hits;				// hits
+	vector<hit> hits_unstranded;    // hits without identified strandness
 	split_interval_map mmap;		// matched interval map
 	split_interval_map imap;		// indel interval map
 
 public:
 	int add_hit(const hit &ht);
+	int add_hit_unstranded(const hit &ht);
 	bool overlap(const hit &ht) const;
 	int clear();
 };

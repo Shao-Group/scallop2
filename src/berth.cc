@@ -89,15 +89,16 @@ int berth::build_berths()
     assert (status == 0);
     
     init_sites();
-    init_directional_coverage();  // New: compute directional coverage
+    // init_directional_coverage();  // New: compute directional coverage
     
     // Choose peak calling method based on data characteristics
     int total_sites = ssc.size() + ttc.size();
-    if (total_sites > 50) {
-        pick_peaks_gmm();  // Use GMM for complex data
-    } else {
+    // if (total_sites > 50) {
+    //     pick_peaks_gmm();  // Use GMM for complex data
+    // } else {
+
         pick_peaks();      // Use traditional method for sparse data
-    }
+    // }
     
     assign_hit_berth();
 
@@ -129,6 +130,7 @@ int berth::init_sites()
     
     for (const auto &hit : hits) 
     {
+        if (hit.strand == '.') continue;
         sl.push_back(hit.itvc1.first);
         ss.push_back(hit.itvc1.second);
         tt.push_back(hit.itvc2.first);

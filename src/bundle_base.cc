@@ -23,6 +23,12 @@ bundle_base::bundle_base()
 bundle_base::~bundle_base()
 {}
 
+int bundle_base::add_hit_unstranded(const hit &ht)
+{
+	hits_unstranded.push_back(ht);
+	return 0;
+}
+
 int bundle_base::add_hit(const hit &ht)
 {
 	// store new hit

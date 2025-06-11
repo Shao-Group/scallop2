@@ -105,10 +105,10 @@ int assembler::assemble()
 		// If library type is empty, we need to add both strands to the bundle		
 		if (library_type == EMPTY && ht.strand == '.' && ht.spos.size() <= 0)
 		{
-			ht.strand = '+';
-			bb1.add_hit(ht);
-			ht.strand = '-';
-			bb2.add_hit(ht);
+			// ht.strand = '+';
+			bb1.add_hit_unstranded(ht);
+			// ht.strand = '-';
+			bb2.add_hit_unstranded(ht);
 		}
 
 		// if(library_type == EMPTY && ht.strand == '.' && ht.spos.size() ) bb1.add_hit(ht);

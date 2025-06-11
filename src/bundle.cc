@@ -672,7 +672,7 @@ int bundle::build_tss_tes()
 	new_gr.print();
 	tss_list_sg.clear();
 	tes_list_sg.clear();
-	if(bb.strand != '+' || bb.strand == '-') printf("Bundle (%d, %d) strand: %c", bb.lpos, bb.rpos, bb.strand);
+	// if(bb.strand != '+' || bb.strand == '-') printf("Bundle (%d, %d) strand: %c", bb.lpos, bb.rpos, bb.strand);
 	for(int i = 1; i < new_gr.num_vertices() - 1; i++)
 	{
 		double wv;
@@ -2168,6 +2168,7 @@ int bundle::merge_tss_tes() {
 
     // Sort hits and junctions (keep existing sorting code)...
     vector<hit> sorted_hits = bb.hits;
+	sorted_hits.insert(sorted_hits.end(), bb.hits_unstranded.begin(), bb.hits_unstranded.end());
     sort(sorted_hits.begin(), sorted_hits.end(), 
          [](const hit &a, const hit &b) { return a.pos < b.pos; });
 
