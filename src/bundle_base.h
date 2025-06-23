@@ -36,7 +36,7 @@ public:
 
 public:
 	int add_hit(const hit &ht);
-	int add_hit_unstranded(const hit &ht);
+	int add_hit_unstranded(const hit &ht);	
 	bool overlap(const hit &ht) const;
 	int clear();
 };

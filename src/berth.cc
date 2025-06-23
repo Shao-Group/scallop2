@@ -97,7 +97,7 @@ int berth::build_berths()
     //     pick_peaks_gmm();  // Use GMM for complex data
     // } else {
 
-        pick_peaks();      // Use traditional method for sparse data
+    pick_peaks();      // Use traditional method for sparse data
     // }
     
     assign_hit_berth();

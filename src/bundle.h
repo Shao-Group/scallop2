@@ -124,8 +124,8 @@ public:
 	// int calculate_window_coverage(int32_t window_start, int32_t window_end, double &mean_coverage, double &max_coverage);
 
 	// Helper functions for TSS/TES analysis
-	vector<hit> get_compatible_hits(int32_t pos, bool is_tss);
-	vector<hit> get_spanning_hits(int32_t pos);
+	vector<const hit*> get_compatible_hits(vector<const hit*> hits, int32_t pos, bool is_tss);
+	vector<const hit*> get_spanning_hits(vector<const hit*> hits, int32_t pos);
 };
 
 #endif

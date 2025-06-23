@@ -2166,11 +2166,22 @@ int bundle::merge_tss_tes() {
     map<int32_t, int> tss_merged_map;
     map<int32_t, int> tes_merged_map;
 
-    // Sort hits and junctions (keep existing sorting code)...
-    vector<hit> sorted_hits = bb.hits;
-	sorted_hits.insert(sorted_hits.end(), bb.hits_unstranded.begin(), bb.hits_unstranded.end());
-    sort(sorted_hits.begin(), sorted_hits.end(), 
-         [](const hit &a, const hit &b) { return a.pos < b.pos; });
+    // Create sorted pointers instead of copying hit objects
+    vector<const hit*> sorted_hit_ptrs;
+    sorted_hit_ptrs.reserve(bb.hits.size() + bb.hits_unstranded.size());
+    
+    // Add pointers to hits
+    for(const auto& h : bb.hits) {
+        sorted_hit_ptrs.push_back(&h);
+    }
+    // Add pointers to unstranded hits
+    for(const auto& h : bb.hits_unstranded) {
+        sorted_hit_ptrs.push_back(&h);
+    }
+    
+    // Sort pointers by position
+    sort(sorted_hit_ptrs.begin(), sorted_hit_ptrs.end(), 
+         [](const hit* a, const hit* b) { return a->pos < b->pos; });
 
     vector<junction> sorted_junctions_start = junctions;
     vector<junction> sorted_junctions_end = junctions;
@@ -2190,7 +2201,7 @@ int bundle::merge_tss_tes() {
         
         tss_tes new_tss(0, tss_pos, weight_sg, 
                        tss_berth.count(tss_pos) ? tss_berth[tss_pos] : 0);
-        new_tss.build(bb, get_compatible_hits(tss_pos, true), sorted_junctions_start, sorted_junctions_end, get_spanning_hits(tss_pos));
+        // new_tss.build(bb, get_compatible_hits(sorted_hit_ptrs, tss_pos, true), sorted_junctions_start, sorted_junctions_end, get_spanning_hits(sorted_hit_ptrs, tss_pos));
         tss_merged.push_back(new_tss);
         tss_merged_map[tss_pos] = tss_merged.size() - 1;
     }
@@ -2199,7 +2210,7 @@ int bundle::merge_tss_tes() {
     for(const auto& kv : tss_berth) {
         if(tss_merged_map.find(kv.first) == tss_merged_map.end()) {
             tss_tes new_tss(0, kv.first, 0, kv.second);
-            new_tss.build(bb, get_compatible_hits(kv.first, true), sorted_junctions_start, sorted_junctions_end, get_spanning_hits(kv.first));
+            // new_tss.build(bb, get_compatible_hits(sorted_hit_ptrs, kv.first, true), sorted_junctions_start, sorted_junctions_end, get_spanning_hits(sorted_hit_ptrs, kv.first));
             tss_merged.push_back(new_tss);
             tss_merged_map[kv.first] = tss_merged.size() - 1;
         }
@@ -2216,7 +2227,7 @@ int bundle::merge_tss_tes() {
 
         tss_tes new_tes(1, tes_pos, weight_sg,
                        tes_berth.count(tes_pos) ? tes_berth[tes_pos] : 0);
-        new_tes.build(bb, get_compatible_hits(tes_pos, false), sorted_junctions_start, sorted_junctions_end, get_spanning_hits(tes_pos));
+        // new_tes.build(bb, get_compatible_hits(sorted_hit_ptrs, tes_pos, false), sorted_junctions_start, sorted_junctions_end, get_spanning_hits(sorted_hit_ptrs, tes_pos));
         tes_merged.push_back(new_tes);
         tes_merged_map[tes_pos] = tes_merged.size() - 1;
     }
@@ -2225,7 +2236,7 @@ int bundle::merge_tss_tes() {
     for(const auto& kv : tes_berth) {
         if(tes_merged_map.find(kv.first) == tes_merged_map.end()) {
             tss_tes new_tes(1, kv.first, 0, kv.second);
-            new_tes.build(bb, get_compatible_hits(kv.first, false), sorted_junctions_start, sorted_junctions_end, get_spanning_hits(kv.first));
+            // new_tes.build(bb, get_compatible_hits(sorted_hit_ptrs, kv.first, false), sorted_junctions_start, sorted_junctions_end, get_spanning_hits(sorted_hit_ptrs, kv.first));
             tes_merged.push_back(new_tes);
             tes_merged_map[kv.first] = tes_merged.size() - 1;
         }
@@ -2320,25 +2331,25 @@ int bundle::build_anchors()
 }
 
 
-vector<hit> bundle::get_compatible_hits(int32_t pos, bool is_tss) {
-    vector<hit> compatible;
-    for(const hit& h : bb.hits) {
+vector<const hit*> bundle::get_compatible_hits(vector<const hit*> hits, int32_t pos, bool is_tss) {
+    vector<const hit*> compatible;
+    for(const hit* h : hits) {
         bool is_compatible = false;
         if(is_tss) {
-            if(h.strand == '+' ) {
-                is_compatible = h.pos > (pos - berth_neighborhood) && 
-                              h.pos <= (pos + berth_neighborhood);
-            } else if (h.strand == '-'){
-                is_compatible = h.rpos > (pos - berth_neighborhood) && 
-                              h.rpos <= (pos + berth_neighborhood);
+            if(h->strand == '+' ) {
+                is_compatible = h->pos > (pos - berth_neighborhood) && 
+                              h->pos <= (pos + berth_neighborhood);
+            } else if (h->strand == '-'){
+                is_compatible = h->rpos > (pos - berth_neighborhood) && 
+                              h->rpos <= (pos + berth_neighborhood);
             }
         } else {
-            if(h.strand == '-') {
-                is_compatible = h.pos > (pos - berth_neighborhood) && 
-                              h.pos <= (pos + berth_neighborhood);
-            } else if (h.strand == '+'){
-                is_compatible = h.rpos > (pos - berth_neighborhood) && 
-                              h.rpos <= (pos + berth_neighborhood);
+            if(h->strand == '-') {
+                is_compatible = h->pos > (pos - berth_neighborhood) && 
+                              h->pos <= (pos + berth_neighborhood);
+            	} else if (h->strand == '+'){
+                is_compatible = h->rpos > (pos - berth_neighborhood) && 
+                              h->rpos <= (pos + berth_neighborhood);
             }
         }
         if(is_compatible) compatible.push_back(h);
@@ -2346,11 +2357,11 @@ vector<hit> bundle::get_compatible_hits(int32_t pos, bool is_tss) {
     return compatible;
 }
 
-vector<hit> bundle::get_spanning_hits(int32_t pos) {
-    vector<hit> spanning;
-    for(const hit& h : bb.hits) {
-        if(h.pos <= (pos - berth_neighborhood) && 
-           h.rpos > (pos + berth_neighborhood)) {
+vector<const hit*> bundle::get_spanning_hits(vector<const hit*> hits, int32_t pos) {
+    vector<const hit*> spanning;
+    for(const hit* h : hits) {
+        if(h->pos <= (pos - berth_neighborhood) && 
+           h->rpos > (pos + berth_neighborhood)) {
             spanning.push_back(h);
         }
     }

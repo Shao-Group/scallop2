@@ -15,10 +15,10 @@ public:
     tss_tes(int type = 0);
     tss_tes(int type, int32_t pos, int weight_berth, int weight_sg);
     void calculate_junction_cnt(vector<junction> &sorted_junctions_start, vector<junction> &sorted_junctions_end);
-    void calculate_clip_length(const vector<hit> &hits);
-    void calculate_anchor_features(const vector<hit> &hits);
+    void calculate_clip_length(const vector<const hit*> &hits);
+    void calculate_anchor_features(const vector<const hit*> &hits);
     void calculate_coverage_features(bundle_base &bb, int32_t pos);
-    void build(bundle_base &bb, const vector<hit> &hits, vector<junction> &sorted_junctions_start, vector<junction> &sorted_junctions_end, const vector<hit> &spanning_hits);
+    void build(bundle_base &bb, const vector<const hit*> &hits, vector<junction> &sorted_junctions_start, vector<junction> &sorted_junctions_end, const vector<const hit*> &spanning_hits);
     // void soft_clip_entropy(vector<hit> &hits);
 
 public:
