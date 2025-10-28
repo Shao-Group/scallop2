@@ -2248,7 +2248,24 @@ int bundle::merge_tss_tes() {
 void bundle::write_tss_tes_features()
 {
 	string tss_fname = berth_folder + tss_output_file;
+	string tss_bed_fname = berth_folder + "tss_candidates.bed";
+	
 	ofstream tss_file(tss_fname, ios::app);
+
+	ofstream tss_bed_file(tss_bed_fname, ios::app);
+	for (int i = 0; i < tss_merged.size(); i++)
+	{
+		tss_tes &tss = tss_merged[i];
+		tss_bed_file << bb.chrm << "\t";
+
+		int ed = bb.strand == '+' ? tss.pos + 50 : tss.pos - 50;
+		tss_bed_file << tss.pos << "\t";
+		tss_bed_file << ed << "\t";
+		tss_bed_file << "tss_" + to_string(tss.pos) + "_" + to_string(tss.weight_sg) + "_" + to_string(tss.weight_berth) << "\t";
+		tss_bed_file << tss.weight_sg << "\t";
+		tss_bed_file << bb.strand << "\n";
+	}
+	tss_bed_file.close();
 
 	for(int i=0; i<tss_merged.size(); i++)
 	{
@@ -2279,6 +2296,20 @@ void bundle::write_tss_tes_features()
 	tss_file.close();
 
 	string tes_fname = berth_folder + tes_output_file;
+	string tes_bed_fname = berth_folder + "tes_candidates.bed";
+	ofstream tes_bed_file(tes_bed_fname, ios::app);
+	for (int i = 0; i < tes_merged.size(); i++)
+	{
+		tss_tes &tes = tes_merged[i];
+		tes_bed_file << bb.chrm << "\t";
+		int st = bb.strand == '+' ? tes.pos - 50 : tes.pos + 50;
+		tes_bed_file << st << "\t";
+		tes_bed_file << tes.pos << "\t";
+		tes_bed_file << "tes_" + to_string(tes.pos) + "_" + to_string(tes.weight_sg) + "_" + to_string(tes.weight_berth) << "\t";
+		tes_bed_file << tes.weight_sg << "\t";
+		tes_bed_file << bb.strand << "\n";
+	}
+	tes_bed_file.close();
 	ofstream tes_file(tes_fname, ios::app);
 	for(int i=0; i<tes_merged.size(); i++)
 	{
