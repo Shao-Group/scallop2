@@ -2168,16 +2168,16 @@ int bundle::merge_tss_tes() {
 
     // Create sorted pointers instead of copying hit objects
     vector<const hit*> sorted_hit_ptrs;
-    sorted_hit_ptrs.reserve(bb.hits.size() + bb.hits_unstranded.size());
+    sorted_hit_ptrs.reserve(bb.hits.size());
     
     // Add pointers to hits
     for(const auto& h : bb.hits) {
         sorted_hit_ptrs.push_back(&h);
     }
     // Add pointers to unstranded hits
-    for(const auto& h : bb.hits_unstranded) {
-        sorted_hit_ptrs.push_back(&h);
-    }
+    // for(const auto& h : bb.hits_unstranded) {
+    //     sorted_hit_ptrs.push_back(&h);
+    // }
     
     // Sort pointers by position
     sort(sorted_hit_ptrs.begin(), sorted_hit_ptrs.end(), 

@@ -417,7 +417,7 @@ int hit::set_anchors(bam1_t *b)
 	if( (is_anchor_both_sides == 0) && (predicted_strand.first != 0 || predicted_strand.second != 0 ) && (predicted_strand.first != predicted_strand.second))
 	{
 		assert (strand == '.');
-		strand =  predicted_strand.first >= predicted_strand.second ? '+' : '-';
+		// strand =  predicted_strand.first >= predicted_strand.second ? '+' : '-';
 		cout << "Predicted strand: " << strand << ", Original Strand: ." << endl;
 	}
 
