@@ -16,6 +16,7 @@ See LICENSE for licensing.
 #include "splice_graph.h"
 #include "hyper_set.h"
 #include "transcript_set.h"
+#include "genome.h"
 
 using namespace std;
 
@@ -33,6 +34,8 @@ private:
 	bundle_base bb2;		// -
 	vector<bundle_base> pool;
 
+	genome gm;			// for gtf genome (-b)
+
 	int hid;
 	int index;
 	bool terminate;
@@ -46,6 +49,7 @@ public:
 
 private:
 	int process(int n);
+	int process_gnn(int n);
 	int assemble(const splice_graph &gr, const hyper_set &hs, transcript_set &ts1, transcript_set &ts2);
 	int assign_RPKM();
 	int write();

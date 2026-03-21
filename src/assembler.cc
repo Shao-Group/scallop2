@@ -21,6 +21,7 @@ See LICENSE for licensing.
 #include "filter.h"
 
 assembler::assembler()
+	: gm(gtf_file)
 {
     sfn = sam_open(input_file.c_str(), "r");
     hdr = sam_hdr_read(sfn);
@@ -99,8 +100,11 @@ int assembler::assemble()
 
 	pool.push_back(bb1);
 	pool.push_back(bb2);
-	process(0);
+	process_gnn(0);
 
+
+	// for GNN; assembly is not needed
+	/*
 	assign_RPKM();
 
 	filter ft(trsts);
@@ -112,7 +116,41 @@ int assembler::assemble()
 	non_full_trsts = ft1.trs;
 
 	write();
+	*/
 	
+	return 0;
+}
+
+int assembler::process_gnn(int n)
+{
+	if(pool.size() < n) return 0;
+
+	for(int i = 0; i < pool.size(); i++)
+	{
+		bundle_base &bb = pool[i];
+
+		int cnt1 = 0;
+		int cnt2 = 0;
+		for(int k = 0; k < bb.hits.size(); k++)
+		{
+			//counts += (1 + bb.hits[k].spos.size());
+			if(bb.hits[k].spos.size() >= 1) cnt1 ++;
+			else cnt2++;
+		}
+
+		if(cnt1 + cnt2 < min_num_hits_in_bundle) continue;
+		if(bb.tid < 0) continue;
+
+		char buf[1024];
+		strcpy(buf, hdr->target_name[bb.tid]);
+		bb.chrm = string(buf);
+
+		bundle bd(bb);
+
+		// TODO
+		bd.build(1, true);
+		bd.print(index++);
+		assemble(bd.gr, bd.hs, ts1, ts2);
 	return 0;
 }
 

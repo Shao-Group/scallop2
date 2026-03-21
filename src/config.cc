@@ -135,6 +135,11 @@ int parse_arguments(int argc, const char ** argv)
 			ref_file = string(argv[i + 1]);
 			i++;
 		}
+		else if(string(argv[i]) == "-b")
+		{
+			gtf_file = string(argv[i + 1]);
+			i++;
+		}
 
 		// internal use
 		else if(string(argv[i]) == "-a")
@@ -511,6 +516,7 @@ int print_parameters()
 	// for input and output
 	printf("algo = %s\n", algo.c_str());
 	printf("input_file = %s\n", input_file.c_str());
+	printf("gtf_file = %s\n", gtf_file.c_str());
 	printf("ref_file = %s\n", ref_file.c_str());
 	printf("ref_file1 = %s\n", ref_file1.c_str());
 	printf("ref_file2 = %s\n", ref_file2.c_str());
