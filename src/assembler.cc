@@ -31,6 +31,13 @@ assembler::assembler()
 	terminate = false;
 	qlen = 0;
 	qcnt = 0;
+
+	// print the loaded genome
+	for(int i = 0; i < gm.genes.size(); i++)
+	{
+		if(gm.genes[i].transcripts.size() <= 0) continue;
+		printf("gene %d: %s, %lu transcripts\n", i, gm.genes[i].transcripts[0].gene_id.c_str(), gm.genes[i].transcripts.size());
+	}
 }
 
 assembler::~assembler()
@@ -42,6 +49,8 @@ assembler::~assembler()
 
 int assembler::assemble()
 {
+	return 0;
+
     while(sam_read1(sfn, hdr, b1t) >= 0)
 	{
 		if(terminate == true) return 0;
@@ -150,7 +159,8 @@ int assembler::process_gnn(int n)
 		// TODO
 		bd.build(1, true);
 		bd.print(index++);
-		assemble(bd.gr, bd.hs, ts1, ts2);
+		//assemble(bd.gr, bd.hs, ts1, ts2);
+	}
 	return 0;
 }
 

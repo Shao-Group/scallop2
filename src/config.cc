@@ -91,6 +91,7 @@ int simulation_max_edge_weight = 0;
 // input and output
 string algo = "scallop2";
 string input_file;
+string gtf_file;
 string ref_file;
 string ref_file1;
 string ref_file2;
@@ -458,7 +459,7 @@ int parse_arguments(int argc, const char ** argv)
 		exit(0);
 	}
 
-	if(output_file == "" && preview_only == false)
+	if(output_file == "" && preview_only == false && gtf_file == "")
 	{
 		printf("error: output-file is missing.\n");
 		exit(0);
