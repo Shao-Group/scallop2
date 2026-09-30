@@ -32,6 +32,7 @@ assembler::assembler()
 	terminate = false;
 	qlen = 0;
 	qcnt = 0;
+	transcript_bundle_counts.assign(tridx.size(), 0);
 
 	if(verbose >= 1) printf("loaded %d annotation transcripts\n", tridx.size());
 }
@@ -104,6 +105,7 @@ int assembler::assemble()
 	pool.push_back(bb1);
 	pool.push_back(bb2);
 	process_gnn(0);
+	if(write_transcript_bundle_counts() != 0) return 1;
 
 
 	// for GNN; assembly is not needed
@@ -164,6 +166,7 @@ int assembler::process_gnn(int n)
 			transcript_match m = matcher.match(tridx.get(id), min_bundle_transcript_exon_overlap, min_bundle_transcript_junction_overlap);
 			if(m.assigned == false) continue;
 			bd.assigned_transcripts.push_back(id);
+			transcript_bundle_counts[id]++;
 			matches.push_back(m);
 		}
 
@@ -188,6 +191,36 @@ int assembler::process_gnn(int n)
 		}
 	}
 	pool.clear();
+	return 0;
+}
+
+int assembler::write_transcript_bundle_counts() const
+{
+	ofstream fout(transcript_bundle_count_file.c_str());
+	if(fout.fail())
+	{
+		printf("error: cannot write transcript-bundle-count file %s.\n",
+				transcript_bundle_count_file.c_str());
+		return 1;
+	}
+
+	const char *header = "transcript_index\ttranscript_id\tgene_id\tchromosome\tstrand\tbundle_count";
+	fout << header << "\n";
+	printf("%s\n", header);
+
+	for(int id = 0; id < tridx.size(); id++)
+	{
+		const indexed_transcript &t = tridx.get(id);
+		fout << id << "\t" << t.trst.transcript_id << "\t" << t.trst.gene_id << "\t"
+			 << t.trst.seqname << "\t" << t.trst.strand << "\t"
+			 << transcript_bundle_counts[id] << "\n";
+		printf("%d\t%s\t%s\t%s\t%c\t%lld\n", id,
+				t.trst.transcript_id.c_str(), t.trst.gene_id.c_str(),
+				t.trst.seqname.c_str(), t.trst.strand,
+				(long long)transcript_bundle_counts[id]);
+	}
+
+	printf("saved transcript-bundle counts to %s\n", transcript_bundle_count_file.c_str());
 	return 0;
 }
 

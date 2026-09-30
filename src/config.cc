@@ -99,6 +99,7 @@ string ref_file1;
 string ref_file2;
 string output_file;
 string output_file1;
+string transcript_bundle_count_file;
 
 // for controling
 bool output_tex_files = false;
@@ -151,6 +152,16 @@ int parse_arguments(int argc, const char ** argv)
 				exit(1);
 			}
 			gtf_file = string(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--transcript_bundle_count_file")
+		{
+			if(i + 1 >= argc)
+			{
+				printf("error: filename is missing after --transcript_bundle_count_file.\n");
+				exit(1);
+			}
+			transcript_bundle_count_file = string(argv[i + 1]);
 			i++;
 		}
 
@@ -515,6 +526,10 @@ int parse_arguments(int argc, const char ** argv)
 			exit(1);
 		}
 	}
+	if(transcript_bundle_count_file == "" && gtf_file != "")
+	{
+		transcript_bundle_count_file = gtf_file + ".bundle_counts.tsv";
+	}
 
 	if(min_bundle_transcript_exon_overlap < 0 || min_bundle_transcript_exon_overlap > 1)
 	{
@@ -593,6 +608,7 @@ int print_parameters()
 	printf("ref_file2 = %s\n", ref_file2.c_str());
 	printf("output_file = %s\n", output_file.c_str());
 	printf("output_file1 = %s\n", output_file1.c_str());
+	printf("transcript_bundle_count_file = %s\n", transcript_bundle_count_file.c_str());
 
 	// for controling
 	printf("library_type = %d\n", library_type);
@@ -630,6 +646,7 @@ int print_help()
 	printf(" %-42s  %s\n", "--preview",  "determine fragment-length-range and library-type and exit");
 	printf(" %-42s  %s\n", "--verbose <0, 1, 2>",  "0: quiet; 1: one line for each graph; 2: with details, default: 1");
 	printf(" %-42s  %s\n", "-b <gtf-file>",  "annotation transcripts to assign to splice-graph bundles");
+	printf(" %-42s  %s\n", "--transcript_bundle_count_file <filename>",  "save per-transcript bundle counts, default: <gtf-file>.bundle_counts.tsv");
 	printf(" %-42s  %s\n", "--min_bundle_transcript_exon_overlap <float>",  "minimum fraction of transcript exonic bases shared with a bundle, default: 0.5");
 	printf(" %-42s  %s\n", "--min_bundle_transcript_junction_overlap <float>",  "minimum fraction of transcript junctions shared with a bundle, default: 0.5");
 	printf(" %-42s  %s\n", "-f/--transcript_fragments <filename>",  "file to which the assembled non-full-length transcripts will be written to");

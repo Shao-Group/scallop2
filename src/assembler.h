@@ -37,6 +37,7 @@ private:
 
 	genome gm;			// for gtf genome (-b)
 	transcript_index tridx;		// annotation transcript index
+	vector<int64_t> transcript_bundle_counts;
 
 	int hid;
 	int index;
@@ -52,6 +53,7 @@ public:
 private:
 	int process(int n);
 	int process_gnn(int n);
+	int write_transcript_bundle_counts() const;
 	int assemble(const splice_graph &gr, const hyper_set &hs, transcript_set &ts1, transcript_set &ts2);
 	int assign_RPKM();
 	int write();

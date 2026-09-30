@@ -8,7 +8,7 @@ On the `gnn` branch, load annotation transcripts from `-b <annotation.gtf>` and 
 
 ## Current state
 
-- Active branch: `gnn` at `c74ea76` (`load gtf file`), tracking `origin/gnn`.
+- Active branch: `gnn`; transcript-to-bundle assignment was committed as `2725ed0`.
 - The `main.cc` assembly call and `assembler::assemble()` BAM loop are active.
 - There are unrelated untracked files above `src/`; leave them alone.
 - Commit `800f43d` added the GNN processing skeleton and commit `c74ea76` added `-b` plus `genome gm` loading.
@@ -97,6 +97,12 @@ Files:
    - The existing dependency file for `bundle.cc` was a dummy, so changing `bundle.h` rebuilt `assembler.o` but left an older `bundle.o`; that constructor did not construct the newly added vector.
    - Explicitly initialized `assigned_transcripts` in `bundle::bundle()`. This both documents the required construction and forces `bundle.cc` to rebuild when the fix is applied.
 
+8. Added per-transcript bundle/graph assignment counts.
+   - `assembler` maintains one 64-bit count per stable transcript-index ID and increments it once for each bundle that accepts that transcript.
+   - At successful completion, every annotation transcript, including zero-count transcripts, is printed and saved as deterministic TSV.
+   - The default output is `<gtf-file>.bundle_counts.tsv`; `--transcript_bundle_count_file <filename>` overrides it.
+   - TSV columns are `transcript_index`, `transcript_id`, `gene_id`, `chromosome`, `strand`, and `bundle_count`.
+
 ## Remaining decisions
 
 - The phrase “share half of the exon regions” could mean half of exon count rather than half of exonic bases. The proposed definition uses exonic bases because it handles partial overlaps and unequal exon lengths predictably.
@@ -112,6 +118,7 @@ Files:
 - `git diff --check` passes.
 - Reproduced the reported large-input crash under GDB at `assembler.cc` while pushing into an unconstructed `assigned_transcripts` vector; object timestamps confirmed the mixed build.
 - After rebuilding `bundle.o`, the same `tests/star.sort.bam` and `tests/scallop2.gtf` run passed the former crash point and ran for 180 seconds without a segmentation fault before an intentional timeout.
+- The two-transcript end-to-end fixture prints and saves `t1` with one assigned bundle and the opposite-strand `t2` with zero assigned bundles.
 - Automake regeneration remains unavailable in this restricted workspace because it tries to write the parent `autom4te.cache`; canonical source registration is complete in tracked `src/Makefile.am`.
 
 ## Next session
