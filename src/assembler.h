@@ -17,6 +17,7 @@ See LICENSE for licensing.
 #include "hyper_set.h"
 #include "transcript_set.h"
 #include "genome.h"
+#include "transcript_index.h"
 
 using namespace std;
 
@@ -35,6 +36,7 @@ private:
 	vector<bundle_base> pool;
 
 	genome gm;			// for gtf genome (-b)
+	transcript_index tridx;		// annotation transcript index
 
 	int hid;
 	int index;

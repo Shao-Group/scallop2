@@ -40,6 +40,7 @@ public:
 	split_interval_map pmap;		// partial exon map
 	splice_graph gr;				// splice graph
 	hyper_set hs;					// hyper set
+	vector<int> assigned_transcripts;	// annotation transcript IDs for GNN
 
 public:
 	virtual int build(int mode, bool revise);

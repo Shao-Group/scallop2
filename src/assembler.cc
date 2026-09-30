@@ -19,9 +19,10 @@ See LICENSE for licensing.
 #include "sgraph_compare.h"
 #include "super_graph.h"
 #include "filter.h"
+#include "transcript_match.h"
 
 assembler::assembler()
-	: gm(gtf_file)
+	: gm(gtf_file), tridx(gm)
 {
     sfn = sam_open(input_file.c_str(), "r");
     hdr = sam_hdr_read(sfn);
@@ -32,12 +33,7 @@ assembler::assembler()
 	qlen = 0;
 	qcnt = 0;
 
-	// print the loaded genome
-	for(int i = 0; i < gm.genes.size(); i++)
-	{
-		if(gm.genes[i].transcripts.size() <= 0) continue;
-		printf("gene %d: %s, %lu transcripts\n", i, gm.genes[i].transcripts[0].gene_id.c_str(), gm.genes[i].transcripts.size());
-	}
+	if(verbose >= 1) printf("loaded %d annotation transcripts\n", tridx.size());
 }
 
 assembler::~assembler()
@@ -49,8 +45,6 @@ assembler::~assembler()
 
 int assembler::assemble()
 {
-	return 0;
-
     while(sam_read1(sfn, hdr, b1t) >= 0)
 	{
 		if(terminate == true) return 0;
@@ -90,7 +84,7 @@ int assembler::assemble()
 		}
 
 		// process
-		process(batch_bundle_size);
+		process_gnn(batch_bundle_size);
 
 		//printf("read strand = %c, xs = %c, ts = %c\n", ht.strand, ht.xs, ht.ts);
 
@@ -147,7 +141,7 @@ int assembler::process_gnn(int n)
 			else cnt2++;
 		}
 
-		if(cnt1 + cnt2 < min_num_hits_in_bundle) continue;
+		//if(cnt1 + cnt2 < min_num_hits_in_bundle) continue;
 		if(bb.tid < 0) continue;
 
 		char buf[1024];
@@ -156,11 +150,44 @@ int assembler::process_gnn(int n)
 
 		bundle bd(bb);
 
-		// TODO
 		bd.build(1, true);
-		bd.print(index++);
-		//assemble(bd.gr, bd.hs, ts1, ts2);
+
+		int32_t lpos = bd.gr.get_vertex_info(0).lpos;
+		int32_t rpos = bd.gr.get_vertex_info(bd.gr.num_vertices() - 1).rpos;
+		vector<int> candidates = tridx.query(bd.gr.chrm, bd.gr.strand, lpos, rpos);
+		transcript_matcher matcher(bd.gr);
+		vector<transcript_match> matches;
+
+		for(int k = 0; k < candidates.size(); k++)
+		{
+			int id = candidates[k];
+			transcript_match m = matcher.match(tridx.get(id), min_bundle_transcript_exon_overlap, min_bundle_transcript_junction_overlap);
+			if(m.assigned == false) continue;
+			bd.assigned_transcripts.push_back(id);
+			matches.push_back(m);
+		}
+
+		int bundle_index = index++;
+		bd.print(bundle_index);
+		if(verbose >= 1)
+		{
+			printf("bundle %d: candidate-transcripts = %lu, assigned-transcripts = %lu\n",
+					bundle_index, candidates.size(), bd.assigned_transcripts.size());
+		}
+		if(verbose >= 2)
+		{
+			for(int k = 0; k < bd.assigned_transcripts.size(); k++)
+			{
+				const indexed_transcript &t = tridx.get(bd.assigned_transcripts[k]);
+				const transcript_match &m = matches[k];
+				printf("bundle %d: transcript = %s, gene = %s, exonic-overlap = %d/%d, junction-overlap = %d/%d\n",
+						bundle_index, t.trst.transcript_id.c_str(), t.trst.gene_id.c_str(),
+						m.shared_exonic_length, m.transcript_exonic_length,
+						m.shared_junctions, m.transcript_junctions);
+			}
+		}
 	}
+	pool.clear();
 	return 0;
 }
 

@@ -40,5 +40,7 @@ scallop2_SOURCES = splice_graph.h splice_graph.cc \
 				   previewer.h previewer.cc \
 				   assembler.h assembler.cc \
 				   transcript_set.h transcript_set.cc \
+				   transcript_index.h transcript_index.cc \
+				   transcript_match.h transcript_match.cc \
 				   filter.h filter.cc \
 				   main.cc

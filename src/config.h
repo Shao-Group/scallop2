@@ -109,6 +109,8 @@ extern double min_guaranteed_edge_weight;
 // for filtering transcripts
 extern double min_single_exon_coverage;
 extern double min_transcript_coverage_ratio; 
+extern double min_bundle_transcript_exon_overlap;
+extern double min_bundle_transcript_junction_overlap;
 extern int min_transcript_length_base;
 extern int min_transcript_length_increase;
 extern int min_exon_length;
@@ -123,7 +125,7 @@ extern int simulation_max_edge_weight;
 extern string algo;
 extern string input_file;
 extern string gtf_file;
-extern string ref_file1;
+extern string ref_file;
 extern string ref_file1;
 extern string ref_file2;
 extern string output_file;

@@ -72,6 +72,8 @@ double max_decompose_error_ratio[7] = {0.33, 0.05, 0.0, 0.25, 0.30, 0.0, 1.1};
 // for selecting paths
 double min_transcript_coverage = 1.5;
 double min_transcript_coverage_ratio = 0.005;
+double min_bundle_transcript_exon_overlap = 0.5;
+double min_bundle_transcript_junction_overlap = 0.5;
 double min_single_exon_coverage = 20;
 double min_transcript_numreads = 10;
 int min_transcript_length_base = 150;
@@ -113,6 +115,11 @@ int parse_arguments(int argc, const char ** argv)
 		// necessary ones
 		if(string(argv[i]) == "-i")
 		{
+			if(i + 1 >= argc)
+			{
+				printf("error: input-file is missing after -i.\n");
+				exit(1);
+			}
 			input_file = string(argv[i + 1]);
 			i++;
 		}
@@ -138,6 +145,11 @@ int parse_arguments(int argc, const char ** argv)
 		}
 		else if(string(argv[i]) == "-b")
 		{
+			if(i + 1 >= argc)
+			{
+				printf("error: gtf-file is missing after -b.\n");
+				exit(1);
+			}
 			gtf_file = string(argv[i + 1]);
 			i++;
 		}
@@ -284,6 +296,26 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_transcript_coverage_ratio")
 		{
 			min_transcript_coverage_ratio = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_bundle_transcript_exon_overlap")
+		{
+			if(i + 1 >= argc)
+			{
+				printf("error: value is missing after --min_bundle_transcript_exon_overlap.\n");
+				exit(1);
+			}
+			min_bundle_transcript_exon_overlap = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_bundle_transcript_junction_overlap")
+		{
+			if(i + 1 >= argc)
+			{
+				printf("error: value is missing after --min_bundle_transcript_junction_overlap.\n");
+				exit(1);
+			}
+			min_bundle_transcript_junction_overlap = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_single_exon_coverage")
@@ -458,6 +490,42 @@ int parse_arguments(int argc, const char ** argv)
 		printf("error: input-file is missing.\n");
 		exit(0);
 	}
+	else
+	{
+		ifstream fin(input_file.c_str());
+		if(fin.fail())
+		{
+			printf("error: cannot open input-file %s.\n", input_file.c_str());
+			exit(1);
+		}
+	}
+
+	if(gtf_file == "" && preview_only == false)
+	{
+		printf("error: gtf-file is missing.\n");
+		exit(1);
+	}
+
+	if(gtf_file != "")
+	{
+		ifstream fin(gtf_file.c_str());
+		if(fin.fail())
+		{
+			printf("error: cannot open gtf-file %s.\n", gtf_file.c_str());
+			exit(1);
+		}
+	}
+
+	if(min_bundle_transcript_exon_overlap < 0 || min_bundle_transcript_exon_overlap > 1)
+	{
+		printf("error: --min_bundle_transcript_exon_overlap must be between 0 and 1.\n");
+		exit(1);
+	}
+	if(min_bundle_transcript_junction_overlap < 0 || min_bundle_transcript_junction_overlap > 1)
+	{
+		printf("error: --min_bundle_transcript_junction_overlap must be between 0 and 1.\n");
+		exit(1);
+	}
 
 	if(output_file == "" && preview_only == false && gtf_file == "")
 	{
@@ -499,6 +567,8 @@ int print_parameters()
 	printf("min_surviving_edge_weight = %.2lf\n", min_surviving_edge_weight);
 	printf("min_transcript_coverage = %.2lf\n", min_transcript_coverage);
 	printf("min_transcript_coverage_ratio = %.2lf\n", min_transcript_coverage_ratio);
+	printf("min_bundle_transcript_exon_overlap = %.2lf\n", min_bundle_transcript_exon_overlap);
+	printf("min_bundle_transcript_junction_overlap = %.2lf\n", min_bundle_transcript_junction_overlap);
 	printf("min_single_exon_coverage = %.2lf\n", min_single_exon_coverage);
 	printf("min_transcript_numreads = %.2lf\n", min_transcript_numreads);
 	printf("min_transcript_length_base = %d\n", min_transcript_length_base);
@@ -552,13 +622,16 @@ int print_command_line(int argc, const char ** argv)
 int print_help()
 {
 	printf("\n");
-	printf("Usage: scallop2 -i <bam-file> -o <gtf-file> [options]\n");
+	printf("Usage: scallop2 -i <bam-file> -b <gtf-file> [options]\n");
 	printf("\n");
 	printf("Options:\n");
 	printf(" %-42s  %s\n", "--help",  "print usage of Scallop and exit");
 	printf(" %-42s  %s\n", "--version",  "print current version of Scallop and exit");
 	printf(" %-42s  %s\n", "--preview",  "determine fragment-length-range and library-type and exit");
 	printf(" %-42s  %s\n", "--verbose <0, 1, 2>",  "0: quiet; 1: one line for each graph; 2: with details, default: 1");
+	printf(" %-42s  %s\n", "-b <gtf-file>",  "annotation transcripts to assign to splice-graph bundles");
+	printf(" %-42s  %s\n", "--min_bundle_transcript_exon_overlap <float>",  "minimum fraction of transcript exonic bases shared with a bundle, default: 0.5");
+	printf(" %-42s  %s\n", "--min_bundle_transcript_junction_overlap <float>",  "minimum fraction of transcript junctions shared with a bundle, default: 0.5");
 	printf(" %-42s  %s\n", "-f/--transcript_fragments <filename>",  "file to which the assembled non-full-length transcripts will be written to");
 	printf(" %-42s  %s\n", "--library_type <first, second, unstranded>",  "library type of the sample, default: unstranded");
 	printf(" %-42s  %s\n", "--assemble_duplicates <integer>",  "the number of consensus runs of the decomposition, default: 10");
@@ -581,4 +654,3 @@ int print_copyright()
 	printf("Scallop2 %s (c) 2021 Qimin Zhang, Qian Shi, and Mingfu Shao, The Pennsylvania State University\n", version.c_str());
 	return 0;
 }
-
