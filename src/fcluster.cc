@@ -5,6 +5,7 @@ See LICENSE for licensing.
 */
 
 #include "fcluster.h"
+#include "config.h"
 #include "util.h"
 #include <cstdio>
 
@@ -44,6 +45,8 @@ const vector<int> & fcluster::get_vlist() const
 
 int fcluster::print(int index) const
 {
+	if(verbose < 2) return 0;
+
 	printf("fcluster %d: type = %d, #fragments = %lu, #phase = %lu, ", index, type, fset.size(), phase.size());
 
 	printf("  v1 = ( ");

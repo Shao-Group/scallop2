@@ -323,7 +323,10 @@ bool super_graph::cut_single_splice_graph(splice_graph &gr, int index)
 
 	if(ks == -1 || kt == -1) return false;
 
-	printf("cut subgraph %d, vertices = [%d, %d] / %lu, #edges = %.0lf, ave = %.2lf, min = %.2lf\n", index, ks, kt, gr.num_vertices(), ksum, kave, kmin);
+	if(verbose >= 2)
+	{
+		printf("cut subgraph %d, vertices = [%d, %d] / %lu, #edges = %.0lf, ave = %.2lf, min = %.2lf\n", index, ks, kt, gr.num_vertices(), ksum, kave, kmin);
+	}
 
 	for(int i = 0; i < ke.size(); i++)
 	{

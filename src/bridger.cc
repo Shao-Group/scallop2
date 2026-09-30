@@ -73,9 +73,12 @@ int bridger::bridge()
 	double r3 = n3 * 100.0 / n;
 	double r4 = n4 * 100.0 / n;
 
-	vector<int> ct = get_bridged_fragments_type();	// ct<ct1, ct2, ct3> paired-end, UMI-linked, both
-	printf("#fragments = %d, #fixed = %d -> %d -> %d -> %d, ratio = %.2lf -> %.2lf -> %.2lf -> %.2lf, #remain = %d, length = (%d, %d, %d), total paired-end = %d, UMI-linked only = %d, intersection: %d, bridged paired-end = %d, UMI-linked only = %d, intersection: %d\n", 
-			n, n1, n2, n3, n4, r1, r2, r3, r4, n - n4, length_low, length_median, length_high, ct[3], ct[4], ct[5], ct[0], ct[1], ct[2]);
+	if(verbose >= 2)
+	{
+		vector<int> ct = get_bridged_fragments_type();	// ct<ct1, ct2, ct3> paired-end, UMI-linked, both
+		printf("#fragments = %d, #fixed = %d -> %d -> %d -> %d, ratio = %.2lf -> %.2lf -> %.2lf -> %.2lf, #remain = %d, length = (%d, %d, %d), total paired-end = %d, UMI-linked only = %d, intersection: %d, bridged paired-end = %d, UMI-linked only = %d, intersection: %d\n",
+				n, n1, n2, n3, n4, r1, r2, r3, r4, n - n4, length_low, length_median, length_high, ct[3], ct[4], ct[5], ct[0], ct[1], ct[2]);
+	}
 
 	/*
 	printf("after bridging ... \n");
@@ -505,10 +508,13 @@ int bridger::bridge_hard_fragments()
 	cluster_open_fragments(open);
 	sort(open.begin(), open.end(), compare_fcluster_v1_v2);
 
-	//print open clusters
-	for(int k = 0; k < open.size(); k++)
+	// print open clusters
+	if(verbose >= 2)
 	{
-		open[k].print(k);
+		for(int k = 0; k < open.size(); k++)
+		{
+			open[k].print(k);
+		}
 	}
 
 	/*
@@ -1388,8 +1394,11 @@ int bridger::build_overlap_index()
 	}
 	*/
 
-	printf("build overlap index with %lu nodes, max-pnode-length = %d, and %d -> %d / %d edges\n", 
-			pnodes.size(), max_pnode_length, cnt1, cnt2, cnt3);
+	if(verbose >= 2)
+	{
+		printf("build overlap index with %lu nodes, max-pnode-length = %d, and %d -> %d / %d edges\n",
+				pnodes.size(), max_pnode_length, cnt1, cnt2, cnt3);
+	}
 
 	// print
 	/*
@@ -1850,4 +1859,3 @@ bool check_suffix(const vector<int> &vx, const vector<int> &vy)
 	}
 	return true;
 }
-

@@ -101,8 +101,11 @@ int region::split_join_interval_map()
 
 		if(b == true)
 		{
-			printf("SPLIT: type = (%d, %d), pos = %d-%d, mid = %d-%d, ave = (%.3lf, %.3lf), dev = (%.3lf, %.3lf)\n", 
-					ltype, rtype, lpos, rpos, p, q, ave1, ave2, dev1, dev2);
+			if(verbose >= 2)
+			{
+				printf("SPLIT: type = (%d, %d), pos = %d-%d, mid = %d-%d, ave = (%.3lf, %.3lf), dev = (%.3lf, %.3lf)\n",
+						ltype, rtype, lpos, rpos, p, q, ave1, ave2, dev1, dev2);
+			}
 
 			jmap += make_pair(ROI(p, q), -1);
 		}
