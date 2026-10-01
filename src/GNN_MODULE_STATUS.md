@@ -4,7 +4,7 @@ Updated: 2026-10-01
 
 ## Goal
 
-On the `gnn` branch, load annotation transcripts from `-b <annotation.gtf>` and alignments from `-i <alignments.bam>`, and count every read bundle whose covered exons and observed splice positions satisfy the transcript-assignment criterion.
+On the `gnn` branch, load annotation transcripts from `-b <annotation.gtf>` and alignments from `-i <alignments.bam>`, assign transcripts from direct read-bundle evidence, and guarantee that every assigned transcript is represented by a source-to-sink path in the resulting splice graph.
 
 ## Current state
 
@@ -18,8 +18,8 @@ On the `gnn` branch, load annotation transcripts from `-b <annotation.gtf>` and 
 
 1. `main.cc` parses options, previews the BAM, constructs `assembler`, and normally calls `assembler::assemble()`.
 2. `assembler::assemble()` reads BAM records, creates `hit` objects, splits them between plus/minus `bundle_base` instances, and flushes a pool of bundles.
-3. `assembler::process_gnn()` constructs a `transcript_matcher` directly from each `bundle_base`, queries annotation candidates, evaluates them, updates per-transcript counts, and prints diagnostics. It does not construct a full `bundle` or splice graph.
-4. `transcript_matcher` builds the bundle exon union from `bundle_base::mmap` and collects unique donor/acceptor coordinates from the `int64_t` junction pairs in `hit::spos` as `int32_t` splice positions.
+3. `assembler::process_gnn()` constructs a `transcript_matcher` directly from each `bundle_base`, queries annotation candidates, evaluates them, and updates per-transcript counts.
+4. The accepted transcript models are then passed into `bundle`. Their exons, junctions, and outer boundaries become structural graph evidence, and `bundle::build(1, true)` builds and revises the splice graph while preserving every assigned source-to-sink transcript path.
 5. `genome` loads genes/transcripts from GTF. Exons are sorted and adjacent exon records are merged by `gene::shrink()` / `transcript::shrink()`.
 
 All relevant genomic intervals are 0-based and right-open. A GTF exon `start..end` becomes `[start-1,end)`. Bundle bounds, partial exons, graph vertices, and transcript exons can therefore be compared directly.
@@ -109,16 +109,25 @@ Files:
    - Scores the fraction of unique query splice positions present in the bundle; the default threshold is 0.5.
    - Renamed the option to `--min_bundle_transcript_splicing_position_overlap`; the former junction-named option remains accepted as a compatibility alias.
 
+10. Added assigned transcripts to splice-graph construction.
+   - `bundle` stores copies of its assigned annotation transcripts and exposes them to `bundle_bridge` as reference transcripts.
+   - Annotation-only junctions are inserted into `bundle::junctions` with minimum structural support; junctions already supported by reads are not duplicated.
+   - Transcript starts and ends are included among region partition coordinates, and bundle bounds expand when an assigned transcript extends beyond the read-supported span.
+   - The union of assigned exon intervals is compared with the structural interval map; only uncovered subintervals are added, so existing read-coverage values are unchanged.
+   - The newly added interval union is retained on `bundle`, and every partial exon and corresponding graph vertex records the number of newly added bases it contains.
+   - After graph revision, missing source, contiguous-exon, junction, and sink edges are restored at minimum weight, vertices on assigned paths are retained, and every assigned transcript is explicitly validated as a source-to-sink path.
+
 ## Remaining decisions
 
 - The phrase “share half of the exon regions” could mean half of exon count rather than half of exonic bases. The proposed definition uses exonic bases because it handles partial overlaps and unequal exon lengths predictably.
 - Exact same-strand matching for `.` bundles may be too strict for unstranded libraries. Keep it strict initially as requested and expose counts of skipped ambiguous bundles.
-- Matching now describes direct read-bundle evidence rather than a revised splice graph. If future GNN input uses a revised graph, the relationship between these labels and graph revision should be measured.
+- Matching describes direct read-bundle evidence, while assigned transcripts are subsequently guaranteed as paths in the revised graph. The per-vertex `newly_added_length` field now explicitly identifies annotation-supplied exon bases for downstream GNN serialization.
 - The final GNN tensor/graph serialization is not yet specified. Matching remains independent of serialization; bundle indices and deterministic transcript counts are available for the next layer.
 
 ## Validation performed
 
 - Focused tests pass for chromosome/strand partitions, boundary-touch non-overlap, multiple candidates, exact 50% exon coverage, below-threshold coverage, splice-position threshold behavior, single-exon handling, strand rejection, and exon extraction from a `bundle_base` coverage map.
+- The assigned-transcript graph test covers expanded transcript bounds, annotation-only junction insertion, boundary-based region partitioning, adding only the union gaps absent from `fmap` without changing existing coverage, retained missing intervals, per-partial-exon/per-vertex newly-added lengths, post-revision path restoration, and final source-to-sink path validation.
 - Every `src/*.cc` translation unit compiles and the full executable links successfully in a clean temporary directory.
 - End-to-end fixture output: two annotations loaded; the plus-strand bundle fetched one candidate and assigned `t1` with exon overlap `100/100` and junction overlap `1/1`; the minus-strand annotation was excluded.
 - `git diff --check` passes.
@@ -129,4 +138,4 @@ Files:
 
 ## Next session
 
-Start with `git status --short --branch` and read this file plus `skills/scallop2-gnn/SKILL.md`. The direct `bundle_base` transcript-assignment module is implemented and validated. The next functional task is to define the GNN example serialization and how its labels should reference the matched transcript IDs currently held locally during `process_gnn()`.
+Start with `git status --short --branch` and read this file plus `skills/scallop2-gnn/SKILL.md`. Direct `bundle_base` assignment and assigned-transcript graph preservation are implemented and validated. The next functional task is to define the GNN example serialization and how it should encode assigned transcript paths and annotation-derived structural edges.

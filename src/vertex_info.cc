@@ -10,6 +10,7 @@ vertex_info::vertex_info()
 {
 	stddev = 1.0;
 	length = 0;
+	newly_added_length = 0;
 	sdist = -1;
 	tdist = -1;
 	type = -1;
@@ -25,6 +26,7 @@ vertex_info::vertex_info(int l)
 	: length(l)
 {
 	stddev = 1.0;
+	newly_added_length = 0;
 	sdist = -1;
 	tdist = -1;
 	type = -1;
@@ -40,6 +42,7 @@ vertex_info::vertex_info(const vertex_info &vi)
 {
 	stddev = vi.stddev;
 	length = vi.length;
+	newly_added_length = vi.newly_added_length;
 	sdist = vi.sdist;
 	tdist = vi.tdist;
 	type = vi.type;

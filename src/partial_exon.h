@@ -30,6 +30,7 @@ public:
 	double ave;						// average abundance
 	double max;						// maximum abundance
 	double dev;						// standard-deviation of abundance
+	int newly_added_length;			// bases supplied only by assigned transcripts
 
 public:
 	string label() const;

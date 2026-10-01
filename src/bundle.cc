@@ -19,9 +19,49 @@ See LICENSE for licensing.
 #include "util.h"
 #include "undirected_graph.h"
 
-bundle::bundle(bundle_base &b)
-	: bb(b), br(b)
+static void merge_intervals(vector<PI32> &v)
 {
+	sort(v.begin(), v.end());
+	int n = 0;
+	for(int i = 0; i < v.size(); i++)
+	{
+		if(v[i].first >= v[i].second) continue;
+		if(n >= 1 && v[i].first <= v[n - 1].second)
+		{
+			if(v[i].second > v[n - 1].second) v[n - 1].second = v[i].second;
+		}
+		else
+		{
+			v[n++] = v[i];
+		}
+	}
+	v.resize(n);
+}
+
+static int interval_overlap_length(const split_interval_map &m, int32_t l, int32_t r)
+{
+	int length = 0;
+	for(SIMI it = m.begin(); it != m.end(); it++)
+	{
+		int32_t p = lower(it->first);
+		int32_t q = upper(it->first);
+		if(q <= l) continue;
+		if(p >= r) break;
+		length += min(q, r) - max(p, l);
+	}
+	return length;
+}
+
+bundle::bundle(bundle_base &b, const vector<transcript> &assigned)
+	: bb(b), br(b), assigned_transcripts(assigned)
+{
+	for(int i = 0; i < assigned_transcripts.size(); i++)
+	{
+		PI32 p = assigned_transcripts[i].get_bounds();
+		if(p.first < bb.lpos) bb.lpos = p.first;
+		if(p.second > bb.rpos) bb.rpos = p.second;
+	}
+	br.ref_trsts = assigned_transcripts;
 	br.build();
 	prepare();
 }
@@ -33,7 +73,9 @@ int bundle::prepare()
 {
 	compute_strand();
 	build_intervals();
+	add_assigned_transcript_intervals();
 	build_junctions();
+	add_assigned_transcript_junctions();
 	build_regions();
 	build_partial_exons();
 
@@ -46,6 +88,7 @@ int bundle::build(int mode, bool revise)
 {
 	build_splice_graph(mode);
 	if(revise == true) revise_splice_graph();
+	if(ensure_assigned_transcript_paths() != 0) return 1;
 	build_hyper_set();
 	return 0;
 }
@@ -102,6 +145,63 @@ int bundle::build_intervals()
 			fmap += make_pair(ROI(s, t), 1);
 		}
 	}
+	return 0;
+}
+
+int bundle::add_assigned_transcript_intervals()
+{
+	newly_added_intervals.clear();
+
+	vector<PI32> assigned;
+	vector<int32_t> partition_points;
+	for(int i = 0; i < assigned_transcripts.size(); i++)
+	{
+		const transcript &t = assigned_transcripts[i];
+		for(int k = 0; k < t.exons.size(); k++)
+		{
+			assigned.push_back(t.exons[k]);
+			partition_points.push_back(t.exons[k].first);
+			partition_points.push_back(t.exons[k].second);
+		}
+	}
+	merge_intervals(assigned);
+
+	vector<PI32> covered;
+	for(SIMI it = fmap.begin(); it != fmap.end(); it++)
+		covered.push_back(PI32(lower(it->first), upper(it->first)));
+	merge_intervals(covered);
+
+	vector<PI32> missing;
+	int j = 0;
+	for(int i = 0; i < assigned.size(); i++)
+	{
+		int32_t p = assigned[i].first;
+		int32_t q = assigned[i].second;
+		while(j < covered.size() && covered[j].second <= p) j++;
+		int k = j;
+		while(k < covered.size() && covered[k].first < q)
+		{
+			if(covered[k].first > p)
+				missing.push_back(PI32(p, min(q, covered[k].first)));
+			if(covered[k].second > p) p = covered[k].second;
+			if(p >= q) break;
+			k++;
+		}
+		if(p < q) missing.push_back(PI32(p, q));
+	}
+
+	for(int i = 0; i < missing.size(); i++)
+	{
+		ROI x(missing[i].first, missing[i].second);
+		fmap += make_pair(x, 1);
+		newly_added_intervals += make_pair(x, 1);
+	}
+
+	// Region construction expects fmap intervals not to cross transcript,
+	// splice, or bundle partition coordinates. Splitting changes no coverage.
+	sort(partition_points.begin(), partition_points.end());
+	partition_points.erase(unique(partition_points.begin(), partition_points.end()), partition_points.end());
+	for(int i = 0; i < partition_points.size(); i++) create_split(fmap, partition_points[i]);
 	return 0;
 }
 
@@ -194,6 +294,37 @@ int bundle::build_junctions()
 	return 0;
 }
 
+int bundle::add_assigned_transcript_junctions()
+{
+	set<int64_t> existing;
+	for(int i = 0; i < junctions.size(); i++)
+	{
+		existing.insert(pack(junctions[i].lpos, junctions[i].rpos));
+	}
+
+	for(int i = 0; i < assigned_transcripts.size(); i++)
+	{
+		const transcript &t = assigned_transcripts[i];
+		vector<PI32> v = t.get_intron_chain();
+		for(int k = 0; k < v.size(); k++)
+		{
+			int64_t p = pack(v[k].first, v[k].second);
+			if(existing.find(p) != existing.end()) continue;
+			junction jc(p, 1);
+			jc.strand = t.strand;
+			junctions.push_back(jc);
+			existing.insert(p);
+		}
+	}
+
+	sort(junctions.begin(), junctions.end(), [](const junction &x, const junction &y)
+	{
+		if(x.lpos != y.lpos) return x.lpos < y.lpos;
+		return x.rpos < y.rpos;
+	});
+	return 0;
+}
+
 int bundle::build_regions()
 {
 	MPI s;
@@ -203,8 +334,8 @@ int bundle::build_regions()
 	{
 		junction &jc = junctions[i];
 
-		double ave, dev, max;
-		evaluate_rectangle(fmap, jc.lpos, jc.rpos, ave, dev, max);
+		//double ave, dev, max;
+		//evaluate_rectangle(fmap, jc.lpos, jc.rpos, ave, dev, max);
 
 		int32_t l = jc.lpos;
 		int32_t r = jc.rpos;
@@ -215,13 +346,21 @@ int bundle::build_regions()
 		if(s.find(r) == s.end()) s.insert(PI(r, RIGHT_SPLICE));
 		else if(s[r] == LEFT_SPLICE) s[r] = LEFT_RIGHT_SPLICE;
 	}
+	for(int i = 0; i < assigned_transcripts.size(); i++)
+	{
+		PI32 p = assigned_transcripts[i].get_bounds();
+		if(s.find(p.first) == s.end()) s.insert(PI(p.first, START_BOUNDARY));
+		if(s.find(p.second) == s.end()) s.insert(PI(p.second, END_BOUNDARY));
+	}
 
+	/*
 	for(int i = 0; i < pexons.size(); i++)
 	{
 		partial_exon &p = pexons[i];
 		if(s.find(p.lpos) != s.end()) s.insert(PI(p.lpos, p.ltype));
 		if(s.find(p.rpos) != s.end()) s.insert(PI(p.rpos, p.rtype));
 	}
+	*/
 
 	vector<PPI> v(s.begin(), s.end());
 	sort(v.begin(), v.end());
@@ -254,6 +393,7 @@ int bundle::build_partial_exons()
 			partial_exon &pe = r.pexons[k];
 			pe.rid = i;
 			pe.pid = pexons.size();
+			pe.newly_added_length = interval_overlap_length(newly_added_intervals, pe.lpos, pe.rpos);
 			pexons.push_back(pe);
 			if((pe.lpos != bb.lpos || pe.rpos != bb.rpos) && pe.ltype == START_BOUNDARY && pe.rtype == END_BOUNDARY) regional.push_back(true);
 			else regional.push_back(false);
@@ -399,6 +539,98 @@ int bundle::link_partial_exons()
 	return 0;
 }
 
+static bool build_transcript_vertex_path(const vector<partial_exon> &pexons,
+		const transcript &t, vector<int> &path)
+{
+	path.clear();
+	int k = 0;
+	for(int i = 0; i < t.exons.size(); i++)
+	{
+		int32_t p = t.exons[i].first;
+		int32_t q = t.exons[i].second;
+		if(p >= q) return false;
+
+		while(k < pexons.size() && pexons[k].rpos <= p) k++;
+		while(p < q)
+		{
+			if(k >= pexons.size()) return false;
+			if(pexons[k].lpos != p || pexons[k].rpos > q) return false;
+			path.push_back(k + 1);
+			p = pexons[k].rpos;
+			k++;
+		}
+	}
+	return path.size() >= 1;
+}
+
+bool bundle::has_transcript_path(const transcript &t)
+{
+	vector<int> path;
+	if(build_transcript_vertex_path(pexons, t, path) == false) return false;
+	if(gr.edge(0, path.front()).second == false) return false;
+	for(int i = 0; i < path.size(); i++)
+	{
+		if(gr.get_vertex_info(path[i]).type == EMPTY_VERTEX) return false;
+		if(i >= 1 && gr.edge(path[i - 1], path[i]).second == false) return false;
+	}
+	if(gr.edge(path.back(), gr.num_vertices() - 1).second == false) return false;
+	return true;
+}
+
+int bundle::ensure_assigned_transcript_paths()
+{
+	for(int i = 0; i < assigned_transcripts.size(); i++)
+	{
+		const transcript &t = assigned_transcripts[i];
+		vector<int> path;
+		if(build_transcript_vertex_path(pexons, t, path) == false)
+		{
+			printf("error: cannot map assigned transcript %s to bundle partial exons.\n",
+					t.transcript_id.c_str());
+			return 1;
+		}
+
+		for(int k = 0; k < path.size(); k++)
+		{
+			int v = path[k];
+			vertex_info vi = gr.get_vertex_info(v);
+			if(vi.type == EMPTY_VERTEX)
+			{
+				vi.type = 0;
+				gr.set_vertex_info(v, vi);
+			}
+			if(gr.get_vertex_weight(v) < min_guaranteed_edge_weight)
+				gr.set_vertex_weight(v, min_guaranteed_edge_weight);
+		}
+
+		vector<PI> edges;
+		edges.push_back(PI(0, path.front()));
+		for(int k = 1; k < path.size(); k++) edges.push_back(PI(path[k - 1], path[k]));
+		edges.push_back(PI(path.back(), gr.num_vertices() - 1));
+
+		for(int k = 0; k < edges.size(); k++)
+		{
+			int s = edges[k].first;
+			int z = edges[k].second;
+			if(gr.edge(s, z).second == true) continue;
+			edge_descriptor e = gr.add_edge(s, z);
+			gr.set_edge_weight(e, min_guaranteed_edge_weight);
+			edge_info ei;
+			ei.weight = min_guaranteed_edge_weight;
+			ei.strand = t.strand;
+			gr.set_edge_info(e, ei);
+		}
+
+		if(has_transcript_path(t) == false)
+		{
+			printf("error: assigned transcript %s is not a source-to-sink graph path.\n",
+					t.transcript_id.c_str());
+			return 1;
+		}
+	}
+	return 0;
+}
+
 int bundle::build_splice_graph(int mode)
 {
 	gr.clear();
@@ -422,6 +654,7 @@ int bundle::build_splice_graph(int mode)
 		vi.lpos = r.lpos;
 		vi.rpos = r.rpos;
 		vi.length = length;
+		vi.newly_added_length = r.newly_added_length;
 		vi.stddev = r.dev;
 		vi.regional = regional[i];
 		vi.type = pexons[i].type;

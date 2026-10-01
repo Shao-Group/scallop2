@@ -85,7 +85,7 @@ int assembler::assemble()
 		}
 
 		// process
-		process_gnn(batch_bundle_size);
+		if(process_gnn(batch_bundle_size) != 0) return 1;
 
 		//printf("read strand = %c, xs = %c, ts = %c\n", ht.strand, ht.xs, ht.ts);
 
@@ -104,7 +104,7 @@ int assembler::assemble()
 
 	pool.push_back(bb1);
 	pool.push_back(bb2);
-	process_gnn(0);
+	if(process_gnn(0) != 0) return 1;
 	if(write_transcript_bundle_counts() != 0) return 1;
 
 
@@ -175,6 +175,18 @@ int assembler::process_gnn(int n)
 			assigned_transcripts.push_back(id);
 			transcript_bundle_counts[id]++;
 			matches.push_back(m);
+		}
+
+		vector<transcript> assigned_models;
+		for(int k = 0; k < assigned_transcripts.size(); k++)
+		{
+			assigned_models.push_back(tridx.get(assigned_transcripts[k]).trst);
+		}
+		bundle bd(bb, assigned_models);
+		if(bd.build(1, true) != 0)
+		{
+			printf("error: failed to preserve assigned transcripts in bundle splice graph.\n");
+			return 1;
 		}
 
 		int bundle_index = index++;

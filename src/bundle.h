@@ -26,13 +26,14 @@ using namespace std;
 class bundle
 {
 public:
-	bundle(bundle_base &bb);
+	bundle(bundle_base &bb, const vector<transcript> &assigned = vector<transcript>());
 	virtual ~bundle();
 
 public:
 	bundle_base &bb;				// input bundle base	
 	bundle_bridge br;				// contains fragments
 	split_interval_map fmap;		// matched interval map
+	split_interval_map newly_added_intervals;	// assigned-exon intervals missing from fmap
 	vector<junction> junctions;		// splice junctions
 	vector<region> regions;			// regions
 	vector<partial_exon> pexons;	// partial exons
@@ -40,6 +41,7 @@ public:
 	split_interval_map pmap;		// partial exon map
 	splice_graph gr;				// splice graph
 	hyper_set hs;					// hyper set
+	vector<transcript> assigned_transcripts;	// annotation transcripts assigned to this bundle
 
 public:
 	virtual int build(int mode, bool revise);
@@ -67,6 +69,10 @@ public:
 	int build_partial_exons();
 	int link_partial_exons();
 	int build_splice_graph(int mode);
+	int add_assigned_transcript_intervals();
+	int add_assigned_transcript_junctions();
+	int ensure_assigned_transcript_paths();
+	bool has_transcript_path(const transcript &t);
 	int build_partial_exon_map();
 	int locate_left_partial_exon(int32_t x);
 	int locate_right_partial_exon(int32_t x);

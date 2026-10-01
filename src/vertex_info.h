@@ -22,6 +22,7 @@ public:
 	int32_t rpos;		// right position
 	double stddev;		// standard deviation of read coverage
 	int length;			// length of this partial exon
+	int newly_added_length;	// bases supplied only by assigned transcripts
 	int sdist;			// shortest distance to s
 	int tdist;			// shortest distance to t
 	int type;			// for various usage
