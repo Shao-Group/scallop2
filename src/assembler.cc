@@ -150,43 +150,73 @@ int assembler::process_gnn(int n)
 		strcpy(buf, hdr->target_name[bb.tid]);
 		bb.chrm = string(buf);
 
-		bundle bd(bb);
-
-		bd.build(1, true);
-
-		int32_t lpos = bd.gr.get_vertex_info(0).lpos;
-		int32_t rpos = bd.gr.get_vertex_info(bd.gr.num_vertices() - 1).rpos;
-		vector<int> candidates = tridx.query(bd.gr.chrm, bd.gr.strand, lpos, rpos);
-		transcript_matcher matcher(bd.gr);
+		transcript_matcher matcher(bb);
+		vector<int> candidates = tridx.query(matcher.chromosome(), matcher.get_strand(),
+				bb.lpos, bb.rpos);
+		vector<int> assigned_transcripts;
 		vector<transcript_match> matches;
+		vector<int> unassigned_transcripts;
+		vector<transcript_match> unassigned_matches;
 
 		for(int k = 0; k < candidates.size(); k++)
 		{
 			int id = candidates[k];
-			transcript_match m = matcher.match(tridx.get(id), min_bundle_transcript_exon_overlap, min_bundle_transcript_junction_overlap);
-			if(m.assigned == false) continue;
-			bd.assigned_transcripts.push_back(id);
+			transcript_match m = matcher.match(tridx.get(id), min_bundle_transcript_exon_overlap,
+					min_bundle_transcript_splicing_position_overlap);
+			if(m.assigned == false)
+			{
+				if(verbose >= 2)
+				{
+					unassigned_transcripts.push_back(id);
+					unassigned_matches.push_back(m);
+				}
+				continue;
+			}
+			assigned_transcripts.push_back(id);
 			transcript_bundle_counts[id]++;
 			matches.push_back(m);
 		}
 
 		int bundle_index = index++;
-		bd.print(bundle_index);
 		if(verbose >= 1)
 		{
 			printf("bundle %d: candidate-transcripts = %lu, assigned-transcripts = %lu\n",
-					bundle_index, candidates.size(), bd.assigned_transcripts.size());
+					bundle_index, candidates.size(), assigned_transcripts.size());
 		}
 		if(verbose >= 2)
 		{
-			for(int k = 0; k < bd.assigned_transcripts.size(); k++)
+			for(int k = 0; k < assigned_transcripts.size(); k++)
 			{
-				const indexed_transcript &t = tridx.get(bd.assigned_transcripts[k]);
+				const indexed_transcript &t = tridx.get(assigned_transcripts[k]);
 				const transcript_match &m = matches[k];
-				printf("bundle %d: transcript = %s, gene = %s, exonic-overlap = %d/%d, junction-overlap = %d/%d\n",
+				printf("bundle %d: transcript = %s, gene = %s, exonic-overlap = %d/%d, splicing-position-overlap = %d/%d\n",
 						bundle_index, t.trst.transcript_id.c_str(), t.trst.gene_id.c_str(),
 						m.shared_exonic_length, m.transcript_exonic_length,
-						m.shared_junctions, m.transcript_junctions);
+						m.shared_splicing_positions, m.transcript_splicing_positions);
+			}
+			for(int k = 0; k < unassigned_transcripts.size(); k++)
+			{
+				int id = unassigned_transcripts[k];
+				const indexed_transcript &t = tridx.get(id);
+				const transcript_match &m = unassigned_matches[k];
+				double exon_fraction = m.transcript_exonic_length > 0 ?
+					1.0 * m.shared_exonic_length / m.transcript_exonic_length : 0;
+				double splicing_position_fraction = m.transcript_splicing_positions > 0 ?
+					1.0 * m.shared_splicing_positions / m.transcript_splicing_positions : 1;
+
+				printf("bundle %d: unassigned-transcript = %s, transcript-index = %d, gene = %s, region = %s:%d-%d, strand = %c, reason = %s, exonic-overlap = %d/%d (%.6f; required %.6f), splicing-position-overlap = %d/%d (%.6f; required %.6f), exons = ",
+						bundle_index, t.trst.transcript_id.c_str(), id, t.trst.gene_id.c_str(),
+						t.trst.seqname.c_str(), t.bounds.first, t.bounds.second, t.trst.strand,
+						m.failure_reason(), m.shared_exonic_length, m.transcript_exonic_length,
+						exon_fraction, min_bundle_transcript_exon_overlap,
+						m.shared_splicing_positions, m.transcript_splicing_positions,
+						splicing_position_fraction, min_bundle_transcript_splicing_position_overlap);
+				for(int j = 0; j < t.trst.exons.size(); j++)
+				{
+					if(j >= 1) printf(",");
+					printf("[%d,%d)", t.trst.exons[j].first, t.trst.exons[j].second);
+				}
+				printf("\n");
 			}
 		}
 	}

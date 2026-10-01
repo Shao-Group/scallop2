@@ -1,10 +1,10 @@
 # GNN transcript-to-bundle module
 
-Updated: 2026-09-30
+Updated: 2026-10-01
 
 ## Goal
 
-On the `gnn` branch, load annotation transcripts from `-b <annotation.gtf>` and alignments from `-i <alignments.bam>`, build one splice graph for each accepted read bundle, and attach every annotation transcript that satisfies the initial assignment criterion.
+On the `gnn` branch, load annotation transcripts from `-b <annotation.gtf>` and alignments from `-i <alignments.bam>`, and count every read bundle whose covered exons and observed splice positions satisfy the transcript-assignment criterion.
 
 ## Current state
 
@@ -18,22 +18,22 @@ On the `gnn` branch, load annotation transcripts from `-b <annotation.gtf>` and 
 
 1. `main.cc` parses options, previews the BAM, constructs `assembler`, and normally calls `assembler::assemble()`.
 2. `assembler::assemble()` reads BAM records, creates `hit` objects, splits them between plus/minus `bundle_base` instances, and flushes a pool of bundles.
-3. `assembler::process_gnn()` constructs `bundle bd(bb)`, calls `bd.build(1, true)`, queries annotation candidates, assigns matching transcript IDs, and prints diagnostics.
-4. The `bundle` constructor prepares aligned intervals, observed junctions, regions, partial exons, and mappings. `build(1, true)` creates and revises `bd.gr` and builds `bd.hs`.
+3. `assembler::process_gnn()` constructs a `transcript_matcher` directly from each `bundle_base`, queries annotation candidates, evaluates them, updates per-transcript counts, and prints diagnostics. It does not construct a full `bundle` or splice graph.
+4. `transcript_matcher` builds the bundle exon union from `bundle_base::mmap` and collects unique donor/acceptor coordinates from the `int64_t` junction pairs in `hit::spos` as `int32_t` splice positions.
 5. `genome` loads genes/transcripts from GTF. Exons are sorted and adjacent exon records are merged by `gene::shrink()` / `transcript::shrink()`.
 
 All relevant genomic intervals are 0-based and right-open. A GTF exon `start..end` becomes `[start-1,end)`. Bundle bounds, partial exons, graph vertices, and transcript exons can therefore be compared directly.
 
 ## Proposed definitions
 
-For transcript `T` and final revised graph `G`:
+For transcript `T` and read bundle `B`:
 
-- `same_locus`: `T.seqname == G.chrm` and `T.strand == G.strand`.
-- `exon_ratio`: length of `union(T.exons) intersect union(G interior vertex intervals)` divided by `T.length()`.
-- `junction_ratio`: number of exact transcript introns `(exon[i].second, exon[i+1].first)` present among graph splice edges divided by `T.exons.size() - 1`.
-- Assign when `same_locus`, `exon_ratio >= 0.5`, and `junction_ratio >= 0.5` all hold.
+- `same_locus`: `T.seqname == B.chrm` and `T.strand == B.strand`; for an ambiguous bundle strand, the matcher applies the same majority-of-`XS` inference previously used by `bundle::compute_strand()`.
+- `exon_ratio`: length of `union(T.exons) intersect union(B.mmap)` divided by `T.length()`.
+- `splicing_position_ratio`: number of unique transcript donor/acceptor coordinates found among the bundle's observed donor/acceptor coordinates divided by the number of unique transcript donor/acceptor coordinates.
+- Assign when `same_locus`, `exon_ratio >= 0.5`, and `splicing_position_ratio >= 0.5` all hold by default.
 
-At the default 0.5 setting, the comparisons are equivalent to `2 * numerator >= denominator`. Thus one of three junctions is insufficient and two of three pass. A zero-junction transcript passes the junction rule and is decided by exon overlap. Boundary-only contact contributes zero exon bases. Assignment is many-to-many.
+At the default 0.5 setting, a four-exon transcript has six splice positions and needs at least three of them in the bundle. A single-exon transcript has no splice positions, so the splice-position rule is vacuously true and exon overlap decides it. Boundary-only contact contributes zero exon bases. Assignment is many-to-many.
 
 The exact-strand rule means a `.` bundle matches only a `.` transcript. This follows the current wording but may yield no labels for ambiguous bundles in unstranded libraries; confirm or revise this policy when real data exposes the case.
 
@@ -44,18 +44,17 @@ The source-level `transcript_index` component replaces use of `genome::locate_ge
 - Flatten all nonempty loaded transcripts into stable records containing a numeric ID, gene/transcript identity, chromosome, strand, bounds, exons, and precomputed introns/exonic length.
 - Partition records by `(chromosome, strand)`.
 - For each partition, build a Boost split interval map whose codomain is the set of transcript IDs active over a genomic segment. This reuses the repository's `ROI` right-open interval type and does not scan unrelated chromosomes or strands.
-- Query with the graph/bundle half-open span `[lpos,rpos)`. Return numeric record IDs; do exact scoring separately.
+- Query with the bundle half-open span `[lpos,rpos)`. Return numeric record IDs; do exact scoring separately.
 
 This index is built once after the GTF is loaded and remains immutable while BAM bundles stream through `assembler`.
 
 Files:
 
 - `transcript_index.h/.cc`: immutable transcript records and chromosome/strand interval maps.
-- `transcript_match.h/.cc`: final-graph exon/junction extraction and exact criterion scoring.
+- `transcript_match.h/.cc`: `bundle_base` exon/splice-position extraction and exact criterion scoring.
 - `assembler.cc`: one-time index construction and per-bundle candidate assignment.
-- `bundle.h`: public `assigned_transcripts` numeric IDs.
-- `config.h/.cc`: `-b` validation and configurable exon/junction thresholds.
-- `tests/test_transcript_assignment.cc`: focused index, criterion, and graph extraction tests.
+- `config.h/.cc`: `-b` validation and configurable exon/splice-position thresholds.
+- `tests/test_transcript_assignment.cc`: focused index, criterion, and `bundle_base::mmap` extraction tests.
 - `tests/data/transcript_assignment.{sam,gtf}`: end-to-end fixture.
 
 ## Completed implementation
@@ -71,20 +70,20 @@ Files:
    - Exposes `query(chromosome, strand, left, right)` plus a const record accessor.
 
 3. Added an independently testable matcher.
-   - Extracts the union of interior graph vertex intervals, excluding source and sink.
-   - Extracts exact splice-junction pairs from non-contiguous interior graph edges.
-   - Computes exon overlap without double counting and counts exact transcript-junction membership.
+   - Joins the covered intervals in `bundle_base::mmap` into an exon union.
+   - Extracts unique donor and acceptor positions from the junction pairs in bundle hits.
+   - Computes exon overlap without double counting and counts transcript splice-position membership.
    - Returns both the boolean decision and raw counts for debugging and later GNN features.
 
 4. Integrated it at the GNN processing boundary.
    - Builds the index once in `assembler` after loading the GTF.
    - Keeps streaming/batching behavior unchanged, but routes every pool flush through `process_gnn()`, including the final pool.
-   - After `bd.build(1, true)`, queries candidates using `bd.gr.chrm`, `bd.gr.strand`, and graph bounds, runs the matcher, and stores accepted IDs in `bd.assigned_transcripts`.
+   - Queries candidates using bundle chromosome, inferred strand, and bounds, then runs the matcher directly against `bundle_base`.
    - Clears the processed pool in `process_gnn()` to prevent repeated batches.
 
 5. Added deterministic diagnostic output.
    - Verbosity 1 prints candidate and assignment counts per bundle.
-   - Verbosity 2 prints assigned `gene_id`/`transcript_id` and raw exon/junction match counts.
+   - Verbosity 2 prints assigned `gene_id`/`transcript_id` and raw exon/splice-position match counts.
    - Assignment order is stable by transcript numeric ID.
 
 6. Verified with focused synthetic fixtures and an end-to-end run.
@@ -93,26 +92,33 @@ Files:
    - Pipeline: a tiny coordinate-sorted BAM plus GTF proving batch and final flush behavior and deterministic assignments.
    - Force or cleanly rebuild all affected sources; do not accept a no-op `make` against stale objects as validation.
 
-7. Fixed a mixed-build crash in `bundle::assigned_transcripts`.
+7. Fixed a historical mixed-build crash in the former `bundle::assigned_transcripts` field.
    - The existing dependency file for `bundle.cc` was a dummy, so changing `bundle.h` rebuilt `assembler.o` but left an older `bundle.o`; that constructor did not construct the newly added vector.
-   - Explicitly initialized `assigned_transcripts` in `bundle::bundle()`. This both documents the required construction and forces `bundle.cc` to rebuild when the fix is applied.
+   - The field was explicitly initialized at the time; the direct-`bundle_base` refactor later removed it entirely.
 
-8. Added per-transcript bundle/graph assignment counts.
+8. Added per-transcript bundle assignment counts.
    - `assembler` maintains one 64-bit count per stable transcript-index ID and increments it once for each bundle that accepts that transcript.
    - At successful completion, every annotation transcript, including zero-count transcripts, is printed and saved as deterministic TSV.
    - The default output is `<gtf-file>.bundle_counts.tsv`; `--transcript_bundle_count_file <filename>` overrides it.
    - TSV columns are `transcript_index`, `transcript_id`, `gene_id`, `chromosome`, `strand`, and `bundle_count`.
 
+9. Refactored matching to operate directly on `bundle_base`.
+   - Removed splice-graph construction from `process_gnn()` and removed the unused `bundle::assigned_transcripts` field.
+   - Builds the joined exon interval map directly from `bundle_base::mmap`, following `region::build_join_interval_map()` semantics.
+   - Replaced exact `int64_t` junction storage with a set of `int32_t` donor/acceptor positions collected from bundle hits.
+   - Scores the fraction of unique query splice positions present in the bundle; the default threshold is 0.5.
+   - Renamed the option to `--min_bundle_transcript_splicing_position_overlap`; the former junction-named option remains accepted as a compatibility alias.
+
 ## Remaining decisions
 
 - The phrase “share half of the exon regions” could mean half of exon count rather than half of exonic bases. The proposed definition uses exonic bases because it handles partial overlaps and unequal exon lengths predictably.
 - Exact same-strand matching for `.` bundles may be too strict for unstranded libraries. Keep it strict initially as requested and expose counts of skipped ambiguous bundles.
-- Matching against the revised graph makes labels consistent with the actual GNN input, but a true annotation junction removed during revision will count as absent. This is intentional in the proposed design and should be measured.
-- The final GNN tensor/graph serialization is not yet specified. Matching remains independent of serialization; bundle IDs and diagnostic counts are ready for that next layer.
+- Matching now describes direct read-bundle evidence rather than a revised splice graph. If future GNN input uses a revised graph, the relationship between these labels and graph revision should be measured.
+- The final GNN tensor/graph serialization is not yet specified. Matching remains independent of serialization; bundle indices and deterministic transcript counts are available for the next layer.
 
 ## Validation performed
 
-- Focused tests pass for chromosome/strand partitions, boundary-touch non-overlap, multiple candidates, exact 50% exon coverage, below-threshold coverage, one-of-three versus two-of-three junctions, single-exon handling, strand rejection, and extraction from a real `splice_graph` object.
+- Focused tests pass for chromosome/strand partitions, boundary-touch non-overlap, multiple candidates, exact 50% exon coverage, below-threshold coverage, splice-position threshold behavior, single-exon handling, strand rejection, and exon extraction from a `bundle_base` coverage map.
 - Every `src/*.cc` translation unit compiles and the full executable links successfully in a clean temporary directory.
 - End-to-end fixture output: two annotations loaded; the plus-strand bundle fetched one candidate and assigned `t1` with exon overlap `100/100` and junction overlap `1/1`; the minus-strand annotation was excluded.
 - `git diff --check` passes.
@@ -123,4 +129,4 @@ Files:
 
 ## Next session
 
-Start with `git status --short --branch` and read this file plus `skills/scallop2-gnn/SKILL.md`. The transcript assignment module is implemented and validated. The next functional task is to define and add the GNN example serialization that consumes `bundle::assigned_transcripts`.
+Start with `git status --short --branch` and read this file plus `skills/scallop2-gnn/SKILL.md`. The direct `bundle_base` transcript-assignment module is implemented and validated. The next functional task is to define the GNN example serialization and how its labels should reference the matched transcript IDs currently held locally during `process_gnn()`.

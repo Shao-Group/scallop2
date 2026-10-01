@@ -20,7 +20,7 @@ See LICENSE for licensing.
 #include "undirected_graph.h"
 
 bundle::bundle(bundle_base &b)
-	: bb(b), br(b), assigned_transcripts()
+	: bb(b), br(b)
 {
 	br.build();
 	prepare();

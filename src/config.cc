@@ -73,7 +73,7 @@ double max_decompose_error_ratio[7] = {0.33, 0.05, 0.0, 0.25, 0.30, 0.0, 1.1};
 double min_transcript_coverage = 1.5;
 double min_transcript_coverage_ratio = 0.005;
 double min_bundle_transcript_exon_overlap = 0.5;
-double min_bundle_transcript_junction_overlap = 0.5;
+double min_bundle_transcript_splicing_position_overlap = 0.5;
 double min_single_exon_coverage = 20;
 double min_transcript_numreads = 10;
 int min_transcript_length_base = 150;
@@ -319,14 +319,15 @@ int parse_arguments(int argc, const char ** argv)
 			min_bundle_transcript_exon_overlap = atof(argv[i + 1]);
 			i++;
 		}
-		else if(string(argv[i]) == "--min_bundle_transcript_junction_overlap")
+		else if(string(argv[i]) == "--min_bundle_transcript_splicing_position_overlap" ||
+				string(argv[i]) == "--min_bundle_transcript_junction_overlap")
 		{
 			if(i + 1 >= argc)
 			{
-				printf("error: value is missing after --min_bundle_transcript_junction_overlap.\n");
+				printf("error: value is missing after %s.\n", argv[i]);
 				exit(1);
 			}
-			min_bundle_transcript_junction_overlap = atof(argv[i + 1]);
+			min_bundle_transcript_splicing_position_overlap = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_single_exon_coverage")
@@ -536,9 +537,9 @@ int parse_arguments(int argc, const char ** argv)
 		printf("error: --min_bundle_transcript_exon_overlap must be between 0 and 1.\n");
 		exit(1);
 	}
-	if(min_bundle_transcript_junction_overlap < 0 || min_bundle_transcript_junction_overlap > 1)
+	if(min_bundle_transcript_splicing_position_overlap < 0 || min_bundle_transcript_splicing_position_overlap > 1)
 	{
-		printf("error: --min_bundle_transcript_junction_overlap must be between 0 and 1.\n");
+		printf("error: --min_bundle_transcript_splicing_position_overlap must be between 0 and 1.\n");
 		exit(1);
 	}
 
@@ -583,7 +584,7 @@ int print_parameters()
 	printf("min_transcript_coverage = %.2lf\n", min_transcript_coverage);
 	printf("min_transcript_coverage_ratio = %.2lf\n", min_transcript_coverage_ratio);
 	printf("min_bundle_transcript_exon_overlap = %.2lf\n", min_bundle_transcript_exon_overlap);
-	printf("min_bundle_transcript_junction_overlap = %.2lf\n", min_bundle_transcript_junction_overlap);
+	printf("min_bundle_transcript_splicing_position_overlap = %.2lf\n", min_bundle_transcript_splicing_position_overlap);
 	printf("min_single_exon_coverage = %.2lf\n", min_single_exon_coverage);
 	printf("min_transcript_numreads = %.2lf\n", min_transcript_numreads);
 	printf("min_transcript_length_base = %d\n", min_transcript_length_base);
@@ -648,7 +649,7 @@ int print_help()
 	printf(" %-42s  %s\n", "-b <gtf-file>",  "annotation transcripts to assign to splice-graph bundles");
 	printf(" %-42s  %s\n", "--transcript_bundle_count_file <filename>",  "save per-transcript bundle counts, default: <gtf-file>.bundle_counts.tsv");
 	printf(" %-42s  %s\n", "--min_bundle_transcript_exon_overlap <float>",  "minimum fraction of transcript exonic bases shared with a bundle, default: 0.5");
-	printf(" %-42s  %s\n", "--min_bundle_transcript_junction_overlap <float>",  "minimum fraction of transcript junctions shared with a bundle, default: 0.5");
+	printf(" %-52s  %s\n", "--min_bundle_transcript_splicing_position_overlap <float>",  "minimum fraction of transcript splicing positions shared with a bundle, default: 0.5");
 	printf(" %-42s  %s\n", "-f/--transcript_fragments <filename>",  "file to which the assembled non-full-length transcripts will be written to");
 	printf(" %-42s  %s\n", "--library_type <first, second, unstranded>",  "library type of the sample, default: unstranded");
 	printf(" %-42s  %s\n", "--assemble_duplicates <integer>",  "the number of consensus runs of the decomposition, default: 10");

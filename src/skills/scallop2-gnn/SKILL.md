@@ -12,28 +12,27 @@ Preserve user changes. In particular, inspect `git status` before editing and do
 ## Stable codebase facts
 
 - `assembler` streams a coordinate-sorted BAM, forms plus/minus `bundle_base` objects, and processes bundles in batches.
-- `bundle` prepares intervals, junctions, regions, and partial exons in its constructor. `bundle::build(1, true)` builds and revises its `splice_graph` and hyper-set.
+- `process_gnn()` matches transcripts directly against `bundle_base`; it does not construct `bundle` or a splice graph.
 - GTF exon coordinates and BAM/graph coordinates are all 0-based, half-open intervals `[left, right)`. `item::parse()` converts GTF's 1-based inclusive start by decrementing the start only.
-- `bundle_base::{lpos,rpos,strand,chrm}` describe the bundle. After graph construction, `splice_graph::{chrm,strand}` and interior `vertex_info::{lpos,rpos}` describe the graph.
-- A graph splice junction is an edge between interior vertices whose source `rpos` is less than the target `lpos`; adjacent vertices with equal boundaries are contiguous exon pieces, not junctions.
+- `bundle_base::{lpos,rpos,strand,chrm}` describe the bundle, `mmap` contains split covered intervals, and each `hit::spos` entry packs an observed donor/acceptor pair.
 - The library `genome::locate_gene()` linearly scans all genes and returns only the single gene with greatest genomic overlap. It is unsuitable for retrieving all candidate transcripts.
 - `transcript_index` partitions immutable transcript records by chromosome/strand and uses a split interval map with `set<int>` codomains to fetch overlapping IDs.
-- `transcript_matcher` extracts exon unions and exact splice junctions from the final revised graph. `assembler::process_gnn()` writes accepted IDs to `bundle::assigned_transcripts`.
+- `transcript_matcher` joins `bundle_base::mmap` into the bundle exon union and stores unique `int32_t` donor/acceptor positions extracted from `hit::spos`. `assembler::process_gnn()` increments deterministic per-transcript bundle counts for accepted IDs.
 
 ## Assignment semantics
 
 Unless the user revises the criterion, assign a transcript to a bundle only when all are true:
 
-1. Chromosome and strand exactly match the final bundle/graph chromosome and strand.
-2. The union of transcript-exon bases overlapping the union of interior graph-vertex intervals covers at least half of the transcript's exonic length: `2 * shared_exonic_bases >= transcript_exonic_bases`.
-3. At least half of the transcript's exact introns occur as graph splice junctions: `2 * matched_junctions >= transcript_junctions`.
+1. Chromosome and strand exactly match the bundle chromosome and inferred strand.
+2. The union of transcript-exon bases overlapping the joined `bundle_base::mmap` intervals covers at least half of the transcript's exonic length.
+3. At least half of the transcript's unique donor/acceptor positions occur among the bundle's observed splice positions.
 
-Treat the junction condition as vacuously true for a single-exon transcript, so exon overlap decides it. Count union lengths to avoid double counting, and use integer cross-multiplication to avoid threshold rounding ambiguity. Do not consume a transcript after a match: assignment is many-to-many unless the user requests unique ownership.
+Treat the splice-position condition as vacuously true for a single-exon transcript, so exon overlap decides it. Count union lengths and unique positions to avoid double counting. Do not consume a transcript after a match: assignment is many-to-many unless the user requests unique ownership.
 
-Use the final revised graph for exact scoring so labels describe the graph passed to the GNN. Fetch candidates first with a chromosome/strand interval index over transcript genomic bounds, then apply exact exon and junction scoring. Keep thresholds named/configurable even if their initial defaults are both `0.5`.
+Fetch candidates first with a chromosome/strand interval index over transcript genomic bounds, then apply exact exon and splice-position scoring against `bundle_base`. Keep thresholds named/configurable even if their initial defaults are both `0.5`. The splice-position option is `--min_bundle_transcript_splicing_position_overlap`; accept the former junction-named option only as a compatibility alias.
 
 ## Implementation boundaries
 
-Keep indexing and matching separate: the index only narrows candidates by chromosome, strand, and genomic-bound overlap; a matcher computes exact criteria from graph intervals and junctions. Store stable flattened transcript records or stable numeric references rather than pointers into containers that may reallocate.
+Keep indexing and matching separate: the index only narrows candidates by chromosome, strand, and genomic-bound overlap; a matcher computes exact criteria from bundle coverage and splice positions. Store stable flattened transcript records or stable numeric references rather than pointers into containers that may reallocate.
 
-Add focused tests for coordinate conversion, boundary-touch non-overlap, multi-exon union overlap, odd junction counts, single-exon handling, strand/chromosome rejection, and multiple overlapping candidates. Also run a clean or forced rebuild when the parent build tree is writable. In a restricted `src/` workspace, use the compile flags in `src/Makefile` with `g++ -fsyntax-only` for changed translation units and record that full Automake regeneration remains pending.
+Add focused tests for coordinate conversion, boundary-touch non-overlap, multi-exon union overlap, odd splice-position counts, single-exon handling, strand/chromosome rejection, and multiple overlapping candidates. Also run a clean or forced rebuild when the parent build tree is writable. In a restricted `src/` workspace, use the compile flags in `src/Makefile` with `g++ -fsyntax-only` for changed translation units and record that full Automake regeneration remains pending.

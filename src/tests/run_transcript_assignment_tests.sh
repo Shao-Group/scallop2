@@ -16,12 +16,14 @@ include_flags=(
 	-I../lib/gtf
 	-I../lib/graph
 	-I../lib/util
+	-I/home/faculty/mxs2589/shared/tools/htslib/htslib-1.5-install/include
 	-I/home/faculty/mxs2589/shared/tools/boost/boost_1_70_0
 )
 
 sources=(
 	transcript_index.cc
 	transcript_match.cc
+	bundle_base.cc
 	splice_graph.cc
 	vertex_info.cc
 	edge_info.cc

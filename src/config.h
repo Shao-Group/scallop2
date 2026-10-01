@@ -110,7 +110,7 @@ extern double min_guaranteed_edge_weight;
 extern double min_single_exon_coverage;
 extern double min_transcript_coverage_ratio; 
 extern double min_bundle_transcript_exon_overlap;
-extern double min_bundle_transcript_junction_overlap;
+extern double min_bundle_transcript_splicing_position_overlap;
 extern int min_transcript_length_base;
 extern int min_transcript_length_increase;
 extern int min_exon_length;

@@ -70,77 +70,75 @@ int test_matcher()
 	vector<PI32> ge;
 	ge.push_back(PI32(10, 20));
 	ge.push_back(PI32(30, 40));
-	set<int64_t> gj;
-	gj.insert(pack(20, 30));
-	gj.insert(pack(40, 50));
-	transcript_matcher m1("chr1", '+', ge, gj);
+	set<int32_t> gp;
+	gp.insert(20);
+	gp.insert(30);
+	gp.insert(40);
+	gp.insert(50);
+	transcript_matcher m1("chr1", '+', ge, gp);
 	transcript_match x = m1.match(t, 0.5, 0.5);
 	assert(x.assigned == true);
 	assert(x.shared_exonic_length == 20 && x.transcript_exonic_length == 40);
-	assert(x.shared_junctions == 2 && x.transcript_junctions == 3);
+	assert(x.shared_splicing_positions == 4 && x.transcript_splicing_positions == 6);
 
-	gj.erase(pack(40, 50));
-	transcript_matcher m2("chr1", '+', ge, gj);
-	assert(m2.match(t, 0.5, 0.5).assigned == false);
+	gp.erase(40);
+	gp.erase(50);
+	transcript_matcher m2("chr1", '+', ge, gp);
+	transcript_match x2 = m2.match(t, 0.5, 0.5);
+	assert(x2.assigned == false);
+	assert(x2.failure == TRANSCRIPT_INSUFFICIENT_SPLICING_POSITION_OVERLAP);
 
 	ge[1] = PI32(30, 39);
-	gj.insert(pack(40, 50));
-	transcript_matcher m3("chr1", '+', ge, gj);
-	assert(m3.match(t, 0.5, 0.5).assigned == false);
+	gp.insert(40);
+	gp.insert(50);
+	transcript_matcher m3("chr1", '+', ge, gp);
+	transcript_match x3 = m3.match(t, 0.5, 0.5);
+	assert(x3.assigned == false);
+	assert(x3.failure == TRANSCRIPT_INSUFFICIENT_EXON_OVERLAP);
 
-	transcript_matcher m4("chr1", '-', ge, gj);
-	assert(m4.match(t, 0.5, 0.5).assigned == false);
+	transcript_matcher m4("chr1", '-', ge, gp);
+	transcript_match x4 = m4.match(t, 0.5, 0.5);
+	assert(x4.assigned == false);
+	assert(x4.failure == TRANSCRIPT_STRAND_MISMATCH);
 
 	vector<PI32> se;
 	se.push_back(PI32(100, 110));
 	indexed_transcript single(build_transcript("chr1", '+', "g1", "single", se));
 	vector<PI32> half;
 	half.push_back(PI32(100, 105));
-	set<int64_t> empty;
+	set<int32_t> empty;
 	transcript_matcher m5("chr1", '+', half, empty);
 	assert(m5.match(single, 0.5, 0.5).assigned == true);
 
 	half[0] = PI32(110, 120);
 	transcript_matcher m6("chr1", '+', half, empty);
-	assert(m6.match(single, 0.5, 0.5).assigned == false);
+	transcript_match x6 = m6.match(single, 0.5, 0.5);
+	assert(x6.assigned == false);
+	assert(x6.failure == TRANSCRIPT_INSUFFICIENT_EXON_OVERLAP);
 	return 0;
 }
 
-int test_graph_matcher()
+int test_bundle_matcher()
 {
-	splice_graph gr;
-	gr.chrm = "chr1";
-	gr.strand = '+';
-
-	for(int i = 0; i < 4; i++) gr.add_vertex();
-	vertex_info v0;
-	v0.lpos = v0.rpos = 10;
-	gr.set_vertex_info(0, v0);
-	vertex_info v1;
-	v1.lpos = 10;
-	v1.rpos = 20;
-	gr.set_vertex_info(1, v1);
-	vertex_info v2;
-	v2.lpos = 30;
-	v2.rpos = 40;
-	gr.set_vertex_info(2, v2);
-	vertex_info v3;
-	v3.lpos = v3.rpos = 40;
-	gr.set_vertex_info(3, v3);
-
-	gr.add_edge(0, 1);
-	gr.add_edge(1, 2);
-	gr.add_edge(2, 3);
+	bundle_base bb;
+	bb.chrm = "chr1";
+	bb.strand = '+';
+	bb.lpos = 10;
+	bb.rpos = 40;
+	bb.mmap += make_pair(ROI(10, 15), 1);
+	bb.mmap += make_pair(ROI(15, 20), 2);
+	bb.mmap += make_pair(ROI(30, 40), 1);
 
 	vector<PI32> te;
 	te.push_back(PI32(10, 20));
 	te.push_back(PI32(30, 40));
 	indexed_transcript t(build_transcript("chr1", '+', "g1", "t0", te));
-	transcript_matcher matcher(gr);
-	transcript_match m = matcher.match(t, 0.5, 0.5);
+	transcript_matcher matcher(bb);
+	transcript_match m = matcher.match(t, 0.5, 0.0);
+	assert(matcher.chromosome() == "chr1" && matcher.get_strand() == '+');
 	assert(m.assigned == true);
 	assert(m.shared_exonic_length == 20);
-	assert(m.shared_junctions == 1);
+	assert(m.shared_splicing_positions == 0 && m.transcript_splicing_positions == 2);
 	return 0;
 }
 
@@ -148,7 +146,7 @@ int main()
 {
 	test_index();
 	test_matcher();
-	test_graph_matcher();
+	test_bundle_matcher();
 	printf("transcript assignment tests passed\n");
 	return 0;
 }
