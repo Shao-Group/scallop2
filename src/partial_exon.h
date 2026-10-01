@@ -33,8 +33,6 @@ public:
 	int newly_added_length;			// bases supplied only by assigned transcripts
 
 public:
-	string label() const;
-	int print(int index) const;
 };
 
 #endif

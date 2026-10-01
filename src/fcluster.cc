@@ -43,28 +43,6 @@ const vector<int> & fcluster::get_vlist() const
 	assert(false);
 }
 
-int fcluster::print(int index) const
-{
-	if(verbose < 2) return 0;
-
-	printf("fcluster %d: type = %d, #fragments = %lu, #phase = %lu, ", index, type, fset.size(), phase.size());
-
-	printf("  v1 = ( ");
-	printv(v1);
-	printf("), v2 = ( ");
-	printv(v2);
-	printf(")\n");
-
-	for(int k = 0; k < phase.size(); k++)
-	{
-		printf("  count = %d, phase %d = (", count[k], k);
-		printv(phase[k]);
-		printf(")\n");
-	}
-
-	return 0;
-}
-
 bool compare_fcluster(const fcluster &fx, const fcluster &fy)
 {
 	const vector<int> &vx = fx.get_vlist();

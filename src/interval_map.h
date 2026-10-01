@@ -43,9 +43,6 @@ SIMI locate_left_iterator(const split_interval_map &imap, int32_t x);
 // locate boundary iterators
 PSIMI locate_boundary_iterators(const split_interval_map &imap, int32_t x, int32_t y);
 
-// return the sum of the lengths of intervals from p to q (include q)
-int compute_coverage(const split_interval_map &imap, SIMI &p, SIMI &q);
-
 // return the maximum overlap of the intervals from p to q (include q)
 int compute_max_overlap(const split_interval_map &imap, SIMI &p, SIMI &q);
 
@@ -54,9 +51,5 @@ int compute_sum_overlap(const split_interval_map &imap, SIMI &p, SIMI &q);
 
 // evaluate a region
 int evaluate_rectangle(const split_interval_map &imap, int ll, int rr, double &ave, double &dev, double &max);
-int evaluate_triangle(const split_interval_map &imap, int ll, int rr, double &ave, double &dev);
-
-// testing
-int test_split_interval_map();
 
 #endif

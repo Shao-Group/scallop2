@@ -68,21 +68,6 @@ int path::print_bridge(int index) const
 	return 0;
 }
 
-vector<int> path::index(int n) const
-{
-	vector<int> vv;
-	vv.resize(n, -1);
-	for(int i = 1; i < v.size(); i++)
-	{
-		int s = v[i - 1];
-		int t = v[i];
-		assert(s >= 0 && s < n);
-		assert(t >= 0 && t < n);
-		vv[s] = t;
-	}
-	return vv;
-}
-
 bool compare_path_abundance(const path &p1, const path &p2)
 {
 	if(p1.abd > p2.abd) return true;

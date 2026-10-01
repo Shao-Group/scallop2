@@ -17,8 +17,6 @@ See LICENSE for licensing.
 #include "partial_exon.h"
 #include "splice_graph.h"
 #include "hyper_set.h"
-#include "path.h"
-#include "gene.h"
 #include "transcript.h"
 
 using namespace std;
@@ -45,26 +43,15 @@ public:
 
 public:
 	virtual int build(int mode, bool revise);
-	int output_transcripts(ofstream &fout, const vector<path> &p, const string &gid) const;	
-	int output_transcripts(gene &gn, const vector<path> &p, const string &gid) const;	
-	int output_transcripts(vector<transcript> &trsts, const vector<path> &p, const string &gid) const;	
-	int output_transcript(ofstream &fout, const path &p, const string &gid, const string &tid) const;	
-	int output_transcript(transcript &trst, const path &p, const string &gid, const string &tid) const;	
-	int count_junctions() const;
-	int print(int index);
 
 public:
 	int prepare();
 
-	// check and init
-	int check_left_ascending();
-	int check_right_ascending();
 	int compute_strand();
 
 	// splice graph
 	int build_intervals();
 	int build_junctions();
-	int correct_junctions();
 	int build_regions();
 	int build_partial_exons();
 	int link_partial_exons();
@@ -93,7 +80,6 @@ public:
 	bool remove_intron_contamination();
 	bool remove_false_boundaries();
 	bool tackle_false_boundaries();
-	int find_contamination_chain();
 
 	// hyper set
 	int build_hyper_set();

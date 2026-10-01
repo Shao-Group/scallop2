@@ -48,7 +48,6 @@ public:
 
 public:
 	int bridge();
-	int print();
 
 public:
 	int bridge_overlapped_fragments();

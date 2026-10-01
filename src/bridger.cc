@@ -508,6 +508,7 @@ int bridger::bridge_hard_fragments()
 	cluster_open_fragments(open);
 	sort(open.begin(), open.end(), compare_fcluster_v1_v2);
 
+	/*
 	// print open clusters
 	if(verbose >= 2)
 	{
@@ -517,7 +518,6 @@ int bridger::bridge_hard_fragments()
 		}
 	}
 
-	/*
 	printf("print pnode bridge...\n");
 	for(int k = 0; k < bd->regions.size(); k++) bd->regions[k].print(k);
 	for(int k = 0; k < pnodes.size(); k++) pnodes[k].print_bridge(k);
@@ -728,10 +728,12 @@ int bridger::bridge_tough_fragments()
 	cluster_open_fragments(open);
 	sort(open.begin(), open.end(), compare_fcluster_v1_v2);
 
+	/*
 	for(int k = 0; k < open.size(); k++)
 	{
 		open[k].print(k);
 	}
+	*/
 
 	vector<PI> open_indices;
 	vector< set<int> > affected(pnodes.size());
@@ -1694,60 +1696,6 @@ vector<int> bridger::get_bridged_fragments_type()
 
 	}
 	return ct;
-}
-
-int bridger::print()
-{
-	int n = 0;
-	/*
-	for(int k = 0; k < fclusters.size(); k++)
-	{
-		n += fclusters[k].fset.size();
-	}
-	printf("#fragments = %lu, #open-fragments = %d, #fclusters = %lu\n", bd->fragments.size(), n, fclusters.size());
-	*/
-
-	for(int k = 0; k < bd->fragments.size(); k++)
-	{
-		if(bd->fragments[k].paths.size() == 1) n++;
-	}
-
-	int total = bd->fragments.size();
-	int remain = total - n;
-	double ratio = n * 100.0 / total;
-
-	printf("#fragments = %d, #fixed = %d, #remain = %d, ratio = %.1lf, length = (%d, %d, %d)\n", total, n, remain, ratio, length_low, length_median, length_high);
-
-	//for(int k = 0; k < fclusters.size(); k++) fclusters[k].print(k);
-	return 0;
-}
-
-bool compare_fragment_v1(fragment *f1, fragment *f2)
-{
-	if(f1->h1->vlist.size() < f2->h1->vlist.size()) return true;
-	if(f1->h1->vlist.size() > f2->h1->vlist.size()) return false;
-
-	for(int k = 0; k < f1->h1->vlist.size(); k++)
-	{
-		if(f1->h1->vlist[k] < f2->h1->vlist[k]) return true;
-		if(f1->h1->vlist[k] > f2->h1->vlist[k]) return false;
-	}
-
-	return (f1->lpos < f2->lpos);
-}
-
-bool compare_fragment_v2(fragment *f1, fragment *f2)
-{
-	if(f1->h2->vlist.size() < f2->h2->vlist.size()) return true;
-	if(f1->h2->vlist.size() > f2->h2->vlist.size()) return false;
-
-	for(int k = 0; k < f1->h2->vlist.size(); k++)
-	{
-		if(f1->h2->vlist[k] < f2->h2->vlist[k]) return true;
-		if(f1->h2->vlist[k] > f2->h2->vlist[k]) return false;
-	}
-
-	return (f1->lpos < f2->lpos);
 }
 
 bool compare_fragment_v3(fragment *f1, fragment *f2)

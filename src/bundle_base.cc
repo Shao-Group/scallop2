@@ -78,13 +78,6 @@ int bundle_base::add_hit(const hit &ht)
 	return 0;
 }
 
-bool bundle_base::overlap(const hit &ht) const
-{
-	if(mmap.find(ROI(ht.pos, ht.pos + 1)) != mmap.end()) return true;
-	if(mmap.find(ROI(ht.rpos - 1, ht.rpos)) != mmap.end()) return true;
-	return false;
-}
-
 int bundle_base::clear()
 {
 	tid = -1;
@@ -97,4 +90,3 @@ int bundle_base::clear()
 	imap.clear();
 	return 0;
 }
-

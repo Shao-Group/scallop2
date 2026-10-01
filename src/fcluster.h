@@ -26,7 +26,6 @@ public:
 
 public:
 	int clear();
-	int print(int k) const;
 	int add_phase(const vector<int> &v);
 	const vector<int> & get_vlist() const;
 };

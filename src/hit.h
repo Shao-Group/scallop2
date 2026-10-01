@@ -70,7 +70,6 @@ public:
 	vector<int64_t> itvi;					// insert interval
 	vector<int64_t> itvd;					// delete interval
 
-	bool concordant;						// whether it is concordant
 	bool paired;							// whether this hit has been paired
 	bool bridged;							// whether this hit has been bridged 
 	char strand;							// strandness
@@ -88,7 +87,6 @@ public:
  	static string get_qname(bam1_t *b);
 	int set_tags(bam1_t *b);
 	int set_strand();
-	int set_concordance();
 	int get_aligned_intervals(vector<int64_t> &v) const;
 	int print() const;
 };

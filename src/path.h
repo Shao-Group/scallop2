@@ -44,7 +44,6 @@ public:
 	int clear();
 	int print(int index) const;
 	int print_bridge(int index) const;
-	vector<int> index(int n) const;
 };
 
 bool compare_path_abundance(const path &p1, const path &p2);

@@ -711,40 +711,6 @@ int bundle_bridge::build_fragments()
 	return 0;
 }
 
-int bundle_bridge::group_fragments()
-{
-	if(fragments.size() == 0) return 0;
-
-	sort(fragments.begin(), fragments.end(), compare_fragment);
-
-	vector<fragment> ff;
-
-	fragment fx = fragments[0];
-	assert(fx.h1->vlist.size() >= 1);
-	assert(fx.h2->vlist.size() >= 1);
-	for(int k = 1; k < fragments.size(); k++)
-	{
-		fragment &fr = fragments[k];
-		assert(fr.h1->vlist.size() >= 1);
-		assert(fr.h2->vlist.size() >= 1);
-
-		if(fx.equal(fr) == true)
-		{
-			fx.append(fr);
-		}
-		else
-		{
-			ff.push_back(fx);
-			fx = fr;
-		}
-	}
-	ff.push_back(fx);
-	fragments = ff;
-
-	//printf("grouped fragments = %lu\n", fragments.size());
-	return 0;
-}
-
 int32_t bundle_bridge::compute_aligned_length(int32_t k1l, int32_t k2r, const vector<int>& v)
 {
 	if(v.size() == 0) return 0;
@@ -755,61 +721,6 @@ int32_t bundle_bridge::compute_aligned_length(int32_t k1l, int32_t k2r, const ve
 		flen += regions[k].rpos - regions[k].lpos;
 	}
 	return flen - k1l - k2r;
-}
-
-int bundle_bridge::print(int index)
-{
-	printf("Bundle %d: ", index);
-
-	// statistic xs
-	int n0 = 0, np = 0, nq = 0;
-	for(int i = 0; i < bb.hits.size(); i++)
-	{
-		if(bb.hits[i].xs == '.') n0++;
-		if(bb.hits[i].xs == '+') np++;
-		if(bb.hits[i].xs == '-') nq++;
-	}
-
-	printf("tid = %d, #hits = %lu, #fragments = %lu, #ref-trsts = %lu, range = %s:%d-%d, orient = %c (%d, %d, %d)\n",
-			bb.tid, bb.hits.size(), fragments.size(), ref_trsts.size(), bb.chrm.c_str(), bb.lpos, bb.rpos, bb.strand, n0, np, nq);
-
-	// print ref-trsts
-	//for(int k = 0; k < ref_trsts.size(); k++) ref_trsts[k].write(cout);
-
-	// print fragments 
-	//for(int i = 0; i < fragments.size(); i++) fragments[i].print(i);
-
-	/*
-	// print fclusters
-	for(int i = 0; i < fclusters.size(); i++) fclusters[i].print(i);
-	*/
-
-	if(verbose <= 1) return 0;
-
-	// print junctions 
-	for(int i = 0; i < junctions.size(); i++)
-	{
-		junctions[i].print(bb.chrm, i);
-	}
-
-	// print bb.hits
-	for(int i = 0; i < bb.hits.size(); i++) bb.hits[i].print();
-
-	// print regions
-	for(int i = 0; i < regions.size(); i++)
-	{
-		regions[i].print(i);
-	}
-
-	// print junctions 
-	for(int i = 0; i < junctions.size(); i++)
-	{
-		junctions[i].print(bb.chrm, i);
-	}
-
-	printf("\n");
-
-	return 0;
 }
 
 vector<int32_t> bundle_bridge::build_accumulate_length(const vector<int> &v)

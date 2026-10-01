@@ -37,7 +37,6 @@ public:
 
 public:
 	int build();
-	int print(int index);
 	int32_t compute_aligned_length(int32_t k1l, int32_t k2r, const vector<int>& v);
 	vector<int32_t> build_accumulate_length(const vector<int> &v);
 	vector<int32_t> get_aligned_intervals(fragment &fr);
@@ -49,7 +48,6 @@ public:
 	int build_regions();
 
 	int build_fragments();
-	int group_fragments();
 
 	int align_hits_transcripts();
 	int align_hit(const map<int32_t, int> &m, const hit &h, vector<int> &v);

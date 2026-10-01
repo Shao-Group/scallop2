@@ -12,10 +12,6 @@ See LICENSE for licensing.
 #include <fstream>
 #include <string>
 #include "bundle_base.h"
-#include "transcript.h"
-#include "splice_graph.h"
-#include "hyper_set.h"
-#include "transcript_set.h"
 #include "genome.h"
 #include "transcript_index.h"
 
@@ -37,28 +33,15 @@ private:
 
 	genome gm;			// for gtf genome (-b)
 	transcript_index tridx;		// annotation transcript index
-	vector<int64_t> transcript_bundle_counts;
 
 	int hid;
 	int index;
-	bool terminate;
-	int qcnt;
-	double qlen;
-	vector<transcript> trsts;
-	vector<transcript> non_full_trsts;
 
 public:
 	int assemble();
 
 private:
-	int process(int n);
 	int process_gnn(int n);
-	int write_transcript_bundle_counts() const;
-	int assemble(const splice_graph &gr, const hyper_set &hs, transcript_set &ts1, transcript_set &ts2);
-	int assign_RPKM();
-	int write();
-	int compare(splice_graph &gr, const string &ref, const string &tex = "");
-	bool determine_regional_graph(splice_graph &gr);
 };
 
 #endif

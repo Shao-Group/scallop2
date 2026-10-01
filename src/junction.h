@@ -35,7 +35,6 @@ public:
 	int rregion;		// region index corresponds to rpos
 
 public:
-	int print(const string &chrm, int index) const;
 };
 
 bool junction_cmp_length(const junction &x, const junction &y);

@@ -58,13 +58,6 @@ bool junction::operator<(const junction &x) const
 	else return false;
 }
 
-int junction::print(const string &chrm, int index) const
-{
-	printf("junction %d: region = %s:%d-%d, region = %d -> %d, pexon = %d -> %d, length = %d, count = %d, strand = %c, nm = %d\n", 
-			index, chrm.c_str(), lpos, rpos, lregion, rregion, lexon, rexon, rpos - lpos, count, strand, nm);
-	return 0;
-}
-
 bool junction_cmp_length(const junction &x, const junction &y)
 {
 	int32_t p1 = x.rpos - x.lpos;
