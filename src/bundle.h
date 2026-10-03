@@ -60,6 +60,7 @@ public:
 	int add_assigned_transcript_junctions();
 	int ensure_assigned_transcript_paths();
 	bool has_transcript_path(const transcript &t);
+	bool get_transcript_path(const transcript &t, vector<int> &path) const;
 	int build_partial_exon_map();
 	int locate_left_partial_exon(int32_t x);
 	int locate_right_partial_exon(int32_t x);

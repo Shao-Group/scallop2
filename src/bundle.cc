@@ -577,6 +577,11 @@ bool bundle::has_transcript_path(const transcript &t)
 	return true;
 }
 
+bool bundle::get_transcript_path(const transcript &t, vector<int> &path) const
+{
+	return build_transcript_vertex_path(pexons, t, path);
+}
+
 int bundle::ensure_assigned_transcript_paths()
 {
 	for(int i = 0; i < assigned_transcripts.size(); i++)

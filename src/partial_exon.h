@@ -31,6 +31,10 @@ public:
 	double max;						// maximum abundance
 	double dev;						// standard-deviation of abundance
 	int newly_added_length;			// bases supplied only by assigned transcripts
+	double indel_sum_cov;			// summed insertion/deletion coverage
+	double indel_ratio;				// indel coverage divided by exon coverage
+	int left_indel;					// distance to the nearest indel from the left
+	int right_indel;					// distance to the nearest indel from the right
 
 public:
 };

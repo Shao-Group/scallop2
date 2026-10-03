@@ -29,6 +29,28 @@ region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split
 	smooth_join_interval_map();
 	//split_join_interval_map();
 	build_partial_exons();
+	build_indel_coverage();
+}
+
+int region::build_indel_coverage()
+{
+	if(imap == NULL) return 0;
+	for(int i = 0; i < pexons.size(); i++)
+	{
+		partial_exon &p = pexons[i];
+		PSIMI x = locate_boundary_iterators(*imap, p.lpos, p.rpos);
+		SIMI first = x.first, last = x.second;
+		if(first == imap->end() || last == imap->end()) continue;
+
+		p.indel_sum_cov = compute_sum_overlap(*imap, first, last);
+		double denominator = p.ave * (p.rpos - p.lpos);
+		p.indel_ratio = denominator > 0 ? p.indel_sum_cov / denominator : 0;
+		int32_t left = std::max(p.lpos, lower(first->first));
+		int32_t right = std::min(p.rpos, upper(last->first));
+		p.left_indel = left - p.lpos;
+		p.right_indel = p.rpos - right;
+	}
+	return 0;
 }
 
 region::~region()

@@ -17,7 +17,7 @@ See LICENSE for licensing.
 #include "transcript_match.h"
 
 assembler::assembler()
-	: gm(gtf_file), tridx(gm)
+	: gm(gtf_file), tridx(gm), features(feature_prefix, feature_sample)
 {
     sfn = sam_open(input_file.c_str(), "r");
     hdr = sam_hdr_read(sfn);
@@ -26,6 +26,11 @@ assembler::assembler()
 	index = 0;
 
 	if(verbose >= 1) printf("loaded %d annotation transcripts\n", tridx.size());
+	if(features.good() == false)
+	{
+		printf("error: cannot create feature files with prefix %s.\n", feature_prefix.c_str());
+		exit(1);
+	}
 }
 
 assembler::~assembler()
@@ -148,6 +153,11 @@ int assembler::process_gnn(int n)
 		}
 
 		int bundle_index = index++;
+		if(features.write_bundle(bd, bundle_index) != 0)
+		{
+			printf("error: failed to write features for bundle %d.\n", bundle_index);
+			return 1;
+		}
 		if(verbose >= 1)
 		{
 			printf("bundle %d: candidate-transcripts = %lu, assigned-transcripts = %lu\n",

@@ -131,6 +131,8 @@ extern string ref_file2;
 extern string output_file;
 extern string output_file1;
 extern string transcript_bundle_count_file;
+extern string feature_prefix;
+extern string feature_sample;
 
 // for controling
 extern bool output_tex_files;

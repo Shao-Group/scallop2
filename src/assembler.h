@@ -14,6 +14,7 @@ See LICENSE for licensing.
 #include "bundle_base.h"
 #include "genome.h"
 #include "transcript_index.h"
+#include "feature_writer.h"
 
 using namespace std;
 
@@ -33,6 +34,7 @@ private:
 
 	genome gm;			// for gtf genome (-b)
 	transcript_index tridx;		// annotation transcript index
+	feature_writer features;		// streaming single-sample feature output
 
 	int hid;
 	int index;

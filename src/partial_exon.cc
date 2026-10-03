@@ -15,4 +15,11 @@ partial_exon::partial_exon(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype)
 	rid = -1;
 	pid = -1;
 	newly_added_length = 0;
+	ave = 0;
+	max = 0;
+	dev = 1;
+	indel_sum_cov = 0;
+	indel_ratio = 0;
+	left_indel = -1;
+	right_indel = -1;
 }

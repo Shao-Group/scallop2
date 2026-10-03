@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cmath>
 #include <cstdio>
 
 #include "bundle.h"
@@ -96,6 +97,7 @@ int main()
 	bb.rpos = 320;
 	bb.mmap += make_pair(ROI(100, 150), 5);
 	bb.mmap += make_pair(ROI(200, 225), 5);
+	bb.imap += make_pair(ROI(110, 115), 2);
 
 	transcript t = make_assigned_transcript();
 	transcript nested = make_nested_transcript();
@@ -130,6 +132,18 @@ int main()
 			found_nested_end = true;
 	}
 	assert(found_nested_start && found_nested_end);
+	bool found_indel_features = false;
+	for(int i = 0; i < bd.pexons.size(); i++)
+	{
+		const partial_exon &pe = bd.pexons[i];
+		if(pe.lpos != 100 || pe.rpos != 150) continue;
+		assert(pe.indel_sum_cov == 10);
+		assert(fabs(pe.indel_ratio - 0.20) < 1e-9);
+		assert(pe.left_indel == 10);
+		assert(pe.right_indel == 35);
+		found_indel_features = true;
+	}
+	assert(found_indel_features);
 	assert(bd.build(1, true) == 0);
 	assert(bd.has_transcript_path(t));
 	assert(bd.has_transcript_path(nested));

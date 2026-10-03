@@ -1,6 +1,6 @@
 # GNN transcript-to-bundle module
 
-Updated: 2026-10-01
+Updated: 2026-10-03
 
 ## Goal
 
@@ -117,12 +117,19 @@ Files:
    - The newly added interval union is retained on `bundle`, and every partial exon and corresponding graph vertex records the number of newly added bases it contains.
    - After graph revision, missing source, contiguous-exon, junction, and sink edges are restored at minimum weight, vertices on assigned paths are retained, and every assigned transcript is explicitly validated as a source-to-sink path.
 
+11. Added single-sample feature serialization.
+   - `feature_writer.h/.cc` streams Aletsch-compatible node, edge, phasing-path, and input-transcript-path CSV files after the final graph has been revised and assigned paths restored.
+   - `--feature_prefix <prefix>` selects the four output paths; by default the input BAM name without `.bam` is used. `--feature_sample <name>` controls the sample column and defaults to the prefix basename.
+   - Node features include graph weight, original maximum coverage, coverage standard deviation, and insertion/deletion coverage statistics. Edge features include final edge weight and assigned-transcript support.
+   - Phasing paths come from the final bundle hyper-set and use Aletsch's large-graph downsampling rule. Transcript rows retain the GTF transcript ID in `path_id`, GTF coverage as abundance, and `label=-1` because `-i`/`-b` do not provide truth labels.
+   - Graph-local node IDs are zero-based in all four files, source/sink vertices and their edges are omitted, and GTF-facing genomic coordinates are one-based inclusive as in the Aletsch files.
+
 ## Remaining decisions
 
 - The phrase “share half of the exon regions” could mean half of exon count rather than half of exonic bases. The proposed definition uses exonic bases because it handles partial overlaps and unequal exon lengths predictably.
 - Exact same-strand matching for `.` bundles may be too strict for unstranded libraries. Keep it strict initially as requested and expose counts of skipped ambiguous bundles.
 - Matching describes direct read-bundle evidence, while assigned transcripts are subsequently guaranteed as paths in the revised graph. The per-vertex `newly_added_length` field now explicitly identifies annotation-supplied exon bases for downstream GNN serialization.
-- The final GNN tensor/graph serialization is not yet specified. Matching remains independent of serialization; bundle indices and deterministic transcript counts are available for the next layer.
+- The four CSV feature tables are now available. Any conversion of these tables into framework-specific tensors remains a separate downstream layer.
 
 ## Validation performed
 

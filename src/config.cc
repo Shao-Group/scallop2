@@ -100,6 +100,8 @@ string ref_file2;
 string output_file;
 string output_file1;
 string transcript_bundle_count_file;
+string feature_prefix;
+string feature_sample;
 
 // for controling
 bool output_tex_files = false;
@@ -163,6 +165,24 @@ int parse_arguments(int argc, const char ** argv)
 			}
 			transcript_bundle_count_file = string(argv[i + 1]);
 			i++;
+		}
+		else if(string(argv[i]) == "--feature_prefix")
+		{
+			if(i + 1 >= argc)
+			{
+				printf("error: prefix is missing after --feature_prefix.\n");
+				exit(1);
+			}
+			feature_prefix = string(argv[++i]);
+		}
+		else if(string(argv[i]) == "--feature_sample")
+		{
+			if(i + 1 >= argc)
+			{
+				printf("error: sample name is missing after --feature_sample.\n");
+				exit(1);
+			}
+			feature_sample = string(argv[++i]);
 		}
 
 		// internal use
@@ -531,6 +551,18 @@ int parse_arguments(int argc, const char ** argv)
 	{
 		transcript_bundle_count_file = gtf_file + ".bundle_counts.tsv";
 	}
+	if(feature_prefix == "")
+	{
+		feature_prefix = input_file;
+		if(feature_prefix.size() >= 4 && feature_prefix.substr(feature_prefix.size() - 4) == ".bam")
+			feature_prefix.resize(feature_prefix.size() - 4);
+	}
+	if(feature_sample == "")
+	{
+		feature_sample = feature_prefix;
+		size_t p = feature_sample.find_last_of("/\\");
+		if(p != string::npos) feature_sample = feature_sample.substr(p + 1);
+	}
 
 	if(min_bundle_transcript_exon_overlap < 0 || min_bundle_transcript_exon_overlap > 1)
 	{
@@ -610,6 +642,8 @@ int print_parameters()
 	printf("output_file = %s\n", output_file.c_str());
 	printf("output_file1 = %s\n", output_file1.c_str());
 	printf("transcript_bundle_count_file = %s\n", transcript_bundle_count_file.c_str());
+	printf("feature_prefix = %s\n", feature_prefix.c_str());
+	printf("feature_sample = %s\n", feature_sample.c_str());
 
 	// for controling
 	printf("library_type = %d\n", library_type);
@@ -648,6 +682,8 @@ int print_help()
 	printf(" %-42s  %s\n", "--verbose <0, 1, 2>",  "0: quiet; 1: one line for each graph; 2: with details, default: 1");
 	printf(" %-42s  %s\n", "-b <gtf-file>",  "annotation transcripts to assign to splice-graph bundles");
 	printf(" %-42s  %s\n", "--transcript_bundle_count_file <filename>",  "save per-transcript bundle counts, default: <gtf-file>.bundle_counts.tsv");
+	printf(" %-42s  %s\n", "--feature_prefix <prefix>",  "write <prefix>.node.csv, .edge.csv, .phasing.csv, and .path.label.csv; default: input BAM without .bam");
+	printf(" %-42s  %s\n", "--feature_sample <name>",  "sample column value in feature CSV files; default: feature-prefix basename");
 	printf(" %-42s  %s\n", "--min_bundle_transcript_exon_overlap <float>",  "minimum fraction of transcript exonic bases shared with a bundle, default: 0.5");
 	printf(" %-52s  %s\n", "--min_bundle_transcript_splicing_position_overlap <float>",  "minimum fraction of transcript splicing positions shared with a bundle, default: 0.5");
 	printf(" %-42s  %s\n", "-f/--transcript_fragments <filename>",  "file to which the assembled non-full-length transcripts will be written to");
