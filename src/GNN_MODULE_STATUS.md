@@ -97,10 +97,10 @@ Files:
    - The field was explicitly initialized at the time; the direct-`bundle_base` refactor later removed it entirely.
 
 8. Added per-transcript bundle assignment counts.
-   - `assembler` maintains one 64-bit count per stable transcript-index ID and increments it once for each bundle that accepts that transcript.
-   - At successful completion, every annotation transcript, including zero-count transcripts, is printed and saved as deterministic TSV.
+   - `assembler` maintains candidate and assigned 64-bit counts per stable transcript-index ID and increments them once for each bundle that queries or accepts that transcript, respectively.
+   - At successful completion, every annotation transcript, including zero-count transcripts, is printed when verbosity is at least 1 and saved as deterministic TSV.
    - The default output is `<gtf-file>.bundle_counts.tsv`; `--transcript_bundle_count_file <filename>` overrides it.
-   - TSV columns are `transcript_index`, `transcript_id`, `gene_id`, `chromosome`, `strand`, and `bundle_count`.
+   - TSV columns are `transcript_index`, `transcript_id`, `gene_id`, `chromosome`, `strand`, `candidate_bundle_count`, and `assigned_bundle_count`.
 
 9. Refactored matching to operate directly on `bundle_base`.
    - Removed splice-graph construction from `process_gnn()` and removed the unused `bundle::assigned_transcripts` field.

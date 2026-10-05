@@ -24,6 +24,8 @@ assembler::assembler()
     b1t = bam_init1();
 	hid = 0;
 	index = 0;
+	transcript_candidate_bundle_counts.assign(tridx.size(), 0);
+	transcript_assigned_bundle_counts.assign(tridx.size(), 0);
 
 	if(verbose >= 1) printf("loaded %d annotation transcripts\n", tridx.size());
 	if(features.good() == false)
@@ -56,6 +58,8 @@ int assembler::assemble()
 		hit ht(b1t, hid++);
 		ht.set_tags(b1t);
 		ht.set_strand();
+
+		//printf("bb1: %d-%d, bb2: %d-%d, ", bb1.lpos, bb1.rpos, bb2.lpos, bb2.rpos);
 		//ht.print();
 
 		//if(ht.nh >= 2 && p.qual < min_mapping_quality) continue;
@@ -96,6 +100,7 @@ int assembler::assemble()
 	pool.push_back(bb1);
 	pool.push_back(bb2);
 	if(process_gnn(0) != 0) return 1;
+	if(write_transcript_bundle_counts() != 0) return 1;
 	
 	return 0;
 }
@@ -125,10 +130,12 @@ int assembler::process_gnn(int n)
 		for(int k = 0; k < candidates.size(); k++)
 		{
 			int id = candidates[k];
+			transcript_candidate_bundle_counts[id]++;
 			transcript_match m = matcher.match(tridx.get(id), min_bundle_transcript_exon_overlap,
 					min_bundle_transcript_splicing_position_overlap);
 			if(m.assigned == false)
 			{
+				if(verbose >= 1) printf("fail to assign: %s, %d\n", tridx.get(id).trst.transcript_id.c_str(), m.failure);
 				if(verbose >= 2)
 				{
 					unassigned_transcripts.push_back(id);
@@ -137,6 +144,7 @@ int assembler::process_gnn(int n)
 				continue;
 			}
 			assigned_transcripts.push_back(id);
+			transcript_assigned_bundle_counts[id]++;
 			matches.push_back(m);
 		}
 
@@ -201,5 +209,41 @@ int assembler::process_gnn(int n)
 		}
 	}
 	pool.clear();
+	return 0;
+}
+
+int assembler::write_transcript_bundle_counts() const
+{
+	ofstream fout(transcript_bundle_count_file.c_str());
+	if(fout.fail())
+	{
+		printf("error: cannot write transcript-bundle-count file %s.\n",
+				transcript_bundle_count_file.c_str());
+		return 1;
+	}
+
+	const char *header = "transcript_index\ttranscript_id\tgene_id\tchromosome\tstrand\tcandidate_bundle_count\tassigned_bundle_count";
+	fout << header << "\n";
+	if(verbose >= 1) printf("%s\n", header);
+
+	for(int id = 0; id < tridx.size(); id++)
+	{
+		const indexed_transcript &t = tridx.get(id);
+		fout << id << "\t" << t.trst.transcript_id << "\t" << t.trst.gene_id << "\t"
+				<< t.trst.seqname << "\t" << t.trst.strand << "\t"
+				<< transcript_candidate_bundle_counts[id] << "\t"
+				<< transcript_assigned_bundle_counts[id] << "\n";
+		if(verbose >= 1)
+		{
+			printf("%d\t%s\t%s\t%s\t%c\t%lld\t%lld\n", id,
+					t.trst.transcript_id.c_str(), t.trst.gene_id.c_str(),
+					t.trst.seqname.c_str(), t.trst.strand,
+					(long long)transcript_candidate_bundle_counts[id],
+					(long long)transcript_assigned_bundle_counts[id]);
+		}
+	}
+
+	if(verbose >= 1)
+		printf("saved transcript-bundle counts to %s\n", transcript_bundle_count_file.c_str());
 	return 0;
 }

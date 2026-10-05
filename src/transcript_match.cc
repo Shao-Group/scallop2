@@ -80,6 +80,7 @@ int transcript_matcher::build_exons(const split_interval_map &mmap)
 	exons.clear();
 	for(SIMI it = mmap.begin(); it != mmap.end(); it++)
 	{
+		//printf("add exon: [%d, %d]\n", lower(it->first), upper(it->first));
 		exons += make_pair(it->first, 1);
 	}
 	return 0;
@@ -109,6 +110,9 @@ int transcript_matcher::compute_shared_exonic_length(const transcript &t) const
 		{
 			int32_t l = lower(it->first);
 			int32_t r = upper(it->first);
+
+			//printf("check transcript %s exon %d [%d-%d]: interval [%d-%d]\n", t.transcript_id.c_str(), i, p.first, p.second, l, r);
+
 			if(l >= p.second) break;
 			if(r <= p.first) continue;
 			int32_t ll = l > p.first ? l : p.first;
@@ -169,13 +173,32 @@ transcript_match transcript_matcher::match(const indexed_transcript &t,
 	if(m.shared_exonic_length < min_exon_overlap * m.transcript_exonic_length)
 	{
 		m.failure = TRANSCRIPT_INSUFFICIENT_EXON_OVERLAP;
+		if(verbose >= 1) printf("transcript-match: transcript=%s, gene=%s, transcript-region=%s:%d-%d, transcript-strand=%c, bundle-chromosome=%s, bundle-strand=%c, result=%s, exonic-overlap=%d/%d (%.6f; required %.6f), splicing-position-overlap=%d/%d (%.6f; required %.6f)\n",
+				t.trst.transcript_id.c_str(), t.trst.gene_id.c_str(),
+				t.trst.seqname.c_str(), t.bounds.first, t.bounds.second, t.trst.strand,
+				chrm.c_str(), strand, m.failure_reason(),
+				m.shared_exonic_length, m.transcript_exonic_length,
+				1.0 * m.shared_exonic_length / m.transcript_exonic_length, min_exon_overlap,
+				m.shared_splicing_positions, m.transcript_splicing_positions,
+				m.transcript_splicing_positions > 0 ?
+				1.0 * m.shared_splicing_positions / m.transcript_splicing_positions : 1.0,
+				min_splicing_position_overlap);
 		return m;
 	}
 	if(m.transcript_splicing_positions >= 1 &&
 		m.shared_splicing_positions <
-		min_splicing_position_overlap * m.transcript_splicing_positions)
+			min_splicing_position_overlap * m.transcript_splicing_positions)
 	{
 		m.failure = TRANSCRIPT_INSUFFICIENT_SPLICING_POSITION_OVERLAP;
+		if(verbose >= 1) printf("transcript-match: transcript=%s, gene=%s, transcript-region=%s:%d-%d, transcript-strand=%c, bundle-chromosome=%s, bundle-strand=%c, result=%s, exonic-overlap=%d/%d (%.6f; required %.6f), splicing-position-overlap=%d/%d (%.6f; required %.6f)\n",
+				t.trst.transcript_id.c_str(), t.trst.gene_id.c_str(),
+				t.trst.seqname.c_str(), t.bounds.first, t.bounds.second, t.trst.strand,
+				chrm.c_str(), strand, m.failure_reason(),
+				m.shared_exonic_length, m.transcript_exonic_length,
+				1.0 * m.shared_exonic_length / m.transcript_exonic_length, min_exon_overlap,
+				m.shared_splicing_positions, m.transcript_splicing_positions,
+				1.0 * m.shared_splicing_positions / m.transcript_splicing_positions,
+				min_splicing_position_overlap);
 		return m;
 	}
 	m.assigned = true;

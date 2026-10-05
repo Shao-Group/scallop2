@@ -26,9 +26,9 @@ int max_edit_distance = 10;
 int32_t min_bundle_gap = 100;		
 int min_num_hits_in_bundle = 5;	
 int min_num_splices_in_bundle = 15;	// not used; accept bundle if #hits with splices is at least this number
-uint32_t min_mapping_quality = 1;
 int32_t min_splice_boundary_hits = 1;
-bool use_second_alignment = false;
+uint32_t min_mapping_quality = 0;
+bool use_second_alignment = true;
 bool uniquely_mapped_only = false;
 int library_type = EMPTY;
 
@@ -681,7 +681,7 @@ int print_help()
 	printf(" %-42s  %s\n", "--preview",  "determine fragment-length-range and library-type and exit");
 	printf(" %-42s  %s\n", "--verbose <0, 1, 2>",  "0: quiet; 1: one line for each graph; 2: with details, default: 1");
 	printf(" %-42s  %s\n", "-b <gtf-file>",  "annotation transcripts to assign to splice-graph bundles");
-	printf(" %-42s  %s\n", "--transcript_bundle_count_file <filename>",  "save per-transcript bundle counts, default: <gtf-file>.bundle_counts.tsv");
+	printf(" %-42s  %s\n", "--transcript_bundle_count_file <filename>",  "save per-transcript candidate and assigned bundle counts, default: <gtf-file>.bundle_counts.tsv");
 	printf(" %-42s  %s\n", "--feature_prefix <prefix>",  "write <prefix>.node.csv, .edge.csv, .phasing.csv, and .path.label.csv; default: input BAM without .bam");
 	printf(" %-42s  %s\n", "--feature_sample <name>",  "sample column value in feature CSV files; default: feature-prefix basename");
 	printf(" %-42s  %s\n", "--min_bundle_transcript_exon_overlap <float>",  "minimum fraction of transcript exonic bases shared with a bundle, default: 0.5");

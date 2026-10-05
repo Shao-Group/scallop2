@@ -35,6 +35,8 @@ private:
 	genome gm;			// for gtf genome (-b)
 	transcript_index tridx;		// annotation transcript index
 	feature_writer features;		// streaming single-sample feature output
+	vector<int64_t> transcript_candidate_bundle_counts;
+	vector<int64_t> transcript_assigned_bundle_counts;
 
 	int hid;
 	int index;
@@ -44,6 +46,7 @@ public:
 
 private:
 	int process_gnn(int n);
+	int write_transcript_bundle_counts() const;
 };
 
 #endif
